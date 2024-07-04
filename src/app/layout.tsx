@@ -3,11 +3,15 @@
 import { Inter } from "next/font/google";
 import '../styles/globals.css';
 import { ChakraProvider, theme } from "@chakra-ui/react";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const RootLayout: FC = ({ children }) => {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+const RootLayout: FC<RootLayoutProps> = ({ children }) => {
   return (
     <html lang="en" data-theme="light">
       <head />
