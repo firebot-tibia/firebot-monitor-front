@@ -1,8 +1,7 @@
-'use client';
+'use client'
 
-import { Box, Container, Flex, Heading, HStack, Image, Link } from '@chakra-ui/react';
-import NextLink from 'next/link';
-
+import { Box, Container, Flex, Heading, HStack, Image, Link } from '@chakra-ui/react'
+import NextLink from 'next/link'
 
 export function Navbar() {
   return (
@@ -21,18 +20,23 @@ export function Navbar() {
           </HStack>
           <HStack spacing={8}>
             <NextLink href="/" passHref>
-              <Link fontSize="lg" color="blue.600" _hover={{ color: 'blue.800' }}>Home</Link>
+              <Link fontSize="lg" color="blue.600" _hover={{ color: 'blue.800' }}>
+                Home
+              </Link>
             </NextLink>
             <NextLink href="/about" passHref>
-              <Link fontSize="lg" color="blue.600" _hover={{ color: 'blue.800' }}>About</Link>
+              <Link fontSize="lg" color="blue.600" _hover={{ color: 'blue.800' }}>
+                About
+              </Link>
             </NextLink>
             <NextLink href="/contact" passHref>
-              <Link fontSize="lg" color="blue.600" _hover={{ color: 'blue.800' }}>Contact</Link>
+              <Link fontSize="lg" color="blue.600" _hover={{ color: 'blue.800' }}>
+                Contact
+              </Link>
             </NextLink>
           </HStack>
         </Flex>
       </Container>
     </Box>
-  );
-};
-
+  )
+}

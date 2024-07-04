@@ -1,4 +1,3 @@
-
 export const metadata = {
   title: 'Tornabra - Monitor',
   description: 'Enemy Monitor',
@@ -8,7 +7,7 @@ export const metadata = {
     locale: 'pt-br',
     type: 'website',
     description: 'Enemy Monitor',
-  }
-};
+  },
+}
 
-export { default } from './home';
+export { default } from './home'

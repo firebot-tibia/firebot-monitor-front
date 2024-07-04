@@ -1,6 +1,5 @@
-import { api } from "./api";
+import { api } from './api'
 
 export const getEnemyGuild = async () => {
-  return api.get('/dashboard/guilds');
-};
-
+  return api.get('/dashboard/guilds')
+}
