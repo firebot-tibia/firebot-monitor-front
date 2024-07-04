@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
 :root {
   --pause-on-hover: running;
   --pause-on-click: running;
@@ -29,4 +31,10 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+
+
+body {
+  @apply bg-dark-gradient text-white font-sans;
 }

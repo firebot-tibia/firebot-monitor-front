@@ -1,11 +1,9 @@
 'use client'
 
-import { Inter } from 'next/font/google'
-import '../styles/globals.css'
-import { ChakraProvider, theme } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
 import { FC, ReactNode } from 'react'
-
-const inter = Inter({ subsets: ['latin'] })
+import '../styles/globals.css'
+import theme from '../styles/theme'
 
 interface RootLayoutProps {
   children: ReactNode
@@ -13,9 +11,9 @@ interface RootLayoutProps {
 
 const RootLayout: FC<RootLayoutProps> = ({ children }) => {
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en">
       <head />
-      <body className={`chakra-ui-light ${inter.className}`}>
+      <body>
         <ChakraProvider theme={theme}>{children}</ChakraProvider>
       </body>
     </html>
