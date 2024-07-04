@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, useToast } from '@chakra-ui/react';
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, useToast, Input } from '@chakra-ui/react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { GuildMemberDTO } from '../dtos/guild.dto';
 
@@ -25,6 +25,14 @@ function getName(name: string | undefined): string {
   return name || 'Unknown';
 }
 
+function getStoredRespawn(name: string): string {
+  return localStorage.getItem(`respawn_${name}`) || '';
+}
+
+function setStoredRespawn(name: string, value: string) {
+  localStorage.setItem(`respawn_${name}`, value);
+}
+
 export function TableWidget({ data, columns, isLoading }: TableWidgetProps<GuildMemberDTO>) {
   const toast = useToast();
 
@@ -36,6 +44,12 @@ export function TableWidget({ data, columns, isLoading }: TableWidgetProps<Guild
       duration: 2000,
       isClosable: true,
     });
+  };
+
+  const handleRespawnChange = (name: string, value: string) => {
+    if (name) {
+      setStoredRespawn(name, value);
+    }
   };
 
   return (
@@ -76,6 +90,15 @@ export function TableWidget({ data, columns, isLoading }: TableWidgetProps<Guild
                   </CopyToClipboard>
                 </Td>
                 <Td color="white" fontSize="sm">{row.level}</Td>
+                <Td color="white" fontSize="sm">
+                  <Input
+                    defaultValue={getStoredRespawn(row.name || '')}
+                    onChange={(e) => handleRespawnChange(row.name || '', e.target.value)}
+                    size="sm-6"
+                    bg="rgba(255, 255, 255, 0.2)"
+                    color="white"
+                  />
+                </Td>
               </Tr>
             ))}
         </Tbody>
