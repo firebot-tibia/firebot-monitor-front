@@ -40,24 +40,24 @@ export function TableWidget({ data, columns, isLoading }: TableWidgetProps<Guild
 
   return (
     <TableContainer>
-      <Table variant="simple" colorScheme="whiteAlpha">
+      <Table variant="simple" size="sm" colorScheme="whiteAlpha" w="100%">
         <Thead>
           <Tr>
             {columns.map((column, index) => (
-              <Th key={index} color="white">{column}</Th>
+              <Th key={index} color="white" fontSize="sm" whiteSpace="nowrap">{column}</Th>
             ))}
           </Tr>
         </Thead>
         <Tbody>
           {isLoading && (
             <Tr>
-              <Td colSpan={columns.length} textAlign="center" color="white">Carregando...</Td>
+              <Td colSpan={columns.length} textAlign="center" color="white" fontSize="sm">Carregando...</Td>
             </Tr>
           )}
           {!isLoading &&
             data.map((row, index) => (
               <Tr key={index} color="white">
-              <Td color="white">
+                <Td color="white" fontSize="sm">
                   <img
                     src={getVocationIcon(row.vocation || '')}
                     alt={row.vocation || 'Unknown'}
@@ -65,7 +65,7 @@ export function TableWidget({ data, columns, isLoading }: TableWidgetProps<Guild
                     height="24"
                   />
                 </Td>
-                <Td color="white">
+                <Td color="white" fontSize="sm">
                   <CopyToClipboard text={`exiva "${getName(row.name)}"`}>
                     <span
                       onClick={() => handleCopy(row.name)}
@@ -75,7 +75,7 @@ export function TableWidget({ data, columns, isLoading }: TableWidgetProps<Guild
                     </span>
                   </CopyToClipboard>
                 </Td>
-                <Td color="white">{row.level}</Td>
+                <Td color="white" fontSize="sm">{row.level}</Td>
               </Tr>
             ))}
         </Tbody>

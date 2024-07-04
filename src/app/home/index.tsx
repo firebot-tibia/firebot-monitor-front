@@ -6,6 +6,8 @@ import {
   CardBody,
   CardHeader,
   Container,
+  Grid,
+  GridItem,
   Heading,
   Input,
   useToast,
@@ -71,40 +73,58 @@ const HomePage: FC = () => {
             />
           </Box>
           {guildMembers && (
-            <>
-              <Heading color="white" as="h2" size="lg" mt="4">
-                Elite Knights
-              </Heading>
-              <TableWidget
-                columns={columns}
-                data={guildMembers.members.Knight}
-                isLoading={isLoading}
-              />
-              <Heading color="white" as="h2" size="lg" mt="4">
-                Master Sorcerers
-              </Heading>
-              <TableWidget
-                columns={columns}
-                data={guildMembers.members.Sorcerer}
-                isLoading={isLoading}
-              />
-              <Heading color="white" as="h2" size="lg" mt="4">
-                Royal Paladins
-              </Heading>
-              <TableWidget
-                columns={columns}
-                data={guildMembers.members.Paladin}
-                isLoading={isLoading}
-              />
-              <Heading color="white" as="h2" size="lg" mt="4">
-                Elder Druids
-              </Heading>
-              <TableWidget
-                columns={columns}
-                data={guildMembers.members.Druid}
-                isLoading={isLoading}
-              />
-            </>
+            <Grid templateColumns="repeat(auto-fit, minmax(400px, 1fr))" gap="7">
+              <GridItem>
+                <Heading color="white" as="h2" size="lg" mt="4">
+                  Elite Knights
+                </Heading>
+                <TableWidget
+                  columns={columns}
+                  data={guildMembers.members.Knight}
+                  isLoading={isLoading}
+                />
+              </GridItem>
+              <GridItem>
+                <Heading color="white" as="h2" size="lg" mt="4">
+                  Master Sorcerers
+                </Heading>
+                <TableWidget
+                  columns={columns}
+                  data={guildMembers.members.Sorcerer}
+                  isLoading={isLoading}
+                />
+              </GridItem>
+              <GridItem>
+                <Heading color="white" as="h2" size="lg" mt="4">
+                  Royal Paladins
+                </Heading>
+                <TableWidget
+                  columns={columns}
+                  data={guildMembers.members.Paladin}
+                  isLoading={isLoading}
+                />
+              </GridItem>
+              <GridItem>
+                <Heading color="white" as="h2" size="lg" mt="4">
+                  Elder Druids
+                </Heading>
+                <TableWidget
+                  columns={columns}
+                  data={guildMembers.members.Druid}
+                  isLoading={isLoading}
+                />
+              </GridItem>
+              <GridItem>
+                <Heading color="white" as="h2" size="lg" mt="4">
+                  MAKER
+                </Heading>
+                <TableWidget
+                  columns={columns}
+                  data={guildMembers.members.MAKER}
+                  isLoading={isLoading}
+                />
+              </GridItem>
+            </Grid>
           )}
         </CardBody>
       </Card>

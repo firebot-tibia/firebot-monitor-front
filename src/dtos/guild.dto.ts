@@ -11,5 +11,6 @@ export interface GuildDTO {
     Paladin: GuildMemberDTO[]
     Knight: GuildMemberDTO[]
     Druid: GuildMemberDTO[]
+    MAKER: GuildMemberDTO[]
   }
 }
