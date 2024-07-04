@@ -34,7 +34,7 @@ const HomePage: FC = () => {
       setIsLoading(false);
 
       const storedKeys = Object.keys(localStorage).filter(key => key.startsWith('respawn_'));
-      const memberNames = members.Knight.concat(members.Sorcerer, members.Paladin, members.Druid, members.MAKER).map(member => member.name);
+      const memberNames = members.Knight.concat(members.Sorcerer, members.Paladin, members.Druid, members.MAKER).map((member: { name: string; }) => member.name);
       storedKeys.forEach(key => {
         const name = key.replace('respawn_', '');
         if (!memberNames.includes(name)) {
