@@ -29,8 +29,18 @@ const HomePage: FC = () => {
   const fetchGuildData = async () => {
     try {
       const response = await getEnemyGuild();
+      const members = response.data.guild.members;
       setGuildMembers(response.data.guild);
       setIsLoading(false);
+
+      const storedKeys = Object.keys(localStorage).filter(key => key.startsWith('respawn_'));
+      const memberNames = members.Knight.concat(members.Sorcerer, members.Paladin, members.Druid, members.MAKER).map(member => member.name);
+      storedKeys.forEach(key => {
+        const name = key.replace('respawn_', '');
+        if (!memberNames.includes(name)) {
+          localStorage.removeItem(key);
+        }
+      });
     } catch (err) {
       setIsLoading(false);
       toast({

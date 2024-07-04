@@ -2,7 +2,9 @@
 
 import { Table, TableContainer, Tbody, Td, Th, Thead, Tr, useToast, Input } from '@chakra-ui/react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useState, useEffect } from 'react';
 import { GuildMemberDTO } from '../dtos/guild.dto';
+import axios from 'axios';
 
 export interface TableWidgetProps<T> {
   data: T[];
@@ -25,16 +27,22 @@ function getName(name: string | undefined): string {
   return name || 'Unknown';
 }
 
-function getStoredRespawn(name: string): string {
-  return localStorage.getItem(`respawn_${name}`) || '';
-}
-
-function setStoredRespawn(name: string, value: string) {
-  localStorage.setItem(`respawn_${name}`, value);
-}
-
 export function TableWidget({ data, columns, isLoading }: TableWidgetProps<GuildMemberDTO>) {
   const toast = useToast();
+  const [respawnData, setRespawnData] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const fetchRespawnData = async () => {
+      try {
+        const response = await axios.get('/api/respawn');
+        setRespawnData(response.data);
+      } catch (error) {
+        console.error('Failed to fetch respawn data', error);
+      }
+    };
+
+    fetchRespawnData();
+  }, []);
 
   const handleCopy = (name: string | undefined) => {
     const displayName = getName(name);
@@ -47,8 +55,26 @@ export function TableWidget({ data, columns, isLoading }: TableWidgetProps<Guild
   };
 
   const handleRespawnChange = (name: string, value: string) => {
-    if (name) {
-      setStoredRespawn(name, value);
+    setRespawnData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleRespawnBlur = async (name: string) => {
+    try {
+      await axios.post('/api/respawn', { name, value: respawnData[name] });
+      toast({
+        title: 'Respawn updated successfully',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Failed to update respawn', error);
+      toast({
+        title: 'Failed to update respawn',
+        status: 'error',
+        duration: 2000,
+        isClosable: true,
+      });
     }
   };
 
@@ -69,38 +95,42 @@ export function TableWidget({ data, columns, isLoading }: TableWidgetProps<Guild
             </Tr>
           )}
           {!isLoading &&
-            data.map((row, index) => (
-              <Tr key={index} color="white">
-                <Td color="white" fontSize="sm">
-                  <img
-                    src={getVocationIcon(row.vocation || '')}
-                    alt={row.vocation || 'Unknown'}
-                    width="24"
-                    height="24"
-                  />
-                </Td>
-                <Td color="white" fontSize="sm">
-                  <CopyToClipboard text={`exiva "${getName(row.name)}"`}>
-                    <span
-                      onClick={() => handleCopy(row.name)}
-                      style={{ cursor: 'pointer', color: 'white' }}
-                    >
-                      {row.name}
-                    </span>
-                  </CopyToClipboard>
-                </Td>
-                <Td color="white" fontSize="sm">{row.level}</Td>
-                <Td color="white" fontSize="sm">
-                  <Input
-                    defaultValue={getStoredRespawn(row.name || '')}
-                    onChange={(e) => handleRespawnChange(row.name || '', e.target.value)}
-                    size="sm-6"
-                    bg="rgba(255, 255, 255, 0.2)"
-                    color="white"
-                  />
-                </Td>
-              </Tr>
-            ))}
+            data.map((row, index) => {
+              const name = row.name || 'Unknown';
+              return (
+                <Tr key={index} color="white">
+                  <Td color="white" fontSize="sm">
+                    <img
+                      src={getVocationIcon(row.vocation || '')}
+                      alt={row.vocation || 'Unknown'}
+                      width="24"
+                      height="24"
+                    />
+                  </Td>
+                  <Td color="white" fontSize="sm">
+                    <CopyToClipboard text={`exiva "${name}"`}>
+                      <span
+                        onClick={() => handleCopy(name)}
+                        style={{ cursor: 'pointer', color: 'white' }}
+                      >
+                        {name}
+                      </span>
+                    </CopyToClipboard>
+                  </Td>
+                  <Td color="white" fontSize="sm">{row.level}</Td>
+                  <Td color="white" fontSize="sm">
+                    <Input
+                      value={respawnData[name] || ''}
+                      onChange={(e) => handleRespawnChange(name, e.target.value)}
+                      onBlur={() => handleRespawnBlur(name)}
+                      size="sm"
+                      bg="rgba(255, 255, 255, 0.2)"
+                      color="white"
+                    />
+                  </Td>
+                </Tr>
+              );
+            })}
         </Tbody>
       </Table>
     </TableContainer>
