@@ -17,12 +17,15 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { GuildDTO } from '../../dtos/guild.dto';
 import { getEnemyGuild } from '../../services/guilds';
 import { TableWidget } from '../../components/table';
+import axios from 'axios';
 
 const HomePage: FC = () => {
   const [guildMembers, setGuildMembers] = useState<GuildDTO | null>(null);
   const [totalOnline, setTotalOnline] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [respawnData, setRespawnData] = useState<{ [key: string]: string }>({});
+  const [iconState, setIconState] = useState<{ [key: string]: string }>({});
 
   const toast = useToast();
   const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Ultimo Exiva', 'PT'], []);
@@ -34,13 +37,13 @@ const HomePage: FC = () => {
       setGuildMembers(response.data.guild);
       setTotalOnline(response.data.guild.total_online);
       setIsLoading(false);
-  
+
       const allMembers = members.Knight.concat(members.Sorcerer, members.Paladin, members.Druid, members.MAKER);
       allMembers.forEach((member: { name: any; }) => {
         const memberData = JSON.stringify(member);
         localStorage.setItem(`respawn_${member.name}`, memberData);
       });
-  
+
       const storedKeys = Object.keys(localStorage).filter(key => key.startsWith('respawn_'));
       const memberNames = allMembers.map((member: { name: any; }) => member.name);
       storedKeys.forEach(key => {
@@ -59,21 +62,32 @@ const HomePage: FC = () => {
       });
     }
   };
-  
 
   useEffect(() => {
+    const fetchStoredData = async () => {
+      try {
+        const response = await axios.get('/api/respawn');
+        setRespawnData(response.data.respawnData);
+        setIconState(response.data.iconState);
+      } catch (error) {
+        console.error('Erro ao buscar dados armazenados', error);
+      }
+    };
+
+    fetchStoredData();
+
     const storedMembers = Object.keys(localStorage)
       .filter(key => key.startsWith('respawn_'))
       .map(key => localStorage.getItem(key))
       .filter(item => item !== null)
       .map((item :any) => JSON.parse(item));
-  
+
     if (storedMembers.length > 0) {
       const initialGuildData: any = { 
         total_online: 0,
         members: { Knight: [], Sorcerer: [], Paladin: [], Druid: [], MAKER: [] }, 
       };
-  
+
       storedMembers.forEach(member => {
         if (
           member.vocation === 'Knight' ||
@@ -85,15 +99,14 @@ const HomePage: FC = () => {
           initialGuildData.members[member.vocation].push(member);
         }
       });
-  
+
       setGuildMembers(initialGuildData);
     }
-  
+
     fetchGuildData();
     const interval = setInterval(fetchGuildData, 8000);
     return () => clearInterval(interval);
   }, []);
-  
 
   const handleCopyAllExivas = () => {
     if (!guildMembers) return;
@@ -163,6 +176,8 @@ const HomePage: FC = () => {
                   columns={columns}
                   data={guildMembers.members.Knight}
                   isLoading={isLoading}
+                  respawnData={respawnData}
+                  iconState={iconState}
                 />
               </GridItem>
               <GridItem>
@@ -173,6 +188,8 @@ const HomePage: FC = () => {
                   columns={columns}
                   data={guildMembers.members.Sorcerer}
                   isLoading={isLoading}
+                  respawnData={respawnData}
+                  iconState={iconState}
                 />
               </GridItem>
               <GridItem>
@@ -183,6 +200,8 @@ const HomePage: FC = () => {
                   columns={columns}
                   data={guildMembers.members.Paladin}
                   isLoading={isLoading}
+                  respawnData={respawnData}
+                  iconState={iconState}
                 />
               </GridItem>
               <GridItem>
@@ -193,6 +212,8 @@ const HomePage: FC = () => {
                   columns={columns}
                   data={guildMembers.members.Druid}
                   isLoading={isLoading}
+                  respawnData={respawnData}
+                  iconState={iconState}
                 />
               </GridItem>
               <GridItem>
@@ -203,6 +224,8 @@ const HomePage: FC = () => {
                   columns={columns}
                   data={guildMembers.members.MAKER}
                   isLoading={isLoading}
+                  respawnData={respawnData}
+                  iconState={iconState}
                 />
               </GridItem>
             </Grid>
