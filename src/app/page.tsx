@@ -10,4 +10,4 @@ export const metadata = {
   },
 }
 
-export { default } from './home'
+export { default } from './home/index'
