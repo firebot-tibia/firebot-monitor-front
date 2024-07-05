@@ -10,15 +10,15 @@ import {
   Container,
   Input,
   Card,
-  CardHeader,
   CardBody,
 } from '@chakra-ui/react';
 import { useEffect, useState, useMemo, FC } from 'react';
 import Navbar from '../../components/navbar';
-import { getCharacter, getRespawn } from '../../services/dashboard';
 import { CharacterType } from '../../shared/enum/character-type.enum';
 import { CharacterListDTO } from '../../dtos/character-list.dto';
 import { TableWidget } from '../../components/table';
+import { getCharacter } from '../../services/character';
+import { getRespawn } from '../../services/respawn';
 
 
 

@@ -5,8 +5,8 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GuildMemberDTO } from '../dtos/guild.dto';
-import { updateRespawn, postRespawn } from '../services/dashboard';
 import { vocationIcons } from '../constant/constant';
+import { updateRespawn, postRespawn } from '../services/respawn';
 
 export interface TableWidgetProps<T> {
   data: T[];
