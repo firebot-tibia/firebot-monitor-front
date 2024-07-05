@@ -63,7 +63,6 @@ const Settings = () => {
     <div>
       <Navbar />
       <main className="p-4">
-        <Heading as="h1" size="xl" mb={4}>Configurações</Heading>
         {isLoading ? (
           <VStack align="center">
             <Spinner size="xl" />
