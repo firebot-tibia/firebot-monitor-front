@@ -6,6 +6,10 @@ export const config = {
       href: '/',
     },
     {
+      name: 'Mapear Enemys',
+      href: '/enemy',
+    },
+    {
       name: 'Configurações',
       href: '/settings',
     },

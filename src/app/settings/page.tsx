@@ -21,7 +21,7 @@ import {
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
 import { io } from 'socket.io-client';
-import Navbar from '../../components/navbar';
+import Navbar from '../../components/navbar/navbar';
 import { GuildDTO, GuildMemberDTO } from '../../dtos/guild.dto';
 import { characterTypeIcons, vocationIcons } from '../../constant/constant';
 import { CharacterType } from '../../shared/enum/character-type.enum';

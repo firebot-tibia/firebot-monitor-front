@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Box, Flex, HStack, Button } from '@chakra-ui/react';
-import { config } from '../config/config';
+import { config } from '../../config/config';
 
 
 const Navbar = () => {
