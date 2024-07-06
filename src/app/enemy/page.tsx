@@ -1,7 +1,7 @@
 'use client';
 
 import { FC } from "react";
-import Navbar from "../../components/navbar/navbar";
+import Navbar from "../../components/navbar";
 
 
 const Enemy: FC = () => {

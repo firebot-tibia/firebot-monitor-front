@@ -1,34 +1,24 @@
 'use client';
 
-import {
-  Box,
-  Heading,
-  Spinner,
-  Grid,
-  GridItem,
-  Container,
-  Input,
-  Card,
-  CardBody,
-} from '@chakra-ui/react';
+import { Box, Heading, Spinner, Grid, GridItem, Container, Input, Card, CardBody } from '@chakra-ui/react';
 import { useEffect, useState, useMemo, FC } from 'react';
 import { io } from 'socket.io-client';
-import Navbar from '../../components/navbar/navbar';
 import { CharacterType } from '../../shared/enum/character-type.enum';
-import { CharacterListDTO } from '../../dtos/character-list.dto';
-import { TableWidget } from '../../components/table/table';
+import { CharacterRespawnDTO } from '../../shared/interface/character-list.interface';
+import Navbar from '../../components/navbar';
+import { TableWidget } from '../../components/table';
 
 const Home: FC = () => {
-  const [characterData, setCharacterData] = useState<{ character: CharacterListDTO; respawn: any }[]>([]);
+  const [characterData, setCharacterData] = useState<CharacterRespawnDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Tempo', 'Ultimo Exiva', 'PT',], []);
+  const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Ultimo Exiva', 'PT'], []);
 
   useEffect(() => {
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001');
 
-    socket.on('characterListData', (data) => {
+    socket.on('characterListData', (data: CharacterRespawnDTO[]) => {
       setCharacterData(data);
       setIsLoading(false);
     });
@@ -74,20 +64,8 @@ const Home: FC = () => {
                   </Heading>
                   <TableWidget
                     columns={columns}
-                    data={filterCharactersByType(CharacterType.MAKER).map(item => item.character)}
+                    data={filterCharactersByType(CharacterType.MAKER)}
                     isLoading={isLoading}
-                    respawnData={characterData.reduce((acc, item) => {
-                      if (item.character.name) {
-                        acc[item.character.name] = item.respawn?.name || '';
-                      }
-                      return acc;
-                    }, {} as { [key: string]: string })}
-                    iconState={characterData.reduce((acc, item) => {
-                      if (item.character.name) {
-                        acc[item.character.name] = item.respawn?.is_pt ? 'true.png' : 'false.png';
-                      }
-                      return acc;
-                    }, {} as { [key: string]: string })}
                   />
                 </GridItem>
                 <GridItem>
@@ -96,20 +74,8 @@ const Home: FC = () => {
                   </Heading>
                   <TableWidget
                     columns={columns}
-                    data={filterCharactersByType(CharacterType.MAIN).map(item => item.character)}
+                    data={filterCharactersByType(CharacterType.MAIN)}
                     isLoading={isLoading}
-                    respawnData={characterData.reduce((acc, item) => {
-                      if (item.character.name) {
-                        acc[item.character.name] = item.respawn?.name || '';
-                      }
-                      return acc;
-                    }, {} as { [key: string]: string })}
-                    iconState={characterData.reduce((acc, item) => {
-                      if (item.character.name) {
-                        acc[item.character.name] = item.respawn?.is_pt ? 'true.png' : 'false.png';
-                      }
-                      return acc;
-                    }, {} as { [key: string]: string })}
                   />
                 </GridItem>
                 <GridItem>
@@ -118,20 +84,8 @@ const Home: FC = () => {
                   </Heading>
                   <TableWidget
                     columns={columns}
-                    data={filterCharactersByType(CharacterType.BOMBA).map(item => item.character)}
+                    data={filterCharactersByType(CharacterType.BOMBA)}
                     isLoading={isLoading}
-                    respawnData={characterData.reduce((acc, item) => {
-                      if (item.character.name) {
-                        acc[item.character.name] = item.respawn?.name || '';
-                      }
-                      return acc;
-                    }, {} as { [key: string]: string })}
-                    iconState={characterData.reduce((acc, item) => {
-                      if (item.character.name) {
-                        acc[item.character.name] = item.respawn?.is_pt ? 'true.png' : 'false.png';
-                      }
-                      return acc;
-                    }, {} as { [key: string]: string })}
                   />
                 </GridItem>
               </Grid>
