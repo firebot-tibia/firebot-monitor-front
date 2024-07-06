@@ -4,13 +4,7 @@ import { FC } from 'react';
 import { Menu, MenuButton, MenuList, MenuItem, Button } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-
-interface CharacterMenuProps {
-  characterName: string;
-  handleCopy: (name: string | undefined) => void;
-  copyAllNames: () => void;
-  copyAllExivas: () => void;
-}
+import { CharacterMenuProps } from '../interface/table.interface';
 
 export const CharacterMenu: FC<CharacterMenuProps> = ({ characterName, handleCopy, copyAllNames, copyAllExivas }) => (
   <Menu>

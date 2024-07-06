@@ -1,11 +1,12 @@
 'use client';
 
-import { FC } from 'react';
 import { Tooltip } from '@chakra-ui/react';
-import { updateRespawn, postRespawn } from '../../../services/respawn';
+import { FC } from 'react';
+import { updateRespawn } from '../../../services/respawn';
 import { PTIconProps } from '../interface/table.interface';
 
-export const PTIcon: FC<PTIconProps> = ({
+
+const PTIcon: FC<PTIconProps> = ({
   characterName,
   localIconState,
   setLocalIconState,
@@ -40,12 +41,7 @@ export const PTIcon: FC<PTIconProps> = ({
     if (updatedSelectedCharacters.length <= 4) {
       try {
         for (const char of updatedSelectedCharacters) {
-          const existingRespawn = localIconState[char];
-          if (existingRespawn) {
             await updateRespawn(char, { character: char, is_pt, pt_members });
-          } else {
-            await postRespawn({ name: char, character: char, is_pt, pt_members });
-          }
         }
         toast({
           title: is_pt ? 'Personagens vinculados com sucesso' : 'Vinculação desfeita',
@@ -97,3 +93,5 @@ export const PTIcon: FC<PTIconProps> = ({
     </Tooltip>
   );
 };
+
+export default PTIcon;

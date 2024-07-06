@@ -2,7 +2,7 @@
 
 import { FC, useState } from 'react';
 import { Input } from '@chakra-ui/react';
-import { updateRespawn, postRespawn } from '../../../services/respawn';
+import { updateRespawn } from '../../../services/respawn';
 import { RespawnInputProps } from '../interface/table.interface';
 
 export const RespawnInput: FC<RespawnInputProps> = ({ characterName, localRespawnData, setLocalRespawnData, toast }) => {
@@ -18,15 +18,7 @@ export const RespawnInput: FC<RespawnInputProps> = ({ characterName, localRespaw
           duration: 2000,
           isClosable: true,
         });
-      } else {
-        await postRespawn({ name: value, character: characterName, is_pt: false });
-        toast({
-          title: 'Respawn registrado com sucesso',
-          status: 'success',
-          duration: 2000,
-          isClosable: true,
-        });
-      }
+      } 
     } catch (error) {
       console.error('Falha ao atualizar respawn', error);
       toast({
