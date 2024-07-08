@@ -1,8 +1,9 @@
 'use client';
 
-import { Box, Heading, Spinner, Grid, GridItem, Container, Input, Card, CardBody } from '@chakra-ui/react';
-import { useEffect, useState, useMemo, FC } from 'react';
+import { Box, Heading, Spinner, Grid, GridItem, Container, Input, Card, CardBody, useToast } from '@chakra-ui/react';
+import { useEffect, useState, useMemo, FC, useCallback } from 'react';
 import { io } from 'socket.io-client';
+import { throttle } from 'lodash';
 import { CharacterType } from '../../shared/enum/character-type.enum';
 import { CharacterRespawnDTO } from '../../shared/interface/character-list.interface';
 import Navbar from '../../components/navbar';
@@ -12,27 +13,63 @@ const Home: FC = () => {
   const [characterData, setCharacterData] = useState<CharacterRespawnDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const toast = useToast();
+  const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
   const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Ultimo Exiva', 'PT'], []);
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001');
+    const socket = io(socketUrl);
 
-    socket.on('characterListData', (data: CharacterRespawnDTO[]) => {
+    const throttledSetCharacterData = throttle((data: CharacterRespawnDTO[]) => {
       setCharacterData(data);
       setIsLoading(false);
+    }, 1000);
+
+    socket.on('characterListData', (data: CharacterRespawnDTO[]) => {
+      if (data) {
+        throttledSetCharacterData(data);
+      } else {
+        toast({
+          title: 'Erro ao carregar dados.',
+          description: 'Não foi possível carregar os dados da guilda.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+      }
     });
 
     socket.emit('requestCharacterListData');
 
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+
+    socket.on('reconnect_attempt', () => {
+      console.log('Attempting to reconnect...');
+    });
+
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [toast, socketUrl]);
 
-  const filterCharactersByType = (type: CharacterType) => {
-    return characterData.filter(item => item.character.type === type);
-  };
+  const filteredCharacterData = useMemo(() => {
+    if (!searchTerm) return characterData;
+    return characterData.filter((item) =>
+      item.character.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, characterData]);
+
+  const filterCharactersByType = useCallback((type: CharacterType) => {
+    return filteredCharacterData.filter((item) => item.character.type === type);
+  }, [filteredCharacterData]);
 
   return (
     <div>

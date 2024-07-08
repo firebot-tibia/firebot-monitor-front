@@ -20,12 +20,12 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
-import { io } from 'socket.io-client';
 import Navbar from '../../components/navbar';
 import { GuildDTO, GuildMemberDTO } from '../../dtos/guild.dto';
 import { characterTypeIcons, vocationIcons } from '../../constant/constant';
 import { CharacterType } from '../../shared/enum/character-type.enum';
 import { postCharacter } from '../../services/character';
+import { getEnemyGuild } from '../../services/guilds';
 
 const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -33,15 +33,24 @@ const Settings = () => {
   const [selectedMembers, setSelectedMembers] = useState<GuildMemberDTO[]>([]);
   const [selectedType, setSelectedType] = useState<CharacterType | null>(null);
   const toast = useToast();
-  const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
   useEffect(() => {
-    const socket = io(socketUrl);
-
-    socket.on('guildData', (data: GuildDTO) => {
-      if (data?.guild.members) {
-        setGuildData(data);
-      } else {
+    const fetchGuildData = async () => {
+      try {
+        const response = await getEnemyGuild();
+        const data = response.data;
+        if (data?.guild?.members) {
+          setGuildData(data);
+        } else {
+          toast({
+            title: 'Erro ao carregar dados.',
+            description: 'Não foi possível carregar os dados da guilda.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
         toast({
           title: 'Erro ao carregar dados.',
           description: 'Não foi possível carregar os dados da guilda.',
@@ -49,15 +58,12 @@ const Settings = () => {
           duration: 5000,
           isClosable: true,
         });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
-
-    socket.emit('requestGuildData');
-
-    return () => {
-      socket.disconnect();
     };
+
+    fetchGuildData();
   }, []);
 
   const handleSelectMember = (member: GuildMemberDTO) => {

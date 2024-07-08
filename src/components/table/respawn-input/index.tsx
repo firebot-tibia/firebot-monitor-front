@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Input } from '@chakra-ui/react';
 import { updateRespawn } from '../../../services/respawn';
 import { RespawnInputProps } from '../interface/table.interface';
@@ -8,17 +8,19 @@ import { RespawnInputProps } from '../interface/table.interface';
 export const RespawnInput: FC<RespawnInputProps> = ({ characterName, localRespawnData, setLocalRespawnData, toast }) => {
   const [value, setValue] = useState(localRespawnData[characterName] || '');
 
+  useEffect(() => {
+    setValue(localRespawnData[characterName] || '');
+  }, [localRespawnData, characterName]);
+
   const handleBlur = async () => {
     try {
-      if (localRespawnData[characterName]) {
-        await updateRespawn(characterName, { name: value, character: characterName, is_pt: false });
-        toast({
-          title: 'Respawn atualizado com sucesso',
-          status: 'success',
-          duration: 2000,
-          isClosable: true,
-        });
-      } 
+      await updateRespawn(characterName, { name: value, character: characterName, is_pt: false });
+      toast({
+        title: 'Respawn atualizado com sucesso',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error('Falha ao atualizar respawn', error);
       toast({
