@@ -58,51 +58,50 @@ export const TableWidget: FC<TableWidgetProps> = ({ data, columns, isLoading }) 
               <Td colSpan={columns.length} textAlign="center" color="white" fontSize="sm">Carregando...</Td>
             </Tr>
           )}
-          {!isLoading &&
-            data.map((row, index) => {
-              const characterName = row.character.name || 'Desconhecido';
-              return (
-                <Tr key={index} color="white">
-                  <Td color="white" fontSize="sm">
-                    <img
-                      src={getVocationIcon(row.character.vocation || '')}
-                      alt={row.character.vocation || 'Desconhecido'}
-                      width="24"
-                      height="24"
-                    />
-                  </Td>
-                  <Td color="white" fontSize="sm">
-                    <CharacterMenu 
-                      characterName={characterName} 
-                      handleCopy={(name) => handleCopy(name, toast)} 
-                      copyAllNames={() => copyAllNames(data, toast)} 
-                      copyAllExivas={() => copyAllExivas(data, toast)} 
-                    />
-                  </Td>
-                  <Td color="white" fontSize="sm">{row.character.level}</Td>
-                  <Td color="white" fontSize="sm">{row.character.onlineTimer}</Td>
-                  <Td color="white" fontSize="sm">
-                    <RespawnInput
-                      characterName={characterName}
-                      localRespawnData={localRespawnData}
-                      setLocalRespawnData={setLocalRespawnData}
-                      toast={toast}
-                    />
-                  </Td>
-                  <Td color="white" fontSize="sm">
-                    <PTIcon
-                      characterName={characterName}
-                      localIconState={localIconState}
-                      setLocalIconState={setLocalIconState}
-                      selectedCharacters={selectedCharacters}
-                      setSelectedCharacters={setSelectedCharacters}
-                      data={data}
-                      toast={toast}
-                    />
-                  </Td>
-                </Tr>
-              );
-            })}
+          {!isLoading && data.map((row, index) => {
+            const characterName = row.character.name || 'Desconhecido';
+            return (
+              <Tr key={index} color="white">
+                <Td color="white" fontSize="sm">
+                  <img
+                    src={getVocationIcon(row.character.vocation || '')}
+                    alt={row.character.vocation || 'Desconhecido'}
+                    width="24"
+                    height="24"
+                  />
+                </Td>
+                <Td color="white" fontSize="sm">
+                  <CharacterMenu 
+                    characterName={characterName} 
+                    handleCopy={(name) => handleCopy(name, toast)} 
+                    copyAllNames={() => copyAllNames(data, toast)} 
+                    copyAllExivas={() => copyAllExivas(data, toast)} 
+                  />
+                </Td>
+                <Td color="white" fontSize="sm">{row.character.level}</Td>
+                <Td color="white" fontSize="sm">{row.character.onlineTimer}</Td>
+                <Td color="white" fontSize="sm">
+                  <RespawnInput
+                    characterName={characterName}
+                    localRespawnData={localRespawnData}
+                    setLocalRespawnData={setLocalRespawnData}
+                    toast={toast}
+                  />
+                </Td>
+                <Td color="white" fontSize="sm">
+                  <PTIcon
+                    characterName={characterName}
+                    localIconState={localIconState}
+                    setLocalIconState={setLocalIconState}
+                    selectedCharacters={selectedCharacters}
+                    setSelectedCharacters={setSelectedCharacters}
+                    data={data}
+                    toast={toast}
+                  />
+                </Td>
+              </Tr>
+            );
+          })}
         </Tbody>
       </Table>
     </TableContainer>

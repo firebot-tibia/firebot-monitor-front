@@ -12,10 +12,6 @@ const styles = {
       color: 'white',
       fontFamily: 'Inter, sans-serif',
     },
-    '*, *::before, *::after': {
-      color: 'white',
-      borderColor: 'gray.600',
-    },
   }),
 };
 

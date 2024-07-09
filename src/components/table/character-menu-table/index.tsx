@@ -8,7 +8,7 @@ import { CharacterMenuProps } from '../interface/table.interface';
 
 export const CharacterMenu: FC<CharacterMenuProps> = ({ characterName, handleCopy, copyAllNames, copyAllExivas }) => (
   <Menu>
-    <MenuButton as={Button} size="xs" rightIcon={<ChevronDownIcon />} bg="transparent" _hover={{ bg: 'transparent' }}>
+    <MenuButton as={Button} size="xs" rightIcon={<ChevronDownIcon />} bg="transparent" _hover={{ bg: 'transparent' }} color="white">
       {characterName}
     </MenuButton>
     <MenuList bg="black" color="white">

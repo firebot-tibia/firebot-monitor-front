@@ -16,7 +16,7 @@ const Home: FC = () => {
   const toast = useToast();
   const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
-  const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Ultimo Exiva', 'PT'], []);
+  const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Tempo', 'Ultimo Exiva', 'PT'], []);
 
   useEffect(() => {
     const socket = io(socketUrl);
@@ -74,37 +74,13 @@ const Home: FC = () => {
   return (
     <div>
       <Navbar />
-      <Container className="p-4" maxW="full" display="flex" flexDirection="column" gap="4">
+      <Container className="p-8" maxW="full" display="flex" flexDirection="column" gap="7">
         <Card bg="rgba(255, 255, 255, 0.2)" backdropFilter="blur(10px)">
           <CardBody>
-            <Box display="flex" gap="2" justifyContent="space-between" mb="4">
-              <Input
-                maxW="320px"
-                placeholder="Buscar membro"
-                size="md"
-                rounded="xl"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                bg="rgba(255, 255, 255, 0.2)"
-                color="white"
-                _placeholder={{ color: 'gray.300' }}
-                backdropFilter="blur(10px)"
-              />
-            </Box>
             {isLoading ? (
               <Spinner size="xl" />
             ) : (
-              <Grid templateColumns="repeat(auto-fit, minmax(400px, 1fr))" gap="7">
-                <GridItem>
-                  <Heading color="white" as="h2" size="lg" mt="4">
-                    Makers
-                  </Heading>
-                  <TableWidget
-                    columns={columns}
-                    data={filterCharactersByType(CharacterType.MAKER)}
-                    isLoading={isLoading}
-                  />
-                </GridItem>
+              <Grid templateColumns="repeat(auto-fit, minmax(800px, 1fr))" gap="7">
                 <GridItem>
                   <Heading color="white" as="h2" size="lg" mt="4">
                     Mains
@@ -122,6 +98,16 @@ const Home: FC = () => {
                   <TableWidget
                     columns={columns}
                     data={filterCharactersByType(CharacterType.BOMBA)}
+                    isLoading={isLoading}
+                  />
+                </GridItem>
+                <GridItem>
+                  <Heading color="white" as="h2" size="lg" mt="4">
+                    Makers
+                  </Heading>
+                  <TableWidget
+                    columns={columns}
+                    data={filterCharactersByType(CharacterType.MAKER)}
                     isLoading={isLoading}
                   />
                 </GridItem>

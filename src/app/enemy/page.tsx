@@ -1,18 +1,45 @@
 'use client';
 
-import { FC } from "react";
-import Navbar from "../../components/navbar";
+import React, { useEffect, useState } from 'react';
+import Navbar from '../../components/navbar';
 
+const GulpHtmlPage: React.FC = () => {
+  const [htmlContent, setHtmlContent] = useState<string>('');
 
-const Enemy: FC = () => {
+  useEffect(() => {
+    fetch('/api/maps-server')
+      .then(response => response.text())
+      .then(data => setHtmlContent(data))
+      .catch(error => console.error('Error fetching HTML:', error));
+  }, []);
 
+  useEffect(() => {
+    if (htmlContent) {
+      const container = document.getElementById('map-container');
+      if (container) {
+        container.innerHTML = htmlContent;
+
+        const scripts = container.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement('script');
+          Array.from(oldScript.attributes).forEach(attr =>
+            newScript.setAttribute(attr.name, attr.value)
+          );
+          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+          oldScript.parentNode?.replaceChild(newScript, oldScript);
+        });
+      }
+    }
+  }, [htmlContent]);
 
   return (
-    <div>
+    <>
       <Navbar />
-
-    </div>
+      <div style={{ height: '100vh', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div id="map-container" style={{ height: '70vh', width: '70%', position: 'relative' }} />
+      </div>
+    </>
   );
 };
 
-export default Enemy;
+export default GulpHtmlPage;
