@@ -24,7 +24,6 @@ gulp.task('css', function() {
     require.resolve('leaflet/dist/leaflet.css'),
     'src/components/maps/_css/leaflet.coordinates.css',
     'src/components/maps/_css/leaflet.buttons.css',
-    'node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css',
     'src/components/maps/_css/map.css'
   ])
     .pipe(concat('map.css'))
@@ -41,7 +40,6 @@ gulp.task('js', function() {
     'src/components/maps/_js/leaflet.levelbuttons.js',
     'src/components/maps/_js/leaflet.exivabutton.js',
     'src/components/maps/_js/leaflet.markersbutton.js',
-    require.resolve('leaflet-fullscreen'),
     'src/components/maps/_js/map.js'
   ])
     .pipe(concat('map.js'))
@@ -51,7 +49,6 @@ gulp.task('js', function() {
 
 gulp.task('images', function() {
   return gulp.src([
-    'node_modules/leaflet-fullscreen/dist/*.png',
     'src/components/maps/_css/*.png',
     'src/components/maps/_img/marker-icons/*.png'
   ])
