@@ -5,9 +5,9 @@ import { useEffect, useState, useMemo, FC, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { throttle } from 'lodash';
 import { CharacterRespawnDTO } from '../../shared/interface/character-list.interface';
-import Navbar from '../../components/navbar';
 import { TableWidget } from '../../components/table';
 import { CharacterType } from '../../shared/enum/character-type.enum';
+import DashboardLayout from '../../components/dashboard';
 
 const Home: FC = () => {
   const [characterData, setCharacterData] = useState<CharacterRespawnDTO[]>([]);
@@ -66,7 +66,7 @@ const Home: FC = () => {
 
   return (
     <div>
-      <Navbar />
+    <DashboardLayout>
       <Container className="p-8" maxW="full" display="flex" flexDirection="column" gap="7">
         <Card bg="rgba(255, 255, 255, 0.2)" backdropFilter="blur(10px)">
           <CardBody>
@@ -119,6 +119,7 @@ const Home: FC = () => {
           </CardBody>
         </Card>
       </Container>
+      </DashboardLayout>
     </div>
   );
 };

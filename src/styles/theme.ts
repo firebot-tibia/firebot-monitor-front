@@ -8,7 +8,7 @@ const config: ThemeConfig = {
 const styles = {
   global: (props: any) => ({
     body: {
-      bg: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
+      bg: 'black',
       color: 'white',
       fontFamily: 'Inter, sans-serif',
     },

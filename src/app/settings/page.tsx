@@ -20,12 +20,12 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
-import Navbar from '../../components/navbar';
 import { GuildDTO, GuildMemberDTO } from '../../dtos/guild.dto';
 import { characterTypeIcons, vocationIcons } from '../../constant/constant';
 import { updateCharacter } from '../../services/character';
 import { getEnemyGuild } from '../../services/guilds';
 import { CharacterType } from '../../shared/enum/character-type.enum';
+import DashboardLayout from '../../components/dashboard';
 
 const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -122,7 +122,7 @@ const Settings = () => {
 
   return (
     <div>
-      <Navbar />
+    <DashboardLayout>
       <main className="p-4">
         {isLoading ? (
           <VStack align="center">
@@ -248,6 +248,7 @@ const Settings = () => {
           </Box>
         )}
       </main>
+      </DashboardLayout>
     </div>
   );
 };

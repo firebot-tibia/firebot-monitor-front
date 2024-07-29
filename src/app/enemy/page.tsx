@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Navbar from '../../components/navbar';
+import DashboardLayout from '../../components/dashboard';
 
 const GulpHtmlPage: React.FC = () => {
   const [htmlContent, setHtmlContent] = useState<string>('');
@@ -34,10 +34,11 @@ const GulpHtmlPage: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <DashboardLayout>
       <div style={{ height: '100vh', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div id="map-container" style={{ height: '70vh', width: '70%', position: 'relative' }} />
       </div>
+      </DashboardLayout>
     </>
   );
 };
