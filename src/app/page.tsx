@@ -1,9 +1,9 @@
 export const metadata = {
-  title: 'Tornabra - Monitor',
+  title: 'Enemy Monitor',
   description: 'Enemy Monitor',
   openGraph: {
     url: ``,
-    title: 'Tornabra - Monitor',
+    title: 'Enemy Monitor',
     locale: 'pt-br',
     type: 'website',
     description: 'Enemy Monitor',
