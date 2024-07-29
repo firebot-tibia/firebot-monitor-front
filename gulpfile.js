@@ -39,7 +39,6 @@ gulp.task('js', function() {
     'src/components/maps/_js/leaflet.crosshairs.js',
     'src/components/maps/_js/leaflet.levelbuttons.js',
     'src/components/maps/_js/leaflet.exivabutton.js',
-    'src/components/maps/_js/leaflet.markersbutton.js',
     'src/components/maps/_js/map.js'
   ])
     .pipe(concat('map.js'))
@@ -50,12 +49,12 @@ gulp.task('js', function() {
 gulp.task('images', function() {
   return gulp.src([
     'src/components/maps/_css/*.png',
-    'src/components/maps/_img/marker-icons/*.png'
+    'src/components/maps/_img/*.png'
   ])
     .pipe(imagemin({
       optimizationLevel: 7
     }))
-    .pipe(gulp.dest('public/dist/_img/marker-icons/'));
+    .pipe(gulp.dest('public/dist/_img'));
 });
 
 gulp.task('build', gulp.series('clean', gulp.parallel('html', 'css', 'js', 'images')));

@@ -7,8 +7,7 @@
 }
 
 .leaflet-control-level-buttons-span,
-.leaflet-control-exiva-button,
-.leaflet-control-markers-button {
+.leaflet-control-exiva-button {
 	font-size: 18px;
 	background-color: #fff;
 	color: black;

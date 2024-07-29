@@ -1,5 +1,5 @@
 export interface GuildMemberDTO {
-  name?: string;
+  name: string;
   vocation?: string;
   level?: number;
   onlineTimer?:any;

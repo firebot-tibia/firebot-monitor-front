@@ -15,4 +15,5 @@ export const characterTypeIcons: { [key in CharacterType]: string } = {
     [CharacterType.MAIN]: '/assets/main.png',
     [CharacterType.MAKER]: '/assets/maker.png',
     [CharacterType.BOMBA]: '/assets/bomb.png',
+    [CharacterType.FRACOKS]: '/assets/fraco.png',
 };

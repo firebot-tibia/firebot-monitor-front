@@ -23,9 +23,9 @@ import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
 import Navbar from '../../components/navbar';
 import { GuildDTO, GuildMemberDTO } from '../../dtos/guild.dto';
 import { characterTypeIcons, vocationIcons } from '../../constant/constant';
-import { CharacterType } from '../../shared/enum/character-type.enum';
-import { postCharacter } from '../../services/character';
+import { updateCharacter } from '../../services/character';
 import { getEnemyGuild } from '../../services/guilds';
+import { CharacterType } from '../../shared/enum/character-type.enum';
 
 const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -92,7 +92,7 @@ const Settings = () => {
     }
 
     const promises = selectedMembers.map((member) =>
-      postCharacter({
+      updateCharacter(member.name, {
         name: member.name,
         vocation: member.vocation,
         level: member.level,
@@ -133,7 +133,6 @@ const Settings = () => {
           <Box>
             {guildData ? (
             <Box mt={4} maxW="md">
-                <Text>Total Online: {guildData.guild.total_online}</Text>
                 <Box mt={4} maxW="md">
                   <Menu>
                     <MenuButton as={Button} rightIcon={<ChevronDownIcon />} bg="black" color="white" w="full">

@@ -1,18 +1,17 @@
 'use client';
 
-import { Box, Heading, Spinner, Grid, GridItem, Container, Input, Card, CardBody, useToast } from '@chakra-ui/react';
+import { Heading, Spinner, Grid, GridItem, Container, Card, CardBody, useToast } from '@chakra-ui/react';
 import { useEffect, useState, useMemo, FC, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { throttle } from 'lodash';
-import { CharacterType } from '../../shared/enum/character-type.enum';
 import { CharacterRespawnDTO } from '../../shared/interface/character-list.interface';
 import Navbar from '../../components/navbar';
 import { TableWidget } from '../../components/table';
+import { CharacterType } from '../../shared/enum/character-type.enum';
 
 const Home: FC = () => {
   const [characterData, setCharacterData] = useState<CharacterRespawnDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const toast = useToast();
   const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
@@ -24,9 +23,9 @@ const Home: FC = () => {
     const throttledSetCharacterData = throttle((data: CharacterRespawnDTO[]) => {
       setCharacterData(data);
       setIsLoading(false);
-    }, 1000);
+    }, 3000);
 
-    socket.on('characterListData', (data: CharacterRespawnDTO[]) => {
+    socket.on('characterData', (data: CharacterRespawnDTO[]) => {
       if (data) {
         throttledSetCharacterData(data);
       } else {
@@ -41,7 +40,7 @@ const Home: FC = () => {
       }
     });
 
-    socket.emit('requestCharacterListData');
+    socket.emit('requestCharacterData');
 
     socket.on('connect', () => {
       console.log('Connected to server');
@@ -60,16 +59,10 @@ const Home: FC = () => {
     };
   }, [toast, socketUrl]);
 
-  const filteredCharacterData = useMemo(() => {
-    if (!searchTerm) return characterData;
-    return characterData.filter((item) =>
-      item.character.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, characterData]);
 
   const filterCharactersByType = useCallback((type: CharacterType) => {
-    return filteredCharacterData.filter((item) => item.character.type === type);
-  }, [filteredCharacterData]);
+    return characterData.filter((item) => item.character.type === type);
+  }, [characterData]);
 
   return (
     <div>
@@ -108,6 +101,16 @@ const Home: FC = () => {
                   <TableWidget
                     columns={columns}
                     data={filterCharactersByType(CharacterType.MAKER)}
+                    isLoading={isLoading}
+                  />
+                </GridItem>
+                <GridItem>
+                  <Heading color="white" as="h2" size="lg" mt="4">
+                    FRACOKS
+                  </Heading>
+                  <TableWidget
+                    columns={columns}
+                    data={filterCharactersByType(CharacterType.FRACOKS)}
                     isLoading={isLoading}
                   />
                 </GridItem>
