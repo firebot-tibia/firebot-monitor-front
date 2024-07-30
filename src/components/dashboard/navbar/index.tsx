@@ -30,11 +30,6 @@ const Navbar = () => {
       alignItems="center"
       py={4}
     >
-      <Box mb={8}>
-        <Text fontSize="2xl" fontWeight="bold" textAlign="center">
-          Enemy Monitor
-        </Text>
-      </Box>
       <VStack spacing={4}>
         {config.nameNavigation.map((navItem, index) => (
           <Link key={index} href={navItem.href} passHref>

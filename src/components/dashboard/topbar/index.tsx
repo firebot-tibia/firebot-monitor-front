@@ -1,8 +1,8 @@
-import { Flex, IconButton, Spacer, HStack } from "@chakra-ui/react";
+import { Flex, IconButton, Spacer, HStack, Text } from "@chakra-ui/react";
 import { FC } from "react";
 import { FaCog, FaSignOutAlt } from "react-icons/fa";
 import Link from 'next/link';
-import WorldSelector from "./world-selector";
+import GuildSelector from "./guild-selector";
 
 const Topbar: FC = () => {
   return (
@@ -16,9 +16,12 @@ const Topbar: FC = () => {
       py={2}
       boxShadow="md"
     >
+     <Text fontSize="2xl" fontWeight="bold" textAlign="center">
+          Enemy Monitor
+      </Text>
       <Spacer />
       <HStack spacing={4}>
-      <WorldSelector />
+      <GuildSelector />
         <Link href="/settings" passHref>
           <IconButton
             aria-label="Settings"

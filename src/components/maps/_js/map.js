@@ -280,9 +280,6 @@
 				return '<b>X</b>: ' + Math.floor(lng);
 			}
 		}).addTo(map);
-		L.LevelButtons.btns = L.levelButtons({
-			layers_widget: layers_widget
-		}).addTo(map);
 		L.ExivaButton.btns = L.exivaButton({
 			crosshairs: this.crosshairs
 		}).addTo(map);
@@ -292,7 +289,6 @@
 	const mapContainer = document.querySelector('#map');
 	const map = new TibiaMap();
 	map.init(mapContainer.dataset);
-	L.LevelButtons.btns.setTibiaMap(map);
 
 		document.documentElement.addEventListener('keydown', function(event) {
 			const _map = map.map;
