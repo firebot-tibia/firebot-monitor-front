@@ -1,6 +1,5 @@
 import { FaMap } from "react-icons/fa";
 import { IoSkullOutline } from "react-icons/io5";
-import { IoSettings } from "react-icons/io5";
 
 export const config = {
   titleNotFound: '',
@@ -10,11 +9,6 @@ export const config = {
       href: '/',
     },
     {
-      name: 'Configurações',
-      href: '/settings',
-      icon: IoSettings,
-    },
-    {
       name: 'Mapa Exiva',
       href: '/enemy',
       icon: FaMap,
@@ -22,6 +16,11 @@ export const config = {
     {
       name: 'Oranges Online',
       href: '/orange',
+      icon: IoSkullOutline,
+    },
+    {
+      name: 'Death List',
+      href: '/deathlist',
       icon: IoSkullOutline,
     },
   ],

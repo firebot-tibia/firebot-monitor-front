@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { Box, VStack, Button, Icon, Text } from '@chakra-ui/react';
-import { FaHome} from 'react-icons/fa';
+import { FaHome } from 'react-icons/fa';
 import Link from 'next/link';
 import { config } from '../../../config/config';
-
 
 const Navbar = () => {
   const [isClient, setIsClient] = useState(false);
@@ -17,7 +16,6 @@ const Navbar = () => {
   if (!isClient) {
     return null;
   }
-
 
   return (
     <Box
@@ -33,7 +31,7 @@ const Navbar = () => {
       py={4}
     >
       <Box mb={8}>
-        <Text fontSize="2xl" fontWeight="bold">
+        <Text fontSize="2xl" fontWeight="bold" textAlign="center">
           Enemy Monitor
         </Text>
       </Box>
@@ -41,7 +39,7 @@ const Navbar = () => {
         {config.nameNavigation.map((navItem, index) => (
           <Link key={index} href={navItem.href} passHref>
             <Button
-              as="a"
+              as="div"
               variant="ghost"
               color="white"
               leftIcon={<Icon as={navItem.icon || FaHome} />}
