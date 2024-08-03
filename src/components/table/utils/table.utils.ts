@@ -1,6 +1,6 @@
 import { useToast } from '@chakra-ui/react';
 import { CharacterRespawnDTO } from '../../../shared/interface/character-list.interface';
-import { vocationIcons } from '../../../constant/constant';
+import { vocationIcons } from '../../../constant/character-const';
 
 export const copyAllNames = (data: CharacterRespawnDTO[], toast: ReturnType<typeof useToast>) => {
   const allNames = data.map(row => row.character.name).join(', ');

@@ -1,19 +1,16 @@
 'use client';
 
-import { useToast, TableContainer, Table, Thead, Tr, Th, Tbody, Td, Tooltip } from "@chakra-ui/react";
+import { useToast, TableContainer, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
 import { useState, useEffect, FC } from "react";
 import { CharacterMenu } from "./character-menu-table";
 import { getVocationIcon, handleCopy, copyAllNames, copyAllExivas } from "./utils/table.utils";
 import { TableWidgetProps } from "./interface/table.interface";
 import { RespawnInput } from "./respawn-input";
-import PTIcon from "./pt-icon";
 
 export const TableWidget: FC<TableWidgetProps> = ({ data, columns, isLoading }) => {
   const toast = useToast();
   const [localRespawnData, setLocalRespawnData] = useState<{ [key: string]: string }>({});
-  const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [localIconState, setLocalIconState] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (initialLoad) {
@@ -24,15 +21,7 @@ export const TableWidget: FC<TableWidgetProps> = ({ data, columns, isLoading }) 
         return acc;
       }, {} as { [key: string]: string });
       
-      const iconState = data.reduce((acc, item) => {
-        if (item.character.name) {
-          acc[item.character.name] = item.respawn?.is_pt ? 'true.png' : 'false.png';
-        }
-        return acc;
-      }, {} as { [key: string]: string });
-
       setLocalRespawnData(respawnData);
-      setLocalIconState(iconState);
       setInitialLoad(false);
     }
   }, [data, initialLoad]);
@@ -85,17 +74,6 @@ export const TableWidget: FC<TableWidgetProps> = ({ data, columns, isLoading }) 
                     characterName={characterName}
                     localRespawnData={localRespawnData}
                     setLocalRespawnData={setLocalRespawnData}
-                    toast={toast}
-                  />
-                </Td>
-                <Td color="white" fontSize="sm">
-                  <PTIcon
-                    characterName={characterName}
-                    localIconState={localIconState}
-                    setLocalIconState={setLocalIconState}
-                    selectedCharacters={selectedCharacters}
-                    setSelectedCharacters={setSelectedCharacters}
-                    data={data}
                     toast={toast}
                   />
                 </Td>

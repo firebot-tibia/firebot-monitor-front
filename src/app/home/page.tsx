@@ -13,7 +13,7 @@ const Home: FC = () => {
   const [characterData, setCharacterData] = useState<CharacterRespawnDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
-  const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+  const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || '';
 
   const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Tempo', 'Ultimo Exiva', 'PT'], []);
 

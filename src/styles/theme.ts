@@ -6,15 +6,20 @@ const config: ThemeConfig = {
 };
 
 const styles = {
-  global: (props: any) => ({
+  global: {
     body: {
       bg: '#1c1c1c',
       color: 'white',
-      fontFamily: 'Inter, sans-serif',
+      fontFamily: 'Neue Regrade, sans-serif',
     },
-  }),
+  },
 };
 
-const theme = extendTheme({ config, styles });
+const fonts = {
+  heading: 'Neue Regrade, sans-serif',
+  body: 'Neue Regrade, sans-serif',
+};
+
+const theme = extendTheme({ config, styles, fonts });
 
 export default theme;

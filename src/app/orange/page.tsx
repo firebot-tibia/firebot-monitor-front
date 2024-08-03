@@ -18,7 +18,7 @@ const Orange = () => {
     <DashboardLayout>
     <Box p={4} maxW="800px" mx="auto">
       <Heading as="h1" mb={4} textAlign="center">
-        Orange List
+        Lista de Oranges
       </Heading>
       <VStack spacing={4} mb={8} align="start">
         <Box w="full">

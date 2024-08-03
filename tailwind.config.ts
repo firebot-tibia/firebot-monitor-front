@@ -1,3 +1,4 @@
+// tailwind.config.js
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -16,10 +17,11 @@ const config: Config = {
         white: '#ffffff',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        neueRegrade: ['Neue Regrade', 'sans-serif'],
       },
     },
   },
   plugins: [],
 };
+
 export default config;

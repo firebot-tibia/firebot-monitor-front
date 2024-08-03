@@ -6,21 +6,15 @@ import { CharacterMenu } from "../character-menu-table";
 import { RespawnInput } from "../respawn-input";
 import { getVocationIcon } from "../utils/table.utils";
 import { TableWidgetRowProps } from "../interface/table.interface";
-import PTIcon from "../pt-icon";
 
 const TableWidgetRow: FC<TableWidgetRowProps> = ({
   row,
   localRespawnData,
   setLocalRespawnData,
-  selectedCharacters,
-  setSelectedCharacters,
-  localIconState,
-  setLocalIconState,
   handleCopy,
   copyAllNames,
   copyAllExivas,
   toast,
-  data,
 }) => {
   const characterName = row.character.name || 'Desconhecido';
 
@@ -49,17 +43,6 @@ const TableWidgetRow: FC<TableWidgetRowProps> = ({
           characterName={characterName} 
           localRespawnData={localRespawnData} 
           setLocalRespawnData={setLocalRespawnData} 
-          toast={toast} 
-        />
-      </Td>
-      <Td color="white" fontSize="sm">
-        <PTIcon 
-          characterName={characterName} 
-          localIconState={localIconState} 
-          setLocalIconState={setLocalIconState} 
-          selectedCharacters={selectedCharacters} 
-          setSelectedCharacters={setSelectedCharacters} 
-          data={data} 
           toast={toast} 
         />
       </Td>

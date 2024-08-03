@@ -7,7 +7,7 @@ export const config = {
   nameNavigation: [
     {
       name: 'Início',
-      href: '/',
+      href: '/home',
     },
     {
       name: 'Mapa Exiva',
@@ -15,12 +15,12 @@ export const config = {
       icon: FaMap,
     },
     {
-      name: 'Checar Orange',
+      name: 'Monitorar Oranges',
       href: '/orange',
       icon: IoSkullOutline,
     },
     {
-      name: 'Death List',
+      name: 'Monitorar Mortes',
       href: '/deathlist',
       icon: IoSkullOutline,
     },

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, VStack, Button, Icon, Text } from '@chakra-ui/react';
+import { Box, VStack, Button, Icon, Text, Center, Image } from '@chakra-ui/react';
 import { FaHome } from 'react-icons/fa';
 import Link from 'next/link';
 import { config } from '../../../config/config';
@@ -30,6 +30,13 @@ const Navbar = () => {
       alignItems="center"
       py={4}
     >
+      <Center mb={8}>
+          <Image 
+            src="assets/logo.png" 
+            alt="" 
+            maxW="25%"
+          />
+        </Center>
       <VStack spacing={4}>
         {config.nameNavigation.map((navItem, index) => (
           <Link key={index} href={navItem.href} passHref>

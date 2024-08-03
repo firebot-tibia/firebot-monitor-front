@@ -1,5 +1,5 @@
 {
-  "name": "tornabra-front",
+  "name": "firebot-front",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -25,6 +25,7 @@
     "gulp-uglify": "^3.0.2",
     "leaflet": "^1.9.4",
     "next": "^14.2.4",
+    "next-auth": "^4.24.7",
     "next-images": "^1.8.5",
     "react": "^19.0.0-rc-df783f9ea1-20240708",
     "react-copy-to-clipboard": "^5.1.0",
