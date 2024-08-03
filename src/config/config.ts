@@ -1,5 +1,6 @@
 import { FaMap } from "react-icons/fa";
 import { IoSkullOutline } from "react-icons/io5";
+import { GiCharacter, GiStarfighter } from "react-icons/gi";
 
 export const config = {
   titleNotFound: '',
@@ -14,7 +15,7 @@ export const config = {
       icon: FaMap,
     },
     {
-      name: 'Oranges Online',
+      name: 'Checar Orange',
       href: '/orange',
       icon: IoSkullOutline,
     },
@@ -22,6 +23,11 @@ export const config = {
       name: 'Death List',
       href: '/deathlist',
       icon: IoSkullOutline,
+    },
+    {
+      name: 'Checar Soulwar',
+      href: '/soulwar',
+      icon: GiStarfighter,
     },
   ],
 };

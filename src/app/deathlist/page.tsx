@@ -44,16 +44,16 @@ const DeathTable = () => {
   return (
     <DashboardLayout>
     <Box p={4}>
-      <Text fontSize="2xl" mb={4} textAlign="center">Recent Deaths</Text>
+      <Text fontSize="2xl" mb={4} textAlign="center">Mortes Recentes</Text>
       <Box overflowX="auto">
         <Table variant="simple" colorScheme="gray">
           <Thead>
             <Tr>
-              <Th>Character</Th>
+              <Th>Nome</Th>
               <Th>Level</Th>
-              <Th>Vocation</Th>
-              <Th>City</Th>
-              <Th>Death</Th>
+              <Th>Vocação</Th>
+              <Th>Cidade</Th>
+              <Th>Morte</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -70,9 +70,9 @@ const DeathTable = () => {
         </Table>
       </Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
-        <Button disabled={currentPage === 1} onClick={() => setCurrentPage((prev) => prev - 1)}>Previous</Button>
-        <Text>Page {currentPage} of {totalPages}</Text>
-        <Button disabled={currentPage === totalPages} onClick={() => setCurrentPage((prev) => prev + 1)}>Next</Button>
+        <Button disabled={currentPage === 1} onClick={() => setCurrentPage((prev) => prev - 1)}>Anterior</Button>
+        <Text>Página {currentPage} de {totalPages}</Text>
+        <Button disabled={currentPage === totalPages} onClick={() => setCurrentPage((prev) => prev + 1)}>Proxima</Button>
       </Box>
       <DeathDetail death={selectedDeath} />
     </Box>
@@ -82,12 +82,12 @@ const DeathTable = () => {
 
 const DeathDetail: React.FC<DeathDetailProps> = ({ death }) => (
   <Box mt={6} p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" bg="gray.700">
-    <Text fontSize="xl" fontWeight="bold">Last Death Details</Text>
-    <Text><strong>Character:</strong> {death.name}</Text>
+    <Text fontSize="xl" fontWeight="bold">Ultimas mortes</Text>
+    <Text><strong>Nome:</strong> {death.name}</Text>
     <Text><strong>Level:</strong> {death.level}</Text>
-    <Text><strong>Vocation:</strong> {death.vocation}</Text>
-    <Text><strong>City:</strong> {death.city}</Text>
-    <Text><strong>Death:</strong> {death.death}</Text>
+    <Text><strong>Vocação:</strong> {death.vocation}</Text>
+    <Text><strong>Cidade:</strong> {death.city}</Text>
+    <Text><strong>Morte:</strong> {death.death}</Text>
   </Box>
 );
 
