@@ -1,126 +1,141 @@
-'use client';
+'use client'
 
-import { Heading, Spinner, Grid, GridItem, Container, Card, CardBody, useToast } from '@chakra-ui/react';
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Spinner,
+  Grid,
+  GridItem,
+  Container,
+  Card,
+  CardBody,
+  Image,
+  Box,
+} from '@chakra-ui/react';
 import { useEffect, useState, useMemo, FC, useCallback } from 'react';
-import { io } from 'socket.io-client';
-import { throttle } from 'lodash';
-import { CharacterRespawnDTO } from '../../shared/interface/character-list.interface';
-import { TableWidget } from '../../components/table';
-import { CharacterType } from '../../shared/enum/character-type.enum';
 import DashboardLayout from '../../components/dashboard';
+import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
+import { CharacterType } from '../../shared/enum/character-type.enum';
+import { useToastContext } from '../../context/toast/toast-context';
+import { characterTypeIcons, vocationIcons } from '../../constant/character';
+import io from 'socket.io-client';
+import Cookies from 'js-cookie';
+
+const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean }> = ({ columns, data, isLoading }) => (
+  <Table variant="simple" size="sm" colorScheme="gray" style={{ tableLayout: 'fixed', width: '100%' }}>
+    <Thead>
+      <Tr>
+        {columns.map((column, index) => (
+          <Th key={index} color="white" textAlign="center" fontSize="sm">{column}</Th>
+        ))}
+      </Tr>
+    </Thead>
+    <Tbody>
+      {isLoading ? (
+        <Tr>
+          <Td colSpan={columns.length} textAlign="center">
+            <Spinner size="lg" />
+          </Td>
+        </Tr>
+      ) : (
+        data.map((member, index) => (
+          <Tr key={index}>
+            <Td textAlign="center" color="white">{index + 1}</Td>
+            <Td textAlign="center" color="white">{member.level}</Td>
+            <Td textAlign="center" color="white">
+              <Image src={vocationIcons[member.vocation] || '/assets/default.png'} alt={member.vocation} boxSize="24px" mx="auto" />
+            </Td>
+            <Td textAlign="left" color="white" isTruncated maxW="150px">{member.name}</Td>
+            <Td textAlign="center" color="white">
+              <Image src={characterTypeIcons[member.kind as CharacterType]} alt={member.kind} boxSize="24px" mx="auto" />
+            </Td>
+            <Td textAlign="center" color="white">{member.status}</Td>
+            <Td textAlign="center" color="white" maxW="150px" isTruncated>{member.onlineStatus ? "Online" : "Offline"}</Td>
+          </Tr>
+        ))
+      )}
+    </Tbody>
+  </Table>
+);
 
 const Home: FC = () => {
-  const [characterData, setCharacterData] = useState<CharacterRespawnDTO[]>([]);
+  const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const toast = useToast();
+  const { showToast } = useToastContext();
   const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || '';
-
-  const columns = useMemo(() => ['Voc', 'Nome', 'Lvl', 'Tempo', 'Ultimo Exiva', 'PT'], []);
+  const token = Cookies.get('token') || '';
 
   useEffect(() => {
-    const socket = io(socketUrl);
 
-    const throttledSetCharacterData = throttle((data: CharacterRespawnDTO[]) => {
-      setCharacterData(data);
-      setIsLoading(false);
-    }, 3000);
+    const socketUrl = `ws://api.firebot.run/ws/enemy?token=${encodeURIComponent(token)}`;
 
-    socket.on('characterData', (data: CharacterRespawnDTO[]) => {
-      if (data) {
-        throttledSetCharacterData(data);
-      } else {
-        toast({
-          title: 'Erro ao carregar dados.',
-          description: 'Não foi possível carregar os dados da guilda.',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-        setIsLoading(false);
-      }
+    const socket = io(socketUrl, {
+      transports: ['websocket'],
+      path: `/ws/enemy`,
     });
 
-    socket.emit('requestCharacterData');
-
     socket.on('connect', () => {
-      console.log('Connected to server');
+      console.log('Socket.io connection established');
+    });
+
+    socket.on('enemy', (data: GuildMemberResponse[]) => {
+      console.log('Received data:', data);
+      setGuildData(data);
+      setIsLoading(false);
+    });
+
+    socket.on('error', (error) => {
+      console.error('Socket.io error:', error);
     });
 
     socket.on('disconnect', () => {
-      console.log('Disconnected from server');
-    });
-
-    socket.on('reconnect_attempt', () => {
-      console.log('Attempting to reconnect...');
+      console.log('Socket.io connection closed');
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [toast, socketUrl]);
+  }, [socketUrl, showToast, token]);
 
+  const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Tempo', 'Exiva'], []);
 
-  const filterCharactersByType = useCallback((type: CharacterType) => {
-    return characterData.filter((item) => item.character.type === type);
-  }, [characterData]);
+  const filterCharactersByType = useCallback((type: string) => {
+    return guildData.filter((item) => item.kind === type);
+  }, [guildData]);
 
   return (
-    <div>
     <DashboardLayout>
       <Container className="p-8" maxW="full" display="flex" flexDirection="column" gap="7">
         <Card bg="rgba(255, 255, 255, 0.2)" backdropFilter="blur(10px)">
           <CardBody>
-            {isLoading ? (
-              <Spinner size="xl" />
-            ) : (
-              <Grid templateColumns="repeat(auto-fit, minmax(800px, 1fr))" gap="7">
-                <GridItem>
-                  <Heading color="white" as="h2" size="lg" mt="4">
-                    Mains
-                  </Heading>
+            <Grid templateColumns="repeat(2, 1fr)" gap="7">
+              <GridItem>
+                <Box overflowX="auto">
                   <TableWidget
                     columns={columns}
-                    data={filterCharactersByType(CharacterType.MAIN)}
+                    data={filterCharactersByType('main')}
                     isLoading={isLoading}
                   />
-                </GridItem>
-                <GridItem>
-                  <Heading color="white" as="h2" size="lg" mt="4">
-                    Bombas
-                  </Heading>
+                </Box>
+              </GridItem>
+              <GridItem>
+                <Box overflowX="auto">
                   <TableWidget
                     columns={columns}
-                    data={filterCharactersByType(CharacterType.BOMBA)}
+                    data={filterCharactersByType('maker')}
                     isLoading={isLoading}
                   />
-                </GridItem>
-                <GridItem>
-                  <Heading color="white" as="h2" size="lg" mt="4">
-                    Makers
-                  </Heading>
-                  <TableWidget
-                    columns={columns}
-                    data={filterCharactersByType(CharacterType.MAKER)}
-                    isLoading={isLoading}
-                  />
-                </GridItem>
-                <GridItem>
-                  <Heading color="white" as="h2" size="lg" mt="4">
-                    FRACOKS
-                  </Heading>
-                  <TableWidget
-                    columns={columns}
-                    data={filterCharactersByType(CharacterType.FRACOKS)}
-                    isLoading={isLoading}
-                  />
-                </GridItem>
-              </Grid>
-            )}
+                </Box>
+              </GridItem>
+            </Grid>
           </CardBody>
         </Card>
       </Container>
-      </DashboardLayout>
-    </div>
+    </DashboardLayout>
   );
 };
 

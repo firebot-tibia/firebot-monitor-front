@@ -20,10 +20,8 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
-import { GuildDTO, GuildMemberDTO } from '../../dtos/guild.dto';
-import { characterTypeIcons, vocationIcons } from '../../constant/character-const';
-import { updateCharacter } from '../../services/character';
-import { getEnemyGuild } from '../../services/guilds';
+import { GuildDTO, GuildMemberDTO } from '../../shared/dtos/guild.dto';
+import { characterTypeIcons, vocationIcons } from '../../constant/character';
 import { CharacterType } from '../../shared/enum/character-type.enum';
 import DashboardLayout from '../../components/dashboard';
 

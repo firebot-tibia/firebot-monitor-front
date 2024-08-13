@@ -7,7 +7,7 @@ const GulpHtmlPage: React.FC = () => {
   const [htmlContent, setHtmlContent] = useState<string>('');
 
   useEffect(() => {
-    fetch('/api/maps-server')
+    fetch('/api/maps')
       .then(response => response.text())
       .then(data => setHtmlContent(data))
       .catch(error => console.error('Error fetching HTML:', error));

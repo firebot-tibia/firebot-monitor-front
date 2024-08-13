@@ -2,7 +2,6 @@ import { Flex, IconButton, Spacer, HStack, Text } from "@chakra-ui/react";
 import { FC } from "react";
 import { FaCog, FaSignOutAlt } from "react-icons/fa";
 import Link from 'next/link';
-import GuildSelector from "./guild-selector";
 
 const Topbar: FC = () => {
   return (
@@ -21,7 +20,6 @@ const Topbar: FC = () => {
       </Text>
       <Spacer />
       <HStack spacing={4}>
-      <GuildSelector />
         <Link href="/settings" passHref>
           <IconButton
             aria-label="Settings"

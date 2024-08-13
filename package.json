@@ -23,6 +23,9 @@
     "gulp-cli": "^3.0.0",
     "gulp-typescript": "^6.0.0-alpha.1",
     "gulp-uglify": "^3.0.2",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "next": "^14.2.4",
     "next-auth": "^4.24.7",
@@ -34,12 +37,15 @@
     "react-icons": "^5.2.1",
     "react-leaflet": "^5.0.0-rc.1",
     "socket.io-client": "^4.7.5",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@alrra/travis-scripts": "^3.0.1",
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^14.1.0",
+    "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/leaflet": "^1.9.12",
     "@types/node": "^20",
     "@types/react": "^18",

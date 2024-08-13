@@ -1,9 +1,11 @@
 import { FaMap } from "react-icons/fa";
 import { IoSkullOutline } from "react-icons/io5";
-import { GiCharacter, GiStarfighter } from "react-icons/gi";
+import { GiStarfighter } from "react-icons/gi";
+import { IoMdStats } from "react-icons/io";
+import { GiDeathZone } from "react-icons/gi";
 
 export const config = {
-  titleNotFound: '',
+  titleNotFound: 'Página não encontrada',
   nameNavigation: [
     {
       name: 'Início',
@@ -22,12 +24,17 @@ export const config = {
     {
       name: 'Monitorar Mortes',
       href: '/deathlist',
-      icon: IoSkullOutline,
+      icon: GiDeathZone,
     },
     {
-      name: 'Checar Soulwar',
+      name: 'Soulwar',
       href: '/soulwar',
       icon: GiStarfighter,
+    },
+    {
+      name: 'Estatísticas da Guild',
+      href: '/guild-stats',
+      icon: IoMdStats,
     },
   ],
 };
