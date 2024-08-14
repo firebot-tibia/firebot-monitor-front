@@ -1,5 +1,3 @@
-import { CharacterType } from "../shared/enum/character-type.enum";
-
 export const vocationIcons: { [key: string]: string } = {
     'Master Sorcerer': '/assets/ms.gif',
     'Sorcerer': '/assets/ms.gif',
@@ -11,9 +9,9 @@ export const vocationIcons: { [key: string]: string } = {
     'Druid': '/assets/ed.gif',
 };
 
-export const characterTypeIcons: { [key in CharacterType]: string } = {
-    [CharacterType.MAIN]: '/assets/main.png',
-    [CharacterType.MAKER]: '/assets/maker.png',
-    [CharacterType.BOMBA]: '/assets/bomb.png',
-    [CharacterType.FRACOKS]: '/assets/fraco.png',
+export const characterTypeIcons: { [key: string]: string } = {
+    ['main']: '/assets/main.png',
+    ['maker']: '/assets/maker.png',
+    ['bomba']: '/assets/bomb.png',
+    ['fracoks']: '/assets/fraco.png',
 };

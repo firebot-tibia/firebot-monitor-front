@@ -1,33 +1,26 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwtDecode from 'jsonwebtoken';
-import { DecodedToken } from '../shared/dtos/auth.dto';
+import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: NextRequest) {
-  const token = req.cookies.get('token')?.value;
-  const { pathname } = req.nextUrl;
-
-  if (pathname === '/' || pathname.startsWith('/public') || pathname.startsWith('/api/auth')) {
-    return NextResponse.next();
-  }
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
   if (!token) {
-    return NextResponse.redirect(new URL('/', req.url));
+    const signInUrl = new URL('/', req.url);
+    return NextResponse.redirect(signInUrl);
   }
 
-  try {
-    const decoded = jwtDecode.decode(token) as DecodedToken;
-    if (decoded && Date.now() < decoded.exp * 1000) {
-      return NextResponse.next();
-    } else {
-      return NextResponse.redirect(new URL('/', req.url));
-    }
-  } catch (error) {
-    console.error('Invalid token:', error);
-    return NextResponse.redirect(new URL('/', req.url));
-  }
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/home/:path*', '/soulwar/:path*', '/orange/:path*', '/settings/:path*', '/enemy/:path*', '/deathlist/:path*', '/guild-stats/:path*'],
+  matcher: [
+    '/home/:path*', 
+    '/soulwar/:path*', 
+    '/orange/:path*', 
+    '/settings/:path*', 
+    '/enemy/:path*', 
+    '/deathlist/:path*', 
+    '/guild-stats/:path*'
+  ],
 };

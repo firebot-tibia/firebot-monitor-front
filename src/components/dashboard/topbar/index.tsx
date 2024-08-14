@@ -10,14 +10,20 @@ const Topbar: FC = () => {
       as="nav"
       bg="black"
       color="white"
+      position="fixed"
+      top="0"
+      left="0"
+      right="0"
       align="center"
       justify="space-between"
       px={4}
       py={2}
+      zIndex="1000" 
+      width="100%"
       boxShadow="md"
     >
-     <Text fontSize="2xl" fontWeight="bold" textAlign="center">
-          Enemy Monitor
+      <Text fontSize="2xl" fontWeight="bold" textAlign="center">
+        Enemy Monitor
       </Text>
       <Spacer />
       <HStack spacing={4}>

@@ -1,3 +1,5 @@
+'use client'
+
 import { Center, Box, Heading, VStack, Select, Text } from '@chakra-ui/react';
 import { ChangeEvent, useState, useCallback } from 'react';
 import DashboardLayout from '../../components/dashboard';
@@ -10,8 +12,6 @@ const Soulwar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const token = localStorage.getItem('token');
-
   const handleSelectChange = useCallback(async (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedWorld = event.target.value;
     setSelectedMundo(selectedWorld);
@@ -20,7 +20,7 @@ const Soulwar = () => {
       setLoading(true);
       setError('');
       try {
-        const data = await getSoulwarPlayers(selectedWorld, token || '');
+        const data = await getSoulwarPlayers(selectedWorld);
         setBonecosSoulwar(data.available_soulwar);
       } catch (error) {
         setError('Failed to load Soulwar data. Please try again.');
@@ -28,7 +28,7 @@ const Soulwar = () => {
         setLoading(false);
       }
     }
-  }, [token]);
+  }, []);
 
   return (
     <DashboardLayout>

@@ -11,7 +11,7 @@ const DashboardLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
       <Topbar />
       <Flex flex="1">
         <Navbar />
-        <Box ml={{ base: 0, md: 60 }} p={4} w="full">
+        <Box ml={{ base: 0, md: 60 }} p={12} w="full">
           {children}
         </Box>
       </Flex>

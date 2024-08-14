@@ -24,19 +24,20 @@ const Navbar = () => {
       color="white"
       w={{ base: "full", md: 60 }}
       pos="fixed"
-      h="full"
+      top="50px" 
+      h="calc(100% - 50px)"
       display="flex"
       flexDirection="column"
       alignItems="center"
-      py={4}
+      py={8}
     >
       <Center mb={8}>
-          <Image 
-            src="assets/logo.png" 
-            alt="" 
-            maxW="25%"
-          />
-        </Center>
+        <Image 
+          src="assets/logo.png" 
+          alt="" 
+          maxW="25%"
+        />
+      </Center>
       <VStack spacing={4}>
         {config.nameNavigation.map((navItem, index) => (
           <Link key={index} href={navItem.href} passHref>

@@ -1,7 +1,5 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
-import { refresh } from './auth';
-import { isTokenExpired } from '../shared/utils/auth-utils';
+import { getSession } from 'next-auth/react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -10,20 +8,14 @@ const api = axios.create({
 
 api.interceptors.request.use(
   async (config) => {
-    let token = Cookies.get('token');
-
-    if (token && isTokenExpired(token)) {
-      try {
-        await refresh();
-        token = Cookies.get('token');
-      } catch (error) {
-        window.location.href = '/';
-        return Promise.reject(error);
-      }
-    }
-
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    const session = await getSession();
+    console.log('session', session);
+    if (session && session.access_token) {
+      config.headers['Authorization'] = `Bearer ${session.access_token}`;
+      config.headers['x-refresh-token'] = `${session.refresh_token}`;
+    } else {
+      window.location.href = '/';
+      return Promise.reject('No access token found');
     }
 
     return config;
@@ -32,7 +24,6 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 
 api.interceptors.response.use(
   (response) => response,
@@ -43,11 +34,18 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await refresh();
+        const session = await getSession();
 
-        return api(originalRequest); 
+        if (session && session.access_token) {
+          originalRequest.headers['Authorization'] = `Bearer ${session.access_token}`;
+          originalRequest.headers['x-refresh-token'] = `${session.refresh_token}`;
+          return api(originalRequest); 
+        } else {
+          window.location.href = '/';
+        }
       } catch (err) {
         window.location.href = '/';
+        return Promise.reject(err);
       }
     }
 

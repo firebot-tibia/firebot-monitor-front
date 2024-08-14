@@ -7,11 +7,6 @@ export const login = async (data: AuthDTO) => {
 };
 
 export const refresh = async () => {
-  try {
     const response = await api.post('/refresh');
     return response.data;
-  } catch (error) {
-    console.error('Error refreshing token:', error);
-    throw new Error('Failed to refresh token');
-  }
 };

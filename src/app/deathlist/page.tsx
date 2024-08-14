@@ -3,11 +3,6 @@
 import React, { useState } from 'react';
 import { Table, Thead, Tbody, Tr, Th, Td, Box, Text, Button } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
-import { Death } from '../../shared/interface/death-list.interface';
-
-interface DeathDetailProps {
-  death: Death;
-}
 
 const mockData = [
   { id: 1, name: 'Zezinho Lojinha Infinita', level: 463, vocation: 'Knight', city: 'Thais', death: 'Died to a Dragon' },
@@ -37,7 +32,7 @@ const DeathTable = () => {
   const currentData = mockData.slice(firstIndex, lastIndex);
   const totalPages = Math.ceil(mockData.length / itemsPerPage);
 
-  const handleClick = (death: Death ) => {
+  const handleClick = (death: any ) => {
     setSelectedDeath(death);
   };
 
@@ -80,7 +75,7 @@ const DeathTable = () => {
   );
 };
 
-const DeathDetail: React.FC<DeathDetailProps> = ({ death }) => (
+const DeathDetail: React.FC<any> = ({ death }) => (
   <Box mt={6} p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" bg="gray.700">
     <Text fontSize="xl" fontWeight="bold">Ultimas mortes</Text>
     <Text><strong>Nome:</strong> {death.name}</Text>

@@ -19,11 +19,9 @@ import {
 import { useEffect, useState, useMemo, FC, useCallback } from 'react';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
-import { CharacterType } from '../../shared/enum/character-type.enum';
 import { useToastContext } from '../../context/toast/toast-context';
 import { characterTypeIcons, vocationIcons } from '../../constant/character';
 import io from 'socket.io-client';
-import Cookies from 'js-cookie';
 import { useSession } from 'next-auth/react';
 
 const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean }> = ({ columns, data, isLoading }) => (
@@ -52,7 +50,7 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
             </Td>
             <Td textAlign="left" color="white" isTruncated maxW="150px">{member.name}</Td>
             <Td textAlign="center" color="white">
-              <Image src={characterTypeIcons[member.kind as CharacterType]} alt={member.kind} boxSize="24px" mx="auto" />
+              <Image src={characterTypeIcons[member.kind]} alt={member.kind} boxSize="24px" mx="auto" />
             </Td>
             <Td textAlign="center" color="white">{member.status}</Td>
             <Td textAlign="center" color="white" maxW="150px" isTruncated>{member.onlineStatus ? "Online" : "Offline"}</Td>
@@ -66,19 +64,20 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
 const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { showToast } = useToastContext();
-  const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || '';
-  const token = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    console.log('Token:', token.data);
-    const socketUrl = `ws://api.firebot.run/ws/enemy?token=${encodeURIComponent(token.data?.user.access_token ?? '')}`;
-
-    const socket = io(socketUrl, {
-      transports: ['websocket'],
-      path: `/ws/enemy`,
-    });
-
+    if (status === 'authenticated' && session.access_token) {
+      const socketUrl = `ws://api.firebot.run`;
+      const token = encodeURIComponent(session.access_token);
+      
+      const socket = io(socketUrl, {
+        path: '/ws/enemy',
+        transports: ['websocket'],
+        query: {
+          token: token,
+        },
+      });
     socket.on('connect', () => {
       console.log('Socket.io connection established');
     });
@@ -100,7 +99,8 @@ const Home: FC = () => {
     return () => {
       socket.disconnect();
     };
-  }, [socketUrl, showToast, token]);
+  }
+}, [status, session]);
 
   const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Tempo', 'Exiva'], []);
 

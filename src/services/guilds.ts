@@ -1,41 +1,38 @@
 import { UpsertPlayerInput } from '../shared/interface/character-upsert.interface';
-import { api } from './api'
+import api from './api';
 
-export const getSoulwarPlayers = async (world: string, token: string) => {
+export const getSoulwarPlayers = async (world: string) => {
   try {
-    const response = await api.get(`/gamedata/soulwars/${world}`, {
-      withCredentials: true,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.get(`/gamedata/soulwars/${world}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching Soulwar players:', error);
     throw error;
   }
 };
 
 export const getOrangeList = async (player: string) => {
   try {
-    const response = await api.get(`/gamedata/orange-list/${player}`, {
-      withCredentials: true,
-    });
+    const response = await api.get(`/gamedata/orange-list?player=${player}`);
     return response.data.orange_list_online; 
   } catch (error) {
-    console.error('Error fetching Orange list:', error);
     throw error;
   }
 };
 
 export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
   try {
-    const response = await api.post('/gamedata/insert-player', playerData, {
-      withCredentials: true,
-    });
+    const response = await api.post('/gamedata/insert-player', playerData);
     return response.data;
   } catch (error) {
-    console.error('Error upserting player:', error);
+    throw error;
+  }
+};
+
+export const getGuildPlayers = async (guildId: string) => {
+  try {
+    const response = await api.get(`/gamedata/guilds/${guildId}`);
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };
