@@ -15,18 +15,19 @@ import {
   Image,
 } from '@chakra-ui/react';
 import { FaUserCircle, FaSignInAlt } from 'react-icons/fa';
-import { useState } from 'react';
-import { useAuth } from '../../context/auth/auth-context';
+import { useEffect, useState } from 'react';
 import { useToastContext } from '../../context/toast/toast-context';
 import { AuthSchema, AuthDTO } from './schema/auth.schema';
-
+import { useSession, signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const { login } = useAuth();
   const { showToast } = useToastContext();
+  const { status } = useSession();
+  const router = useRouter();
 
   const handleLogin = async () => {
     const result = AuthSchema.safeParse({ email, password });
@@ -41,7 +42,7 @@ const LoginPage = () => {
 
     try {
       const data: AuthDTO = { email, password };
-      await login(data);
+      await signIn('credentials', { email: data.email, password: data.password });
       showToast({
         title: 'Logado com sucesso',
         description: 'Você será redirecionado para a página principal.',
@@ -60,6 +61,12 @@ const LoginPage = () => {
       });
     }
   };
+
+  useEffect(() => {
+    if(status === 'authenticated') {
+      router.push('/home');
+    }
+  }, [status, router])
 
   return (
     <Flex minH="100vh" bg="gray.900">
