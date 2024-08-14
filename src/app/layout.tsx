@@ -6,7 +6,6 @@ import '../styles/globals.css'
 import theme from '../styles/theme'
 import { ToastProvider } from '../context/toast/toast-context';
 import { SessionProvider } from "next-auth/react";
-
 interface RootLayoutProps {
   children: ReactNode
 }

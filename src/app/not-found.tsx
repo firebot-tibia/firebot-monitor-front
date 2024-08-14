@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Text, Flex } from '@chakra-ui/react';
+import { Button, Text, Flex, Center, Image } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 
 const Custom404 = () => {
@@ -15,6 +15,9 @@ const Custom404 = () => {
       color="white"
       direction="column"
     >
+    <Center>
+        <Image src="assets/logo.png" alt="" maxW="5%" />
+    </Center>
       <Text fontSize="6xl" fontWeight="bold" mb={4}>
         404
       </Text>
