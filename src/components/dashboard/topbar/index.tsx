@@ -2,6 +2,7 @@ import { Flex, IconButton, Spacer, HStack, Text } from "@chakra-ui/react";
 import { FC } from "react";
 import { FaCog, FaSignOutAlt } from "react-icons/fa";
 import Link from 'next/link';
+import { signOut } from "next-auth/react";
 
 const Topbar: FC = () => {
   return (
@@ -30,9 +31,10 @@ const Topbar: FC = () => {
             as="div"
           />
         </Link>
-        <Link href="/logout" passHref>
+        <Link href="#" passHref>
           <IconButton
             aria-label="Logout"
+            onClick={() => { signOut({ redirect: true, callbackUrl: '/' }) }}
             icon={<FaSignOutAlt />}
             variant="ghost"
             color="white"

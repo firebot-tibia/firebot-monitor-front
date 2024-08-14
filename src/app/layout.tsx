@@ -7,6 +7,7 @@ import '../styles/globals.css'
 import theme from '../styles/theme'
 import { ToastProvider } from '../context/toast/toast-context';
 import { AuthProvider } from '../context/auth/auth-context';
+import { SessionProvider } from "next-auth/react";
 
 interface RootLayoutProps {
   children: ReactNode
@@ -20,15 +21,15 @@ const RootLayout: FC<RootLayoutProps> = ({ children }) => {
     <html lang="en">
       <head />
       <body>
-        <ChakraProvider theme={theme}>
-          <StoreContext.Provider value={store}>
-            <ToastProvider>
-              <AuthProvider>
-                {children}
-              </AuthProvider>
-           </ToastProvider>
-          </StoreContext.Provider>
-        </ChakraProvider>
+        <SessionProvider>
+          <ChakraProvider theme={theme}>
+            <StoreContext.Provider value={store}>
+              <ToastProvider>
+                  {children}
+              </ToastProvider>
+            </StoreContext.Provider>
+          </ChakraProvider>
+        </SessionProvider>
       </body>
     </html>
   )

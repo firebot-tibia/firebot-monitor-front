@@ -24,6 +24,7 @@ import { useToastContext } from '../../context/toast/toast-context';
 import { characterTypeIcons, vocationIcons } from '../../constant/character';
 import io from 'socket.io-client';
 import Cookies from 'js-cookie';
+import { useSession } from 'next-auth/react';
 
 const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean }> = ({ columns, data, isLoading }) => (
   <Table variant="simple" size="sm" colorScheme="gray" style={{ tableLayout: 'fixed', width: '100%' }}>
@@ -67,11 +68,11 @@ const Home: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { showToast } = useToastContext();
   const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || '';
-  const token = Cookies.get('token') || '';
+  const token = useSession();
 
   useEffect(() => {
-
-    const socketUrl = `ws://api.firebot.run/ws/enemy?token=${encodeURIComponent(token)}`;
+    console.log('Token:', token.data);
+    const socketUrl = `ws://api.firebot.run/ws/enemy?token=${encodeURIComponent(token.data?.user.access_token ?? '')}`;
 
     const socket = io(socketUrl, {
       transports: ['websocket'],
@@ -89,7 +90,7 @@ const Home: FC = () => {
     });
 
     socket.on('error', (error) => {
-      console.error('Socket.io error:', error);
+      console.error('error', error);
     });
 
     socket.on('disconnect', () => {
