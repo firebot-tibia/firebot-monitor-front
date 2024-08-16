@@ -68,7 +68,7 @@ const Soulwar = () => {
                   {paginatedItems.length > 0 ? (
                     paginatedItems.map((boneco: any) => (
                       <Box key={boneco.name} p={2} borderBottom="1px" borderColor="gray.200">
-                        {boneco.name}
+                        Character: {boneco.name} - Voc: {boneco.vocation} - Lvl: {boneco.level}
                       </Box>
                     ))
                   ) : (
