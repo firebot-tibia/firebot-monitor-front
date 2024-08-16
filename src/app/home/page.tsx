@@ -44,16 +44,16 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
         data.map((member, index) => (
           <Tr key={index}>
             <Td textAlign="center" color="white">{index + 1}</Td>
-            <Td textAlign="center" color="white">{member.level}</Td>
+            <Td textAlign="center" color="white">{member.Level}</Td>
             <Td textAlign="center" color="white">
-              <Image src={vocationIcons[member.vocation] || '/assets/default.png'} alt={member.vocation} boxSize="24px" mx="auto" />
+              <Image src={vocationIcons[member.Vocation] || '/assets/default.png'} alt={member.Vocation} boxSize="24px" mx="auto" />
             </Td>
-            <Td textAlign="left" color="white" isTruncated maxW="150px">{member.name}</Td>
+            <Td textAlign="left" color="white" isTruncated maxW="150px">{member.Name}</Td>
             <Td textAlign="center" color="white">
-              <Image src={characterTypeIcons[member.kind]} alt={member.kind} boxSize="24px" mx="auto" />
+              <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="24px" mx="auto" />
             </Td>
-            <Td textAlign="center" color="white">{member.status}</Td>
-            <Td textAlign="center" color="white" maxW="150px" isTruncated>{member.onlineStatus ? "Online" : "Offline"}</Td>
+            <Td textAlign="center" color="white">{member.Status}</Td>
+            <Td textAlign="center" color="white" maxW="150px" isTruncated>{member.OnlineStatus ? "Online" : "Offline"}</Td>
           </Tr>
         ))
       )}

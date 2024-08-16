@@ -9,7 +9,7 @@ import { useToastContext } from '../../context/toast/toast-context';
 const Orange = () => {
   const [characterName, setCharacterName] = useState('');
   const [characterList, setCharacterList] = useState<
-    { name: string; level: number; vocation: string; onlineStatus: boolean }[]
+    { Name: string; Level: number; Vocation: string; OnlineStatus: boolean }[]
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -82,12 +82,12 @@ const Orange = () => {
             <Text color="gray.500">Loading...</Text>
           ) : error ? (
             <Text color="red.500">{error}</Text>
-          ) : characterList.length > 0 ? (
+          ) : characterList?.length > 0 ? (
             characterList.map((character, index) => (
               <Box key={index} p={2} borderBottom="1px" borderColor="gray.200">
-                <Text><strong>Nome:</strong> {character.name}</Text>
-                <Text><strong>Nível:</strong> {character.level}</Text>
-                <Text><strong>Vocação:</strong> {character.vocation}</Text>
+                <Text><strong>Nome:</strong> {character.Name}</Text>
+                <Text><strong>Nível:</strong> {character.Level}</Text>
+                <Text><strong>Vocação:</strong> {character.Vocation}</Text>
                 <HStack>
                   <Text><strong>Status:</strong></Text>
                   <Box
@@ -95,9 +95,9 @@ const Orange = () => {
                     width="10px"
                     height="10px"
                     borderRadius="50%"
-                    bg={character.onlineStatus ? 'green.500' : 'red.500'}
+                    bg={character.OnlineStatus ? 'green.500' : 'red.500'}
                   />
-                  <Text>{character.onlineStatus ? 'Online' : 'Offline'}</Text>
+                  <Text>{character.OnlineStatus ? 'Online' : 'Offline'}</Text>
                 </HStack>
               </Box>
             ))

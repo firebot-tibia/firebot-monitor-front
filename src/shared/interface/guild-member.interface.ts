@@ -1,10 +1,10 @@
 export interface GuildMemberResponse {
-    alias: string;
-    kind: string;
-    level: number;
-    name: string;
-    onlineStatus: boolean;
-    status: string;
-    vocation: string;
+    Alias: string;
+    Kind: string;
+    Level: number;
+    Name: string;
+    OnlineStatus: boolean;
+    Status: string;
+    Vocation: string;
   }
   
