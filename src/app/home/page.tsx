@@ -105,7 +105,7 @@ const Home: FC = () => {
   const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Tempo', 'Exiva'], []);
 
   const filterCharactersByType = useCallback((type: string) => {
-    return guildData.filter((item) => item.kind === type);
+    return guildData.filter((item) => item.Kind === type);
   }, [guildData]);
 
   return (

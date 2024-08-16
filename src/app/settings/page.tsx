@@ -58,13 +58,13 @@ const Settings = () => {
   }, [session, showToast]);
 
   const handleSelectMember = (member: GuildMemberResponse) => {
-    if (!selectedMembers.some((m) => m.name === member.name)) {
+    if (!selectedMembers.some((m) => m.Name === member.Name)) {
       setSelectedMembers([...selectedMembers, member]);
     }
   };
 
   const handleRemoveMember = (member: GuildMemberResponse) => {
-    setSelectedMembers(selectedMembers.filter((m) => m.name !== member.name));
+    setSelectedMembers(selectedMembers.filter((m) => m.Name !== member.Name));
   };
 
   const handleSelectType = (type: string) => {
@@ -84,8 +84,8 @@ const Settings = () => {
 
     const promises = selectedMembers.map((member) =>
       upsertPlayer({
-        name: member.name,
-        status: member.status,
+        name: member.Name,
+        status: member.Status,
         kind: selectedType,
       })
     );
@@ -138,12 +138,12 @@ const Settings = () => {
                         >
                           <Flex align="center">
                             <Image
-                              src={vocationIcons[member.vocation || 'default'] || '/assets/default.gif'}
-                              alt={member.vocation || 'default'}
+                              src={vocationIcons[member.Vocation || 'default'] || '/assets/default.gif'}
+                              alt={member.Vocation || 'default'}
                               boxSize="20px"
                               mr={2}
                             />
-                            {member.name}
+                            {member.Name}
                           </Flex>
                         </MenuItem>
                       ))}
@@ -200,12 +200,12 @@ const Settings = () => {
                         <Flex align="center" justify="space-between">
                           <Flex align="center">
                             <Image
-                              src={vocationIcons[member.vocation || 'default']}
-                              alt={member.vocation || 'default'}
+                              src={vocationIcons[member.Vocation || 'default']}
+                              alt={member.Vocation || 'default'}
                               boxSize="20px"
                               mr={2}
                             />
-                            <Text color="white">{member.name}</Text>
+                            <Text color="white">{member.Name}</Text>
                           </Flex>
                           <IconButton
                             aria-label="Remove"
