@@ -68,7 +68,7 @@ const Home: FC = () => {
 
   useEffect(() => {
     if (status === 'authenticated' && session.access_token) {
-      const socketUrl = `ws://api.firebot.run`;
+      const socketUrl = `wss://api.firebot.run`;
       const token = encodeURIComponent(session.access_token);
       
       const socket = io(socketUrl, {
