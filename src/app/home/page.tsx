@@ -1,5 +1,8 @@
-'use client'
+'use client';
 
+import { useEffect, useState, useMemo, FC, useCallback } from 'react';
+import DashboardLayout from '../../components/dashboard';
+import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import {
   Table,
   Thead,
@@ -16,12 +19,6 @@ import {
   Image,
   Box,
 } from '@chakra-ui/react';
-import { useEffect, useState, useMemo, FC, useCallback } from 'react';
-import DashboardLayout from '../../components/dashboard';
-import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
-import { useToastContext } from '../../context/toast/toast-context';
-import { characterTypeIcons, vocationIcons } from '../../constant/character';
-import io from 'socket.io-client';
 import { useSession } from 'next-auth/react';
 
 const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean }> = ({ columns, data, isLoading }) => (
@@ -52,8 +49,9 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
             <Td textAlign="center" color="white">
               <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="24px" mx="auto" />
             </Td>
-            <Td textAlign="center" color="white">{member.Status}</Td>
-            <Td textAlign="center" color="white" maxW="150px" isTruncated>{member.OnlineStatus ? "Online" : "Offline"}</Td>
+            <Td textAlign="center" color="white">
+              <Box as="span" display="inline-block" w={3} h={3} borderRadius="full" bg={member.OnlineStatus ? 'green.500' : 'red.500'} />
+            </Td>
           </Tr>
         ))
       )}
@@ -67,42 +65,30 @@ const Home: FC = () => {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === 'authenticated' && session.access_token) {
-      const socketUrl = `wss://api.firebot.run`;
+    if (status === 'authenticated' && session?.access_token) {
       const token = encodeURIComponent(session.access_token);
-      
-      const socket = io(socketUrl, {
-        path: '/ws/enemy',
-        transports: ['websocket'],
-        query: {
-          token: token,
-        },
-      });
-    socket.on('connect', () => {
-      console.log('Socket.io connection established');
-    });
 
-    socket.on('enemy', (data: GuildMemberResponse[]) => {
-      console.log('Received data:', data);
-      setGuildData(data);
-      setIsLoading(false);
-    });
+      const eventSource = new EventSource(`wss://api.firebot.run/ws/enemy?token=${token}`);
 
-    socket.on('error', (error) => {
-      console.error('error', error);
-    });
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received data:', data);
+        setGuildData(data);
+        setIsLoading(false);
+      };
 
-    socket.on('disconnect', () => {
-      console.log('Socket.io connection closed');
-    });
+      eventSource.onerror = (error) => {
+        console.error('EventSource error:', error);
+        eventSource.close();
+      };
 
-    return () => {
-      socket.disconnect();
-    };
-  }
-}, [status, session]);
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, [status, session]);
 
-  const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Tempo', 'Exiva'], []);
+  const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Status'], []);
 
   const filterCharactersByType = useCallback((type: string) => {
     return guildData.filter((item) => item.Kind === type);

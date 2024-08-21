@@ -9,6 +9,14 @@ export const vocationIcons: { [key: string]: string } = {
     'Druid': '/assets/ed.gif',
 };
 
+
+export const Vocations: { [key: string]: string } = {
+    'sorcerer': '/assets/ms.gif',
+    'paladin': '/assets/rp.gif',
+    'knight': '/assets/ek.gif',
+    'druid': '/assets/ed.gif',
+};
+
 export const characterTypeIcons: { [key: string]: string } = {
     ['main']: '/assets/main.png',
     ['maker']: '/assets/maker.png',

@@ -14,55 +14,72 @@ import {
   SimpleGrid,
   Heading,
   Text,
+  Image,
 } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
+import { getExperienceList } from '../../services/guilds';
+import { Vocations } from '../../constant/character';
 
 interface GuildMemberResponse {
-  rank: number;
+  experience: string;
   vocation: string;
   name: string;
   level: number;
-  dailyExp: number;
-  timeOnline: string;
-  status: boolean;
+  online: boolean;
 }
-
-interface GuildStatsResponse {
-  ally: GuildMemberResponse[];
-  enemy: GuildMemberResponse[];
-}
-
-const fetchGuildStats = async (guildType: 'ally' | 'enemy', filter: string, nameFilter: string): Promise<GuildMemberResponse[]> => {
-  const response: GuildStatsResponse = {
-    ally: [
-      { rank: 1, vocation: 'EK', name: 'Maarculino', level: 531, dailyExp: 60619094, timeOnline: '15:15', status: true },
-      { rank: 2, vocation: 'ED', name: 'Zezinho', level: 528, dailyExp: 47739010, timeOnline: '7:30', status: false },
-    ],
-    enemy: [
-      { rank: 1, vocation: 'MS', name: 'Tank Crusher', level: 532, dailyExp: 53633991, timeOnline: '5:45', status: true },
-      { rank: 2, vocation: 'RP', name: 'Wallace Novaera', level: 539, dailyExp: 49821389, timeOnline: '7:45', status: false },
-    ]
-  };
-
-  return response[guildType];
-};
 
 const GuildStats = () => {
   const [guildType, setGuildType] = useState<'ally' | 'enemy'>('ally');
   const [filter, setFilter] = useState('Diaria');
+  const [vocationFilter, setVocationFilter] = useState('');
   const [nameFilter, setNameFilter] = useState('');
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [noDataFound, setNoDataFound] = useState(false);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await fetchGuildStats(guildType, filter, nameFilter);
-      setGuildData(data);
-    };
+  const fetchGuildStats = async () => {
+    try {
+      const query = {
+        kind: guildType,
+        vocation: vocationFilter,
+        name: nameFilter,
+        offset: (currentPage - 1) * itemsPerPage,
+        limit: itemsPerPage,
+      };
 
-    fetchData();
-  }, [guildType, filter, nameFilter]);
+      const response = await getExperienceList(query);
+      const experienceField =
+        filter === 'Diaria' ? 'experience_one_day' :
+        filter === 'Semanal' ? 'experience_one_week' : 'experience_one_month';
+
+      const formattedData = response.exp_list.players.map((player: any) => ({
+        experience: player[experienceField],
+        vocation: player.vocation,
+        name: player.name,
+        level: player.level,
+        online: player.online,
+      }));
+
+      if (formattedData.length === 0) {
+        setNoDataFound(true);
+      } else {
+        setGuildData(formattedData);
+        setTotalRecords(response.exp_list.Count.records);
+        setTotalPages(response.exp_list.Count.pages);
+        setNoDataFound(false);
+      }
+    } catch (error) {
+      console.error('Failed to fetch guild stats:', error);
+      setNoDataFound(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchGuildStats();
+  }, [guildType, filter, vocationFilter, nameFilter, currentPage]);
 
   const handleGuildTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setGuildType(e.target.value as 'ally' | 'enemy');
@@ -72,15 +89,13 @@ const GuildStats = () => {
     setFilter(e.target.value);
   };
 
+  const handleVocationFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setVocationFilter(e.target.value);
+  };
+
   const handleNameFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNameFilter(e.target.value);
   };
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedItems = guildData.slice(startIndex, endIndex);
-
-  const totalPages = Math.ceil(guildData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -90,7 +105,7 @@ const GuildStats = () => {
     <DashboardLayout>
       <Box p={4}>
         <Heading as="h1" mb={6} textAlign="center">Estatísticas da Guilda</Heading>
-        <SimpleGrid columns={3} spacing={4} mb={4}>
+        <SimpleGrid columns={4} spacing={4} mb={4}>
           <Select value={guildType} onChange={handleGuildTypeChange}>
             <option value="ally">Guild aliada</option>
             <option value="enemy">Guild Inimiga</option>
@@ -100,6 +115,14 @@ const GuildStats = () => {
             <option value="Semanal">Semanal</option>
             <option value="Mensal">Mensal</option>
           </Select>
+          <Select value={vocationFilter} onChange={handleVocationFilterChange}>
+            <option value="">Todas as vocações</option>
+            {Object.keys(Vocations).map((vocation) => (
+              <option key={vocation} value={vocation}>
+                {vocation}
+              </option>
+            ))}
+          </Select>
           <input
             type="text"
             placeholder="Buscar pelo nome do personagem"
@@ -108,60 +131,64 @@ const GuildStats = () => {
           />
         </SimpleGrid>
 
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>#</Th>
-              <Th>Voc</Th>
-              <Th>Nome</Th>
-              <Th>Lvl</Th>
-              <Th>Exp</Th>
-              <Th>Tempo</Th>
-              <Th>Status</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {paginatedItems.map((item, index) => (
-              <Tr key={index}>
-                <Td>{item.rank}</Td>
-                <Td>{item.vocation}</Td>
-                <Td>{item.name}</Td>
-                <Td>{item.level}</Td>
-                <Td>{item.dailyExp.toLocaleString()}</Td>
-                <Td>{item.timeOnline}</Td>
-                <Td>
-                    <Box
-                    as="span"
-                    display="inline-block"
-                    w={3}
-                    h={3}
-                    borderRadius="full"
-                    bg={item.status ? 'green.500' : 'red.500'}
-                    />
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+        {noDataFound ? (
+          <Text textAlign="center" mt={4} color="red.500">Nenhum dado encontrado.</Text>
+        ) : (
+          <>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Exp</Th>
+                  <Th>Voc</Th>
+                  <Th>Nome</Th>
+                  <Th>Lvl</Th>
+                  <Th>Status</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {guildData.map((item, index) => (
+                  <Tr key={index}>
+                    <Td>{item.experience}</Td>
+                    <Td>
+                      <Image src={Vocations[item.vocation]} alt={item.vocation} boxSize="24px" />
+                    </Td>
+                    <Td>{item.name}</Td>
+                    <Td>{item.level}</Td>
+                    <Td>
+                      <Box
+                        as="span"
+                        display="inline-block"
+                        w={3}
+                        h={3}
+                        borderRadius="full"
+                        bg={item.online ? 'green.500' : 'red.500'}
+                      />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
 
-        {guildData.length > itemsPerPage && (
-          <SimpleGrid columns={3} spacing={4} mt={4}>
-            <Button
-              onClick={() => handlePageChange(currentPage - 1)}
-              isDisabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            <Text textAlign="center" lineHeight="40px">
-              Page {currentPage} of {totalPages}
-            </Text>
-            <Button
-              onClick={() => handlePageChange(currentPage + 1)}
-              isDisabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-          </SimpleGrid>
+            {totalRecords > itemsPerPage && (
+              <SimpleGrid columns={3} spacing={4} mt={4}>
+                <Button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  isDisabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <Text textAlign="center" lineHeight="40px">
+                  Page {currentPage} of {totalPages}
+                </Text>
+                <Button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  isDisabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </SimpleGrid>
+            )}
+          </>
         )}
       </Box>
     </DashboardLayout>
