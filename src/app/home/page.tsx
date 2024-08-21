@@ -20,6 +20,7 @@ import {
   Box,
 } from '@chakra-ui/react';
 import { useSession } from 'next-auth/react';
+import { characterTypeIcons, vocationIcons } from '../../constant/character';
 
 const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean }> = ({ columns, data, isLoading }) => (
   <Table variant="simple" size="sm" colorScheme="gray" style={{ tableLayout: 'fixed', width: '100%' }}>
