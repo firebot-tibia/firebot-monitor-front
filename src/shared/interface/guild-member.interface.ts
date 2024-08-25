@@ -6,5 +6,7 @@ export interface GuildMemberResponse {
     OnlineStatus: boolean;
     Status: string;
     Vocation: string;
+    Local: string;
+    TimeOnline: string;
   }
   

@@ -87,6 +87,7 @@ const Settings = () => {
         name: member.Name,
         status: member.Status,
         kind: selectedType,
+        local: member.Local,
       })
     );
 

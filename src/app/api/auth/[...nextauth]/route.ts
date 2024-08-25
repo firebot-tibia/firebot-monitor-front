@@ -55,13 +55,14 @@ const handler = NextAuth({
       const isExpired = token.exp && Date.now() >= token.exp * 1000;
 
       if (isExpired) {
+        console.log('Token expired, refreshing...');
         try {
           const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {}, {
             headers: {
               'x-refresh-token': token.refresh_token,
             },
           });
-
+          console.log(data);
           token.access_token = data.access_token;
           token.exp = data.exp;
 

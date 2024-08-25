@@ -1,7 +1,7 @@
 export interface AuthDTO {
     email?: string;
     password?: string;
-  }
+}
   
   export interface DecodedToken {
     ally_guild: string;
@@ -10,5 +10,4 @@ export interface AuthDTO {
     exp: number;
     status: string;
     sub: string;
-  }
-  
+}
