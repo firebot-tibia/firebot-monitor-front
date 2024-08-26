@@ -23,39 +23,42 @@ import { characterTypeIcons, vocationIcons } from '../../constant/character';
 import DashboardLayout from '../../components/dashboard';
 import { useSession } from 'next-auth/react';
 import { useToastContext } from '../../context/toast/toast-context';
-import { getGuildPlayers, upsertPlayer } from '../../services/guilds';
+import { upsertPlayer } from '../../services/guilds';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 
 const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [guildData, setGuildData] = useState<GuildMemberResponse[] | null>(null);
+  const [guildData, setGuildData] = useState<GuildMemberResponse[] | null>([]);
   const [selectedMembers, setSelectedMembers] = useState<GuildMemberResponse[]>([]);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const { showToast } = useToastContext();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    const fetchGuildData = async () => {
-      if (session?.user?.enemy_guild) {
-        try {
-          const data = await getGuildPlayers(session.user.enemy_guild);
-          setGuildData(data.guild.members);
-        } catch (error) {
-          showToast({
-            title: 'Erro ao carregar dados.',
-            description: 'Não foi possível carregar os dados da guilda.',
-            status: 'error',
-            duration: 5000,
-            isClosable: true,
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
+    if (status === 'authenticated' && session?.access_token) {
+      const token = encodeURIComponent(session.access_token);
+      const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${token}`;
+      const eventSource = new EventSource(sseUrl);
 
-    fetchGuildData();
-  }, [session, showToast]);
+      eventSource.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        console.log('Event received:', data);
+        if (data?.enemy) {
+          setGuildData((prevGuildData) => [...(prevGuildData || []), ...data.enemy]);
+        }
+        setIsLoading(false);
+      };
+
+      eventSource.onerror = function (event) {
+        console.error('Error occurred:', event);
+        eventSource.close();
+      };
+
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, [session, status]);
 
   const handleSelectMember = (member: GuildMemberResponse) => {
     if (!selectedMembers.some((m) => m.Name === member.Name)) {
@@ -82,6 +85,8 @@ const Settings = () => {
       return;
     }
 
+    console.log('upsertPlayer', selectedMembers)
+    console.log('upsertPlayer', selectedType)
     const promises = selectedMembers.map((member) =>
       upsertPlayer({
         name: member.Name,
@@ -90,7 +95,7 @@ const Settings = () => {
         local: member.Local,
       })
     );
-
+    console.log(promises)
     try {
       await Promise.all(promises);
       showToast({
@@ -121,7 +126,7 @@ const Settings = () => {
           </VStack>
         ) : (
           <Box>
-            {guildData ? (
+            {guildData && guildData.length > 0 ? (
               <Box mt={4} maxW="md">
                 <Box mt={4} maxW="md">
                   <Menu>

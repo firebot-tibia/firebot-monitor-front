@@ -29,15 +29,6 @@ export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
   }
 };
 
-export const getGuildPlayers = async (guildId: string) => {
-  try {
-    const response = await api.get(`/gamedata/guilds/${guildId}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 export const getExperienceList = async (query: { kind: string; vocation: string; name: string; offset: number; limit: number }) => {
   try {
     const response = await api.get(`/gamedata/experience-list`, {

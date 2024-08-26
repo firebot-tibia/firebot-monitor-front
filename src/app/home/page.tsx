@@ -39,17 +39,14 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
                 <Td textAlign="center" fontWeight="bold" py={1} fontSize="xs">{index + 1}</Td>
                 <Td textAlign="center" py={1} fontSize="xs">{member.Level}</Td>
                 <Td textAlign="center" py={1} fontSize="xs">
-                  <Image src={vocationIcons[member.Vocation] || '/assets/default.png'} alt={member.Vocation} boxSize="16px" mx="auto" />
+                  <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="16px" mx="auto" />
                 </Td>
                 <Td textAlign="left" maxW="xs" isTruncated py={1} fontSize="xs">{member.Name}</Td>
                 <Td textAlign="center" py={1} fontSize="xs">
                   <Flex alignItems="center" justifyContent="center">
-                    <Image src={characterTypeIcons[member.Kind] || '/assets/default.png'} alt={member.Kind} boxSize="14px" mr={2} />
+                    <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="14px" mr={2} />
                     {member.Kind || 'n/a'}
                   </Flex>
-                </Td>
-                <Td textAlign="center" py={1} fontSize="xs">
-                  <Box as="span" display="inline-block" w={3} h={3} borderRadius="full" bg={member.OnlineStatus ? 'green.500' : 'red.500'} />
                 </Td>
                 <Td textAlign="center" py={1} fontSize="xs">
                   <Input
@@ -87,6 +84,7 @@ const Home: FC = () => {
 
       eventSource.onmessage = function (event) {
         const data = JSON.parse(event.data);
+        console.log('Event received:', data);
         if (data?.enemy) {
           setGuildData(data.enemy);
         }
@@ -104,19 +102,15 @@ const Home: FC = () => {
     }
   }, [status, session]);
 
-  const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Status', 'Exiva', 'Tempo'], []);
+  const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Exiva', 'Tempo'], []);
 
   const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks'], []);
-
-  const sortedGuildData = useMemo(() => {
-    return guildData.sort((a, b) => b.Level - a.Level || a.Vocation.localeCompare(b.Vocation));
-  }, [guildData]);
 
   return (
     <DashboardLayout>
       <Grid w="full">
         {types.map((type) => {
-          const filteredData = sortedGuildData.filter(member => member.Kind === type);
+          const filteredData = guildData.filter(member => member.Kind === type);
           if (filteredData.length > 0) {
             return (
               <Box key={type} w="full">
@@ -133,7 +127,7 @@ const Home: FC = () => {
         <Box w="full">
           <TableWidget
             columns={columns}
-            data={sortedGuildData.filter(member => !member.Kind)}
+            data={guildData.filter(member => !member.Kind)}
             isLoading={isLoading}
           />
         </Box>

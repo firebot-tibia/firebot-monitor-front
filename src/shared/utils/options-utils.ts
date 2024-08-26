@@ -28,7 +28,7 @@ export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof u
   const exivas = `exiva "${data.Name}`;
   navigator.clipboard.writeText(exivas);
   toast({
-    title: 'Todos os exivas copiados para a área de transferência.',
+    title: 'Exiva copiado para a área de transferência.',
     status: 'success',
     duration: 2000,
     isClosable: true,

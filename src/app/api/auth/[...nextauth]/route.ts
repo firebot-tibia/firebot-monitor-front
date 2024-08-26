@@ -14,7 +14,7 @@ const providers = [
           email: credentials?.email,
           password: credentials?.password,
         });
-
+        console.log(data);
         if (data) {
           return {
             ...data, 
@@ -80,6 +80,7 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }: { session: any, token: JWT }) {
+      console.log(session);
       session.access_token = token.access_token;
       session.refresh_token = token.refresh_token;
       session.user = {

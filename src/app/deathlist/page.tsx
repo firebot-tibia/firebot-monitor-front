@@ -1,83 +1,143 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, Box, Text, Button } from '@chakra-ui/react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Table, Thead, Tbody, Tr, Th, Td, Box, Text, Button, Spinner } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
+import { useSession } from 'next-auth/react';
 
-const mockData = [
-  { id: 1, name: 'Zezinho Lojinha Infinita', level: 463, vocation: 'Knight', city: 'Thais', death: 'Died to a Dragon' },
-  { id: 2, name: 'Macamagon Wallculino', level: 460, vocation: 'Paladin', city: 'Venore', death: 'Died to a Giant Spider' },
-  { id: 3, name: 'Veh Na Missao', level: 432, vocation: 'Sorcerer', city: 'Carlin', death: 'Died to a Demon' },
-  { id: 4, name: 'Ren Mendo', level: 358, vocation: 'Druid', city: 'Edron', death: 'Died to a Hydra' },
-  { id: 5, name: 'Kina Frontlione', level: 357, vocation: 'Knight', city: 'Darashia', death: 'Died to a Dragon Lord' },
-  { id: 6, name: 'Tom Unebra', level: 345, vocation: 'Knight', city: 'Ab\'dendriel', death: 'Died to a Dragon Lord' },
-  { id: 7, name: 'Nasty Odeio Pobres', level: 316, vocation: 'Sorcerer', city: 'Thais', death: 'Died to a Giant Spider' },
-  { id: 8, name: 'Zezinho Beijoqueiro', level: 479, vocation: 'Knight', city: 'Liberty Bay', death: 'Died to a Dragon Lord' },
-  { id: 9, name: 'Nelzerah Casca Debala', level: 455, vocation: 'Knight', city: 'Yalahar', death: 'Died to a Hydra' },
-  { id: 10, name: 'Mrgreeen on unebra', level: 433, vocation: 'Knight', city: 'Yalahar', death: 'Died to a Hydra' },
-  { id: 11, name: 'Ungle Errepe', level: 389, vocation: 'Knight', city: 'Edron', death: 'Died to a Dragon Lord' },
-  { id: 12, name: 'Junior Godlike', level: 366, vocation: 'Knight', city: 'Edron', death: 'Died to a Dragon Lord' },
-  { id: 13, name: 'Royal Moonster', level: 345, vocation: 'Knight', city: 'Liberty Bay', death: 'Died to a Dragon Lord' },
-  { id: 14, name: 'Lcofzin', level: 343, vocation: 'Knight', city: 'Liberty Bay', death: 'Died to a Dragon Lord' },
-];
+interface Death {
+  id: string;
+  name: string;
+  level: number;
+  vocation: string;
+  city: string;
+  death: string;
+  timestamp: number;
+}
 
 const itemsPerPage = 5;
 
 const DeathTable = () => {
+  const [deathList, setDeathList] = useState<Death[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedDeath, setSelectedDeath] = useState(mockData[0]);
+  const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.access_token) {
+      const token = encodeURIComponent(session.access_token);
+      const sseUrl = `https://api.firebot.run/subscription/list/?token=${token}`;
+      const eventSource = new EventSource(sseUrl);
+
+      eventSource.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        console.log('Event received:', data);
+        if (data?.death) {
+          setDeathList((prevDeathList) => [
+            ...prevDeathList,
+            {
+              ...data.death,
+              id: `${data.death.name}-${Date.now()}`,
+              timestamp: Date.now(),
+            },
+          ]);
+          if (!selectedDeath) {
+            setSelectedDeath(data.death);
+          }
+        }
+        setIsLoading(false);
+      };
+
+      eventSource.onerror = function (event) {
+        console.error('Error occurred:', event);
+        eventSource.close();
+      };
+
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, [status, session, selectedDeath]);
+
+  const recentDeaths = useMemo(() => {
+    const now = Date.now();
+    return deathList.filter(death => now - death.timestamp < 24 * 60 * 60 * 1000);
+  }, [deathList]);
 
   const lastIndex = currentPage * itemsPerPage;
   const firstIndex = lastIndex - itemsPerPage;
-  const currentData = mockData.slice(firstIndex, lastIndex);
-  const totalPages = Math.ceil(mockData.length / itemsPerPage);
+  const currentData = recentDeaths.slice(firstIndex, lastIndex);
+  const totalPages = Math.ceil(recentDeaths.length / itemsPerPage);
 
-  const handleClick = (death: any ) => {
+  const handleClick = (death: Death) => {
     setSelectedDeath(death);
   };
 
   return (
     <DashboardLayout>
-    <Box p={4}>
-      <Text fontSize="2xl" mb={4} textAlign="center">Mortes Recentes</Text>
-      <Box overflowX="auto">
-        <Table variant="simple" colorScheme="gray">
-          <Thead>
-            <Tr>
-              <Th>Nome</Th>
-              <Th>Level</Th>
-              <Th>Vocação</Th>
-              <Th>Cidade</Th>
-              <Th>Morte</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {currentData.map((death) => (
-              <Tr key={death.id} onClick={() => handleClick(death)} _hover={{ bg: 'gray.600', cursor: 'pointer' }}>
-                <Td>{death.name}</Td>
-                <Td>{death.level}</Td>
-                <Td>{death.vocation}</Td>
-                <Td>{death.city}</Td>
-                <Td>{death.death}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+      <Box p={4}>
+        <Text fontSize="2xl" mb={4} textAlign="center">Mortes Recentes</Text>
+        <Box overflowX="auto">
+          {isLoading ? (
+            <Spinner size="xl" />
+          ) : recentDeaths.length === 0 ? (
+            <Text textAlign="center" fontSize="lg">Sem mortes recentes</Text>
+          ) : (
+            <Table variant="simple" colorScheme="gray">
+              <Thead>
+                <Tr>
+                  <Th>Nome</Th>
+                  <Th>Level</Th>
+                  <Th>Vocação</Th>
+                  <Th>Cidade</Th>
+                  <Th>Morte</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {currentData.map((death) => (
+                  <Tr
+                    key={death.id}
+                    onClick={() => handleClick(death)}
+                    _hover={{ bg: 'gray.600', cursor: 'pointer' }}
+                  >
+                    <Td>{death.name}</Td>
+                    <Td>{death.level}</Td>
+                    <Td>{death.vocation}</Td>
+                    <Td>{death.city}</Td>
+                    <Td>{death.death}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          )}
+        </Box>
+        {recentDeaths.length > 0 && (
+          <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
+            <Button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              Anterior
+            </Button>
+            <Text>Página {currentPage} de {totalPages}</Text>
+            <Button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Próxima
+            </Button>
+          </Box>
+        )}
+        {selectedDeath && <DeathDetail death={selectedDeath} />}
       </Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
-        <Button disabled={currentPage === 1} onClick={() => setCurrentPage((prev) => prev - 1)}>Anterior</Button>
-        <Text>Página {currentPage} de {totalPages}</Text>
-        <Button disabled={currentPage === totalPages} onClick={() => setCurrentPage((prev) => prev + 1)}>Proxima</Button>
-      </Box>
-      <DeathDetail death={selectedDeath} />
-    </Box>
     </DashboardLayout>
   );
 };
 
-const DeathDetail: React.FC<any> = ({ death }) => (
+const DeathDetail: React.FC<{ death: Death }> = ({ death }) => (
   <Box mt={6} p={4} borderWidth="1px" borderRadius="lg" overflow="hidden" bg="gray.700">
-    <Text fontSize="xl" fontWeight="bold">Ultimas mortes</Text>
+    <Text fontSize="xl" fontWeight="bold">Detalhes da Morte</Text>
     <Text><strong>Nome:</strong> {death.name}</Text>
     <Text><strong>Level:</strong> {death.level}</Text>
     <Text><strong>Vocação:</strong> {death.vocation}</Text>

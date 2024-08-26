@@ -22,4 +22,5 @@ export const characterTypeIcons: { [key: string]: string } = {
     ['maker']: '/assets/maker.png',
     ['bomba']: '/assets/bomb.png',
     ['fracoks']: '/assets/fraco.png',
+    ['exitados']: '/assets/exit.jpeg',
 };
