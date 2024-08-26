@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Table, Thead, Tbody, Tr, Th, Td, Box, Text, Button, Spinner, useToast } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
