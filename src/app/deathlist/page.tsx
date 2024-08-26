@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, Box, Text, Button, Spinner } from '@chakra-ui/react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Table, Thead, Tbody, Tr, Th, Td, Box, Text, Button, Spinner, useToast } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { useSession } from 'next-auth/react';
 
@@ -23,25 +23,41 @@ const DeathTable = () => {
   const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { data: session, status } = useSession();
+  const toast = useToast();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
       const token = encodeURIComponent(session.access_token);
-      const sseUrl = `https://api.firebot.run/subscription/list/?token=${token}`;
+      const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${token}`;
       const eventSource = new EventSource(sseUrl);
 
       eventSource.onmessage = function (event) {
         const data = JSON.parse(event.data);
         console.log('Event received:', data);
         if (data?.death) {
+          const newDeath = {
+            ...data.death,
+            id: `${data.death.name}-${Date.now()}`,
+            timestamp: Date.now(),
+          };
           setDeathList((prevDeathList) => [
             ...prevDeathList,
-            {
-              ...data.death,
-              id: `${data.death.name}-${Date.now()}`,
-              timestamp: Date.now(),
-            },
+            newDeath,
           ]);
+
+          if (audioRef.current) {
+            audioRef.current.play();
+          }
+
+          toast({
+            title: 'Nova morte registrada!',
+            description: `${newDeath.name} morreu em ${newDeath.city} para ${newDeath.death}.`,
+            status: 'info',
+            duration: 5000,
+            isClosable: true,
+          });
+
           if (!selectedDeath) {
             setSelectedDeath(data.death);
           }
@@ -58,7 +74,7 @@ const DeathTable = () => {
         eventSource.close();
       };
     }
-  }, [status, session, selectedDeath]);
+  }, [status, session, selectedDeath, toast]);
 
   const recentDeaths = useMemo(() => {
     const now = Date.now();
@@ -77,6 +93,7 @@ const DeathTable = () => {
   return (
     <DashboardLayout>
       <Box p={4}>
+        <audio ref={audioRef} src="/notification-sound.mp3" />
         <Text fontSize="2xl" mb={4} textAlign="center">Mortes Recentes</Text>
         <Box overflowX="auto">
           {isLoading ? (
