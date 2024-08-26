@@ -92,7 +92,7 @@ const DeathTable = () => {
   return (
     <DashboardLayout>
       <Box p={4}>
-        <audio ref={audioRef} src="/notification-sound.mp3" />
+        <audio ref={audioRef} src="assets/notification_sound.mp3" />
         <Text fontSize="2xl" mb={4} textAlign="center">Mortes Recentes</Text>
         <Box overflowX="auto">
           {isLoading ? (
