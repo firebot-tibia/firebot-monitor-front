@@ -14,7 +14,6 @@ const providers = [
           email: credentials?.email,
           password: credentials?.password,
         });
-        console.log(data);
         if (data) {
           return {
             ...data, 
@@ -42,45 +41,34 @@ const handler = NextAuth({
       if (user) {
         token.access_token = user.access_token;
         token.refresh_token = user.refresh_token;
-
+    
         const decoded = jwt.decode(user.access_token) as DecodedToken;
-        token.ally_guild = decoded.ally_guild;
-        token.email = decoded.email;
-        token.enemy_guild = decoded.enemy_guild;
         token.exp = decoded.exp;
-        token.status = decoded.status;
-        token.sub = decoded.sub;
       }
-
-      const isExpired = token.exp && Date.now() >= token.exp * 1000;
+  
+      const isExpired = token.exp && Date.now() <= token.exp * 1000;
 
       if (isExpired) {
-        console.log('Token expired, refreshing...');
         try {
           const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {}, {
             headers: {
               'x-refresh-token': token.refresh_token,
             },
           });
-          console.log(data);
+
           token.access_token = data.access_token;
           token.exp = data.exp;
-
+    
           const decoded = jwt.decode(data.access_token) as DecodedToken;
-          token.ally_guild = decoded.ally_guild;
-          token.email = decoded.email;
-          token.enemy_guild = decoded.enemy_guild;
-          token.status = decoded.status;
-          token.sub = decoded.sub;
+          token.exp = decoded.exp;
         } catch (error) {
           console.error('Token refresh error:', error);
         }
       }
-
+    
       return token;
-    },
+    },   
     async session({ session, token }: { session: any, token: JWT }) {
-      console.log(session);
       session.access_token = token.access_token;
       session.refresh_token = token.refresh_token;
       session.user = {
