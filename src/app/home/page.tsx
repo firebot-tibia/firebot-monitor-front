@@ -7,10 +7,42 @@ import { GuildMemberResponse } from '../../shared/interface/guild-member.interfa
 import { useSession } from 'next-auth/react';
 import { vocationIcons, characterTypeIcons } from '../../constant/character';
 import { copyExivas } from '../../shared/utils/options-utils';
+import { upsertPlayer } from '../../services/guilds';
+import jwt from 'jsonwebtoken';
 
-const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean }> = ({ columns, data, isLoading }) => {
+const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean, guildId: string }> = ({ columns, data, isLoading, guildId }) => {
   const toast = useToast();
-  
+
+  const handleLocalChange = async (member: GuildMemberResponse, newLocal: string) => {
+    try {
+      const playerData = {
+        guild_id: guildId,
+        kind: member.Kind,
+        name: member.Name,
+        status: member.Status,
+        local: newLocal,
+      };
+
+      await upsertPlayer(playerData);
+
+      toast({
+        title: 'Success',
+        description: `Exiva location updated for ${member.Name}.`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: `Failed to update Exiva location for ${member.Name}.`,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Box p={2} w="full" bg="blackAlpha.800" rounded="lg" mb={4}>
       <Table variant="simple" size="xs" colorScheme="blackAlpha">
@@ -59,6 +91,7 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
                     w="full"
                     minW="90px"
                     fontSize="xs"
+                    onBlur={(e) => handleLocalChange(member, e.target.value)}
                   />
                 </Td>
                 <Td textAlign="center" fontFamily="monospace" py={1} fontSize="xs">{(member.TimeOnline)}</Td>
@@ -74,17 +107,22 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
 const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
+      const decoded = jwt.decode(session.access_token) as { enemy_guild: string } | null;
+      if (decoded?.enemy_guild) {
+        setEnemyGuildId(decoded.enemy_guild);
+      }
+
       const token = encodeURIComponent(session.access_token);
       const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${token}`;
       const eventSource = new EventSource(sseUrl);
 
       eventSource.onmessage = function (event) {
         const data = JSON.parse(event.data);
-        console.log('Event received:', data);
         if (data?.enemy) {
           setGuildData(data.enemy);
         }
@@ -104,7 +142,7 @@ const Home: FC = () => {
 
   const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Exiva', 'Tempo'], []);
 
-  const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks'], []);
+  const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados'], []);
 
   return (
     <DashboardLayout>
@@ -118,6 +156,7 @@ const Home: FC = () => {
                   columns={columns}
                   data={filteredData}
                   isLoading={isLoading}
+                  guildId={enemyGuildId || ''}
                 />
               </Box>
             );
@@ -129,6 +168,7 @@ const Home: FC = () => {
             columns={columns}
             data={guildData.filter(member => !member.Kind)}
             isLoading={isLoading}
+            guildId={enemyGuildId || ''}
           />
         </Box>
       </Grid>

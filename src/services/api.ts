@@ -9,7 +9,6 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     const session = await getSession();
-    console.log('session', session);
     if (session && session.access_token) {
       config.headers['Authorization'] = `Bearer ${session.access_token}`;
       config.headers['x-refresh-token'] = `${session.refresh_token}`;

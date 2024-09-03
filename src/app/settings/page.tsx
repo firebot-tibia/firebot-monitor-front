@@ -1,48 +1,38 @@
 'use client';
 
-import {
-  Box,
-  Heading,
-  Text,
-  Spinner,
-  VStack,
-  Flex,
-  Image,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Button,
-  List,
-  ListItem,
-  IconButton,
-} from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import { Box, Button, Flex, Heading, Image, IconButton, List, ListItem, Menu, MenuButton, MenuItem, MenuList, Spinner, Text, VStack, useToast } from '@chakra-ui/react';
 import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
-import { characterTypeIcons, vocationIcons } from '../../constant/character';
 import DashboardLayout from '../../components/dashboard';
 import { useSession } from 'next-auth/react';
-import { useToastContext } from '../../context/toast/toast-context';
-import { upsertPlayer } from '../../services/guilds';
+import { vocationIcons, characterTypeIcons } from '../../constant/character';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
+import { upsertPlayer } from '../../services/guilds';
+import jwt from 'jsonwebtoken'; 
+import { DecodedToken } from '../../shared/dtos/auth.dto';
 
 const Settings = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [guildData, setGuildData] = useState<GuildMemberResponse[] | null>([]);
+  const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<GuildMemberResponse[]>([]);
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const { showToast } = useToastContext();
+  const [isLoading, setIsLoading] = useState(true);
   const { data: session, status } = useSession();
+  const toast = useToast();
+  const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
+      const decoded = jwt.decode(session.access_token) as DecodedToken;
+      if (decoded?.enemy_guild) {
+        setEnemyGuildId(decoded.enemy_guild);
+      }
+
       const token = encodeURIComponent(session.access_token);
       const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${token}`;
       const eventSource = new EventSource(sseUrl);
 
       eventSource.onmessage = function (event) {
         const data = JSON.parse(event.data);
-        console.log('Event received:', data);
         if (data?.enemy) {
           setGuildData((prevGuildData) => [...(prevGuildData || []), ...data.enemy]);
         }
@@ -75,30 +65,30 @@ const Settings = () => {
   };
 
   const handleSubmit = async () => {
-    if (!selectedType) {
-      showToast({
-        title: 'Selecione um tipo de personagem.',
-        status: 'warning',
+    if (!selectedType || !enemyGuildId) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione um tipo de personagem e certifique-se de que a guilda foi carregada.',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
       return;
     }
 
-    console.log('upsertPlayer', selectedMembers)
-    console.log('upsertPlayer', selectedType)
     const promises = selectedMembers.map((member) =>
       upsertPlayer({
+        guild_id: enemyGuildId,
         name: member.Name,
         status: member.Status,
         kind: selectedType,
-        local: member.Local,
+        local: member.Local || '',
       })
     );
-    console.log(promises)
+
     try {
       await Promise.all(promises);
-      showToast({
+      toast({
         title: 'Personagens adicionados com sucesso.',
         status: 'success',
         duration: 3000,
@@ -107,7 +97,7 @@ const Settings = () => {
       setSelectedMembers([]);
       setSelectedType(null);
     } catch (err) {
-      showToast({
+      toast({
         title: 'Erro ao adicionar personagens.',
         status: 'error',
         duration: 3000,

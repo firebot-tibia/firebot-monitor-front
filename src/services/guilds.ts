@@ -22,7 +22,7 @@ export const getOrangeList = async (player: string) => {
 
 export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
   try {
-    const response = await api.post('/gamedata/insert-player', playerData);
+    const response = await api.post('/gamedata/insert-player-editor', playerData);
     return response.data;
   } catch (error) {
     throw error;

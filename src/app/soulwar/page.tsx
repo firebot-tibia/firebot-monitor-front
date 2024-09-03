@@ -1,6 +1,6 @@
 'use client'
 
-import { Center, Box, Heading, VStack, Select, Text, Button, SimpleGrid } from '@chakra-ui/react';
+import { Center, Box, Heading, VStack, Select, Text, Button, Table, Thead, Tbody, Tr, Th, Td, SimpleGrid } from '@chakra-ui/react';
 import { ChangeEvent, useState, useCallback } from 'react';
 import DashboardLayout from '../../components/dashboard';
 import { Worlds } from '../../constant/world';
@@ -12,7 +12,7 @@ const Soulwar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 50;
 
   const handleSelectChange = useCallback(async (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedWorld = event.target.value;
@@ -23,10 +23,10 @@ const Soulwar = () => {
       setError('');
       setCurrentPage(1);
       try {
-        const data  = await getSoulwarPlayers(selectedWorld);
+        const data = await getSoulwarPlayers(selectedWorld);
         setBonecosSoulwar(data.avaiable_soulwar || []);
       } catch (error) {
-        console.log(error)
+        console.log(error);
         setError('Falha ao buscar dados da soulwar');
       } finally {
         setLoading(false);
@@ -47,7 +47,7 @@ const Soulwar = () => {
   return (
     <DashboardLayout>
       <Center p={4}>
-        <Box w="full" maxW="600px">
+        <Box w="full" maxW="800px">
           <Heading as="h1" mb={6} textAlign="center">Lista da Soulwar</Heading>
           <VStack spacing={4} align="stretch">
             <Select placeholder="Selecione o mundo" onChange={handleSelectChange} value={selectedMundo}>
@@ -63,14 +63,27 @@ const Soulwar = () => {
               <Text color="red.500">{error}</Text>
             ) : (
               <>
-                <Box borderWidth={1} borderRadius="lg" p={4} h="400px" overflowY="auto">
+                <Box borderWidth={1} borderRadius="lg" p={4} overflowX="auto">
                   <Heading as="h2" size="lg" mb={4}>Personagens que não fizeram Soulwar</Heading>
                   {paginatedItems.length > 0 ? (
-                    paginatedItems.map((boneco: any) => (
-                      <Box key={boneco.name} p={2} borderBottom="1px" borderColor="gray.200">
-                        Character: {boneco.name} - Voc: {boneco.vocation} - Lvl: {boneco.level}
-                      </Box>
-                    ))
+                    <Table variant="striped" colorScheme="gray">
+                      <Thead>
+                        <Tr>
+                          <Th>Nome</Th>
+                          <Th>Vocação</Th>
+                          <Th>Nível</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {paginatedItems.map((boneco: any) => (
+                          <Tr key={boneco.name}>
+                            <Td>{boneco.name}</Td>
+                            <Td>{boneco.vocation}</Td>
+                            <Td>{boneco.level}</Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
                   ) : (
                     <Text color="gray.500">Sem dados da soulwar</Text>
                   )}

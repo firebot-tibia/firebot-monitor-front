@@ -1,6 +1,7 @@
 'use client';
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, Box, Text, Button, Spinner, useToast } from '@chakra-ui/react';
+
+import React, { useState, useEffect, useMemo, useRef, useReducer } from 'react';
+import { Box, Button, Text, Spinner, useToast, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { useSession } from 'next-auth/react';
 
@@ -11,19 +12,35 @@ interface Death {
   vocation: string;
   city: string;
   death: string;
-  timestamp: number;
+  date: Date;
 }
 
 const itemsPerPage = 5;
 
+type Action =
+  | { type: 'ADD_DEATH'; payload: Death }
+  | { type: 'SET_DEATH_LIST'; payload: Death[] };
+
+function deathReducer(state: Death[], action: Action): Death[] {
+  switch (action.type) {
+    case 'ADD_DEATH':
+      return [...state, action.payload];
+    case 'SET_DEATH_LIST':
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
 const DeathTable = () => {
-  const [deathList, setDeathList] = useState<Death[]>([]);
+  const [deathList, dispatch] = useReducer(deathReducer, []);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { data: session, status } = useSession();
   const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -33,32 +50,31 @@ const DeathTable = () => {
 
       eventSource.onmessage = function (event) {
         const data = JSON.parse(event.data);
-        console.log('Event received:', data);
         if (data?.death) {
-          const newDeath = {
+          const newDeath: Death = {
             ...data.death,
             id: `${data.death.name}-${Date.now()}`,
-            timestamp: Date.now(),
+            date: new Date(data.date),
+            death: data.death.text,
           };
-          setDeathList((prevDeathList) => [
-            ...prevDeathList,
-            newDeath,
-          ]);
+          dispatch({ type: 'ADD_DEATH', payload: newDeath });
 
-          if (audioRef.current) {
-            audioRef.current.play();
+          if (audioEnabled && audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              console.log('Playback prevented:', error);
+            });
           }
 
           toast({
             title: 'Nova morte registrada!',
-            description: `${newDeath.name} morreu em ${newDeath.city} para ${newDeath.death}.`,
+            description: `${newDeath.name} morreu para ${newDeath.death}.`,
             status: 'info',
             duration: 5000,
             isClosable: true,
           });
 
           if (!selectedDeath) {
-            setSelectedDeath(data.death);
+            setSelectedDeath(newDeath);
           }
         }
         setIsLoading(false);
@@ -73,11 +89,19 @@ const DeathTable = () => {
         eventSource.close();
       };
     }
-  }, [status, session, selectedDeath, toast]);
+  }, [status, session, selectedDeath, toast, audioEnabled]);
+
+  useEffect(() => {
+    const now = Date.now();
+    dispatch({
+      type: 'SET_DEATH_LIST',
+      payload: deathList.filter(death => now - new Date(death.date).getTime() < 12 * 60 * 60 * 1000),
+    });
+  }, []);
 
   const recentDeaths = useMemo(() => {
     const now = Date.now();
-    return deathList.filter(death => now - death.timestamp < 24 * 60 * 60 * 1000);
+    return deathList.filter(death => now - new Date(death.date).getTime() < 12 * 60 * 60 * 1000);
   }, [deathList]);
 
   const lastIndex = currentPage * itemsPerPage;
@@ -89,15 +113,29 @@ const DeathTable = () => {
     setSelectedDeath(death);
   };
 
+  const enableAudio = () => {
+    setAudioEnabled(true);
+    if (audioRef.current) {
+      audioRef.current.play().catch((error) => {
+        console.log('Playback prevented:', error);
+      });
+    }
+  };
+
   return (
     <DashboardLayout>
       <Box p={4}>
-        <audio ref={audioRef} src="assets/notification_sound.mp3" />
+        <audio ref={audioRef} src="/assets/notification_sound.mp3" />
+        {!audioEnabled && (
+          <Button onClick={enableAudio} mb={4}>
+            Habilitar Alerta
+          </Button>
+        )}
         <Text fontSize="2xl" mb={4} textAlign="center">Mortes Recentes</Text>
         <Box overflowX="auto">
           {isLoading ? (
             <Spinner size="xl" />
-          ) : recentDeaths.length === 0 ? (
+          ) : currentData.length <= 0 ? (
             <Text textAlign="center" fontSize="lg">Sem mortes recentes</Text>
           ) : (
             <Table variant="simple" colorScheme="gray">
