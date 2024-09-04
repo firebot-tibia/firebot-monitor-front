@@ -39,7 +39,7 @@ export const config = {
     },
     {
       name: 'Adicionar Alertas',
-      href: '/alert',
+      href: '/finder',
       icon: HiOutlineBellAlert,
     },
   ],
