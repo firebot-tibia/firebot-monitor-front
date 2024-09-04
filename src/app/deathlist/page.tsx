@@ -230,7 +230,7 @@ const DeathDetail: React.FC<{ death: Death }> = ({ death }) => (
     <Text><strong>Vocação:</strong> {death.vocation}</Text>
     <Text><strong>Cidade:</strong> {death.city}</Text>
     <Text><strong>Morte:</strong> {death.death}</Text>
-    <Text><strong>Data:</strong> {death.date}</Text>
+    <Text><strong>Data:</strong> {formatDate(death.date)}</Text>
   </Box>
 );
 
