@@ -85,7 +85,7 @@ const DeathTable = () => {
           const newDeath: Death = {
             ...data.death,
             id: `${data.death.name}-${Date.now()}`,
-            date: new Date(data.date || Date.now()),
+            date: new Date(data.death.date || Date.now()),
             death: data.death.text,
           };
           dispatch({ type: 'ADD_DEATH', payload: newDeath });
@@ -129,7 +129,7 @@ const DeathTable = () => {
         const deathTime = death.date ? new Date(death.date).getTime() : now;
         return now - deathTime < 12 * 60 * 60 * 1000;
       })
-      .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime()); // Ordena por data mais recente
+      .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime());
   }, [deathList]);
 
   useEffect(() => {
@@ -230,6 +230,7 @@ const DeathDetail: React.FC<{ death: Death }> = ({ death }) => (
     <Text><strong>Vocação:</strong> {death.vocation}</Text>
     <Text><strong>Cidade:</strong> {death.city}</Text>
     <Text><strong>Morte:</strong> {death.death}</Text>
+    <Text><strong>Data:</strong> {death.date}</Text>
   </Box>
 );
 
