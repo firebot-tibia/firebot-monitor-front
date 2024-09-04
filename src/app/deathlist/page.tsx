@@ -12,7 +12,7 @@ interface Death {
   vocation: string;
   city: string;
   death: string;
-  date: Date;
+  date: Date | null;
 }
 
 const itemsPerPage = 5;
@@ -49,7 +49,6 @@ const DeathTable = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
 
-  // Load death list and audio setting from localStorage on client side
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedDeaths = localStorage.getItem('deathList');
@@ -73,7 +72,7 @@ const DeathTable = () => {
           const newDeath: Death = {
             ...data.death,
             id: `${data.death.name}-${Date.now()}`,
-            date: new Date(data.date),
+            date: new Date(data.date || Date.now()),
             death: data.death.text,
           };
           dispatch({ type: 'ADD_DEATH', payload: newDeath });
@@ -86,6 +85,13 @@ const DeathTable = () => {
             isClosable: true,
           });
 
+          // Toca o som de notificação se o áudio estiver habilitado
+          if (audioEnabled && audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              console.log('Erro ao tocar o áudio:', error);
+            });
+          }
+
           if (!selectedDeath) {
             setSelectedDeath(newDeath);
           }
@@ -94,7 +100,7 @@ const DeathTable = () => {
       };
 
       eventSource.onerror = function (event) {
-        console.error('Error occurred:', event);
+        console.error('Erro ao se conectar ao SSE:', event);
         eventSource.close();
       };
 
@@ -104,10 +110,12 @@ const DeathTable = () => {
     }
   }, [status, session, selectedDeath, toast, audioEnabled]);
 
-  // Remove the useEffect that filters deathList because it can cause infinite loops
   const recentDeaths = useMemo(() => {
     const now = Date.now();
-    return deathList.filter(death => now - new Date(death.date).getTime() < 12 * 60 * 60 * 1000);
+    return deathList.filter(death => {
+      const deathTime = death.date ? new Date(death.date).getTime() : now;
+      return now - deathTime < 12 * 60 * 60 * 1000;
+    });
   }, [deathList]);
 
   useEffect(() => {
@@ -144,7 +152,7 @@ const DeathTable = () => {
             <Box display="flex" justifyContent="center" alignItems="center" height="100%">
               <Spinner size="xl" />
             </Box>
-          ) : currentData.length <= 0 ? (
+          ) : currentData.length === 0 ? (
             <Text textAlign="center" fontSize="lg">Sem mortes recentes</Text>
           ) : (
             <Table variant="simple" colorScheme="gray">

@@ -3,7 +3,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { JWT } from 'next-auth/jwt';
 import { DecodedToken } from '../../../../shared/dtos/auth.dto';
-import jwt from 'jsonwebtoken'; 
+import jwt from 'jsonwebtoken';
 
 const providers = [
   CredentialsProvider({
@@ -16,7 +16,7 @@ const providers = [
         });
         if (data) {
           return {
-            ...data, 
+            ...data,
             access_token: data.access_token,
             refresh_token: data.refresh_token,
           };
@@ -41,12 +41,12 @@ const handler = NextAuth({
       if (user) {
         token.access_token = user.access_token;
         token.refresh_token = user.refresh_token;
-    
+
         const decoded = jwt.decode(user.access_token) as DecodedToken;
         token.exp = decoded.exp;
       }
-  
-      const isExpired = token.exp && Date.now() <= token.exp * 1000;
+
+      const isExpired = token.exp && Date.now() >= token.exp * 1000;
 
       if (isExpired) {
         try {
@@ -57,17 +57,15 @@ const handler = NextAuth({
           });
 
           token.access_token = data.access_token;
-          token.exp = data.exp;
-    
           const decoded = jwt.decode(data.access_token) as DecodedToken;
           token.exp = decoded.exp;
         } catch (error) {
           console.error('Token refresh error:', error);
         }
       }
-    
+
       return token;
-    },   
+    },
     async session({ session, token }: { session: any, token: JWT }) {
       session.access_token = token.access_token;
       session.refresh_token = token.refresh_token;
