@@ -21,23 +21,36 @@ type Action =
   | { type: 'ADD_DEATH'; payload: Death }
   | { type: 'SET_DEATH_LIST'; payload: Death[] };
 
-function deathReducer(state: Death[], action: Action): Death[] {
-  switch (action.type) {
-    case 'ADD_DEATH':
-      const updatedState = [...state, action.payload];
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('deathList', JSON.stringify(updatedState));
-      }
-      return updatedState;
-    case 'SET_DEATH_LIST':
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('deathList', JSON.stringify(action.payload));
-      }
-      return action.payload;
-    default:
-      return state;
+  function deathReducer(state: Death[], action: Action): Death[] {
+    switch (action.type) {
+      case 'ADD_DEATH':
+        const updatedState = [action.payload, ...state];
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('deathList', JSON.stringify(updatedState));
+        }
+        return updatedState;
+      case 'SET_DEATH_LIST':
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('deathList', JSON.stringify(action.payload));
+        }
+        return action.payload;
+      default:
+        return state;
+    }
   }
-}
+  
+
+const formatDate = (dateString: Date | null) => {
+  if (!dateString) return 'Data desconhecida';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+};
 
 const DeathTable = () => {
   const [deathList, dispatch] = useReducer(deathReducer, []);
@@ -85,7 +98,6 @@ const DeathTable = () => {
             isClosable: true,
           });
 
-          // Toca o som de notificação se o áudio estiver habilitado
           if (audioEnabled && audioRef.current) {
             audioRef.current.play().catch((error) => {
               console.log('Erro ao tocar o áudio:', error);
@@ -112,10 +124,12 @@ const DeathTable = () => {
 
   const recentDeaths = useMemo(() => {
     const now = Date.now();
-    return deathList.filter(death => {
-      const deathTime = death.date ? new Date(death.date).getTime() : now;
-      return now - deathTime < 12 * 60 * 60 * 1000;
-    });
+    return deathList
+      .filter(death => {
+        const deathTime = death.date ? new Date(death.date).getTime() : now;
+        return now - deathTime < 12 * 60 * 60 * 1000;
+      })
+      .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime()); // Ordena por data mais recente
   }, [deathList]);
 
   useEffect(() => {
@@ -163,6 +177,7 @@ const DeathTable = () => {
                   <Th>Vocação</Th>
                   <Th>Cidade</Th>
                   <Th>Morte</Th>
+                  <Th>Data</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -177,6 +192,7 @@ const DeathTable = () => {
                     <Td>{death.vocation}</Td>
                     <Td>{death.city}</Td>
                     <Td>{death.death}</Td>
+                    <Td>{formatDate(death.date)}</Td>
                   </Tr>
                 ))}
               </Tbody>
