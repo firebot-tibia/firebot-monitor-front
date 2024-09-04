@@ -15,6 +15,7 @@ import {
   Heading,
   Text,
   Image,
+  Spinner,
 } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { getExperienceList } from '../../services/guilds';
@@ -38,10 +39,12 @@ const GuildStats = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [noDataFound, setNoDataFound] = useState(false);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
 
   const fetchGuildStats = async () => {
     try {
+      setLoading(true);
       const query = {
         kind: guildType,
         vocation: vocationFilter,
@@ -74,6 +77,8 @@ const GuildStats = () => {
     } catch (error) {
       console.error('Failed to fetch guild stats:', error);
       setNoDataFound(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,7 +136,12 @@ const GuildStats = () => {
           />
         </SimpleGrid>
 
-        {noDataFound ? (
+        {loading ? (
+          <Box textAlign="center" mt={4}>
+            <Spinner size="xl" />
+            <Text>Carregando...</Text>
+          </Box>
+        ) : noDataFound ? (
           <Text textAlign="center" mt={4} color="red.500">Nenhum dado encontrado.</Text>
         ) : (
           <>
@@ -175,16 +185,16 @@ const GuildStats = () => {
                   onClick={() => handlePageChange(currentPage - 1)}
                   isDisabled={currentPage === 1}
                 >
-                  Previous
+                  Anterior
                 </Button>
                 <Text textAlign="center" lineHeight="40px">
-                  Page {currentPage} of {totalPages}
+                Página {currentPage} de {totalPages}
                 </Text>
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   isDisabled={currentPage === totalPages}
                 >
-                  Next
+                  Próximo
                 </Button>
               </SimpleGrid>
             )}

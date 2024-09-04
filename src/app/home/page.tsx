@@ -26,20 +26,26 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
       await upsertPlayer(playerData);
 
       toast({
-        title: 'Success',
-        description: `Exiva location updated for ${member.Name}.`,
+        title: 'Sucesso',
+        description: `Local do Exiva atualizado para ${member.Name}.`,
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: `Failed to update Exiva location for ${member.Name}.`,
+        title: 'Erro',
+        description: `Falha ao atualizar o local do Exiva para ${member.Name}.`,
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, member: GuildMemberResponse) => {
+    if (e.key === 'Enter') {
+      handleLocalChange(member, e.currentTarget.value);
     }
   };
 
@@ -92,6 +98,7 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
                     minW="90px"
                     fontSize="xs"
                     onBlur={(e) => handleLocalChange(member, e.target.value)}
+                    onKeyPress={(e) => handleKeyPress(e, member)}
                   />
                 </Td>
                 <Td textAlign="center" fontFamily="monospace" py={1} fontSize="xs">{(member.TimeOnline)}</Td>
@@ -130,7 +137,7 @@ const Home: FC = () => {
       };
 
       eventSource.onerror = function (event) {
-        console.error('Error occurred:', event);
+        console.error('Erro ocorreu:', event);
         eventSource.close();
       };
 

@@ -24,8 +24,15 @@ type Action =
 function deathReducer(state: Death[], action: Action): Death[] {
   switch (action.type) {
     case 'ADD_DEATH':
-      return [...state, action.payload];
+      const updatedState = [...state, action.payload];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deathList', JSON.stringify(updatedState));
+      }
+      return updatedState;
     case 'SET_DEATH_LIST':
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deathList', JSON.stringify(action.payload));
+      }
       return action.payload;
     default:
       return state;
@@ -41,6 +48,18 @@ const DeathTable = () => {
   const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
+
+  // Load death list and audio setting from localStorage on client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedDeaths = localStorage.getItem('deathList');
+      if (savedDeaths) {
+        dispatch({ type: 'SET_DEATH_LIST', payload: JSON.parse(savedDeaths) });
+      }
+      const savedAudioEnabled = localStorage.getItem('audioEnabled') === 'true';
+      setAudioEnabled(savedAudioEnabled);
+    }
+  }, []);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -58,12 +77,6 @@ const DeathTable = () => {
             death: data.death.text,
           };
           dispatch({ type: 'ADD_DEATH', payload: newDeath });
-
-          if (audioEnabled && audioRef.current) {
-            audioRef.current.play().catch((error) => {
-              console.log('Playback prevented:', error);
-            });
-          }
 
           toast({
             title: 'Nova morte registrada!',
@@ -91,18 +104,17 @@ const DeathTable = () => {
     }
   }, [status, session, selectedDeath, toast, audioEnabled]);
 
-  useEffect(() => {
-    const now = Date.now();
-    dispatch({
-      type: 'SET_DEATH_LIST',
-      payload: deathList.filter(death => now - new Date(death.date).getTime() < 12 * 60 * 60 * 1000),
-    });
-  }, []);
-
+  // Remove the useEffect that filters deathList because it can cause infinite loops
   const recentDeaths = useMemo(() => {
     const now = Date.now();
     return deathList.filter(death => now - new Date(death.date).getTime() < 12 * 60 * 60 * 1000);
   }, [deathList]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('audioEnabled', String(audioEnabled));
+    }
+  }, [audioEnabled]);
 
   const lastIndex = currentPage * itemsPerPage;
   const firstIndex = lastIndex - itemsPerPage;
@@ -115,11 +127,6 @@ const DeathTable = () => {
 
   const enableAudio = () => {
     setAudioEnabled(true);
-    if (audioRef.current) {
-      audioRef.current.play().catch((error) => {
-        console.log('Playback prevented:', error);
-      });
-    }
   };
 
   return (
@@ -134,7 +141,9 @@ const DeathTable = () => {
         <Text fontSize="2xl" mb={4} textAlign="center">Mortes Recentes</Text>
         <Box overflowX="auto">
           {isLoading ? (
-            <Spinner size="xl" />
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+              <Spinner size="xl" />
+            </Box>
           ) : currentData.length <= 0 ? (
             <Text textAlign="center" fontSize="lg">Sem mortes recentes</Text>
           ) : (

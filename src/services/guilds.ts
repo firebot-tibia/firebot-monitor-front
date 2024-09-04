@@ -4,7 +4,6 @@ import api from './api';
 export const getSoulwarPlayers = async (world: string) => {
   try {
     const response = await api.get(`/gamedata/soulwars/${world}`);
-    console.log(response);
     return response.data;
   } catch (error) {
     throw error;

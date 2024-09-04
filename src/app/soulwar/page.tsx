@@ -26,7 +26,6 @@ const Soulwar = () => {
         const data = await getSoulwarPlayers(selectedWorld);
         setBonecosSoulwar(data.avaiable_soulwar || []);
       } catch (error) {
-        console.log(error);
         setError('Falha ao buscar dados da soulwar');
       } finally {
         setLoading(false);

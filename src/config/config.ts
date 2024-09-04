@@ -9,7 +9,7 @@ export const config = {
   titleNotFound: 'Página não encontrada',
   nameNavigation: [
     {
-      name: 'Início',
+      name: 'Monitorar Guild',
       href: '/home',
     },
     {

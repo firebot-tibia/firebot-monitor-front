@@ -261,7 +261,6 @@
                 const xID = Math.floor(coordX / 256) * 256;
                 const yID = Math.floor(coordY / 256) * 256;
                 const id = xID + '_' + yID + '_' + coordZ;
-                console.log(id);
             }
         });
         this.crosshairs = L.crosshairs().addTo(map);
