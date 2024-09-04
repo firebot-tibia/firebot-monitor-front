@@ -28,7 +28,7 @@ export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
   }
 };
 
-export const getExperienceList = async (query: { kind: string; vocation: string; name: string; offset: number; limit: number }) => {
+export const getExperienceList = async (query: { kind: string; vocation: string; name: string; sort: string; offset: number; limit: number }) => {
   try {
     const response = await api.get(`/gamedata/experience-list`, {
       params: query,

@@ -16,6 +16,12 @@ import {
   Text,
   Image,
   Spinner,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatGroup,
+  Input,
 } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { getExperienceList } from '../../services/guilds';
@@ -32,6 +38,7 @@ interface GuildMemberResponse {
 const GuildStats = () => {
   const [guildType, setGuildType] = useState<'ally' | 'enemy'>('ally');
   const [filter, setFilter] = useState('Diaria');
+  const [sort, setSort] = useState('exp_yesterday'); 
   const [vocationFilter, setVocationFilter] = useState('');
   const [nameFilter, setNameFilter] = useState('');
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
@@ -40,6 +47,8 @@ const GuildStats = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [noDataFound, setNoDataFound] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [totalExp, setTotalExp] = useState(0);
+  const [avgExp, setAvgExp] = useState(0);
   const itemsPerPage = 10;
 
   const fetchGuildStats = async () => {
@@ -48,12 +57,15 @@ const GuildStats = () => {
       const query = {
         kind: guildType,
         vocation: vocationFilter,
-        name: nameFilter,
+        name: nameFilter,  
+        sort: sort,       
         offset: (currentPage - 1) * itemsPerPage,
         limit: itemsPerPage,
       };
 
       const response = await getExperienceList(query);
+
+      // Atualize o acesso ao array players
       const experienceField =
         filter === 'Diaria' ? 'experience_one_day' :
         filter === 'Semanal' ? 'experience_one_week' : 'experience_one_month';
@@ -70,9 +82,17 @@ const GuildStats = () => {
         setNoDataFound(true);
       } else {
         setGuildData(formattedData);
-        setTotalRecords(response.exp_list.Count.records);
-        setTotalPages(response.exp_list.Count.pages);
+        setTotalRecords(response.exp_list.Count.records);  // Atualize a chave de contagem
+        setTotalPages(response.exp_list.Count.pages);      // Atualize a chave de páginas
         setNoDataFound(false);
+        setTotalExp(
+          filter === 'Diaria' ? response.exp_list.total_exp_yesterday :
+          filter === 'Semanal' ? response.exp_list.total_exp_7_days : response.exp_list.total_exp_30_days
+        );
+        setAvgExp(
+          filter === 'Diaria' ? response.exp_list.medium_exp_yesterday :
+          filter === 'Semanal' ? response.exp_list.medium_exp_7_days : response.exp_list.medium_exp_30_days
+        );
       }
     } catch (error) {
       console.error('Failed to fetch guild stats:', error);
@@ -84,14 +104,18 @@ const GuildStats = () => {
 
   useEffect(() => {
     fetchGuildStats();
-  }, [guildType, filter, vocationFilter, nameFilter, currentPage]);
+  }, [guildType, filter, vocationFilter, nameFilter, sort, currentPage]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedFilter = e.target.value;
+    setFilter(selectedFilter);
+    const newSort = selectedFilter === 'Diaria' ? 'exp_yesterday' : 
+                    selectedFilter === 'Semanal' ? 'exp_week' : 'exp_month';
+    setSort(newSort);
+  };
 
   const handleGuildTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setGuildType(e.target.value as 'ally' | 'enemy');
-  };
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilter(e.target.value);
   };
 
   const handleVocationFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -113,7 +137,7 @@ const GuildStats = () => {
         <SimpleGrid columns={4} spacing={4} mb={4}>
           <Select value={guildType} onChange={handleGuildTypeChange}>
             <option value="ally">Guild aliada</option>
-            <option value="enemy">Guild Inimiga</option>
+            <option value="enemy">Guild inimiga</option>
           </Select>
           <Select value={filter} onChange={handleFilterChange}>
             <option value="Diaria">Diária</option>
@@ -128,11 +152,11 @@ const GuildStats = () => {
               </option>
             ))}
           </Select>
-          <input
-            type="text"
-            placeholder="Buscar pelo nome do personagem"
+          <Input
+            placeholder="Buscar personagem por nome"
             value={nameFilter}
             onChange={handleNameFilterChange}
+            mb={4}
           />
         </SimpleGrid>
 
@@ -145,6 +169,21 @@ const GuildStats = () => {
           <Text textAlign="center" mt={4} color="red.500">Nenhum dado encontrado.</Text>
         ) : (
           <>
+            <StatGroup mb={4}>
+              <Stat>
+                <StatLabel>Experiência Total</StatLabel>
+                <StatNumber>
+                  {totalExp.toLocaleString('pt-BR')}
+                </StatNumber>
+                <StatHelpText>{filter}</StatHelpText>
+              </Stat>
+              <Stat>
+                <StatLabel>Experiência Média</StatLabel>
+                <StatNumber>{avgExp.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</StatNumber>
+                <StatHelpText>{filter}</StatHelpText>
+              </Stat>
+            </StatGroup>
+
             <Table variant="simple">
               <Thead>
                 <Tr>
@@ -188,13 +227,13 @@ const GuildStats = () => {
                   Anterior
                 </Button>
                 <Text textAlign="center" lineHeight="40px">
-                Página {currentPage} de {totalPages}
+                  Página {currentPage} de {totalPages}
                 </Text>
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   isDisabled={currentPage === totalPages}
                 >
-                  Próximo
+                  Próxima
                 </Button>
               </SimpleGrid>
             )}
