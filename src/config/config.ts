@@ -19,6 +19,11 @@ export const config = {
       icon: FaMap,
     },
     {
+      name: 'Monitorar Masslog',
+      href: '/alert',
+      icon: HiOutlineBellAlert,
+    },
+    {
       name: 'Monitorar Oranges',
       href: '/orange',
       icon: IoSkullOutline,
@@ -42,11 +47,6 @@ export const config = {
       name: 'Global Wars',
       href: '/war',
       icon: GiWarAxe,
-    },
-    {
-      name: 'Adicionar Alertas',
-      href: '/alert',
-      icon: HiOutlineBellAlert,
-    },
+    }
   ],
 };

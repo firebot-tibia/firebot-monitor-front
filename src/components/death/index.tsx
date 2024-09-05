@@ -76,13 +76,6 @@ export const DeathTable: React.FC = () => {
   useEffect(() => {
     if (eventSourceError) {
       setIsInitialLoad(false);
-      toast({
-        title: 'Erro de Conexão',
-        description: eventSourceError.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
     }
   }, [eventSourceError, toast]);
 
