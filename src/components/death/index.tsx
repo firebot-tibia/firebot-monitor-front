@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, ComponentType } from "react";
+import dynamic from 'next/dynamic';
 import { 
   Box, 
   Button, 
@@ -24,7 +25,15 @@ import { useAudio } from "../../hooks/useAudio";
 import { useDeaths } from "../../hooks/useDeaths";
 import { formatDate } from "../../shared/utils/date-utils";
 import { useEventSource } from "../../hooks/useEvent";
-import { DeathDetail } from "./death-detail";
+
+interface DeathDetailProps {
+  death: Death;
+}
+
+const DeathDetail = dynamic<DeathDetailProps>(
+  () => import('./death-detail').then((mod) => mod.DeathDetail as ComponentType<DeathDetailProps>),
+  { ssr: false }
+);
 
 const ITEMS_PER_PAGE = 10;
 
@@ -35,6 +44,17 @@ export const DeathTable: React.FC = () => {
   const { deathList, addDeath } = useDeaths();
   const { audioEnabled, enableAudio, playAudio } = useAudio('/assets/notification_sound.mp3');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    // Definir um tempo limite para o carregamento inicial
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 5000); // 5 segundos de tempo limite
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleNewDeath = useCallback((newDeath: Death) => {
     addDeath(newDeath);
@@ -63,19 +83,25 @@ export const DeathTable: React.FC = () => {
         death: data.death.text,
       };
       handleNewDeath(newDeath);
-    } else {
-      setIsInitialLoad(false);
     }
+    setIsInitialLoad(false);
   }, [handleNewDeath]);
 
   const { error: eventSourceError } = useEventSource(
-    `https://api.firebot.run/subscription/enemy/`,
+    isClient ? `https://api.firebot.run/subscription/enemy/` : null,
     handleMessage
   );
 
   useEffect(() => {
     if (eventSourceError) {
       setIsInitialLoad(false);
+      toast({
+        title: 'Erro de conexão',
+        description: 'Não foi possível conectar ao servidor. Por favor, tente novamente mais tarde.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   }, [eventSourceError, toast]);
 
@@ -102,6 +128,10 @@ export const DeathTable: React.FC = () => {
   }, []);
 
   const renderContent = () => {
+    if (!isClient) {
+      return null;
+    }
+
     if (isInitialLoad) {
       return (
         <Center height="200px">
@@ -149,6 +179,10 @@ export const DeathTable: React.FC = () => {
       </Table>
     );
   };
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <DashboardLayout>

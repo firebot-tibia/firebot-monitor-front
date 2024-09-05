@@ -1,7 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 export const useAudio = (audioSrc: string) => {
-  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('audioEnabled');
+      return saved !== null ? JSON.parse(saved) : false;
+    }
+    return false;
+  });
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -9,6 +15,10 @@ export const useAudio = (audioSrc: string) => {
       audioRef.current = new Audio(audioSrc);
     }
   }, [audioSrc]);
+
+  useEffect(() => {
+    localStorage.setItem('audioEnabled', JSON.stringify(audioEnabled));
+  }, [audioEnabled]);
 
   const enableAudio = useCallback(() => {
     if (audioRef.current) {
