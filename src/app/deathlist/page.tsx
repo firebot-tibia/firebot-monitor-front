@@ -21,24 +21,23 @@ type Action =
   | { type: 'ADD_DEATH'; payload: Death }
   | { type: 'SET_DEATH_LIST'; payload: Death[] };
 
-  function deathReducer(state: Death[], action: Action): Death[] {
-    switch (action.type) {
-      case 'ADD_DEATH':
-        const updatedState = [action.payload, ...state];
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('deathList', JSON.stringify(updatedState));
-        }
-        return updatedState;
-      case 'SET_DEATH_LIST':
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('deathList', JSON.stringify(action.payload));
-        }
-        return action.payload;
-      default:
-        return state;
-    }
+function deathReducer(state: Death[], action: Action): Death[] {
+  switch (action.type) {
+    case 'ADD_DEATH':
+      const updatedState = [action.payload, ...state];
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deathList', JSON.stringify(updatedState));
+      }
+      return updatedState;
+    case 'SET_DEATH_LIST':
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('deathList', JSON.stringify(action.payload));
+      }
+      return action.payload;
+    default:
+      return state;
   }
-  
+}
 
 const formatDate = (dateString: Date | null) => {
   if (!dateString) return 'Data desconhecida';
@@ -148,7 +147,13 @@ const DeathTable = () => {
   };
 
   const enableAudio = () => {
-    setAudioEnabled(true);
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        setAudioEnabled(true);
+      }).catch((error) => {
+        console.log('Erro ao tocar o áudio:', error);
+      });
+    }
   };
 
   return (
