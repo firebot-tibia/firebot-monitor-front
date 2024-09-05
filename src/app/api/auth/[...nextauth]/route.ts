@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import NextAuth from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { DecodedToken } from '../../../../shared/dtos/auth.dto';
+import { DecodedToken } from '../../../../shared/interface/auth.interface';
 import { refreshAccessToken } from '../../../../services/auth';
 
 const providers = [

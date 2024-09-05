@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Button, Flex, Heading, Image, IconButton, List, ListItem, Menu, MenuButton, MenuItem, MenuList, Spinner, Text, VStack, useToast } from '@chakra-ui/react';
 import { ChevronDownIcon, DeleteIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
@@ -9,7 +9,8 @@ import { vocationIcons, characterTypeIcons } from '../../constant/character';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { upsertPlayer } from '../../services/guilds';
 import jwt from 'jsonwebtoken'; 
-import { DecodedToken } from '../../shared/dtos/auth.dto';
+import { DecodedToken } from '../../shared/interface/auth.interface';
+import { useEventSource } from '../../hooks/useEvent';
 
 const Settings = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
@@ -20,35 +21,44 @@ const Settings = () => {
   const toast = useToast();
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
 
+  const handleEventSourceMessage = useCallback((data: any) => {
+    if (data?.enemy) {
+      setGuildData((prevGuildData) => {
+        const newMembers = data.enemy.filter((newMember: GuildMemberResponse) => 
+          !prevGuildData.some((existingMember) => existingMember.Name === newMember.Name)
+        );
+        return [...prevGuildData, ...newMembers];
+      });
+    }
+    setIsLoading(false);
+  }, []);
+
+  const baseUrl = session?.access_token 
+    ? `https://api.firebot.run/subscription/enemy/?token=${encodeURIComponent(session.access_token)}`
+    : null;
+
+  const { error } = useEventSource(baseUrl, handleEventSourceMessage);
+
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
       const decoded = jwt.decode(session.access_token) as DecodedToken;
       if (decoded?.enemy_guild) {
         setEnemyGuildId(decoded.enemy_guild);
       }
-
-      const token = encodeURIComponent(session.access_token);
-      const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${token}`;
-      const eventSource = new EventSource(sseUrl);
-
-      eventSource.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        if (data?.enemy) {
-          setGuildData((prevGuildData) => [...(prevGuildData || []), ...data.enemy]);
-        }
-        setIsLoading(false);
-      };
-
-      eventSource.onerror = function (event) {
-        console.error('Error occurred:', event);
-        eventSource.close();
-      };
-
-      return () => {
-        eventSource.close();
-      };
     }
   }, [session, status]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao conectar ao servidor. Por favor, tente novamente mais tarde.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [error, toast]);
 
   const handleSelectMember = (member: GuildMemberResponse) => {
     if (!selectedMembers.some((m) => m.Name === member.Name)) {
@@ -68,7 +78,7 @@ const Settings = () => {
     if (!selectedType || !enemyGuildId) {
       toast({
         title: 'Erro',
-        description: 'Selecione um tipo de personagem e certifique-se de que a guilda foi carregada.',
+        description: 'Por favor, selecione um tipo de personagem e certifique-se de que a guilda foi carregada.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -124,9 +134,9 @@ const Settings = () => {
                       Selecione o membro
                     </MenuButton>
                     <MenuList bg="black" color="white" maxH="400px" overflowY="auto">
-                      {guildData.map((member, index) => (
+                      {guildData.map((member) => (
                         <MenuItem
-                          key={index}
+                          key={member.Name}
                           bg="black"
                           color="white"
                           _hover={{ bg: "gray.700" }}
@@ -191,8 +201,8 @@ const Settings = () => {
                     Personagens Selecionados:
                   </Heading>
                   <List spacing={3} mt={2}>
-                    {selectedMembers.map((member, index) => (
-                      <ListItem key={index}>
+                    {selectedMembers.map((member) => (
+                      <ListItem key={member.Name}>
                         <Flex align="center" justify="space-between">
                           <Flex align="center">
                             <Image
@@ -204,7 +214,7 @@ const Settings = () => {
                             <Text color="white">{member.Name}</Text>
                           </Flex>
                           <IconButton
-                            aria-label="Remove"
+                            aria-label="Remover"
                             color="blue"
                             icon={<DeleteIcon />}
                             size="sm"
