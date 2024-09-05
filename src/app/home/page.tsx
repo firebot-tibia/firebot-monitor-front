@@ -1,23 +1,75 @@
 'use client';
 
-import { useEffect, useState, useMemo, FC, useRef } from 'react';
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Image, Input, Flex, Spinner, Grid, useToast } from '@chakra-ui/react';
+import { useEffect, useState, useMemo, FC, useCallback } from 'react';
+import { Box, Spinner, Grid, useToast, Text } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { useSession } from 'next-auth/react';
-import { vocationIcons, characterTypeIcons } from '../../constant/character';
 import { copyExivas } from '../../shared/utils/options-utils';
 import { upsertPlayer } from '../../services/guilds';
-import jwt from 'jsonwebtoken';
-import axios from 'axios';
+import { useEventSource } from '../../hooks/useEvent';
+import { GuildMemberTable } from '../../components/guild';
+import { UpsertPlayerInput } from '../../shared/interface/character-upsert.interface';
 
-const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean, guildId: string }> = ({ columns, data, isLoading, guildId }) => {
+const Home: FC = () => {
+  const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
+  const { data: session, status } = useSession();
   const toast = useToast();
 
+  const handleMessage = useCallback((data: any) => {
+    if (data?.enemy) {
+      setGuildData(data.enemy);
+    }
+    setIsLoading(false);
+  }, []);
+
+  const { error } = useEventSource(
+    status === 'authenticated' ? `https://api.firebot.run/subscription/enemy/` : null,
+    handleMessage
+  );
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: 'Erro de conexão',
+        description: `Houve um problema ao conectar com o servidor: ${error.message}. Tentando reconectar...`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [error, toast]);
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.access_token) {
+      try {
+        const decoded = JSON.parse(atob(session.access_token.split('.')[1]));
+        if (decoded?.enemy_guild) {
+          setEnemyGuildId(decoded.enemy_guild);
+        }
+      } catch (error) {
+        console.error('Error decoding access token:', error);
+      }
+    }
+  }, [status, session, toast]);
+
   const handleLocalChange = async (member: GuildMemberResponse, newLocal: string) => {
+    if (!enemyGuildId) {
+      toast({
+        title: 'Erro',
+        description: 'ID da guilda inimiga não disponível.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
-      const playerData = {
-        guild_id: guildId,
+      const playerData: UpsertPlayerInput = {
+        guild_id: enemyGuildId,
         kind: member.Kind,
         name: member.Name,
         status: member.Status,
@@ -25,190 +77,64 @@ const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoadin
       };
 
       await upsertPlayer(playerData);
-
-      toast({
-        title: 'Sucesso',
-        description: `Local do Exiva atualizado para ${member.Name}.`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
     } catch (error) {
-      toast({
-        title: 'Erro',
-        description: `Falha ao atualizar o local do Exiva para ${member.Name}.`,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      console.error('Failed to update player:', error);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, member: GuildMemberResponse) => {
-    if (e.key === 'Enter') {
-      handleLocalChange(member, e.currentTarget.value);
-    }
-  };
-
-  return (
-    <Box p={2} w="full" bg="blackAlpha.800" rounded="lg" mb={4}>
-      <Table variant="simple" size="xs" colorScheme="blackAlpha">
-        <Thead bg="black">
-          <Tr>
-            {columns.map((column, index) => (
-              <Th key={index} textAlign="center" borderBottomColor="gray.600" py={1} fontSize="xs">{column}</Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {isLoading ? (
-            <Tr>
-              <Td colSpan={columns.length} textAlign="center">
-                <Spinner size="sm" />
-              </Td>
-            </Tr>
-          ) : (
-            data?.map((member, index) => (
-              <Tr 
-                key={index} 
-                bg={index % 2 === 0 ? 'gray.900' : 'gray.800'} 
-                _hover={{ bg: 'gray.700', cursor: 'pointer' }} 
-                onClick={() => copyExivas(member, toast)}
-              >
-                <Td textAlign="center" fontWeight="bold" py={1} fontSize="xs">{index + 1}</Td>
-                <Td textAlign="center" py={1} fontSize="xs">{member.Level}</Td>
-                <Td textAlign="center" py={1} fontSize="xs">
-                  <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="16px" mx="auto" />
-                </Td>
-                <Td textAlign="left" maxW="xs" isTruncated py={1} fontSize="xs">{member.Name}</Td>
-                <Td textAlign="center" py={1} fontSize="xs">
-                  <Flex alignItems="center" justifyContent="center">
-                    <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="14px" mr={2} />
-                    {member.Kind || 'n/a'}
-                  </Flex>
-                </Td>
-                <Td textAlign="center" py={1} fontSize="xs">
-                  <Input
-                    defaultValue={member.Local || ''}
-                    bg="gray.800"
-                    p={1}
-                    rounded="md"
-                    color="white"
-                    textAlign="center"
-                    w="full"
-                    minW="90px"
-                    fontSize="xs"
-                    onBlur={(e) => handleLocalChange(member, e.target.value)}
-                    onKeyPress={(e) => handleKeyPress(e, member)}
-                  />
-                </Td>
-                <Td textAlign="center" fontFamily="monospace" py={1} fontSize="xs">{(member.TimeOnline)}</Td>
-              </Tr>
-            ))
-          )}
-        </Tbody>
-      </Table>
-    </Box>
-  );
-};
-
-const Home: FC = () => {
-  const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
-  const { data: session, status, update } = useSession();
-  const eventSourceRef = useRef<EventSource | null>(null);
-
-  const refreshToken = async () => {
-    try {
-      const response = await axios.post('/api/auth/refresh', {
-        refresh_token: session?.refresh_token,
-      });
-      const { access_token, refresh_token } = response.data;
-      await update({ access_token, refresh_token });
-      return access_token;
-    } catch (error) {
-      console.error('Failed to refresh token:', error);
-      throw error;
-    }
-  };
-
-  const setupEventSource = (token: string) => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
-
-    const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${encodeURIComponent(token)}`;
-    eventSourceRef.current = new EventSource(sseUrl);
-
-    eventSourceRef.current.onmessage = function (event) {
-      const data = JSON.parse(event.data);
-      if (data?.enemy) {
-        setGuildData(data.enemy);
-      }
-      setIsLoading(false);
-    };
-
-    eventSourceRef.current.onerror = async function (event) {
-      console.error('Error occurred:', event);
-      eventSourceRef.current?.close();
-
-      try {
-        const newToken = await refreshToken();
-        setupEventSource(newToken);
-      } catch (refreshError) {
-        console.error('Failed to refresh token and reconnect:', refreshError);
-        // Handle failed refresh (e.g., redirect to login)
-      }
-    };
-  };
-
-  useEffect(() => {
-    if (status === 'authenticated' && session?.access_token) {
-      const decoded = jwt.decode(session.access_token) as { enemy_guild: string } | null;
-      if (decoded?.enemy_guild) {
-        setEnemyGuildId(decoded.enemy_guild);
-      }
-
-      setupEventSource(session.access_token);
-
-      return () => {
-        eventSourceRef.current?.close();
-      };
-    }
-  }, [status, session]);
-
-  const columns = useMemo(() => ['#', 'Lvl', 'Voc', 'Nome', 'Tipo', 'Exiva', 'Tempo'], []);
+  const handleMemberClick = useCallback((member: GuildMemberResponse) => {
+    copyExivas(member, toast);
+  }, [toast]);
 
   const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados'], []);
 
+  if (status === 'loading') {
+    return (
+      <DashboardLayout>
+        <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+          <Spinner size="xl" />
+        </Box>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
-      <Grid w="full">
-        {types.map((type) => {
-          const filteredData = guildData.filter(member => member.Kind === type);
-          if (filteredData.length > 0) {
-            return (
-              <Box key={type} w="full">
-                <TableWidget
-                  columns={columns}
-                  data={filteredData}
-                  isLoading={isLoading}
-                  guildId={enemyGuildId || ''}
-                />
-              </Box>
-            );
-          }
-          return null;
-        })}
-        <Box w="full">
-          <TableWidget
-            columns={columns}
-            data={guildData.filter(member => !member.Kind)}
-            isLoading={isLoading}
-            guildId={enemyGuildId || ''}
-          />
-        </Box>
+      <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4} w="full">
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+            <Spinner size="xl" />
+          </Box>
+        ) : guildData.length === 0 ? (
+          <Box textAlign="center" fontSize="xl" mt={10}>
+            <Text>Nenhum dado de guilda disponível.</Text>
+          </Box>
+        ) : (
+          types.map((type) => {
+            const filteredData = guildData.filter(member => member.Kind === type);
+            if (filteredData.length > 0) {
+              return (
+                <Box key={type} w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
+                  <GuildMemberTable
+                    data={filteredData}
+                    onLocalChange={handleLocalChange}
+                    onMemberClick={handleMemberClick}
+                  />
+                </Box>
+              );
+            }
+            return null;
+          })
+        )}
+        {!isLoading && guildData.length > 0 && (
+          <Box w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
+            <GuildMemberTable
+              data={guildData.filter(member => !member.Kind)}
+              onLocalChange={handleLocalChange}
+              onMemberClick={handleMemberClick}
+            />
+          </Box>
+        )}
       </Grid>
     </DashboardLayout>
   );

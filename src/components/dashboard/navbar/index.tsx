@@ -1,12 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Box, VStack, Button, Icon, Text, Center, Image } from '@chakra-ui/react';
-import { FaHome } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { Box, VStack, Button, Icon, Text, Center, Image, Tooltip, Flex } from '@chakra-ui/react';
+import { FaHome, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Link from 'next/link';
 import { config } from '../../../config/config';
 
-const Navbar = () => {
+interface NavbarProps {
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ isOpen, onToggle }) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -22,37 +27,49 @@ const Navbar = () => {
       as="nav"
       bg="black"
       color="white"
-      w={{ base: "full", md: 60 }}
+      w={isOpen ? "240px" : "60px"}
       pos="fixed"
-      top="50px" 
+      top="50px"
       h="calc(100% - 50px)"
       display="flex"
       flexDirection="column"
       alignItems="center"
-      py={8}
+      py={4}
+      transition="width 0.3s ease"
     >
-      <Center mb={8}>
-        <Image 
-          src="assets/logo.png" 
-          alt="" 
-          maxW="25%"
-        />
-      </Center>
-      <VStack spacing={4}>
+      <Flex justifyContent="flex-end" w="full" px={2} mb={4}>
+        <Button
+          size="sm"
+          onClick={onToggle}
+          bg="gray.700"
+          _hover={{ bg: "gray.600" }}
+          borderRadius="full"
+        >
+          <Icon as={isOpen ? FaChevronLeft : FaChevronRight} />
+        </Button>
+      </Flex>
+      {isOpen && (
+        <Center mb={8}>
+          <Image src="assets/logo.png" alt="Logo" maxW="30%" />
+        </Center>
+      )}
+      <VStack spacing={4} align="stretch" width="full">
         {config.nameNavigation.map((navItem, index) => (
-          <Link key={index} href={navItem.href} passHref>
-            <Button
-              as="div"
-              variant="ghost"
-              color="white"
-              leftIcon={<Icon as={navItem.icon || FaHome} />}
-              w="full"
-              justifyContent="start"
-              pl={6}
-            >
-              {navItem.name}
-            </Button>
-          </Link>
+          <Tooltip key={index} label={navItem.name} placement="right" isDisabled={isOpen}>
+            <Link href={navItem.href} passHref>
+              <Button
+                as="div"
+                variant="ghost"
+                color="white"
+                leftIcon={<Icon as={navItem.icon || FaHome} />}
+                w="full"
+                justifyContent={isOpen ? "center" : "center"}
+                px={2}
+              >
+                {isOpen && <Text textAlign="center">{navItem.name}</Text>}
+              </Button>
+            </Link>
+          </Tooltip>
         ))}
       </VStack>
     </Box>

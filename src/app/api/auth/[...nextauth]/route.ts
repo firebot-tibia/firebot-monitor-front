@@ -4,32 +4,7 @@ import NextAuth from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { DecodedToken } from '../../../../shared/dtos/auth.dto';
-
-const refreshToken = async (token: JWT): Promise<JWT> => {
-  try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {}, {
-      headers: {
-        'x-refresh-token': token.refresh_token,
-      },
-    });
-
-    const { access_token, refresh_token } = response.data;
-    const decoded = jwt.decode(access_token) as DecodedToken;
-
-    return {
-      ...token,
-      access_token,
-      refresh_token,
-      exp: decoded.exp,
-    };
-  } catch (error) {
-    console.error('Erro ao atualizar o token:', error);
-    return {
-      ...token,
-      error: 'RefreshAccessTokenError',
-    };
-  }
-};
+import { refreshAccessToken } from '../../../../services/auth';
 
 const providers = [
   CredentialsProvider({
@@ -76,8 +51,7 @@ const handler = NextAuth({
       const isExpired = token.exp && nowUnix >= token.exp;
 
       if (isExpired) {
-        console.log('Token expirado, tentando refresh...');
-        return refreshToken(token);
+        return refreshAccessToken(token);
       }
 
       return token;
