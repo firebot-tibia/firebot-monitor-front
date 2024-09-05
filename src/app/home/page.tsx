@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, FC } from 'react';
+import { useEffect, useState, useMemo, FC, useRef } from 'react';
 import { Box, Table, Thead, Tbody, Tr, Th, Td, Image, Input, Flex, Spinner, Grid, useToast } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
@@ -9,6 +9,7 @@ import { vocationIcons, characterTypeIcons } from '../../constant/character';
 import { copyExivas } from '../../shared/utils/options-utils';
 import { upsertPlayer } from '../../services/guilds';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
 
 const TableWidget: FC<{ columns: string[], data: GuildMemberResponse[], isLoading: boolean, guildId: string }> = ({ columns, data, isLoading, guildId }) => {
   const toast = useToast();
@@ -115,7 +116,52 @@ const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  const refreshToken = async () => {
+    try {
+      const response = await axios.post('/api/auth/refresh', {
+        refresh_token: session?.refresh_token,
+      });
+      const { access_token, refresh_token } = response.data;
+      await update({ access_token, refresh_token });
+      return access_token;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      throw error;
+    }
+  };
+
+  const setupEventSource = (token: string) => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${encodeURIComponent(token)}`;
+    eventSourceRef.current = new EventSource(sseUrl);
+
+    eventSourceRef.current.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      if (data?.enemy) {
+        setGuildData(data.enemy);
+      }
+      setIsLoading(false);
+    };
+
+    eventSourceRef.current.onerror = async function (event) {
+      console.error('Error occurred:', event);
+      eventSourceRef.current?.close();
+
+      try {
+        const newToken = await refreshToken();
+        setupEventSource(newToken);
+      } catch (refreshError) {
+        console.error('Failed to refresh token and reconnect:', refreshError);
+        // Handle failed refresh (e.g., redirect to login)
+      }
+    };
+  };
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -124,25 +170,10 @@ const Home: FC = () => {
         setEnemyGuildId(decoded.enemy_guild);
       }
 
-      const token = encodeURIComponent(session.access_token);
-      const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${token}`;
-      const eventSource = new EventSource(sseUrl);
-
-      eventSource.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        if (data?.enemy) {
-          setGuildData(data.enemy);
-        }
-        setIsLoading(false);
-      };
-
-      eventSource.onerror = function (event) {
-        console.error('Erro ocorreu:', event);
-        eventSource.close();
-      };
+      setupEventSource(session.access_token);
 
       return () => {
-        eventSource.close();
+        eventSourceRef.current?.close();
       };
     }
   }, [status, session]);

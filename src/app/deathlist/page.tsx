@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef, useReducer } from 'react';
 import { Box, Button, Text, Spinner, useToast, Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { useSession } from 'next-auth/react';
+import axios from 'axios';
 
 interface Death {
   id: string;
@@ -56,10 +57,11 @@ const DeathTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -72,54 +74,83 @@ const DeathTable = () => {
     }
   }, []);
 
+  const refreshToken = async () => {
+    try {
+      const response = await axios.post('/api/auth/refresh', {
+        refresh_token: session?.refresh_token,
+      });
+      const { access_token, refresh_token } = response.data;
+      await update({ access_token, refresh_token });
+      return access_token;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      throw error;
+    }
+  };
+
+  const setupEventSource = (token: string) => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${encodeURIComponent(token)}`;
+    eventSourceRef.current = new EventSource(sseUrl);
+
+    eventSourceRef.current.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      if (data?.death) {
+        const newDeath: Death = {
+          ...data.death,
+          id: `${data.death.name}-${Date.now()}`,
+          date: new Date(data.death.date || Date.now()),
+          death: data.death.text,
+        };
+        dispatch({ type: 'ADD_DEATH', payload: newDeath });
+
+        toast({
+          title: 'Nova morte registrada!',
+          description: `${newDeath.name} morreu para ${newDeath.death}.`,
+          status: 'info',
+          duration: 5000,
+          isClosable: true,
+        });
+
+        if (audioEnabled && audioRef.current) {
+          audioRef.current.play().catch((error) => {
+            console.log('Erro ao tocar o áudio:', error);
+          });
+        }
+
+        if (!selectedDeath) {
+          setSelectedDeath(newDeath);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    eventSourceRef.current.onerror = async function (event) {
+      console.error('Erro ao se conectar ao SSE:', event);
+      eventSourceRef.current?.close();
+
+      try {
+        const newToken = await refreshToken();
+        setupEventSource(newToken);
+      } catch (refreshError) {
+        console.error('Failed to refresh token and reconnect:', refreshError);
+        // Handle failed refresh (e.g., redirect to login)
+      }
+    };
+  };
+
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
-      const token = encodeURIComponent(session.access_token);
-      const sseUrl = `https://api.firebot.run/subscription/enemy/?token=${token}`;
-      const eventSource = new EventSource(sseUrl);
-
-      eventSource.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        if (data?.death) {
-          const newDeath: Death = {
-            ...data.death,
-            id: `${data.death.name}-${Date.now()}`,
-            date: new Date(data.death.date || Date.now()),
-            death: data.death.text,
-          };
-          dispatch({ type: 'ADD_DEATH', payload: newDeath });
-
-          toast({
-            title: 'Nova morte registrada!',
-            description: `${newDeath.name} morreu para ${newDeath.death}.`,
-            status: 'info',
-            duration: 5000,
-            isClosable: true,
-          });
-
-          if (audioEnabled && audioRef.current) {
-            audioRef.current.play().catch((error) => {
-              console.log('Erro ao tocar o áudio:', error);
-            });
-          }
-
-          if (!selectedDeath) {
-            setSelectedDeath(newDeath);
-          }
-        }
-        setIsLoading(false);
-      };
-
-      eventSource.onerror = function (event) {
-        console.error('Erro ao se conectar ao SSE:', event);
-        eventSource.close();
-      };
+      setupEventSource(session.access_token);
 
       return () => {
-        eventSource.close();
+        eventSourceRef.current?.close();
       };
     }
-  }, [status, session, selectedDeath, toast, audioEnabled]);
+  }, [status, session]);
 
   const recentDeaths = useMemo(() => {
     const now = Date.now();

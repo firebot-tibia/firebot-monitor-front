@@ -1,9 +1,35 @@
 import axios from 'axios';
-import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { JWT } from 'next-auth/jwt';
-import { DecodedToken } from '../../../../shared/dtos/auth.dto';
 import jwt from 'jsonwebtoken';
+import NextAuth from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { DecodedToken } from '../../../../shared/dtos/auth.dto';
+
+const refreshToken = async (token: JWT): Promise<JWT> => {
+  try {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {}, {
+      headers: {
+        'x-refresh-token': token.refresh_token,
+      },
+    });
+
+    const { access_token, refresh_token } = response.data;
+    const decoded = jwt.decode(access_token) as DecodedToken;
+
+    return {
+      ...token,
+      access_token,
+      refresh_token,
+      exp: decoded.exp,
+    };
+  } catch (error) {
+    console.error('Erro ao atualizar o token:', error);
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError',
+    };
+  }
+};
 
 const providers = [
   CredentialsProvider({
@@ -46,24 +72,12 @@ const handler = NextAuth({
         token.exp = decoded.exp;
       }
 
-      const isExpired = token.exp && Date.now() >= token.exp * 1000;
+      const nowUnix = Math.floor(Date.now() / 1000);
+      const isExpired = token.exp && nowUnix >= token.exp;
 
       if (isExpired) {
         console.log('Token expirado, tentando refresh...');
-        try {
-          const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {}, {
-            headers: {
-              'x-refresh-token': token.refresh_token,
-            },
-          });
-
-          token.access_token = data.access_token;
-          const decoded = jwt.decode(data.access_token) as DecodedToken;
-          token.exp = decoded.exp;
-        } catch (error) {
-          console.error('Erro ao tentar atualizar o token:', error);
-          return Promise.reject(error);
-        }
+        return refreshToken(token);
       }
 
       return token;
@@ -72,6 +86,7 @@ const handler = NextAuth({
     async session({ session, token }: { session: any, token: JWT }) {
       session.access_token = token.access_token;
       session.refresh_token = token.refresh_token;
+      session.error = token.error;
       session.user = {
         ally_guild: token.ally_guild,
         email: token.email,
