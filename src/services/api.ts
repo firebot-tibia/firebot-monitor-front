@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -40,10 +40,10 @@ api.interceptors.response.use(
           originalRequest.headers['x-refresh-token'] = `${session.refresh_token}`;
           return api(originalRequest); 
         } else {
-          window.location.href = '/';
+          signIn();
         }
       } catch (err) {
-        window.location.href = '/';
+        signIn();
         return Promise.reject(err);
       }
     }

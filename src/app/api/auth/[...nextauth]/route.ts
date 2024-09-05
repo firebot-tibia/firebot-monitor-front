@@ -49,6 +49,7 @@ const handler = NextAuth({
       const isExpired = token.exp && Date.now() >= token.exp * 1000;
 
       if (isExpired) {
+        console.log('Token expirado, tentando refresh...');
         try {
           const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {}, {
             headers: {
@@ -60,12 +61,14 @@ const handler = NextAuth({
           const decoded = jwt.decode(data.access_token) as DecodedToken;
           token.exp = decoded.exp;
         } catch (error) {
-          console.error('Token refresh error:', error);
+          console.error('Erro ao tentar atualizar o token:', error);
+          return Promise.reject(error);
         }
       }
 
       return token;
     },
+
     async session({ session, token }: { session: any, token: JWT }) {
       session.access_token = token.access_token;
       session.refresh_token = token.refresh_token;

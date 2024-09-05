@@ -65,7 +65,6 @@ const GuildStats = () => {
 
       const response = await getExperienceList(query);
 
-      // Atualize o acesso ao array players
       const experienceField =
         filter === 'Diaria' ? 'experience_one_day' :
         filter === 'Semanal' ? 'experience_one_week' : 'experience_one_month';
@@ -82,8 +81,8 @@ const GuildStats = () => {
         setNoDataFound(true);
       } else {
         setGuildData(formattedData);
-        setTotalRecords(response.exp_list.Count.records);  // Atualize a chave de contagem
-        setTotalPages(response.exp_list.Count.pages);      // Atualize a chave de páginas
+        setTotalRecords(response.exp_list.Count.records);  
+        setTotalPages(response.exp_list.Count.pages);     
         setNoDataFound(false);
         setTotalExp(
           filter === 'Diaria' ? response.exp_list.total_exp_yesterday :
