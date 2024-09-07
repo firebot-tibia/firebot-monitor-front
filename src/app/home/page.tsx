@@ -88,6 +88,11 @@ const Home: FC = () => {
 
   const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados'], []);
 
+  const unclassifiedMembers = useMemo(() => 
+    guildData.filter(member => !member.Kind || !types.includes(member.Kind)),
+    [guildData, types]
+  );
+
   if (status === 'loading') {
     return (
       <DashboardLayout>
@@ -110,30 +115,33 @@ const Home: FC = () => {
             <Text>Nenhum dado de guilda disponível.</Text>
           </Box>
         ) : (
-          types.map((type) => {
-            const filteredData = guildData.filter(member => member.Kind === type);
-            if (filteredData.length > 0) {
-              return (
-                <Box key={type} w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
-                  <GuildMemberTable
-                    data={filteredData}
-                    onLocalChange={handleLocalChange}
-                    onMemberClick={handleMemberClick}
-                  />
-                </Box>
-              );
-            }
-            return null;
-          })
-        )}
-        {!isLoading && guildData.length > 0 && (
-          <Box w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
-            <GuildMemberTable
-              data={guildData.filter(member => !member.Kind)}
-              onLocalChange={handleLocalChange}
-              onMemberClick={handleMemberClick}
-            />
-          </Box>
+          <>
+            {types.map((type) => {
+              const filteredData = guildData.filter(member => member.Kind === type);
+              if (filteredData.length > 0) {
+                return (
+                  <Box key={type} w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
+                    <GuildMemberTable
+                      data={filteredData}
+                      onLocalChange={handleLocalChange}
+                      onMemberClick={handleMemberClick}
+                    />
+                  </Box>
+                );
+              }
+              return null;
+            })}
+            {unclassifiedMembers.length > 0 && (
+              <Box w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
+                <Text mb={2} fontWeight="bold">Personagens Sem Classificação</Text>
+                <GuildMemberTable
+                  data={unclassifiedMembers}
+                  onLocalChange={handleLocalChange}
+                  onMemberClick={handleMemberClick}
+                />
+              </Box>
+            )}
+          </>
         )}
       </Grid>
     </DashboardLayout>

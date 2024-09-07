@@ -2,22 +2,8 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
-  Box,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Spinner,
-  useToast,
-  Input,
-  VStack,
-  HStack,
-  Text,
-  Heading,
-  Alert as ChakraAlert,
-  AlertIcon,
+  Box, Table, Thead, Tbody, Tr, Th, Td, Spinner, useToast,
+  Input, VStack, HStack, Text, Heading, Alert as ChakraAlert, AlertIcon,
 } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { useSession } from 'next-auth/react';
@@ -27,14 +13,7 @@ import { GuildMemberResponse } from '../../shared/interface/guild-member.interfa
 const CharacterTable: React.FC<{ characters: GuildMemberResponse[], isLoading: boolean }> = ({ characters, isLoading }) => {
   const columns = useMemo(() => ['#', 'Level', 'Nome', 'Vocação', 'Tipo', 'Status', 'Tempo Online'], []);
   
-  if (isLoading) {
-    return (
-      <Box textAlign="center" py={4}>
-        <Spinner size="xl" />
-      </Box>
-    );
-  }
-
+  if (isLoading) return <Box textAlign="center" py={4}><Spinner size="xl" /></Box>;
   if (characters.length === 0) {
     return (
       <ChakraAlert status="info">
@@ -78,10 +57,12 @@ const Alert: React.FC = () => {
   const toast = useToast();
   const { status } = useSession();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastAlertTimeRef = useRef<number>(0);
 
-  const checkThreshold = useCallback((currentCharacters: GuildMemberResponse[]) => {
+  const checkThreshold = useCallback((newCharacters: GuildMemberResponse[]) => {
+    console.log('Checking threshold...', { newCharacters, threshold, timeWindow });
     const now = Date.now();
-    const recentCharacters = currentCharacters.filter(
+    const recentCharacters = newCharacters.filter(
       char => char.OnlineStatus && 
       (now - new Date(char.TimeOnline).getTime()) / 1000 <= timeWindow
     );
@@ -89,8 +70,18 @@ const Alert: React.FC = () => {
     const recentBombas = recentCharacters.filter(char => char.Kind === 'bomba');
     const recentMakers = recentCharacters.filter(char => char.Kind === 'maker');
     
+    console.log('Recent characters:', { recentBombas, recentMakers });
+
     if (recentBombas.length >= threshold || recentMakers.length >= threshold) {
+      if (now - lastAlertTimeRef.current < 10000) {
+        console.log('Alert cooldown active, skipping...');
+        return;
+      }
+      lastAlertTimeRef.current = now;
+
       const msg = `Alerta! ${recentBombas.length} bombas e ${recentMakers.length} makers logaram nos últimos ${timeWindow} segundos!`;
+      console.log('Triggering alert:', msg);
+
       toast({
         title: 'Alerta de Personagens!',
         description: msg,
@@ -105,12 +96,13 @@ const Alert: React.FC = () => {
       }
 
       if (audioRef.current) {
-        audioRef.current.play().catch(console.error);
+        audioRef.current.play().catch(error => console.error('Failed to play audio:', error));
       }
     }
   }, [threshold, timeWindow, toast]);
 
   const handleMessage = useCallback((data: any) => {
+    console.log('Received message:', data);
     if (data?.enemy) {
       const newCharacters = data.enemy
         .filter((member: GuildMemberResponse) => member.Kind === 'bomba' || member.Kind === 'maker');
@@ -118,11 +110,18 @@ const Alert: React.FC = () => {
       setCharacters(prevCharacters => {
         const updatedCharacters = newCharacters.map((newChar: GuildMemberResponse) => {
           const existingChar = prevCharacters.find(c => c.Name === newChar.Name);
-          if (existingChar && !existingChar.OnlineStatus && newChar.OnlineStatus) {
-            checkThreshold([...prevCharacters, newChar]);
+          if (!existingChar || (existingChar && !existingChar.OnlineStatus && newChar.OnlineStatus)) {
+            console.log('New character logged in:', newChar);
+            return { ...newChar, isNew: true };
           }
           return newChar;
         });
+
+        const newLogins = updatedCharacters.filter(char => char.isNew);
+        if (newLogins.length > 0) {
+          console.log('Detected new logins:', newLogins);
+          checkThreshold(newLogins);
+        }
 
         return updatedCharacters;
       });
@@ -138,6 +137,7 @@ const Alert: React.FC = () => {
 
   useEffect(() => {
     if (error) {
+      console.error('Connection error:', error);
       toast({
         title: 'Erro de conexão',
         description: `Houve um problema ao conectar com o servidor: ${error.message}. Tentando reconectar...`,
@@ -148,10 +148,16 @@ const Alert: React.FC = () => {
     }
   }, [error, toast]);
 
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load();
+    }
+  }, []);
+
   return (
     <DashboardLayout>
       <Box p={4}>
-        <audio ref={audioRef} src="/assets/alert_sound.mp3" />
+        <audio ref={audioRef} src="/assets/notification_sound.mp3" />
         <VStack spacing={4} align="stretch">
           <Heading as="h1" size="xl">Monitoramento de Bombas e Makers</Heading>
           <HStack>
@@ -176,14 +182,7 @@ const Alert: React.FC = () => {
           </HStack>
           <Box>
             <Heading as="h2" size="lg" mb={2}>Lista de Personagens</Heading>
-            {!isLoading && characters.length === 0 ? (
-              <ChakraAlert status="info">
-                <AlertIcon />
-                Nenhum personagem está sendo monitorado no momento.
-              </ChakraAlert>
-            ) : (
-              <CharacterTable characters={characters} isLoading={isLoading} />
-            )}
+            <CharacterTable characters={characters} isLoading={isLoading} />
           </Box>
         </VStack>
       </Box>
