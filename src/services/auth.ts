@@ -2,25 +2,15 @@ import axios from 'axios';
 
 export const refreshAccessToken = async (session: any) => {
   try {
+    console.log('Refreshing access token...');
     const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {}, {
       headers: {
-        'x-refresh-token': session.refresh_token,
+        'x-refresh-token': session?.refresh_token,
       },
     });
-
-    const { access_token, refresh_token } = response.data;
-
-    return {
-      ...session,
-      access_token,
-      refresh_token,
-      error: null,
-    };
+    console.log('Session:', response.data);
+    return response.data;
   } catch (error) {
-    console.error('Error refreshing access token:', error);
-    return {
-      ...session,
-      error: 'RefreshAccessTokenError',
-    };
+    console.log('Failed to refresh access token:', error);
   }
 };

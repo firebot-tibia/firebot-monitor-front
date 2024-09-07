@@ -12,19 +12,22 @@ import {
   Text,
   Icon,
   Image,
+  useToast,
+  VStack,
+  Heading,
 } from '@chakra-ui/react';
 import { FaUserCircle, FaSignInAlt } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
-import { useToastContext } from '../../context/toast/toast-context';
 import { AuthSchema, AuthDTO } from './schema/auth.schema';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const { showToast } = useToastContext();
+  const toast = useToast();
   const { status } = useSession();
   const router = useRouter();
 
@@ -39,10 +42,21 @@ const LoginPage = () => {
       return;
     }
 
+    setErrors({});
+
     try {
       const data: AuthDTO = { email, password };
-      await signIn('credentials', { email: data.email, password: data.password });
-      showToast({
+      const signInResult = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        throw new Error(signInResult.error);
+      }
+
+      toast({
         title: 'Logado com sucesso',
         description: 'Você será redirecionado para a página principal.',
         status: 'success',
@@ -51,7 +65,7 @@ const LoginPage = () => {
       });
     } catch (error) {
       setErrors({ password: 'E-mail ou senha incorretos' });
-      showToast({
+      toast({
         title: 'Login incorreto',
         description: 'Verifique seu e-mail ou senha e tente novamente.',
         status: 'error',
@@ -62,32 +76,31 @@ const LoginPage = () => {
   };
 
   useEffect(() => {
-    if(status === 'authenticated') {
+    if (status === 'authenticated') {
       router.push('/home');
     }
-  }, [status, router])
+  }, [status, router]);
 
   return (
-    <Flex minH="100vh" bg="gray.900">
+    <Flex minH="100vh" direction={{ base: "column", md: "row" }} bg="gray.900">
       <Flex
         flex="1"
         justify="center"
-        direction="column"
+        align="center"
         bg="white"
         color="gray.900"
+        p={8}
+        display={{ base: "none", md: "flex" }}
       >
-        <Center>
-          <Image src="assets/logo.png" alt="" maxW="20%" />
-        </Center>
-      </Flex>
-
-      <Flex flex="1" justify="center" direction="column" bg="white" color="gray.900">
-        <Text fontSize="3xl" fontWeight="bold" mb={2}>
-          Bem vindo,
-        </Text>
-        <Text fontSize="xl">
-          realize o <Text as="span" color="red.600">login</Text> ao lado!
-        </Text>
+        <VStack spacing={4}>
+          <Image src="assets/logo.png" alt="" maxW={{ base: "20%", md: "20%", lg: "20%" }} />
+          <Heading as="h2" size="xl" textAlign="center">
+            Bem vindo,
+          </Heading>
+          <Text fontSize="xl" textAlign="center">
+            realize o <Text as="span" color="red.600">login</Text> ao lado!
+          </Text>
+        </VStack>
       </Flex>
 
       <Flex
@@ -97,7 +110,7 @@ const LoginPage = () => {
         direction="column"
         justify="center"
         align="center"
-        p={10}
+        p={{ base: 4, md: 10 }}
       >
         <Center mb={8}>
           <Icon as={FaUserCircle} w={12} h={12} color="red.600" />

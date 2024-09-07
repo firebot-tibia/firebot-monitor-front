@@ -6,17 +6,21 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const excludedRoutes = ['/login', '/refresh'];
+
 api.interceptors.request.use(
   async (config) => {
+    if (excludedRoutes.some(route => config.url?.includes(route))) {
+      return config;
+    }
+
     const session = await getSession();
-    if (session && session.access_token) {
+    if (session?.access_token) {
       config.headers['Authorization'] = `Bearer ${session.access_token}`;
-      config.headers['x-refresh-token'] = `${session.refresh_token}`;
     } else {
       window.location.href = '/';
       return Promise.reject('No access token found');
     }
-
     return config;
   },
   (error) => {
@@ -29,15 +33,18 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    if (excludedRoutes.some(route => originalRequest.url?.includes(route))) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
         const session = await getSession();
 
-        if (session && session.access_token) {
+        if (session?.access_token) {
           originalRequest.headers['Authorization'] = `Bearer ${session.access_token}`;
-          originalRequest.headers['x-refresh-token'] = `${session.refresh_token}`;
           return api(originalRequest); 
         } else {
           signIn();

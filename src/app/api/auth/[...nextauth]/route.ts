@@ -15,6 +15,7 @@ const providers = [
           email: credentials?.email,
           password: credentials?.password,
         });
+        
         if (data) {
           return {
             ...data,
@@ -25,7 +26,7 @@ const providers = [
         return null;
       } catch (error) {
         console.error('Login error:', error);
-        return null;
+        throw new Error('Invalid email or password');
       }
     },
     credentials: {
