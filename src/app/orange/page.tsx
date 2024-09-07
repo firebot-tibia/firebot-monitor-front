@@ -1,10 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Button, Input, VStack, Text, Heading, HStack } from '@chakra-ui/react';
+import { Box, Button, Input, VStack, Text, Heading, HStack, useToast } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
 import { getOrangeList } from '../../services/guilds';
-import { useToastContext } from '../../context/toast/toast-context';
 
 const Orange = () => {
   const [characterName, setCharacterName] = useState('');
@@ -13,12 +12,12 @@ const Orange = () => {
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { showToast } = useToastContext();
+  const toast = useToast();
 
   const handleSubmit = async () => {
     if (characterName.trim() === '') {
       setError('Nome do personagem necessário');
-      showToast({
+      toast({
         title: 'Nome do personagem necessário.',
         description: 'Por favor, insira o nome do personagem.',
         status: 'warning',
@@ -34,7 +33,7 @@ const Orange = () => {
     try {
       const data = await getOrangeList(characterName.trim());
       setCharacterList(data);
-      showToast({
+      toast({
         title: 'Sucesso!',
         description: `Lista de Orange para ${characterName} carregada.`,
         status: 'success',
@@ -43,7 +42,7 @@ const Orange = () => {
       });
     } catch (error) {
       setError('Failed to fetch the orange list. Please try again.');
-      showToast({
+      toast({
         title: 'Erro ao carregar lista.',
         description: 'Falha ao carregar a lista de Orange. Tente novamente.',
         status: 'error',
