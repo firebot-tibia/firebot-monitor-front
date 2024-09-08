@@ -35,7 +35,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isOpen, onToggle }) => {
       flexDirection="column"
       alignItems="center"
       py={4}
-      transition="width 0.1s ease"
     >
       {isOpen && (
         <Center mb={8}>
