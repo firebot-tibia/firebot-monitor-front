@@ -14,19 +14,9 @@ export const config = {
       href: '/home',
     },
     {
-      name: 'Monitorar Masslog',
-      href: '/alert',
-      icon: HiOutlineBellAlert,
-    },
-    {
       name: 'Monitorar Mortes',
       href: '/deathlist',
       icon: GiDeathZone,
-    },
-    {
-      name: 'Monitorar Oranges',
-      href: '/orange',
-      icon: IoSkullOutline,
     },
     {
       name: 'Estatísticas da Guild',
@@ -35,7 +25,7 @@ export const config = {
     },
     {
       name: 'Mapa Exiva',
-      href: '/enemy',
+      href: '/tibia-map',
       icon: FaMap,
     },
     {

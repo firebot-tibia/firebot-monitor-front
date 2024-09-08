@@ -1,27 +1,31 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, FC, useCallback, useRef } from 'react';
-import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, HStack, Tooltip, Icon, Switch, Badge, SimpleGrid } from '@chakra-ui/react';
-import { InfoIcon } from '@chakra-ui/icons';
+import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, SimpleGrid, Button, Collapse } from '@chakra-ui/react';
+import { InfoIcon, ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { useSession } from 'next-auth/react';
-import { copyExivas } from '../../shared/utils/options-utils';
 import { upsertPlayer } from '../../services/guilds';
 import { useEventSource } from '../../hooks/useEvent';
 import { GuildMemberTable } from '../../components/guild';
 import { UpsertPlayerInput } from '../../shared/interface/character-upsert.interface';
 import { ClassificationModal } from '../../components/guild/classification-modal';
+import { CharacterDetailsModal } from '../../components/guild/character-details-modal';
+import { BombaMakerMonitor } from '../../components/guild/character-monitor';
 
 const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<GuildMemberResponse | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<GuildMemberResponse | null>(null);
   const [isVerticalLayout, setIsVerticalLayout] = useState(false);
   const [gridColumns, setGridColumns] = useState(3);
   const [visibleListsCount, setVisibleListsCount] = useState(0);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [showMonitor, setShowMonitor] = useState(false);
+  const { isOpen: isClassificationOpen, onOpen: onClassificationOpen, onClose: onClassificationClose } = useDisclosure();
+  const { isOpen: isDetailsOpen, onOpen: onDetailsOpen, onClose: onDetailsClose } = useDisclosure();
   const { data: session, status } = useSession();
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -99,14 +103,15 @@ const Home: FC = () => {
   };
 
   const handleMemberClick = useCallback((member: GuildMemberResponse) => {
-    copyExivas(member, toast);
-  }, [toast]);
+    setSelectedCharacter(member);
+    onDetailsOpen();
+  }, [onDetailsOpen]);
 
   const handleOpenClassification = useCallback((member: GuildMemberResponse, event: React.MouseEvent) => {
     event.preventDefault();
     setSelectedMember(member);
-    onOpen();
-  }, [onOpen]);
+    onClassificationOpen();
+  }, [onClassificationOpen]);
 
   const handleClassify = useCallback(async (type: string) => {
     if (!enemyGuildId || !selectedMember) return;
@@ -133,7 +138,7 @@ const Home: FC = () => {
         duration: 3000,
         isClosable: true,
       });
-      onClose();
+      onClassificationClose();
     } catch (error) {
       console.error('Failed to classify player:', error);
       toast({
@@ -144,7 +149,45 @@ const Home: FC = () => {
         isClosable: true,
       });
     }
-  }, [enemyGuildId, selectedMember, toast, onClose]);
+  }, [enemyGuildId, selectedMember, toast, onClassificationClose]);
+
+  const handleExivaChange = useCallback(async (newExiva: string) => {
+    if (!enemyGuildId || !selectedCharacter) return;
+
+    try {
+      const playerData: UpsertPlayerInput = {
+        guild_id: enemyGuildId,
+        kind: selectedCharacter.Kind,
+        name: selectedCharacter.Name,
+        status: selectedCharacter.Status,
+        local: newExiva,
+      };
+
+      await upsertPlayer(playerData);
+      setGuildData(prevData =>
+        prevData.map(m =>
+          m.Name === selectedCharacter.Name ? { ...m, Local: newExiva } : m
+        )
+      );
+      setSelectedCharacter(prev => prev ? { ...prev, Local: newExiva } : null);
+      toast({
+        title: 'Sucesso',
+        description: `Exiva de ${selectedCharacter.Name} atualizado.`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Failed to update player exiva:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar o exiva do jogador.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }, [enemyGuildId, selectedCharacter, toast]);
 
   const handleLayoutToggle = () => {
     setIsVerticalLayout(!isVerticalLayout);
@@ -194,9 +237,9 @@ const Home: FC = () => {
                   <InfoIcon mr={2} />
                   <Text fontWeight="bold">Instruções de Uso:</Text>
                 </Flex>
-                <Text mt={2} fontSize="sm">• Clique esquerdo: copiar exiva</Text>
+                <Text mt={2} fontSize="sm">• Clique esquerdo: ver detalhes do personagem</Text>
                 <Text fontSize="sm">• Clique direito: classificar personagem</Text>
-                <Text fontSize="sm">• Campo Exiva: atualizar localização</Text>
+                <Text fontSize="sm">• Campo Local: atualizar localização</Text>
               </Box>
               <Flex align="center">
                 <Text mr={2}>Layout:</Text>
@@ -208,6 +251,31 @@ const Home: FC = () => {
                 <Text ml={2}>{isVerticalLayout ? 'Vertical' : 'Horizontal'}</Text>
               </Flex>
             </Flex>
+          </Box>
+
+          <Box>
+            <Button
+              onClick={() => setShowMonitor(!showMonitor)}
+              rightIcon={showMonitor ? <ChevronUpIcon /> : <ChevronDownIcon />}
+              mb={4}
+            >
+              {showMonitor ? 'Esconder' : 'Mostrar'} Monitor de Bombas e Makers
+            </Button>
+            <Collapse in={showMonitor} animateOpacity>
+              <Box
+                p="40px"
+                color="white"
+                mt="4"
+                bg="gray.700"
+                rounded="md"
+                shadow="md"
+              >
+                <BombaMakerMonitor
+                  characters={guildData}
+                  isLoading={isLoading}
+                />
+              </Box>
+            </Collapse>
           </Box>
 
           <SimpleGrid 
@@ -264,10 +332,16 @@ const Home: FC = () => {
           </SimpleGrid>
         </VStack>
         <ClassificationModal
-          isOpen={isOpen}
-          onClose={onClose}
+          isOpen={isClassificationOpen}
+          onClose={onClassificationClose}
           onClassify={handleClassify}
           selectedMember={selectedMember?.Name || null}
+        />
+        <CharacterDetailsModal
+          isOpen={isDetailsOpen}
+          onClose={onDetailsClose}
+          character={selectedCharacter}
+          onExivaChange={handleExivaChange}
         />
       </div>
     </DashboardLayout>

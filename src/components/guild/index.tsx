@@ -46,8 +46,8 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
               <HStack spacing={2}>
                 <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="16px" />
                 <Text fontSize="sm" fontWeight="bold">{member.Name}</Text>
+                <Text fontSize="xs">Lvl {member.Level}</Text>
               </HStack>
-              <Text fontSize="xs">Lvl {member.Level}</Text>
             </HStack>
             <HStack mt={1} spacing={2} justify="space-between">
               <HStack spacing={2}>
@@ -61,7 +61,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             {showExivaInput && (
               <Input
                 mt={1}
-                placeholder="Exiva"
+                placeholder="Local"
                 defaultValue={member.Local || ''}
                 bg="gray.800"
                 size="xs"
@@ -79,12 +79,10 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
     <Table variant="simple" size="sm">
       <Thead>
         <Tr>
-          <Th fontSize="xs">Nome</Th>
-          <Th fontSize="xs">Nível</Th>
-          <Th fontSize="xs">Vocação</Th>
+          <Th fontSize="xs">Personagem</Th>
           <Th fontSize="xs">Tipo</Th>
           <Th fontSize="xs">Tempo Online</Th>
-          {showExivaInput && <Th fontSize="xs">Exiva</Th>}
+          {showExivaInput && <Th fontSize="xs">Local</Th>}
         </Tr>
       </Thead>
       <Tbody>
@@ -96,21 +94,24 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             cursor="pointer"
             _hover={{ bg: 'gray.700' }}
           >
-            <Td fontSize="sm">{member.Name}</Td>
-            <Td fontSize="xs">{member.Level}</Td>
             <Td>
-              <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="16px" display="inline-block" mr={1} />
-              <Text fontSize="xs" display="inline">{member.Vocation}</Text>
+              <HStack spacing={2}>
+                <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="16px" />
+                <Text fontSize="sm">{member.Name}</Text>
+                <Text fontSize="xs">Lvl {member.Level}</Text>
+              </HStack>
             </Td>
             <Td>
-              <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="14px" display="inline-block" mr={1} />
-              <Text fontSize="xs" display="inline">{member.Kind || 'n/a'}</Text>
+              <HStack spacing={2}>
+                <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="14px" />
+                <Text fontSize="xs">{member.Kind || 'n/a'}</Text>
+              </HStack>
             </Td>
             <Td fontSize="xs" color={member.TimeOnline === '00:00:00' ? 'red.300' : 'inherit'}>{member.TimeOnline}</Td>
             {showExivaInput && (
               <Td>
                 <Input
-                  placeholder="Exiva"
+                  placeholder="Local"
                   defaultValue={member.Local || ''}
                   bg="gray.800"
                   size="sm"
