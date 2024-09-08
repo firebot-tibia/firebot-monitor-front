@@ -4,10 +4,8 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
   VStack,
   HStack,
   Text,
@@ -20,6 +18,7 @@ import {
   IconButton,
   useToast,
   Tooltip,
+  Select,
 } from '@chakra-ui/react';
 import { CopyIcon } from '@chakra-ui/icons';
 import { vocationIcons } from '../../../constant/character';
@@ -32,6 +31,7 @@ interface CharacterDetailsModalProps {
   onClose: () => void;
   character: GuildMemberResponse | null;
   onExivaChange: (newExiva: string) => void;
+  onClassify: (type: string) => void;
 }
 
 export const CharacterDetailsModal: FC<CharacterDetailsModalProps> = ({
@@ -39,8 +39,10 @@ export const CharacterDetailsModal: FC<CharacterDetailsModalProps> = ({
   onClose,
   character,
   onExivaChange,
+  onClassify,
 }) => {
   const toast = useToast();
+  const classificationTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'unclassified'];
 
   if (!character) return null;
 
@@ -79,6 +81,20 @@ export const CharacterDetailsModal: FC<CharacterDetailsModalProps> = ({
               </Stat>
             </StatGroup>
             <HStack align="center">
+              <Text fontWeight="bold">Classificação</Text>
+              <Select
+                value={character.Kind || 'unclassified'}
+                onChange={(e) => onClassify(e.target.value)}
+                bg="gray.700"
+              >
+                {classificationTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </Select>
+            </HStack>
+            <HStack align="center">
               <Text fontWeight="bold">Exiva</Text>
               <Tooltip label="Copiar exiva">
                 <IconButton
@@ -97,11 +113,6 @@ export const CharacterDetailsModal: FC<CharacterDetailsModalProps> = ({
             <OrangeList characterName={character.Name} />
           </VStack>
         </ModalBody>
-        <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={onClose}>
-            Fechar
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

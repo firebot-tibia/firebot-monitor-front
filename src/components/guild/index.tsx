@@ -7,7 +7,6 @@ interface GuildMemberTableProps {
   data: GuildMemberResponse[];
   onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
   onMemberClick: (member: GuildMemberResponse) => void;
-  onClassify: (member: GuildMemberResponse, event: React.MouseEvent) => void;
   layout: 'horizontal' | 'vertical';
   showExivaInput: boolean;
 }
@@ -16,19 +15,9 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   data, 
   onLocalChange, 
   onMemberClick, 
-  onClassify,
   layout,
   showExivaInput
 }) => {
-  const handleRowClick = (member: GuildMemberResponse, event: React.MouseEvent) => {
-    if (event.type === 'contextmenu') {
-      event.preventDefault();
-      onClassify(member, event);
-    } else {
-      onMemberClick(member);
-    }
-  };
-
   if (layout === 'vertical') {
     return (
       <VStack spacing={2} align="stretch">
@@ -38,8 +27,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             bg={index % 2 === 0 ? 'gray.700' : 'gray.600'} 
             p={2}
             rounded="md"
-            onClick={(e) => handleRowClick(member, e)}
-            onContextMenu={(e) => handleRowClick(member, e)}
+            onClick={() => onMemberClick(member)}
             cursor="pointer"
           >
             <HStack spacing={2} justify="space-between">
@@ -89,8 +77,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         {data.map((member) => (
           <Tr 
             key={member.Name}
-            onClick={(e) => handleRowClick(member, e)}
-            onContextMenu={(e) => handleRowClick(member, e)}
+            onClick={() => onMemberClick(member)}
             cursor="pointer"
             _hover={{ bg: 'gray.700' }}
           >

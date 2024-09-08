@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, FC, useCallback, useRef } from 'react';
-import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, SimpleGrid, Button, Collapse } from '@chakra-ui/react';
+import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, Button, Collapse, Grid } from '@chakra-ui/react';
 import { InfoIcon, ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
@@ -10,7 +10,6 @@ import { upsertPlayer } from '../../services/guilds';
 import { useEventSource } from '../../hooks/useEvent';
 import { GuildMemberTable } from '../../components/guild';
 import { UpsertPlayerInput } from '../../shared/interface/character-upsert.interface';
-import { ClassificationModal } from '../../components/guild/classification-modal';
 import { CharacterDetailsModal } from '../../components/guild/character-details-modal';
 import { BombaMakerMonitor } from '../../components/guild/character-monitor';
 
@@ -18,13 +17,9 @@ const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
-  const [selectedMember, setSelectedMember] = useState<GuildMemberResponse | null>(null);
   const [selectedCharacter, setSelectedCharacter] = useState<GuildMemberResponse | null>(null);
   const [isVerticalLayout, setIsVerticalLayout] = useState(false);
-  const [gridColumns, setGridColumns] = useState(3);
-  const [visibleListsCount, setVisibleListsCount] = useState(0);
   const [showMonitor, setShowMonitor] = useState(false);
-  const { isOpen: isClassificationOpen, onOpen: onClassificationOpen, onClose: onClassificationClose } = useDisclosure();
   const { isOpen: isDetailsOpen, onOpen: onDetailsOpen, onClose: onDetailsClose } = useDisclosure();
   const { data: session, status } = useSession();
   const toast = useToast();
@@ -61,24 +56,6 @@ const Home: FC = () => {
     }
   }, [status, session]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth;
-      if (width < 768) {
-        setGridColumns(1);
-      } else if (width < 1200) {
-        setGridColumns(2);
-      } else {
-        setGridColumns(3);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    handleResize(); 
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   const handleLocalChange = async (member: GuildMemberResponse, newLocal: string) => {
     if (!enemyGuildId) return;
 
@@ -107,38 +84,32 @@ const Home: FC = () => {
     onDetailsOpen();
   }, [onDetailsOpen]);
 
-  const handleOpenClassification = useCallback((member: GuildMemberResponse, event: React.MouseEvent) => {
-    event.preventDefault();
-    setSelectedMember(member);
-    onClassificationOpen();
-  }, [onClassificationOpen]);
-
   const handleClassify = useCallback(async (type: string) => {
-    if (!enemyGuildId || !selectedMember) return;
+    if (!enemyGuildId || !selectedCharacter) return;
 
     try {
       const playerData: UpsertPlayerInput = {
         guild_id: enemyGuildId,
         kind: type,
-        name: selectedMember.Name,
-        status: selectedMember.Status,
-        local: selectedMember.Local || '',
+        name: selectedCharacter.Name,
+        status: selectedCharacter.Status,
+        local: selectedCharacter.Local || '',
       };
 
       await upsertPlayer(playerData);
       setGuildData(prevData => 
         prevData.map(m => 
-          m.Name === selectedMember.Name ? { ...m, Kind: type } : m
+          m.Name === selectedCharacter.Name ? { ...m, Kind: type } : m
         )
       );
+      setSelectedCharacter(prev => prev ? { ...prev, Kind: type } : null);
       toast({
         title: 'Sucesso',
-        description: `${selectedMember.Name} classificado como ${type}.`,
+        description: `${selectedCharacter.Name} classificado como ${type}.`,
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      onClassificationClose();
     } catch (error) {
       console.error('Failed to classify player:', error);
       toast({
@@ -149,7 +120,7 @@ const Home: FC = () => {
         isClosable: true,
       });
     }
-  }, [enemyGuildId, selectedMember, toast, onClassificationClose]);
+  }, [enemyGuildId, selectedCharacter, toast]);
 
   const handleExivaChange = useCallback(async (newExiva: string) => {
     if (!enemyGuildId || !selectedCharacter) return;
@@ -204,17 +175,8 @@ const Home: FC = () => {
       type: 'unclassified',
       data: guildData.filter(member => !member.Kind || !types.includes(member.Kind))
     };
-    const filteredGroups = [...grouped, unclassified].filter(group => group.data.length > 0);
-    setVisibleListsCount(filteredGroups.length);
-    return filteredGroups;
+    return [...grouped, unclassified].filter(group => group.data.length > 0);
   }, [guildData, types]);
-
-  const getGridColumns = useCallback(() => {
-    if (isVerticalLayout) return 1;
-    if (visibleListsCount === 1) return 1;
-    if (visibleListsCount === 2) return 2;
-    return gridColumns;
-  }, [isVerticalLayout, visibleListsCount, gridColumns]);
 
   if (status === 'loading') {
     return (
@@ -237,8 +199,7 @@ const Home: FC = () => {
                   <InfoIcon mr={2} />
                   <Text fontWeight="bold">Instruções de Uso:</Text>
                 </Flex>
-                <Text mt={2} fontSize="sm">• Clique esquerdo: ver detalhes do personagem</Text>
-                <Text fontSize="sm">• Clique direito: classificar personagem</Text>
+                <Text mt={2} fontSize="sm">• Clique: ver detalhes do personagem</Text>
                 <Text fontSize="sm">• Campo Local: atualizar localização</Text>
               </Box>
               <Flex align="center">
@@ -278,21 +239,17 @@ const Home: FC = () => {
             </Collapse>
           </Box>
 
-          <SimpleGrid 
-            columns={getGridColumns()}
-            spacing={4}
-            width="100%"
-          >
-            {isLoading ? (
-              <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
-                <Spinner size="xl" />
-              </Box>
-            ) : guildData.length === 0 ? (
-              <Box textAlign="center" fontSize="xl" mt={10}>
-                <Text>Nenhum dado de guilda disponível.</Text>
-              </Box>
-            ) : (
-              groupedData.map(({ type, data }) => (
+          {isLoading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+              <Spinner size="xl" />
+            </Box>
+          ) : guildData.length === 0 ? (
+            <Box textAlign="center" fontSize="xl" mt={10}>
+              <Text>Nenhum dado de guilda disponível.</Text>
+            </Box>
+          ) : (
+            <Grid templateColumns={isVerticalLayout ? "1fr" : "repeat(2, 1fr)"} gap={4}>
+              {groupedData.map(({ type, data }) => (
                 <Box 
                   key={type} 
                   bg="gray.800" 
@@ -303,7 +260,6 @@ const Home: FC = () => {
                   minHeight="300px"
                   display="flex"
                   flexDirection="column"
-                  width={visibleListsCount === 1 ? "100%" : "auto"}
                 >
                   <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
                     <Text mb={2} fontWeight="bold" cursor="help">
@@ -321,27 +277,21 @@ const Home: FC = () => {
                       data={data}
                       onLocalChange={handleLocalChange}
                       onMemberClick={handleMemberClick}
-                      onClassify={handleOpenClassification}
                       layout={isVerticalLayout ? 'vertical' : 'horizontal'}
                       showExivaInput={type !== 'exitados'}
                     />
                   </Box>
                 </Box>
-              ))
-            )}
-          </SimpleGrid>
+              ))}
+            </Grid>
+          )}
         </VStack>
-        <ClassificationModal
-          isOpen={isClassificationOpen}
-          onClose={onClassificationClose}
-          onClassify={handleClassify}
-          selectedMember={selectedMember?.Name || null}
-        />
         <CharacterDetailsModal
           isOpen={isDetailsOpen}
           onClose={onDetailsClose}
           character={selectedCharacter}
           onExivaChange={handleExivaChange}
+          onClassify={handleClassify}
         />
       </div>
     </DashboardLayout>
