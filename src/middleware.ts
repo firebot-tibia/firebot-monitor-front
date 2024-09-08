@@ -5,7 +5,6 @@ export const config = {
     '/home/:path*', 
     '/soulwar/:path*', 
     '/orange/:path*', 
-    '/settings/:path*', 
     '/enemy/:path*', 
     '/deathlist/:path*', 
     '/guild-stats/:path*'

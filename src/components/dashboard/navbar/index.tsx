@@ -11,7 +11,7 @@ interface NavbarProps {
   onToggle: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ isOpen, onToggle }) => {
+export const Navbar: React.FC<NavbarProps> = ({ isOpen, onToggle }) => {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -35,19 +35,8 @@ const Navbar: React.FC<NavbarProps> = ({ isOpen, onToggle }) => {
       flexDirection="column"
       alignItems="center"
       py={4}
-      transition="width 0.3s ease"
+      transition="width 0.1s ease"
     >
-      <Flex justifyContent="flex-end" w="full" px={2} mb={4}>
-        <Button
-          size="sm"
-          onClick={onToggle}
-          bg="gray.700"
-          _hover={{ bg: "gray.600" }}
-          borderRadius="full"
-        >
-          <Icon as={isOpen ? FaChevronLeft : FaChevronRight} />
-        </Button>
-      </Flex>
       {isOpen && (
         <Center mb={8}>
           <Image src="assets/logo.png" alt="Logo" maxW="30%" />
@@ -75,5 +64,3 @@ const Navbar: React.FC<NavbarProps> = ({ isOpen, onToggle }) => {
     </Box>
   );
 };
-
-export default Navbar;

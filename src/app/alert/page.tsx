@@ -9,8 +9,16 @@ import DashboardLayout from '../../components/dashboard';
 import { useSession } from 'next-auth/react';
 import { useEventSource } from '../../hooks/useEvent';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
+import { Pagination } from '../../components/pagination';
 
-const CharacterTable: React.FC<{ characters: GuildMemberResponse[], isLoading: boolean }> = ({ characters, isLoading }) => {
+const ITEMS_PER_PAGE = 15;
+
+const CharacterTable: React.FC<{ 
+  characters: GuildMemberResponse[], 
+  isLoading: boolean,
+  currentPage: number,
+  itemsPerPage: number
+}> = ({ characters, isLoading, currentPage, itemsPerPage }) => {
   const columns = useMemo(() => ['#', 'Level', 'Nome', 'Vocação', 'Tipo', 'Status', 'Tempo Online'], []);
   
   if (isLoading) return <Box textAlign="center" py={4}><Spinner size="xl" /></Box>;
@@ -23,6 +31,9 @@ const CharacterTable: React.FC<{ characters: GuildMemberResponse[], isLoading: b
     );
   }
 
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCharacters = characters.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <Table variant="simple" size="sm">
       <Thead>
@@ -33,9 +44,9 @@ const CharacterTable: React.FC<{ characters: GuildMemberResponse[], isLoading: b
         </Tr>
       </Thead>
       <Tbody>
-        {characters.map((character, index) => (
+        {paginatedCharacters.map((character, index) => (
           <Tr key={character.Name}>
-            <Td>{index + 1}</Td>
+            <Td>{startIndex + index + 1}</Td>
             <Td>{character.Level}</Td>
             <Td>{character.Name}</Td>
             <Td>{character.Vocation}</Td>
@@ -54,10 +65,13 @@ const Alert: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [threshold, setThreshold] = useState(3);
   const [timeWindow, setTimeWindow] = useState(120);
+  const [currentPage, setCurrentPage] = useState(1);
   const toast = useToast();
   const { status } = useSession();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastAlertTimeRef = useRef<number>(0);
+
+  const totalPages = Math.ceil(characters.length / ITEMS_PER_PAGE);
 
   const checkThreshold = useCallback((newCharacters: GuildMemberResponse[]) => {
     console.log('Checking threshold...', { newCharacters, threshold, timeWindow });
@@ -117,7 +131,7 @@ const Alert: React.FC = () => {
           return newChar;
         });
 
-        const newLogins = updatedCharacters.filter(char => char.isNew);
+        const newLogins = updatedCharacters.filter((char: any) => char.isNew);
         if (newLogins.length > 0) {
           console.log('Detected new logins:', newLogins);
           checkThreshold(newLogins);
@@ -138,21 +152,18 @@ const Alert: React.FC = () => {
   useEffect(() => {
     if (error) {
       console.error('Connection error:', error);
-      toast({
-        title: 'Erro de conexão',
-        description: `Houve um problema ao conectar com o servidor: ${error.message}. Tentando reconectar...`,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
     }
-  }, [error, toast]);
+  }, [error]);
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.load();
     }
   }, []);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <DashboardLayout>
@@ -182,7 +193,19 @@ const Alert: React.FC = () => {
           </HStack>
           <Box>
             <Heading as="h2" size="lg" mb={2}>Lista de Personagens</Heading>
-            <CharacterTable characters={characters} isLoading={isLoading} />
+            <CharacterTable 
+              characters={characters} 
+              isLoading={isLoading} 
+              currentPage={currentPage}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
+            {!isLoading && characters.length > 0 && (
+              <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                onPageChange={handlePageChange} 
+              />
+            )}
           </Box>
         </VStack>
       </Box>

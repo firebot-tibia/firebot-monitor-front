@@ -14,19 +14,9 @@ export const config = {
       href: '/home',
     },
     {
-      name: 'Mapa Exiva',
-      href: '/enemy',
-      icon: FaMap,
-    },
-    {
       name: 'Monitorar Masslog',
       href: '/alert',
       icon: HiOutlineBellAlert,
-    },
-    {
-      name: 'Monitorar Oranges',
-      href: '/orange',
-      icon: IoSkullOutline,
     },
     {
       name: 'Monitorar Mortes',
@@ -34,14 +24,24 @@ export const config = {
       icon: GiDeathZone,
     },
     {
-      name: 'Soulwar',
-      href: '/soulwar',
-      icon: GiStarfighter,
+      name: 'Monitorar Oranges',
+      href: '/orange',
+      icon: IoSkullOutline,
     },
     {
       name: 'Estatísticas da Guild',
       href: '/guild-stats',
       icon: IoMdStats,
+    },
+    {
+      name: 'Mapa Exiva',
+      href: '/enemy',
+      icon: FaMap,
+    },
+    {
+      name: 'Soulwar',
+      href: '/soulwar',
+      icon: GiStarfighter,
     },
     {
       name: 'Global Wars',

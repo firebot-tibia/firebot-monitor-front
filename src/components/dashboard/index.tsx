@@ -1,18 +1,23 @@
 'use client';
 
-import { Box, Flex, useDisclosure } from "@chakra-ui/react";
-import { FC } from "react";
-import Navbar from "./navbar";
+import { Box, Flex } from "@chakra-ui/react";
+import { FC, useState } from "react";
 import Topbar from "./topbar";
+import { Navbar } from "./navbar";
 
 const DashboardLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: true });
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+  };
 
   return (
     <Flex direction="column" h="100vh">
-      <Topbar />
+      <Topbar onToggleMenu={handleToggle} />
+      
       <Flex flex="1">
-        <Navbar isOpen={isOpen} onToggle={onToggle} />
+        <Navbar isOpen={isOpen} onToggle={handleToggle} />
         <Box 
           ml={isOpen ? "240px" : "60px"} 
           p={12} 

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useMemo, FC, useCallback } from 'react';
-import { Box, Spinner, Grid, useToast, Text } from '@chakra-ui/react';
+import React, { useEffect, useState, useMemo, FC, useCallback, useRef } from 'react';
+import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, HStack, Tooltip, Icon, Switch, Badge, SimpleGrid } from '@chakra-ui/react';
+import { InfoIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { useSession } from 'next-auth/react';
@@ -10,13 +11,19 @@ import { upsertPlayer } from '../../services/guilds';
 import { useEventSource } from '../../hooks/useEvent';
 import { GuildMemberTable } from '../../components/guild';
 import { UpsertPlayerInput } from '../../shared/interface/character-upsert.interface';
+import { ClassificationModal } from '../../components/guild/classification-modal';
 
 const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
+  const [selectedMember, setSelectedMember] = useState<GuildMemberResponse | null>(null);
+  const [isVerticalLayout, setIsVerticalLayout] = useState(false);
+  const [gridColumns, setGridColumns] = useState(3);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { data: session, status } = useSession();
   const toast = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMessage = useCallback((data: any) => {
     if (data?.enemy) {
@@ -32,13 +39,7 @@ const Home: FC = () => {
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: 'Erro de conexão',
-        description: `Houve um problema ao conectar com o servidor: ${error.message}. Tentando reconectar...`,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      console.error('Connection error:', error);
     }
   }, [error, toast]);
 
@@ -53,19 +54,28 @@ const Home: FC = () => {
         console.error('Error decoding access token:', error);
       }
     }
-  }, [status, session, toast]);
+  }, [status, session]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setGridColumns(1);
+      } else if (width < 1200) {
+        setGridColumns(2);
+      } else {
+        setGridColumns(3);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); 
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLocalChange = async (member: GuildMemberResponse, newLocal: string) => {
-    if (!enemyGuildId) {
-      toast({
-        title: 'Erro',
-        description: 'ID da guilda inimiga não disponível.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
+    if (!enemyGuildId) return;
 
     try {
       const playerData: UpsertPlayerInput = {
@@ -77,6 +87,11 @@ const Home: FC = () => {
       };
 
       await upsertPlayer(playerData);
+      setGuildData(prevData =>
+        prevData.map(m =>
+          m.Name === member.Name ? { ...m, Local: newLocal } : m
+        )
+      );
     } catch (error) {
       console.error('Failed to update player:', error);
     }
@@ -86,12 +101,67 @@ const Home: FC = () => {
     copyExivas(member, toast);
   }, [toast]);
 
+  const handleOpenClassification = useCallback((member: GuildMemberResponse, event: React.MouseEvent) => {
+    event.preventDefault();
+    setSelectedMember(member);
+    onOpen();
+  }, [onOpen]);
+
+  const handleClassify = useCallback(async (type: string) => {
+    if (!enemyGuildId || !selectedMember) return;
+
+    try {
+      const playerData: UpsertPlayerInput = {
+        guild_id: enemyGuildId,
+        kind: type,
+        name: selectedMember.Name,
+        status: selectedMember.Status,
+        local: selectedMember.Local || '',
+      };
+
+      await upsertPlayer(playerData);
+      setGuildData(prevData => 
+        prevData.map(m => 
+          m.Name === selectedMember.Name ? { ...m, Kind: type } : m
+        )
+      );
+      toast({
+        title: 'Sucesso',
+        description: `${selectedMember.Name} classificado como ${type}.`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+    } catch (error) {
+      console.error('Failed to classify player:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao classificar o jogador.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }, [enemyGuildId, selectedMember, toast, onClose]);
+
+  const handleLayoutToggle = () => {
+    setIsVerticalLayout(!isVerticalLayout);
+  };
+
   const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados'], []);
 
-  const unclassifiedMembers = useMemo(() => 
-    guildData.filter(member => !member.Kind || !types.includes(member.Kind)),
-    [guildData, types]
-  );
+  const groupedData = useMemo(() => {
+    const grouped = types.map(type => ({
+      type,
+      data: guildData.filter(member => member.Kind === type)
+    }));
+    const unclassified = {
+      type: 'unclassified',
+      data: guildData.filter(member => !member.Kind || !types.includes(member.Kind))
+    };
+    return [...grouped, unclassified].filter(group => group.data.length > 0);
+  }, [guildData, types]);
 
   if (status === 'loading') {
     return (
@@ -105,45 +175,90 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout>
-      <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4} w="full">
-        {isLoading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-            <Spinner size="xl" />
+      <div ref={containerRef}>
+        <VStack spacing={6} align="stretch" w="full">
+          <Box bg="blue.700" p={4} rounded="md">
+            <Flex align="center" justify="space-between" flexWrap="wrap">
+              <Box flex="1" minW="200px" mb={{ base: 4, md: 0 }}>
+                <Flex align="center">
+                  <InfoIcon mr={2} />
+                  <Text fontWeight="bold">Instruções de Uso:</Text>
+                </Flex>
+                <Text mt={2} fontSize="sm">• Clique esquerdo: copiar exiva</Text>
+                <Text fontSize="sm">• Clique direito: classificar personagem</Text>
+                <Text fontSize="sm">• Campo Exiva: atualizar localização</Text>
+              </Box>
+              <Flex align="center">
+                <Text mr={2}>Layout:</Text>
+                <Switch
+                  isChecked={!isVerticalLayout}
+                  onChange={handleLayoutToggle}
+                  colorScheme="teal"
+                />
+                <Text ml={2}>{isVerticalLayout ? 'Vertical' : 'Horizontal'}</Text>
+              </Flex>
+            </Flex>
           </Box>
-        ) : guildData.length === 0 ? (
-          <Box textAlign="center" fontSize="xl" mt={10}>
-            <Text>Nenhum dado de guilda disponível.</Text>
-          </Box>
-        ) : (
-          <>
-            {types.map((type) => {
-              const filteredData = guildData.filter(member => member.Kind === type);
-              if (filteredData.length > 0) {
-                return (
-                  <Box key={type} w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
+
+          <SimpleGrid 
+            columns={isVerticalLayout ? 1 : gridColumns}
+            spacing={4}
+            width="100%"
+          >
+            {isLoading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+                <Spinner size="xl" />
+              </Box>
+            ) : guildData.length === 0 ? (
+              <Box textAlign="center" fontSize="xl" mt={10}>
+                <Text>Nenhum dado de guilda disponível.</Text>
+              </Box>
+            ) : (
+              groupedData.map(({ type, data }) => (
+                <Box 
+                  key={type} 
+                  bg="gray.800" 
+                  p={4} 
+                  rounded="lg" 
+                  shadow="md" 
+                  height="100%"
+                  minHeight="300px"
+                  display="flex"
+                  flexDirection="column"
+                >
+                  <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
+                    <Text mb={2} fontWeight="bold" cursor="help">
+                      {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
+                      <Icon as={InfoIcon} ml={1} w={3} h={3} />
+                    </Text>
+                  </Tooltip>
+                  {type === 'exitados' && (
+                    <Badge colorScheme="purple" mb={2}>
+                      Geralmente em Robson Isle, Thais
+                    </Badge>
+                  )}
+                  <Box flexGrow={1} overflowY="auto">
                     <GuildMemberTable
-                      data={filteredData}
+                      data={data}
                       onLocalChange={handleLocalChange}
                       onMemberClick={handleMemberClick}
+                      onClassify={handleOpenClassification}
+                      layout={isVerticalLayout ? 'vertical' : 'horizontal'}
+                      showExivaInput={type !== 'exitados'}
                     />
                   </Box>
-                );
-              }
-              return null;
-            })}
-            {unclassifiedMembers.length > 0 && (
-              <Box w="full" bg="gray.800" p={4} rounded="lg" shadow="md">
-                <Text mb={2} fontWeight="bold">Personagens Sem Classificação</Text>
-                <GuildMemberTable
-                  data={unclassifiedMembers}
-                  onLocalChange={handleLocalChange}
-                  onMemberClick={handleMemberClick}
-                />
-              </Box>
+                </Box>
+              ))
             )}
-          </>
-        )}
-      </Grid>
+          </SimpleGrid>
+        </VStack>
+        <ClassificationModal
+          isOpen={isOpen}
+          onClose={onClose}
+          onClassify={handleClassify}
+          selectedMember={selectedMember?.Name || null}
+        />
+      </div>
     </DashboardLayout>
   );
 };

@@ -1,10 +1,14 @@
 import { Flex, IconButton, Spacer, HStack, Text } from "@chakra-ui/react";
 import { FC } from "react";
-import { FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaCog, FaSignOutAlt, FaBars } from "react-icons/fa";
 import Link from 'next/link';
 import { signOut } from "next-auth/react";
 
-const Topbar: FC = () => {
+interface TopbarProps {
+  onToggleMenu: () => void;
+}
+
+const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
   return (
     <Flex
       as="nav"
@@ -22,21 +26,19 @@ const Topbar: FC = () => {
       width="100%"
       boxShadow="md"
     >
+      <IconButton
+        aria-label="Open menu"
+        icon={<FaBars />}
+        onClick={onToggleMenu}
+        variant="ghost"
+        color="white"
+        fontSize="24px"
+      />
       <Text fontSize="2xl" fontWeight="bold" textAlign="center">
         Enemy Monitor
       </Text>
       <Spacer />
       <HStack spacing={4}>
-        <Link href="/settings" passHref>
-          <IconButton
-            aria-label="Settings"
-            icon={<FaCog />}
-            variant="ghost"
-            color="white"
-            fontSize="20px"
-            as="div"
-          />
-        </Link>
         <Link href="#" passHref>
           <IconButton
             aria-label="Logout"
