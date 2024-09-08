@@ -20,6 +20,7 @@ const Home: FC = () => {
   const [selectedMember, setSelectedMember] = useState<GuildMemberResponse | null>(null);
   const [isVerticalLayout, setIsVerticalLayout] = useState(false);
   const [gridColumns, setGridColumns] = useState(3);
+  const [visibleListsCount, setVisibleListsCount] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data: session, status } = useSession();
   const toast = useToast();
@@ -41,7 +42,7 @@ const Home: FC = () => {
     if (error) {
       console.error('Connection error:', error);
     }
-  }, [error, toast]);
+  }, [error]);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -160,8 +161,17 @@ const Home: FC = () => {
       type: 'unclassified',
       data: guildData.filter(member => !member.Kind || !types.includes(member.Kind))
     };
-    return [...grouped, unclassified].filter(group => group.data.length > 0);
+    const filteredGroups = [...grouped, unclassified].filter(group => group.data.length > 0);
+    setVisibleListsCount(filteredGroups.length);
+    return filteredGroups;
   }, [guildData, types]);
+
+  const getGridColumns = useCallback(() => {
+    if (isVerticalLayout) return 1;
+    if (visibleListsCount === 1) return 1;
+    if (visibleListsCount === 2) return 2;
+    return gridColumns;
+  }, [isVerticalLayout, visibleListsCount, gridColumns]);
 
   if (status === 'loading') {
     return (
@@ -201,7 +211,7 @@ const Home: FC = () => {
           </Box>
 
           <SimpleGrid 
-            columns={isVerticalLayout ? 1 : gridColumns}
+            columns={getGridColumns()}
             spacing={4}
             width="100%"
           >
@@ -225,6 +235,7 @@ const Home: FC = () => {
                   minHeight="300px"
                   display="flex"
                   flexDirection="column"
+                  width={visibleListsCount === 1 ? "100%" : "auto"}
                 >
                   <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
                     <Text mb={2} fontWeight="bold" cursor="help">
