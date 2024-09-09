@@ -58,20 +58,13 @@ export const DeathTable: React.FC = () => {
   const handleNewDeath = useCallback((newDeath: Death) => {
     addDeath(newDeath);
     setIsInitialLoad(false);
-    toast({
-      title: 'Nova morte registrada!',
-      description: `${newDeath.name} morreu para ${newDeath.death}.`,
-      status: 'info',
-      duration: 5000,
-      isClosable: true,
-    });
     if (audioEnabled) {
       playAudio();
     }
     if (!selectedDeath) {
       setSelectedDeath(newDeath);
     }
-  }, [addDeath, audioEnabled, playAudio, selectedDeath, toast]);
+  }, [addDeath, audioEnabled, playAudio, selectedDeath]);
 
   const handleMessage = useCallback((data: any) => {
     if (data?.death) {
