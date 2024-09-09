@@ -48,10 +48,9 @@ export const DeathTable: React.FC = () => {
 
   useEffect(() => {
     setIsClient(true);
-    // Definir um tempo limite para o carregamento inicial
     const timer = setTimeout(() => {
       setIsInitialLoad(false);
-    }, 5000); // 5 segundos de tempo limite
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -158,6 +157,7 @@ export const DeathTable: React.FC = () => {
             <Th>Cidade</Th>
             <Th>Morte</Th>
             <Th>Data</Th>
+            <Th>Tipo</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -173,6 +173,7 @@ export const DeathTable: React.FC = () => {
               <Td>{death.city}</Td>
               <Td>{death.death}</Td>
               <Td>{formatDate(death.date)}</Td>
+              <Td>{death.kind}</Td>
             </Tr>
           ))}
         </Tbody>

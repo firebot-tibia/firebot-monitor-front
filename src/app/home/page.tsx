@@ -151,24 +151,10 @@ const Home: FC = () => {
       );
       setSelectedCharacter(prev => prev ? { ...prev, Local: newExiva } : null);
       console.log(`Updated exiva for ${selectedCharacter.Name} to ${newExiva}`);
-      toast({
-        title: 'Sucesso',
-        description: `Exiva de ${selectedCharacter.Name} atualizado.`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
     } catch (error) {
       console.error('Failed to update player exiva:', error);
-      toast({
-        title: 'Erro',
-        description: 'Falha ao atualizar o exiva do jogador.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
     }
-  }, [enemyGuildId, selectedCharacter, toast]);
+  }, [enemyGuildId, selectedCharacter]);
 
   const handleLayoutToggle = () => {
     setIsVerticalLayout(!isVerticalLayout);
