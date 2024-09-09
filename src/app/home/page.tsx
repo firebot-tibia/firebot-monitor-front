@@ -26,7 +26,9 @@ const Home: FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMessage = useCallback((data: any) => {
+    console.log('Received new data:', JSON.stringify(data, null, 2));
     if (data?.enemy) {
+      console.log('Updating guild data with:', JSON.stringify(data.enemy, null, 2));
       setGuildData(data.enemy);
     }
     setIsLoading(false);
@@ -56,6 +58,10 @@ const Home: FC = () => {
     }
   }, [status, session]);
 
+  useEffect(() => {
+    console.log('Current guild data:', JSON.stringify(guildData, null, 2));
+  }, [guildData]);
+
   const handleLocalChange = async (member: GuildMemberResponse, newLocal: string) => {
     if (!enemyGuildId) return;
 
@@ -74,12 +80,14 @@ const Home: FC = () => {
           m.Name === member.Name ? { ...m, Local: newLocal } : m
         )
       );
+      console.log(`Updated local for ${member.Name} to ${newLocal}`);
     } catch (error) {
       console.error('Failed to update player:', error);
     }
   };
 
   const handleMemberClick = useCallback((member: GuildMemberResponse) => {
+    console.log('Member clicked:', member);
     setSelectedCharacter(member);
     onDetailsOpen();
   }, [onDetailsOpen]);
@@ -103,6 +111,7 @@ const Home: FC = () => {
         )
       );
       setSelectedCharacter(prev => prev ? { ...prev, Kind: type } : null);
+      console.log(`Classified ${selectedCharacter.Name} as ${type}`);
       toast({
         title: 'Sucesso',
         description: `${selectedCharacter.Name} classificado como ${type}.`,
@@ -141,6 +150,7 @@ const Home: FC = () => {
         )
       );
       setSelectedCharacter(prev => prev ? { ...prev, Local: newExiva } : null);
+      console.log(`Updated exiva for ${selectedCharacter.Name} to ${newExiva}`);
       toast({
         title: 'Sucesso',
         description: `Exiva de ${selectedCharacter.Name} atualizado.`,
@@ -162,6 +172,7 @@ const Home: FC = () => {
 
   const handleLayoutToggle = () => {
     setIsVerticalLayout(!isVerticalLayout);
+    console.log(`Layout changed to ${isVerticalLayout ? 'vertical' : 'horizontal'}`);
   };
 
   const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados'], []);

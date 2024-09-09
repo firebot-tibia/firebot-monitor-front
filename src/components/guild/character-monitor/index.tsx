@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Box, Table, Thead, Tbody, Tr, Th, Td, Spinner,
   Input, VStack, HStack, Text, Alert, AlertIcon,
-  useToast,
+  useToast, Button,
 } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 
@@ -18,21 +18,40 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastAlertTimeRef = useRef<number>(0);
 
+  const parseTimeOnline = (timeOnline: string): number => {
+    const parts = timeOnline.split(':').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) {
+      console.error(`Invalid TimeOnline format: ${timeOnline}`);
+      return 0;
+    }
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  };
+
   const checkThreshold = useCallback((newCharacters: GuildMemberResponse[]) => {
+    console.log('Checking threshold...', { newCharacters, threshold, timeWindow });
     const now = Date.now();
-    const recentCharacters = newCharacters.filter(
-      char => char.OnlineStatus && 
-      (now - new Date(char.TimeOnline).getTime()) / 1000 <= timeWindow
-    );
+    const recentCharacters = newCharacters.filter(char => {
+      if (!char.OnlineStatus) return false;
+      console.log(`Character ${char.Name} - TimeOnline: ${char.TimeOnline}, OnlineStatus: ${char.OnlineStatus}`);
+      const timeOnlineSeconds = parseTimeOnline(char.TimeOnline);
+      console.log(`Character ${char.Name} online time: ${timeOnlineSeconds} seconds`);
+      return timeOnlineSeconds <= timeWindow;
+    });
     
     const recentBombas = recentCharacters.filter(char => char.Kind === 'bomba');
     const recentMakers = recentCharacters.filter(char => char.Kind === 'maker');
+    
+    console.log('Recent characters:', { recentBombas, recentMakers });
 
     if (recentBombas.length >= threshold || recentMakers.length >= threshold) {
-      if (now - lastAlertTimeRef.current < 10000) return;
+      if (now - lastAlertTimeRef.current < 60000) { // 1 minute delay
+        console.log('Alert cooldown active, skipping...');
+        return;
+      }
       lastAlertTimeRef.current = now;
 
       const msg = `Alerta! ${recentBombas.length} bombas e ${recentMakers.length} makers logaram nos últimos ${timeWindow} segundos!`;
+      console.log('Triggering alert:', msg);
 
       toast({
         title: 'Alerta de Personagens!',
@@ -44,18 +63,34 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
       
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(msg);
+        utterance.lang = 'pt-BR'; // Set language to Portuguese
+        utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'pt-BR') || null;
         speechSynthesis.speak(utterance);
       }
 
       if (audioRef.current) {
         audioRef.current.play().catch(error => console.error('Failed to play audio:', error));
       }
+    } else {
+      console.log('Threshold not met, no alert triggered.');
     }
   }, [threshold, timeWindow, toast]);
 
   useEffect(() => {
+    console.log('Characters updated, checking threshold...', characters);
     checkThreshold(characters);
   }, [characters, checkThreshold]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load();
+    }
+    
+    speechSynthesis.onvoiceschanged = () => {
+      const voices = speechSynthesis.getVoices();
+      console.log('Available voices:', voices);
+    };
+  }, []);
 
   const filteredCharacters = characters.filter(char => char.Kind === 'bomba' || char.Kind === 'maker');
 
