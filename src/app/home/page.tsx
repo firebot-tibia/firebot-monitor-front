@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, FC, useCallback, useRef } from 'react';
-import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, Button, Collapse, Grid } from '@chakra-ui/react';
+import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, Button, Collapse, Grid, useMediaQuery } from '@chakra-ui/react';
 import { InfoIcon, ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
@@ -24,6 +24,7 @@ const Home: FC = () => {
   const { data: session, status } = useSession();
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)");
 
   const handleMessage = useCallback((data: any) => {
     console.log('Received new data:', JSON.stringify(data, null, 2));
@@ -166,11 +167,13 @@ const Home: FC = () => {
   const groupedData = useMemo(() => {
     const grouped = types.map(type => ({
       type,
-      data: guildData.filter(member => member.Kind === type)
+      data: guildData.filter(member => member.Kind === type),
+      onlineCount: guildData.filter(member => member.Kind === type && member.TimeOnline !== '00:00:00').length
     }));
     const unclassified = {
       type: 'unclassified',
-      data: guildData.filter(member => !member.Kind || !types.includes(member.Kind))
+      data: guildData.filter(member => !member.Kind || !types.includes(member.Kind)),
+      onlineCount: guildData.filter(member => (!member.Kind || !types.includes(member.Kind)) && member.TimeOnline !== '00:00:00').length
     };
     return [...grouped, unclassified].filter(group => group.data.length > 0);
   }, [guildData, types]);
@@ -187,11 +190,11 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout>
-      <div ref={containerRef}>
-        <VStack spacing={6} align="stretch" w="full">
+      <Box ref={containerRef} maxWidth="100vw" overflow="hidden">
+        <VStack spacing={6} align="stretch" style={{ transform: 'scale(0.8)', transformOrigin: 'top left', width: '125%', padding: '2.5%' }}>
           <Box bg="blue.700" p={4} rounded="md">
-            <Flex align="center" justify="space-between" flexWrap="wrap">
-              <Box flex="1" minW="200px" mb={{ base: 4, md: 0 }}>
+            <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'center' }} justify="space-between">
+              <Box mb={{ base: 4, md: 0 }}>
                 <Flex align="center">
                   <InfoIcon mr={2} />
                   <Text fontWeight="bold">Instruções de Uso:</Text>
@@ -199,7 +202,7 @@ const Home: FC = () => {
                 <Text mt={2} fontSize="sm">• Clique: ver detalhes do personagem</Text>
                 <Text fontSize="sm">• Campo Local: atualizar localização</Text>
               </Box>
-              <Flex align="center">
+              <Flex align="center" justifyContent={{ base: 'flex-start', md: 'flex-end' }} mt={{ base: 2, md: 0 }}>
                 <Text mr={2}>Layout:</Text>
                 <Switch
                   isChecked={!isVerticalLayout}
@@ -216,6 +219,7 @@ const Home: FC = () => {
               onClick={() => setShowMonitor(!showMonitor)}
               rightIcon={showMonitor ? <ChevronUpIcon /> : <ChevronDownIcon />}
               mb={4}
+              width="100%"
             >
               {showMonitor ? 'Esconder' : 'Mostrar'} Monitor de Bombas e Makers
             </Button>
@@ -245,8 +249,8 @@ const Home: FC = () => {
               <Text>Nenhum dado de guilda disponível.</Text>
             </Box>
           ) : (
-            <Grid templateColumns={isVerticalLayout ? "1fr" : "repeat(2, 1fr)"} gap={4}>
-              {groupedData.map(({ type, data }) => (
+            <Grid templateColumns={isVerticalLayout || !isLargerThan1280 ? "1fr" : "repeat(2, 1fr)"} gap={4}>
+              {groupedData.map(({ type, data, onlineCount }) => (
                 <Box 
                   key={type} 
                   bg="gray.800" 
@@ -258,12 +262,17 @@ const Home: FC = () => {
                   display="flex"
                   flexDirection="column"
                 >
-                  <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
-                    <Text mb={2} fontWeight="bold" cursor="help">
-                      {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
-                      <Icon as={InfoIcon} ml={1} w={3} h={3} />
-                    </Text>
-                  </Tooltip>
+                  <Flex justify="space-between" align="center" mb={2}>
+                    <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
+                      <Text fontWeight="bold" cursor="help">
+                        {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
+                        <Icon as={InfoIcon} ml={1} w={3} h={3} />
+                      </Text>
+                    </Tooltip>
+                    <Badge colorScheme="green">
+                      {onlineCount} online
+                    </Badge>
+                  </Flex>
                   {type === 'exitados' && (
                     <Badge colorScheme="purple" mb={2}>
                       Geralmente em Robson Isle, Thais
@@ -274,8 +283,9 @@ const Home: FC = () => {
                       data={data}
                       onLocalChange={handleLocalChange}
                       onMemberClick={handleMemberClick}
-                      layout={isVerticalLayout ? 'vertical' : 'horizontal'}
+                      layout={isVerticalLayout || !isLargerThan1280 ? 'vertical' : 'horizontal'}
                       showExivaInput={type !== 'exitados'}
+                      type={type}
                     />
                   </Box>
                 </Box>
@@ -290,7 +300,7 @@ const Home: FC = () => {
           onExivaChange={handleExivaChange}
           onClassify={handleClassify}
         />
-      </div>
+      </Box>
     </DashboardLayout>
   );
 };
