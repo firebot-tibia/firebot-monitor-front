@@ -1,4 +1,3 @@
-import { Worlds } from '../constant/world';
 import { UpsertPlayerInput } from '../shared/interface/character-upsert.interface';
 import { WorldData, WarStatus } from '../shared/interface/war.interface';
 import api from './api';
@@ -41,32 +40,3 @@ export const getExperienceList = async (query: { kind: string; vocation: string;
   }
 };
 
-export const fetchWorldsData = async (): Promise<WorldData[]> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  return Worlds.map(world => ({
-    world,
-    status: ['Dominado', 'Em Guerra', 'Sofrendo ataques'][Math.floor(Math.random() * 3)] as WarStatus,
-    dominantGuild: `Guild${Math.floor(Math.random() * 1000)}`,
-    enemyGuild: Math.random() > 0.5 ? `Enemy${Math.floor(Math.random() * 1000)}` : null,
-    playersOnline: Math.floor(Math.random() * 100),
-    totalPlayersDominated: Math.floor(Math.random() * 100),
-    totalPlayersEnemy: Math.floor(Math.random() * 2000) + 1000,
-    alliance: `Alliance${Math.floor(Math.random() * 10)}`,
-  }));
-};
-
-export const fetchWorldDetails = async (world: string): Promise<WorldData> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  return {
-    world,
-    status: ['Dominado', 'Em Guerra', 'Sofrendo ataques'][Math.floor(Math.random() * 3)] as WarStatus,
-    dominantGuild: `Guild${Math.floor(Math.random() * 1000)}`,
-    enemyGuild: Math.random() > 0.5 ? `Enemy${Math.floor(Math.random() * 1000)}` : null,
-    playersOnline: Math.floor(Math.random() * 100),
-    totalPlayersDominated: Math.floor(Math.random() * 2000) + 1000,
-    totalPlayersEnemy: Math.floor(Math.random() * 100),
-    alliance: `Alliance${Math.floor(Math.random() * 10)}`,
-  };
-};

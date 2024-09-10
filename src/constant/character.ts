@@ -23,4 +23,5 @@ export const characterTypeIcons: { [key: string]: string } = {
     ['bomba']: '/assets/bomb.png',
     ['fracoks']: '/assets/fraco.png',
     ['exitados']: '/assets/exit.jpeg',
+    ['mwall']: '/assets/mwall.gif',
 };

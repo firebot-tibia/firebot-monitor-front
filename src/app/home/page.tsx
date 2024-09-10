@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, FC, useCallback, useRef } from 'react';
-import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, Button, Collapse, Grid, useMediaQuery } from '@chakra-ui/react';
+import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, Button, Collapse, SimpleGrid, useMediaQuery } from '@chakra-ui/react';
 import { InfoIcon, ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
@@ -25,11 +25,10 @@ const Home: FC = () => {
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)");
+  const [isLargerThan1600] = useMediaQuery("(min-width: 1600px)");
 
   const handleMessage = useCallback((data: any) => {
-    console.log('Received new data:', JSON.stringify(data, null, 2));
     if (data?.enemy) {
-      console.log('Updating guild data with:', JSON.stringify(data.enemy, null, 2));
       setGuildData(data.enemy);
     }
     setIsLoading(false);
@@ -59,10 +58,6 @@ const Home: FC = () => {
     }
   }, [status, session]);
 
-  useEffect(() => {
-    console.log('Current guild data:', JSON.stringify(guildData, null, 2));
-  }, [guildData]);
-
   const handleLocalChange = async (member: GuildMemberResponse, newLocal: string) => {
     if (!enemyGuildId) return;
 
@@ -81,14 +76,12 @@ const Home: FC = () => {
           m.Name === member.Name ? { ...m, Local: newLocal } : m
         )
       );
-      console.log(`Updated local for ${member.Name} to ${newLocal}`);
     } catch (error) {
       console.error('Failed to update player:', error);
     }
   };
 
   const handleMemberClick = useCallback((member: GuildMemberResponse) => {
-    console.log('Member clicked:', member);
     setSelectedCharacter(member);
     onDetailsOpen();
   }, [onDetailsOpen]);
@@ -112,7 +105,6 @@ const Home: FC = () => {
         )
       );
       setSelectedCharacter(prev => prev ? { ...prev, Kind: type } : null);
-      console.log(`Classified ${selectedCharacter.Name} as ${type}`);
       toast({
         title: 'Sucesso',
         description: `${selectedCharacter.Name} classificado como ${type}.`,
@@ -151,7 +143,6 @@ const Home: FC = () => {
         )
       );
       setSelectedCharacter(prev => prev ? { ...prev, Local: newExiva } : null);
-      console.log(`Updated exiva for ${selectedCharacter.Name} to ${newExiva}`);
     } catch (error) {
       console.error('Failed to update player exiva:', error);
     }
@@ -159,10 +150,9 @@ const Home: FC = () => {
 
   const handleLayoutToggle = () => {
     setIsVerticalLayout(!isVerticalLayout);
-    console.log(`Layout changed to ${isVerticalLayout ? 'vertical' : 'horizontal'}`);
   };
 
-  const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados'], []);
+  const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'], []);
 
   const groupedData = useMemo(() => {
     const grouped = types.map(type => ({
@@ -190,55 +180,51 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout>
-      <Box ref={containerRef} maxWidth="100vw" overflow="hidden">
-        <VStack spacing={6} align="stretch" style={{ transform: 'scale(0.8)', transformOrigin: 'top left', width: '125%', padding: '2.5%' }}>
-          <Box bg="blue.700" p={4} rounded="md">
-            <Flex direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'center' }} justify="space-between">
-              <Box mb={{ base: 4, md: 0 }}>
-                <Flex align="center">
-                  <InfoIcon mr={2} />
-                  <Text fontWeight="bold">Instruções de Uso:</Text>
-                </Flex>
-                <Text mt={2} fontSize="sm">• Clique: ver detalhes do personagem</Text>
-                <Text fontSize="sm">• Campo Local: atualizar localização</Text>
-              </Box>
-              <Flex align="center" justifyContent={{ base: 'flex-start', md: 'flex-end' }} mt={{ base: 2, md: 0 }}>
-                <Text mr={2}>Layout:</Text>
-                <Switch
-                  isChecked={!isVerticalLayout}
-                  onChange={handleLayoutToggle}
-                  colorScheme="teal"
-                />
-                <Text ml={2}>{isVerticalLayout ? 'Vertical' : 'Horizontal'}</Text>
+      <Box ref={containerRef} maxWidth="100vw" overflow="hidden" fontSize={isLargerThan1600 ? "sm" : "xs"}>
+        <VStack spacing={2} align="stretch" style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111.11%', padding: '1%' }}>
+          <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" bg="blue.700" p={2} rounded="md">
+            <Box>
+              <Flex align="center">
+                <InfoIcon mr={1} />
+                <Text fontWeight="bold">Instruções:</Text>
               </Flex>
+              <Text fontSize="xs">• Clique: ver detalhes</Text>
+              <Text fontSize="xs">• Campo Local: atualizar</Text>
+            </Box>
+            <Flex align="center" mt={{ base: 2, md: 0 }}>
+              <Text mr={2}>Layout:</Text>
+              <Switch
+                isChecked={!isVerticalLayout}
+                onChange={handleLayoutToggle}
+                colorScheme="teal"
+                size="sm"
+              />
+              <Text ml={2}>{isVerticalLayout ? 'Vertical' : 'Horizontal'}</Text>
             </Flex>
-          </Box>
+          </Flex>
 
-          <Box>
-            <Button
-              onClick={() => setShowMonitor(!showMonitor)}
-              rightIcon={showMonitor ? <ChevronUpIcon /> : <ChevronDownIcon />}
-              mb={4}
-              width="100%"
+          <Button
+            onClick={() => setShowMonitor(!showMonitor)}
+            rightIcon={showMonitor ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            size="sm"
+            width="100%"
+          >
+            {showMonitor ? 'Esconder' : 'Mostrar'} Monitor de Bombas e Makers
+          </Button>
+          <Collapse in={showMonitor} animateOpacity>
+            <Box
+              p={2}
+              color="white"
+              bg="gray.700"
+              rounded="md"
+              shadow="md"
             >
-              {showMonitor ? 'Esconder' : 'Mostrar'} Monitor de Bombas e Makers
-            </Button>
-            <Collapse in={showMonitor} animateOpacity>
-              <Box
-                p="40px"
-                color="white"
-                mt="4"
-                bg="gray.700"
-                rounded="md"
-                shadow="md"
-              >
-                <BombaMakerMonitor
-                  characters={guildData}
-                  isLoading={isLoading}
-                />
-              </Box>
-            </Collapse>
-          </Box>
+              <BombaMakerMonitor
+                characters={guildData}
+                isLoading={isLoading}
+              />
+            </Box>
+          </Collapse>
 
           {isLoading ? (
             <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
@@ -249,32 +235,32 @@ const Home: FC = () => {
               <Text>Nenhum dado de guilda disponível.</Text>
             </Box>
           ) : (
-            <Grid templateColumns={isVerticalLayout || !isLargerThan1280 ? "1fr" : "repeat(2, 1fr)"} gap={4}>
+            <SimpleGrid columns={isLargerThan1600 ? 3 : (isLargerThan1280 ? 2 : 1)} spacing={2}>
               {groupedData.map(({ type, data, onlineCount }) => (
                 <Box 
                   key={type} 
                   bg="gray.800" 
-                  p={4} 
+                  p={2} 
                   rounded="lg" 
                   shadow="md" 
                   height="100%"
-                  minHeight="300px"
+                  minHeight="200px"
                   display="flex"
                   flexDirection="column"
                 >
-                  <Flex justify="space-between" align="center" mb={2}>
+                  <Flex justify="space-between" align="center" mb={1}>
                     <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
-                      <Text fontWeight="bold" cursor="help">
+                      <Text fontWeight="bold" cursor="help" fontSize={isLargerThan1600 ? "sm" : "xs"}>
                         {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
-                        <Icon as={InfoIcon} ml={1} w={3} h={3} />
+                        <Icon as={InfoIcon} ml={1} w={2} h={2} />
                       </Text>
                     </Tooltip>
-                    <Badge colorScheme="green">
+                    <Badge colorScheme="green" fontSize="xx-small">
                       {onlineCount} online
                     </Badge>
                   </Flex>
                   {type === 'exitados' && (
-                    <Badge colorScheme="purple" mb={2}>
+                    <Badge colorScheme="purple" mb={1} fontSize="xx-small">
                       Geralmente em Robson Isle, Thais
                     </Badge>
                   )}
@@ -283,14 +269,15 @@ const Home: FC = () => {
                       data={data}
                       onLocalChange={handleLocalChange}
                       onMemberClick={handleMemberClick}
-                      layout={isVerticalLayout || !isLargerThan1280 ? 'vertical' : 'horizontal'}
+                      layout={isVerticalLayout ? 'vertical' : 'horizontal'}
                       showExivaInput={type !== 'exitados'}
                       type={type}
+                      fontSize={isLargerThan1600 ? "xs" : "xx-small"}
                     />
                   </Box>
                 </Box>
               ))}
-            </Grid>
+            </SimpleGrid>
           )}
         </VStack>
         <CharacterDetailsModal

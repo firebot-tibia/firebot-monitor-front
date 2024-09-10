@@ -42,7 +42,7 @@ export const CharacterDetailsModal: FC<CharacterDetailsModalProps> = ({
   onClassify,
 }) => {
   const toast = useToast();
-  const classificationTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'unclassified'];
+  const classificationTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall', 'unclassified'];
 
   if (!character) return null;
 

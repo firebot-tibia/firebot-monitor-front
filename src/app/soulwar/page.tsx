@@ -3,8 +3,8 @@
 import { Center, Box, Heading, VStack, Select, Text, Button, Table, Thead, Tbody, Tr, Th, Td, SimpleGrid } from '@chakra-ui/react';
 import { ChangeEvent, useState, useCallback } from 'react';
 import DashboardLayout from '../../components/dashboard';
-import { Worlds } from '../../constant/world';
 import { getSoulwarPlayers } from '../../services/guilds';
+import { worlds } from '../../constant/world';
 
 const Soulwar = () => {
   const [selectedMundo, setSelectedMundo] = useState<string>('');
@@ -50,12 +50,17 @@ const Soulwar = () => {
           <Heading as="h1" mb={6} textAlign="center">Lista da Soulwar</Heading>
           <VStack spacing={4} align="stretch">
             <Select placeholder="Selecione o mundo" onChange={handleSelectChange} value={selectedMundo}>
-              {Worlds.map(world => (
-                <option key={world} value={world}>
-                  {world}
+              {worlds.map(world => (
+                <option key={world.name} value={world.name}>
+                  {world.name}
                 </option>
               ))}
             </Select>
+            {selectedMundo && (
+              <Text fontSize="sm" color="gray.500">
+                {worlds.find(w => w.name === selectedMundo)?.location} - {worlds.find(w => w.name === selectedMundo)?.pvpType}
+              </Text>
+            )}
             {loading ? (
               <Text color="gray.500">Carregando...</Text>
             ) : error ? (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -10,33 +10,16 @@ import {
   HStack,
 } from '@chakra-ui/react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { fetchWorldsData } from '../../services/guilds';
 import DashboardLayout from '../../components/dashboard';
-import { WorldData } from '../../shared/interface/war.interface';
-import WorldStatusTable from '../../components/war/world-table';
+import { worlds } from '../../constant/world';
 
 
 const WorldsWarStatus: React.FC = () => {
-  const [worldsData, setWorldsData] = useState<WorldData[]>([]);
+  const [worldsData, setWorldsData] = useState(worlds);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
   const itemsPerPage = 20;
-
-  useEffect(() => {
-    const loadWorldsData = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchWorldsData();
-        setWorldsData(data);
-      } catch (error) {
-        console.error('Failed to fetch worlds data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadWorldsData();
-  }, []);
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -59,8 +42,6 @@ const WorldsWarStatus: React.FC = () => {
           </Box>
         ) : (
           <>
-            <WorldStatusTable worlds={paginatedWorlds} />
-
             <HStack mt={4} justify="space-between">
               <Button
                 leftIcon={<ChevronLeftIcon />}

@@ -12,6 +12,7 @@ interface GuildMemberTableProps {
   layout: 'horizontal' | 'vertical';
   showExivaInput: boolean;
   type: string;
+  fontSize: string;
 }
 
 export const GuildMemberTable: FC<GuildMemberTableProps> = ({ 
@@ -20,7 +21,8 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   onMemberClick, 
   layout,
   showExivaInput,
-  type
+  type,
+  fontSize
 }) => {
   const toast = useToast();
 
@@ -35,12 +37,12 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             rounded="md"
             onClick={() => onMemberClick(member)}
             cursor="pointer"
-            fontSize="xs"
+            fontSize={fontSize}
           >
             <Flex justify="space-between" align="center">
               <HStack spacing={1}>
-                <Text fontWeight="bold" width="20px">#{index + 1}</Text>
-                <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="14px" />
+                <Text fontWeight="bold" width="14px">#{index + 1}</Text>
+                <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
                 <Text fontWeight="bold">{member.Name}</Text>
                 <Text>Lvl {member.Level}</Text>
                 <IconButton
@@ -56,7 +58,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             </Flex>
             <Flex mt={1} justify="space-between" align="center">
               <HStack spacing={1}>
-                <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="12px" />
+                <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="10px" />
                 <Text>{member.Kind || 'n/a'}</Text>
               </HStack>
               <Text color={member.TimeOnline === '00:00:00' ? 'red.300' : 'inherit'}>
@@ -70,6 +72,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                 defaultValue={member.Local || ''}
                 bg="gray.800"
                 size="xs"
+                fontSize={fontSize}
                 onChange={(e) => onLocalChange(member, e.target.value)}
                 onClick={(e) => e.stopPropagation()}
               />
@@ -81,14 +84,14 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   }
 
   return (
-    <Table variant="simple" size="sm" style={{ transform: 'scale(1.0)', transformOrigin: 'top left' }}>
+    <Table variant="simple" size="sm">
       <Thead>
         <Tr>
-          <Th fontSize="xs" width="50px">#</Th>
-          <Th fontSize="xs">Personagem</Th>
-          <Th fontSize="xs">Tipo</Th>
-          <Th fontSize="xs">Tempo Online</Th>
-          {showExivaInput && <Th fontSize="xs">Local</Th>}
+          <Th fontSize={fontSize} width="30px">#</Th>
+          <Th fontSize={fontSize}>Personagem</Th>
+          <Th fontSize={fontSize}>Tipo</Th>
+          <Th fontSize={fontSize}>Tempo</Th>
+          {showExivaInput && <Th fontSize={fontSize}>Local</Th>}
         </Tr>
       </Thead>
       <Tbody>
@@ -99,11 +102,12 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             cursor="pointer"
             _hover={{ bg: 'gray.700' }}
           >
-            <Td fontSize="xs">{index + 1}</Td>
+            <Td fontSize={fontSize}>{index + 1}</Td>
             <Td>
               <HStack spacing={1}>
-                <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="14px" />
-                <Text fontSize="xs">{member.Name}</Text>
+                <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
+                <Text fontSize={fontSize}>{member.Name}</Text>
+                <Text fontSize={fontSize}>Lvl {member.Level}</Text>
                 <IconButton
                   aria-label="Copy exiva"
                   icon={<CopyIcon />}
@@ -113,16 +117,15 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                     handleCopy(member.Name, toast);
                   }}
                 />
-                <Text fontSize="xs">Lvl {member.Level}</Text>
               </HStack>
             </Td>
             <Td>
               <HStack spacing={1}>
-                <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="12px" />
-                <Text fontSize="xs">{member.Kind || 'n/a'}</Text>
+                <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="10px" />
+                <Text fontSize={fontSize}>{member.Kind || 'n/a'}</Text>
               </HStack>
             </Td>
-            <Td fontSize="xs" color={member.TimeOnline === '00:00:00' ? 'red.300' : 'inherit'}>{member.TimeOnline}</Td>
+            <Td fontSize={fontSize} color={member.TimeOnline === '00:00:00' ? 'red.300' : 'inherit'}>{member.TimeOnline}</Td>
             {showExivaInput && (
               <Td>
                 <Input
@@ -130,8 +133,9 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                   defaultValue={member.Local || ''}
                   bg="gray.800"
                   size="xs"
+                  fontSize={fontSize}
                   width="100%"
-                  minWidth="120px"
+                  minWidth="80px"
                   onChange={(e) => onLocalChange(member, e.target.value)}
                   onClick={(e) => e.stopPropagation()}
                 />
