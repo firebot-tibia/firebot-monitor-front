@@ -4,6 +4,7 @@ import { GuildMemberResponse } from '../../shared/interface/guild-member.interfa
 import { vocationIcons, characterTypeIcons } from '../../constant/character';
 import { CopyIcon } from '@chakra-ui/icons';
 import { handleCopy } from '../../shared/utils/options-utils';
+import { LocalInput } from './local-input';
 
 interface GuildMemberTableProps {
   data: GuildMemberResponse[];
@@ -11,7 +12,6 @@ interface GuildMemberTableProps {
   onMemberClick: (member: GuildMemberResponse) => void;
   layout: 'horizontal' | 'vertical';
   showExivaInput: boolean;
-  type: string;
   fontSize: string;
 }
 
@@ -21,7 +21,6 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   onMemberClick, 
   layout,
   showExivaInput,
-  type,
   fontSize
 }) => {
   const toast = useToast();
@@ -66,15 +65,11 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
               </Text>
             </Flex>
             {showExivaInput && (
-              <Input
-                mt={1}
-                placeholder="Local"
-                defaultValue={member.Local || ''}
-                bg="gray.800"
-                size="xs"
+              <LocalInput
+                member={member}
+                onLocalChange={onLocalChange}
                 fontSize={fontSize}
-                onChange={(e) => onLocalChange(member, e.target.value)}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()} 
               />
             )}
           </Box>
@@ -127,19 +122,14 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             </Td>
             <Td fontSize={fontSize} color={member.TimeOnline === '00:00:00' ? 'red.300' : 'inherit'}>{member.TimeOnline}</Td>
             {showExivaInput && (
-              <Td>
-                <Input
-                  placeholder="Local"
-                  defaultValue={member.Local || ''}
-                  bg="gray.800"
-                  size="xs"
+            <Td>
+                <LocalInput
+                  member={member}
+                  onLocalChange={onLocalChange}
                   fontSize={fontSize}
-                  width="100%"
-                  minWidth="80px"
-                  onChange={(e) => onLocalChange(member, e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()} 
                 />
-              </Td>
+            </Td>
             )}
           </Tr>
         ))}

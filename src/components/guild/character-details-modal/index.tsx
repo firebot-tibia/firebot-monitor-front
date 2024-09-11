@@ -9,7 +9,6 @@ import {
   VStack,
   HStack,
   Text,
-  Input,
   Image,
   Stat,
   StatLabel,
@@ -25,12 +24,13 @@ import { vocationIcons } from '../../../constant/character';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 import { copyExivas, handleCopy } from '../../../shared/utils/options-utils';
 import { OrangeList } from '../orange-list';
+import { LocalInput } from '../local-input';
 
 interface CharacterDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   character: GuildMemberResponse | null;
-  onExivaChange: (newExiva: string) => void;
+  onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
   onClassify: (type: string) => void;
 }
 
@@ -38,7 +38,7 @@ export const CharacterDetailsModal: FC<CharacterDetailsModalProps> = ({
   isOpen,
   onClose,
   character,
-  onExivaChange,
+  onLocalChange,
   onClassify,
 }) => {
   const toast = useToast();
@@ -105,10 +105,10 @@ export const CharacterDetailsModal: FC<CharacterDetailsModalProps> = ({
                 />
               </Tooltip>
             </HStack>
-            <Input
-              placeholder="Digite o exiva"
-              defaultValue={character.Local || ''}
-              onChange={(e) => onExivaChange(e.target.value)}
+            <LocalInput
+              member={character} 
+              onLocalChange={(character, newLocal) => onLocalChange(character, newLocal)}
+              fontSize="md"
             />
             <OrangeList characterName={character.Name} />
           </VStack>

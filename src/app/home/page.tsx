@@ -117,30 +117,6 @@ const Home: FC = () => {
     }
   }, [enemyGuildId, selectedCharacter, toast]);
 
-  const handleExivaChange = useCallback(async (newExiva: string) => {
-    if (!enemyGuildId || !selectedCharacter) return;
-
-    try {
-      const playerData: UpsertPlayerInput = {
-        guild_id: enemyGuildId,
-        kind: selectedCharacter.Kind,
-        name: selectedCharacter.Name,
-        status: selectedCharacter.Status,
-        local: newExiva,
-      };
-
-      await upsertPlayer(playerData);
-      setGuildData(prevData =>
-        prevData.map(m =>
-          m.Name === selectedCharacter.Name ? { ...m, Local: newExiva } : m
-        )
-      );
-      setSelectedCharacter(prev => prev ? { ...prev, Local: newExiva } : null);
-    } catch (error) {
-      console.error('Failed to update player exiva:', error);
-    }
-  }, [enemyGuildId, selectedCharacter]);
-
   const handleLayoutToggle = () => {
     setIsVerticalLayout(!isVerticalLayout);
   };
@@ -264,7 +240,6 @@ const Home: FC = () => {
                       onMemberClick={handleMemberClick}
                       layout={isVerticalLayout ? 'vertical' : 'horizontal'}
                       showExivaInput={type !== 'exitados'}
-                      type={type}
                       fontSize={isLargerThan1600 ? "xs" : "xx-small"}
                     />
                   </Box>
@@ -277,7 +252,7 @@ const Home: FC = () => {
           isOpen={isDetailsOpen}
           onClose={onDetailsClose}
           character={selectedCharacter}
-          onExivaChange={handleExivaChange}
+          onLocalChange={handleLocalChange}
           onClassify={handleClassify}
         />
       </Box>

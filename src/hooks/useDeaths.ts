@@ -17,10 +17,10 @@ export const useDeaths = () => {
   const addDeath = useCallback((newDeath: Death) => {
     setDeathList(prevList => {
       const updatedList = [newDeath, ...prevList];
-      const twelveHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const twentyfourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       return updatedList.filter(death => {
         if (death.date) {
-          return new Date(death.date) > twelveHoursAgo;
+          return new Date(death.date) > twentyfourHoursAgo;
         }
         return true;
       });
