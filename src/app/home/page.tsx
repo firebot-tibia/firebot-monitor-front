@@ -114,13 +114,6 @@ const Home: FC = () => {
       });
     } catch (error) {
       console.error('Failed to classify player:', error);
-      toast({
-        title: 'Erro',
-        description: 'Falha ao classificar o jogador.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
     }
   }, [enemyGuildId, selectedCharacter, toast]);
 

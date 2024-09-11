@@ -3,8 +3,8 @@ export interface Death {
     name: string;
     level: number;
     vocation: string;
-    kind: string;
     city: string;
     death: string;
-    date: Date | null;
- }
+    date?: Date | string;
+    kind: string;
+  }

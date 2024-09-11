@@ -5,7 +5,6 @@ import { getOrangeList } from '../../../services/guilds';
 interface OrangeListProps {
   characterName: string;
 }
-
 interface OrangeCharacter {
   Name: string;
   Level: number;
@@ -22,7 +21,7 @@ export const OrangeList: FC<OrangeListProps> = ({ characterName }) => {
     const fetchOrangeList = async () => {
       try {
         const data = await getOrangeList(characterName);
-        setOrangeList(data || []); // Set to empty array if data is undefined
+        setOrangeList(data || []);
       } catch (error) {
         setError('Falha ao carregar a lista de Orange.');
       } finally {
@@ -37,7 +36,7 @@ export const OrangeList: FC<OrangeListProps> = ({ characterName }) => {
   if (error) return <Text color="red.500">{error}</Text>;
 
   return (
-    <VStack align="stretch" spacing={2} maxH="200px" overflowY="auto">
+    <VStack align="stretch" spacing={2} maxH="400px" overflowY="auto">
       <Text fontWeight="bold">Lista de Oranges</Text>
       {!orangeList || orangeList.length === 0 ? (
         <Text>Nenhum orange encontrado.</Text>

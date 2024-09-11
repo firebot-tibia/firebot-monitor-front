@@ -1,8 +1,6 @@
-import React, {useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import {
-  Box, Table, Thead, Tbody, Tr, Th, Td, Spinner,
-  Input, VStack, HStack, Text, Alert, AlertIcon,
-  useToast,
+  Box, Input, VStack, HStack, Text, useToast, Checkbox, CheckboxGroup
 } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
@@ -17,16 +15,17 @@ const parseTimeOnline = (timeOnline: string): number => {
   return parts.length === 3 ? parts[0] * 3600 + parts[1] * 60 + parts[2] : 0;
 };
 
-export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters, isLoading }) => {
+export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters }) => {
   const [threshold, setThreshold] = useLocalStorage('bomba-maker-threshold', 3);
   const [timeWindow, setTimeWindow] = useLocalStorage('bomba-maker-timeWindow', 120);
+  const [monitoredLists, setMonitoredLists] = useLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
   const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastAlertTimeRef = useRef<number>(0);
 
   const filteredCharacters = useMemo(() => 
-    characters.filter(char => char.Kind === 'bomba' || char.Kind === 'maker'),
-    [characters]
+    characters.filter(char => monitoredLists.includes(char.Kind)),
+    [characters, monitoredLists]
   );
 
   const checkThreshold = useCallback(() => {
@@ -37,12 +36,16 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
       char.OnlineStatus && parseTimeOnline(char.TimeOnline) <= timeWindow
     );
     
-    const recentBombas = recentCharacters.filter(char => char.Kind === 'bomba');
-    const recentMakers = recentCharacters.filter(char => char.Kind === 'maker');
+    const recentCounts = monitoredLists.reduce((acc, list) => {
+      acc[list] = recentCharacters.filter(char => char.Kind === list).length;
+      return acc;
+    }, {} as Record<string, number>);
 
-    if (recentBombas.length >= threshold || recentMakers.length >= threshold) {
+    if (Object.values(recentCounts).some(count => count >= threshold)) {
       lastAlertTimeRef.current = now;
-      const msg = `Alerta! ${recentBombas.length} bombas e ${recentMakers.length} makers logaram nos últimos ${timeWindow} segundos!`;
+      const msg = `Alerta! ${Object.entries(recentCounts)
+        .map(([type, count]) => `${count} ${type}`)
+        .join(' e ')} logaram nos últimos ${timeWindow} segundos!`;
 
       toast({
         title: 'Alerta de Personagens!',
@@ -63,7 +66,7 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
         audioRef.current.play().catch(error => console.error('Failed to play audio:', error));
       }
     }
-  }, [filteredCharacters, threshold, timeWindow, toast]);
+  }, [filteredCharacters, threshold, timeWindow, toast, monitoredLists]);
 
   useEffect(() => {
     checkThreshold();
@@ -74,10 +77,11 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
       audioRef.current.load();
     }
     
-    speechSynthesis.onvoiceschanged = () => {
-      console.log('Available voices:', speechSynthesis.getVoices());
-    };
   }, []);
+
+  const handleListChange = (checkedLists: string[]) => {
+    setMonitoredLists(checkedLists);
+  };
 
   return (
     <Box>
@@ -105,6 +109,19 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
             />
           </Box>
         </HStack>
+        <Box>
+          <Text fontSize="sm">Listas para monitorar:</Text>
+          <CheckboxGroup colorScheme="green" defaultValue={monitoredLists} onChange={handleListChange}>
+            <HStack>
+              <Checkbox value="bomba">Bomba</Checkbox>
+              <Checkbox value="maker">Maker</Checkbox>
+              <Checkbox value="main">Main</Checkbox>
+              <Checkbox value="fracoks">Fracoks</Checkbox>
+              <Checkbox value="mwall">MWall</Checkbox>
+              <Checkbox value="exitados">Exitados</Checkbox>
+            </HStack>
+          </CheckboxGroup>
+        </Box>
       </VStack>
     </Box>
   );

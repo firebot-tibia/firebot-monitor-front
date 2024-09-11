@@ -87,33 +87,16 @@ export const DeathTable: React.FC = () => {
   useEffect(() => {
     if (eventSourceError) {
       setIsInitialLoad(false);
-      toast({
-        title: 'Erro de conexão',
-        description: 'Não foi possível conectar ao servidor. Por favor, tente novamente mais tarde.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
     }
   }, [eventSourceError, toast]);
-
-  const recentDeaths = useMemo(() => {
-    const now = Date.now();
-    return deathList
-      .filter(death => {
-        const deathTime = death.date ? new Date(death.date).getTime() : now;
-        return now - deathTime < 12 * 60 * 60 * 1000;
-      })
-      .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime());
-  }, [deathList]);
 
   const currentData = useMemo(() => {
     const lastIndex = currentPage * ITEMS_PER_PAGE;
     const firstIndex = lastIndex - ITEMS_PER_PAGE;
-    return recentDeaths.slice(firstIndex, lastIndex);
-  }, [recentDeaths, currentPage]);
+    return deathList.slice(firstIndex, lastIndex);
+  }, [deathList, currentPage]);
 
-  const totalPages = Math.ceil(recentDeaths.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(deathList.length / ITEMS_PER_PAGE);
 
   const handleClick = useCallback((death: Death) => {
     setSelectedDeath(death);
@@ -132,7 +115,7 @@ export const DeathTable: React.FC = () => {
       );
     }
 
-    if (recentDeaths.length === 0) {
+    if (deathList.length === 0) {
       return <Text textAlign="center" fontSize="lg">Sem mortes recentes</Text>;
     }
 
@@ -191,7 +174,7 @@ export const DeathTable: React.FC = () => {
             )}
             <Box width="100%">
               {renderContent()}
-              {recentDeaths.length > 0 && (
+              {deathList.length > 0 && (
                 <Box mt={4}>
                   <Pagination
                     currentPage={currentPage}
