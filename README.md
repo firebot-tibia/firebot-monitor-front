@@ -1,1 +1,1 @@
-# firebot-front 
+# firebot-front
