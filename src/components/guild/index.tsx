@@ -100,6 +100,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
           <Tr>
             <Th px={1} py={1}>#</Th>
             <Th px={1} py={1}>Personagem</Th>
+            <Th px={1} py={1}>Lvl</Th>
             <Th px={1} py={1}>Tipo</Th>
             <Th px={1} py={1}>Tempo</Th>
             {showExivaInput && <Th px={1} py={1}>Local</Th>}
@@ -120,7 +121,11 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                   <Tooltip label="Clique para copiar exiva">
                     <Text onClick={(e) => handleNameClick(e, member)} cursor="pointer">{member.Name}</Text>
                   </Tooltip>
-                  <Text>Lvl {member.Level}</Text>
+                </HStack>
+              </Td>
+              <Td px={1} py={1}>
+                <HStack spacing={1}>
+                  <Text>{member.Level}</Text>
                 </HStack>
               </Td>
               <Td px={1} py={1}>
@@ -132,12 +137,14 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
               <Td px={1} py={1} color={getTimeColor(member.TimeOnline)}>{member.TimeOnline}</Td>
               {showExivaInput && (
                 <Td px={1} py={1}>
-                  <LocalInput
-                    member={member}
-                    onLocalChange={onLocalChange}
-                    fontSize={fontSize}
-                    onClick={(e) => e.stopPropagation()} 
-                  />
+                  <Tooltip label="Escreva para autocompletar com os respawns ou customize">
+                    <LocalInput
+                      member={member}
+                      onLocalChange={onLocalChange}
+                      fontSize={fontSize}
+                      onClick={(e) => e.stopPropagation()} 
+                    />
+                  </Tooltip>
                 </Td>
               )}
             </Tr>
