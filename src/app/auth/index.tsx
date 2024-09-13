@@ -47,8 +47,8 @@ const LoginPage = () => {
     try {
       const data: AuthDTO = { email, password };
       const signInResult = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
+        email: data.email.trim(),
+        password: data.password.trim(),
         redirect: false,
       });
 

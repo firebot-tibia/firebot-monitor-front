@@ -158,7 +158,7 @@ const Home: FC = () => {
                 <Text fontWeight="bold">Instruções:</Text>
               </Flex>
               <Text fontSize="xs">• Clique: ver detalhes</Text>
-              <Text fontSize="xs">• Campo Local: atualizar</Text>
+              <Text fontSize="xs">• Campo Local: atualizar em qual local do jogo o personagem se encontra.</Text>
             </Box>
             <Flex align="center" mt={{ base: 2, md: 0 }}>
               <Text mr={2}>Layout:</Text>
@@ -178,7 +178,7 @@ const Home: FC = () => {
             size="sm"
             width="100%"
           >
-            {showMonitor ? 'Esconder' : 'Mostrar'} Monitor de Bombas e Makers
+            {showMonitor ? 'Esconder' : 'Mostrar'} Monitor de Masslog nas listas
           </Button>
           <Collapse in={showMonitor} animateOpacity>
             <Box

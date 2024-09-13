@@ -16,11 +16,20 @@ import {
   useToast,
   VStack,
   Center,
-  Flex
+  Flex,
+  Badge,
+  Tooltip,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import DashboardLayout from "../../components/dashboard";
 import { Death } from "../../shared/interface/death.interface";
-import { Pagination } from "../../components/pagination";
 import { useAudio } from "../../hooks/useAudio";
 import { useDeaths } from "../../hooks/useDeaths";
 import { formatDate } from "../../shared/utils/date-utils";
@@ -35,7 +44,83 @@ const DeathDetail = dynamic<DeathDetailProps>(
   { ssr: false }
 );
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 15;
+
+const TruncatedText: React.FC<{ text: string }> = ({ text }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const truncatedText = text.length > 100 ? `${text.slice(0, 100)}...` : text;
+
+  return (
+    <>
+      <Text isTruncated maxWidth="300px">
+        {truncatedText}
+        {text.length > 100 && (
+          <Button size="xs" ml={2} onClick={onOpen}>
+            <ChevronDownIcon />
+          </Button>
+        )}
+      </Text>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Death Details</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>{text}</Text>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+};
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
+
+  return (
+    <Flex justify="center" align="center" mt={4}>
+      <Button
+        onClick={handlePrevious}
+        isDisabled={currentPage === 1}
+        mr={2}
+        size="sm"
+      >
+        <ChevronLeftIcon />
+      </Button>
+      <Text fontSize="sm">
+        Página {currentPage} de {totalPages}
+      </Text>
+      <Button
+        onClick={handleNext}
+        isDisabled={currentPage === totalPages}
+        ml={2}
+        size="sm"
+      >
+        <ChevronRightIcon />
+      </Button>
+    </Flex>
+  );
+};
 
 export const DeathTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,6 +172,13 @@ export const DeathTable: React.FC = () => {
   useEffect(() => {
     if (eventSourceError) {
       setIsInitialLoad(false);
+      toast({
+        title: "Erro de conexão",
+        description: "Não foi possível conectar ao servidor de eventos.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   }, [eventSourceError, toast]);
 
@@ -96,10 +188,14 @@ export const DeathTable: React.FC = () => {
     return deathList.slice(firstIndex, lastIndex);
   }, [deathList, currentPage]);
 
-  const totalPages = Math.ceil(deathList.length / ITEMS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(deathList.length / ITEMS_PER_PAGE));
 
   const handleClick = useCallback((death: Death) => {
     setSelectedDeath(death);
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
   }, []);
 
   const renderContent = () => {
@@ -124,36 +220,48 @@ export const DeathTable: React.FC = () => {
     }
 
     return (
-      <Table variant="simple" colorScheme="gray">
-        <Thead>
-          <Tr>
-            <Th>Nome</Th>
-            <Th>Nível</Th>
-            <Th>Vocação</Th>
-            <Th>Cidade</Th>
-            <Th>Morte</Th>
-            <Th>Data</Th>
-            <Th>Tipo</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {currentData.map((death) => (
-            <Tr
-              key={death.id}
-              onClick={() => handleClick(death)}
-              _hover={{ bg: 'gray.600', cursor: 'pointer' }}
-            >
-              <Td>{death.name}</Td>
-              <Td>{death.level}</Td>
-              <Td>{death.vocation}</Td>
-              <Td>{death.city}</Td>
-              <Td>{death.death}</Td>
-              <Td>{formatDate(death.date)}</Td>
-              <Td>{death.kind}</Td>
+      <Box overflowX="auto">
+        <Table variant="simple" colorScheme="gray" size="sm">
+          <Thead>
+            <Tr>
+              <Th>Nome</Th>
+              <Th>Nível</Th>
+              <Th>Vocação</Th>
+              <Th>Cidade</Th>
+              <Th>Morte</Th>
+              <Th>Data</Th>
             </Tr>
-          ))}
-        </Tbody>
-      </Table>
+          </Thead>
+          <Tbody>
+            {currentData.map((death) => (
+              <Tr
+                key={death.id}
+                onClick={() => handleClick(death)}
+                _hover={{ bg: 'gray.700', cursor: 'pointer' }}
+              >
+                <Td>
+                  <Tooltip label={death.name} placement="top-start">
+                    <Text isTruncated maxWidth="150px">{death.name}</Text>
+                  </Tooltip>
+                </Td>
+                <Td><Badge colorScheme="purple">{death.level}</Badge></Td>
+                <Td>
+                  <Badge colorScheme="blue">
+                    {death.vocation}
+                  </Badge>
+                </Td>
+                <Td>
+                  <Badge colorScheme="green">
+                    {death.city}
+                  </Badge>
+                </Td>
+                <Td><TruncatedText text={death.death} /></Td>
+                <Td>{formatDate(death.date)}</Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
     );
   };
 
@@ -164,29 +272,29 @@ export const DeathTable: React.FC = () => {
   return (
     <DashboardLayout>
       <Flex direction="column" align="center" justify="center" minHeight="calc(100vh - 100px)">
-        <Box width="100%" maxWidth="1200px" p={12}>
-          <VStack spacing={8} align="center">
-            <Text fontSize="3xl" fontWeight="bold" textAlign="center">Mortes Recentes</Text>
-            {!audioEnabled && (
-              <Button onClick={enableAudio} colorScheme="blue">
-                Habilitar Alerta Sonoro
-              </Button>
-            )}
-            <Box width="100%">
+        <Box width="100%" maxWidth="1200px" p={4}>
+          <VStack spacing={4} align="stretch">
+            <Flex justify="space-between" align="center">
+              <Text fontSize="2xl" fontWeight="bold">Mortes Recentes</Text>
+              {!audioEnabled && (
+                <Button onClick={enableAudio} colorScheme="blue" size="sm">
+                  Habilitar Alerta Sonoro
+                </Button>
+              )}
+            </Flex>
+            <Box>
               {renderContent()}
               {deathList.length > 0 && (
-                <Box mt={4}>
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
-                </Box>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               )}
             </Box>
             
             {selectedDeath && (
-              <Box mt={4} width="100%">
+              <Box mt={4}>
                 <DeathDetail death={selectedDeath} />
               </Box>
             )}

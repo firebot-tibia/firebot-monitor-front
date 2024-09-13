@@ -59,7 +59,7 @@ export const LocalInput: FC<LocalInputProps> = ({
         onChange={handleInputChange}
         placeholder="Local Hunt"
         onFocus={() => setIsDropdownOpen(true)}
-        onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} // Delay closing to allow option selection
+        onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} 
         bg="gray.800"
         size="xs"
         fontSize={fontSize}
