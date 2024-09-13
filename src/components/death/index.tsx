@@ -67,8 +67,8 @@ const TruncatedText: React.FC<{ text: string }> = ({ text }) => {
 export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
-  const { audioEnabled, enableAudio, playAudio } = useAudio('/assets/notification_sound.mp3');
   const [newDeathCount, setNewDeathCount] = useState(0);
+  const { audioEnabled, enableAudio, playAudio, initializeAudio } = useAudio('/assets/notification_sound.mp3');
 
   const currentData = useMemo(() => {
     const lastIndex = currentPage * ITEMS_PER_PAGE;
@@ -96,6 +96,11 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
       }
     }
   }, [deathList, onNewDeath, audioEnabled, playAudio]);
+
+  const handleEnableAudio = useCallback(() => {
+    enableAudio();
+    initializeAudio();
+  }, [enableAudio, initializeAudio]);
 
   const renderContent = () => {
     if (deathList.length === 0) {
@@ -158,6 +163,7 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
         <VStack spacing={4} align="stretch">
           <Center>
             <Text fontSize="2xl" fontWeight="bold">
+              Mortes Recentes
               {newDeathCount > 0 && (
                 <Badge ml={2} colorScheme="red" borderRadius="full">
                   {newDeathCount}
@@ -167,7 +173,11 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
           </Center>
           <Flex justify="flex-end">
             {!audioEnabled && (
-              <Button onClick={enableAudio} colorScheme="blue" size="sm">
+              <Button 
+                onClick={handleEnableAudio} 
+                colorScheme="blue" 
+                size="sm"
+              >
                 Habilitar Alerta Sonoro
               </Button>
             )}
