@@ -1,7 +1,6 @@
 import { Flex, IconButton, Spacer, HStack, Text } from "@chakra-ui/react";
-import { FC } from "react";
-import { FaCog, FaSignOutAlt, FaBars } from "react-icons/fa";
-import Link from 'next/link';
+import { FC, useCallback } from "react";
+import { FaSignOutAlt, FaBars } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 
 interface TopbarProps {
@@ -9,6 +8,29 @@ interface TopbarProps {
 }
 
 const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
+  const clearLocalStorage = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const domain = 'monitor.firebot.run';
+      
+      if (window.location.hostname === domain) {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key) {
+            localStorage.removeItem(key);
+          }
+        }
+        console.log('LocalStorage cleared for', domain);
+      } else {
+        console.log('Not on the target domain. LocalStorage not cleared.');
+      }
+    }
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    clearLocalStorage();
+    signOut({ redirect: true, callbackUrl: '/' });
+  }, [clearLocalStorage]);
+
   return (
     <Flex
       as="nav"
@@ -39,17 +61,14 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
       </Text>
       <Spacer />
       <HStack spacing={4}>
-        <Link href="#" passHref>
-          <IconButton
-            aria-label="Logout"
-            onClick={() => { signOut({ redirect: true, callbackUrl: '/' }) }}
-            icon={<FaSignOutAlt />}
-            variant="ghost"
-            color="white"
-            fontSize="20px"
-            as="div"
-          />
-        </Link>
+        <IconButton
+          aria-label="Logout"
+          onClick={handleLogout}
+          icon={<FaSignOutAlt />}
+          variant="ghost"
+          color="white"
+          fontSize="20px"
+        />
       </HStack>
     </Flex>
   );

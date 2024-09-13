@@ -1,5 +1,4 @@
-import { FaMap } from "react-icons/fa";
-import { IoSkullOutline } from "react-icons/io5";
+import { FaMap, FaDiscord } from "react-icons/fa";
 import { IoMdStats } from "react-icons/io";
 
 export const config = {
@@ -18,6 +17,12 @@ export const config = {
       name: 'Mapa Exiva',
       href: '/tibia-map',
       icon: FaMap,
+    },
+    {
+      name: 'Suporte no Discord',
+      href: 'https://discord.gg/5eUrDejn', 
+      icon: FaDiscord,
+      target: '_blank',
     },
   ],
 };

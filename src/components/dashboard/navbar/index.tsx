@@ -44,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isOpen, onToggle }) => {
       <VStack spacing={4} align="stretch" width="full">
         {config.nameNavigation.map((navItem, index) => (
           <Tooltip key={index} label={navItem.name} placement="right" isDisabled={isOpen}>
-            <Link href={navItem.href} passHref>
+            <Link href={navItem.href} target={navItem.target} passHref>
               <Button
                 as="div"
                 variant="ghost"
