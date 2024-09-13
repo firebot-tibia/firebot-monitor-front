@@ -1,5 +1,6 @@
-import React, { FC } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, VStack, HStack, Text, Image, Box, Flex, useToast, Tooltip } from '@chakra-ui/react';
+import React, { FC, useState } from 'react';
+import { Table, Thead, Tbody, Tr, Th, Td, VStack, HStack, Text, Image, Box, Flex, useToast, Tooltip, Menu, MenuButton, MenuList, MenuItem, Button } from '@chakra-ui/react';
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { vocationIcons, characterTypeIcons } from '../../constant/character';
 import { LocalInput } from './local-input';
@@ -9,7 +10,7 @@ import { getTimeColor } from '../../shared/utils/utils';
 interface GuildMemberTableProps {
   data: GuildMemberResponse[];
   onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
-  onMemberClick: (member: GuildMemberResponse) => void;
+  onClassificationChange: (member: GuildMemberResponse, newClassification: string) => void;
   layout: 'horizontal' | 'vertical';
   showExivaInput: boolean;
   fontSize: string;
@@ -33,61 +34,104 @@ const ClassificationLegend: FC = () => (
   </HStack>
 );
 
+const characterTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall', 'unclassified'];
+
 export const GuildMemberTable: FC<GuildMemberTableProps> = ({ 
   data, 
   onLocalChange, 
-  onMemberClick, 
+  onClassificationChange,
   layout,
   showExivaInput,
   fontSize
 }) => {
   const toast = useToast();
+  const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
 
   const handleNameClick = (e: React.MouseEvent, member: GuildMemberResponse) => {
     e.stopPropagation();
     copyExivas(member, toast);
   };
 
+  const handleClassificationClick = (e: React.MouseEvent, member: GuildMemberResponse, newType: string) => {
+    e.stopPropagation();
+    onClassificationChange(member, newType);
+    setOpenMenus(prev => ({ ...prev, [member.Name]: false }));
+  };
+
+  const toggleMenu = (e: React.MouseEvent, memberName: string) => {
+    e.stopPropagation();
+    setOpenMenus(prev => ({ ...prev, [memberName]: !prev[memberName] }));
+  };
+
+  const renderClassification = (member: GuildMemberResponse) => (
+    <Menu isOpen={openMenus[member.Name]} onClose={() => setOpenMenus(prev => ({ ...prev, [member.Name]: false }))}>
+      <MenuButton
+        as={Button}
+        rightIcon={<ChevronDownIcon />}
+        onClick={(e) => toggleMenu(e, member.Name)}
+        size="xs"
+        variant="ghost"
+      >
+        <HStack spacing={1}>
+          <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="10px" />
+          <Box as="span">{member.Kind || 'n/a'}</Box>
+        </HStack>
+      </MenuButton>
+      <MenuList>
+        {characterTypes.map((type) => (
+          <MenuItem key={type} onClick={(e) => handleClassificationClick(e, member, type)}>
+            {type}
+          </MenuItem>
+        ))}
+      </MenuList>
+    </Menu>
+  );
+
+  const renderMemberRow = (member: GuildMemberResponse, index: number) => (
+    <Box 
+      key={member.Name}
+      bg={index % 2 === 0 ? 'gray.700' : 'gray.600'} 
+      p={1}
+      cursor="pointer"
+      fontSize={fontSize}
+      borderBottom="1px solid"
+      borderColor="gray.600"
+    >
+      <Flex justify="space-between" align="center">
+        <HStack spacing={1}>
+          <Box width="14px">{index + 1}</Box>
+          <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
+          <Box 
+            fontWeight="bold" 
+            onClick={(e) => handleNameClick(e, member)} 
+            cursor="pointer"
+            title="Clique para copiar exiva"
+          >
+            {member.Name}
+          </Box>
+          <Box>Lvl {member.Level}</Box>
+        </HStack>
+        <HStack spacing={1}>
+          {renderClassification(member)}
+          <Box color={getTimeColor(member.TimeOnline)}>{member.TimeOnline}</Box>
+        </HStack>
+      </Flex>
+      {showExivaInput && (
+        <LocalInput
+          member={member}
+          onLocalChange={onLocalChange}
+          fontSize={fontSize}
+          onClick={(e) => e.stopPropagation()} 
+        />
+      )}
+    </Box>
+  );
+
   if (layout === 'vertical') {
     return (
       <VStack spacing={0} align="stretch">
         <ClassificationLegend />
-        {data.map((member, index) => (
-          <Box 
-            key={member.Name}
-            bg={index % 2 === 0 ? 'gray.700' : 'gray.600'} 
-            p={1}
-            onClick={() => onMemberClick(member)}
-            cursor="pointer"
-            fontSize={fontSize}
-            borderBottom="1px solid"
-            borderColor="gray.600"
-          >
-            <Flex justify="space-between" align="center">
-              <HStack spacing={1}>
-                <Text width="14px">{index + 1}</Text>
-                <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
-                <Tooltip label="Clique para copiar exiva">
-                  <Text fontWeight="bold" onClick={(e) => handleNameClick(e, member)} cursor="pointer">{member.Name}</Text>
-                </Tooltip>
-                <Text>Lvl {member.Level}</Text>
-              </HStack>
-              <HStack spacing={1}>
-                <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="10px" />
-                <Text>{member.Kind || 'n/a'}</Text>
-                <Text color={getTimeColor(member.TimeOnline)}>{member.TimeOnline}</Text>
-              </HStack>
-            </Flex>
-            {showExivaInput && (
-              <LocalInput
-                member={member}
-                onLocalChange={onLocalChange}
-                fontSize={fontSize}
-                onClick={(e) => e.stopPropagation()} 
-              />
-            )}
-          </Box>
-        ))}
+        {data.map((member, index) => renderMemberRow(member, index))}
       </VStack>
     );
   }
@@ -110,7 +154,6 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
           {data.map((member, index) => (
             <Tr 
               key={member.Name}
-              onClick={() => onMemberClick(member)}
               cursor="pointer"
               _hover={{ bg: 'gray.700' }}
             >
@@ -118,33 +161,34 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
               <Td px={1} py={1}>
                 <HStack spacing={1}>
                   <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
-                  <Tooltip label="Clique para copiar exiva">
-                    <Text onClick={(e) => handleNameClick(e, member)} cursor="pointer">{member.Name}</Text>
-                  </Tooltip>
+                  <Box 
+                    onClick={(e) => handleNameClick(e, member)} 
+                    cursor="pointer"
+                    title="Clique para copiar exiva"
+                  >
+                    {member.Name}
+                  </Box>
                 </HStack>
               </Td>
               <Td px={1} py={1}>
                 <HStack spacing={1}>
-                  <Text>{member.Level}</Text>
+                  <Box>{member.Level}</Box>
                 </HStack>
               </Td>
               <Td px={1} py={1}>
-                <HStack spacing={1}>
-                  <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="10px" />
-                  <Text>{member.Kind || 'n/a'}</Text>
-                </HStack>
+                {renderClassification(member)}
               </Td>
               <Td px={1} py={1} color={getTimeColor(member.TimeOnline)}>{member.TimeOnline}</Td>
               {showExivaInput && (
                 <Td px={1} py={1}>
-                  <Tooltip label="Escreva para autocompletar com os respawns ou customize">
+                  <Box title="Escreva para autocompletar com os respawns ou customize">
                     <LocalInput
                       member={member}
                       onLocalChange={onLocalChange}
                       fontSize={fontSize}
                       onClick={(e) => e.stopPropagation()} 
                     />
-                  </Tooltip>
+                  </Box>
                 </Td>
               )}
             </Tr>

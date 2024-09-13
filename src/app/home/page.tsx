@@ -10,17 +10,14 @@ import { upsertPlayer } from '../../services/guilds';
 import { useEventSource } from '../../hooks/useEvent';
 import { GuildMemberTable } from '../../components/guild';
 import { UpsertPlayerInput } from '../../shared/interface/character-upsert.interface';
-import { CharacterDetailsModal } from '../../components/guild/character-details-modal';
 import { BombaMakerMonitor } from '../../components/guild/character-monitor';
 
 const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
-  const [selectedCharacter, setSelectedCharacter] = useState<GuildMemberResponse | null>(null);
   const [isVerticalLayout, setIsVerticalLayout] = useState(false);
   const [showMonitor, setShowMonitor] = useState(false);
-  const { isOpen: isDetailsOpen, onOpen: onDetailsOpen, onClose: onDetailsClose } = useDisclosure();
   const { data: session, status } = useSession();
   const toast = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,41 +78,6 @@ const Home: FC = () => {
     }
   };
 
-  const handleMemberClick = useCallback((member: GuildMemberResponse) => {
-    setSelectedCharacter(member);
-    onDetailsOpen();
-  }, [onDetailsOpen]);
-
-  const handleClassify = useCallback(async (type: string) => {
-    if (!enemyGuildId || !selectedCharacter) return;
-
-    try {
-      const playerData: UpsertPlayerInput = {
-        guild_id: enemyGuildId,
-        kind: type,
-        name: selectedCharacter.Name,
-        status: selectedCharacter.Status,
-        local: selectedCharacter.Local || '',
-      };
-
-      await upsertPlayer(playerData);
-      setGuildData(prevData => 
-        prevData.map(m => 
-          m.Name === selectedCharacter.Name ? { ...m, Kind: type } : m
-        )
-      );
-      setSelectedCharacter(prev => prev ? { ...prev, Kind: type } : null);
-      toast({
-        title: 'Sucesso',
-        description: `${selectedCharacter.Name} classificado como ${type}.`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error('Failed to classify player:', error);
-    }
-  }, [enemyGuildId, selectedCharacter, toast]);
 
   const handleLayoutToggle = () => {
     setIsVerticalLayout(!isVerticalLayout);
@@ -136,6 +98,43 @@ const Home: FC = () => {
     };
     return [...grouped, unclassified].filter(group => group.data.length > 0);
   }, [guildData, types]);
+
+  const handleClassificationChange = async (member: GuildMemberResponse, newClassification: string) => {
+    if (!enemyGuildId) return;
+  
+    try {
+      const playerData: UpsertPlayerInput = {
+        guild_id: enemyGuildId,
+        kind: newClassification,
+        name: member.Name,
+        status: member.Status,
+        local: member.Local || '',
+      };
+  
+      await upsertPlayer(playerData);
+      setGuildData(prevData => 
+        prevData.map(m => 
+          m.Name === member.Name ? { ...m, Kind: newClassification } : m
+        )
+      );
+      toast({
+        title: 'Sucesso',
+        description: `${member.Name} classificado como ${newClassification}.`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Failed to classify player:', error);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao classificar o jogador.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   if (status === 'loading') {
     return (
@@ -235,27 +234,20 @@ const Home: FC = () => {
                     </Badge>
                   )}
                   <Box flexGrow={1} overflowY="auto">
-                    <GuildMemberTable
-                      data={data}
-                      onLocalChange={handleLocalChange}
-                      onMemberClick={handleMemberClick}
-                      layout={isVerticalLayout ? 'vertical' : 'horizontal'}
-                      showExivaInput={type !== 'exitados'}
-                      fontSize={isLargerThan1600 ? "xs" : "xx-small"}
-                    />
+                  <GuildMemberTable
+                        data={data}
+                        onLocalChange={handleLocalChange}
+                        onClassificationChange={handleClassificationChange}
+                        layout={isVerticalLayout ? 'vertical' : 'horizontal'}
+                        showExivaInput={type !== 'exitados'}
+                        fontSize={isLargerThan1600 ? "xs" : "xx-small"}
+                      />
                   </Box>
                 </Box>
               ))}
             </SimpleGrid>
           )}
         </VStack>
-        <CharacterDetailsModal
-          isOpen={isDetailsOpen}
-          onClose={onDetailsClose}
-          character={selectedCharacter}
-          onLocalChange={handleLocalChange}
-          onClassify={handleClassify}
-        />
       </Box>
     </DashboardLayout>
   );
