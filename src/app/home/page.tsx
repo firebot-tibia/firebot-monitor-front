@@ -1,35 +1,78 @@
 'use client';
-
-import React, { useEffect, useState, useMemo, FC, useCallback, useRef } from 'react';
-import { Box, Spinner, Flex, useToast, Text, useDisclosure, VStack, Tooltip, Icon, Switch, Badge, Button, Collapse, SimpleGrid, useMediaQuery } from '@chakra-ui/react';
-import { InfoIcon, ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import React, { FC, useState, useEffect, useCallback } from 'react';
+import { 
+  Box, 
+  VStack, 
+  Flex, 
+  Text, 
+  Spinner, 
+  useToast, 
+  SimpleGrid, 
+  Switch, 
+  Button, 
+  Collapse, 
+  Accordion, 
+  AccordionItem, 
+  AccordionButton, 
+  AccordionPanel, 
+  AccordionIcon,
+  Badge,
+  Icon,
+  Tooltip,
+  useMediaQuery
+} from '@chakra-ui/react';
+import { InfoIcon, ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
+import { useDeaths } from '../../hooks/useDeaths';
+import { useEventSource } from '../../hooks/useEvent';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
+import { Death } from '../../shared/interface/death.interface';
 import { useSession } from 'next-auth/react';
 import { upsertPlayer } from '../../services/guilds';
-import { useEventSource } from '../../hooks/useEvent';
-import { GuildMemberTable } from '../../components/guild';
-import { UpsertPlayerInput } from '../../shared/interface/character-upsert.interface';
 import { BombaMakerMonitor } from '../../components/guild/character-monitor';
+import DeathTable from '../../components/death';
+import { GuildMemberTable } from '../../components/guild/guild-table';
 
 const Home: FC = () => {
+  const [newDeathCount, setNewDeathCount] = useState(0);
+  const { deathList, addDeath } = useDeaths();
+  const toast = useToast();
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
   const [isVerticalLayout, setIsVerticalLayout] = useState(false);
   const [showMonitor, setShowMonitor] = useState(false);
   const { data: session, status } = useSession();
-  const toast = useToast();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)");
   const [isLargerThan1600] = useMediaQuery("(min-width: 1600px)");
+
+  const handleNewDeath = useCallback((newDeath: Death) => {
+    addDeath(newDeath);
+    setNewDeathCount((prev) => prev + 1);
+    toast({
+      title: "Nova morte registrada",
+      description: `${newDeath.name} morreu.`,
+      status: "info",
+      duration: 5000,
+      isClosable: true,
+    });
+  }, [addDeath, toast]);
 
   const handleMessage = useCallback((data: any) => {
     if (data?.enemy) {
       setGuildData(data.enemy);
     }
+    if (data?.death) {
+      const newDeath: Death = {
+        ...data.death,
+        id: `${data.death.name}-${Date.now()}`,
+        date: new Date(data.death.date || Date.now()),
+        death: data.death.text,
+      };
+      handleNewDeath(newDeath);
+    }
     setIsLoading(false);
-  }, []);
+  }, [handleNewDeath]);
 
   const { error } = useEventSource(
     status === 'authenticated' ? `https://api.firebot.run/subscription/enemy/` : null,
@@ -39,8 +82,15 @@ const Home: FC = () => {
   useEffect(() => {
     if (error) {
       console.error('Connection error:', error);
+      toast({
+        title: "Erro de conexão",
+        description: "Não foi possível conectar ao servidor de eventos.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
-  }, [error]);
+  }, [error, toast]);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -59,7 +109,7 @@ const Home: FC = () => {
     if (!enemyGuildId) return;
 
     try {
-      const playerData: UpsertPlayerInput = {
+      const playerData = {
         guild_id: enemyGuildId,
         kind: member.Kind,
         name: member.Name,
@@ -78,32 +128,11 @@ const Home: FC = () => {
     }
   };
 
-
-  const handleLayoutToggle = () => {
-    setIsVerticalLayout(!isVerticalLayout);
-  };
-
-  const types = useMemo(() => ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'], []);
-
-  const groupedData = useMemo(() => {
-    const grouped = types.map(type => ({
-      type,
-      data: guildData.filter(member => member.Kind === type),
-      onlineCount: guildData.filter(member => member.Kind === type && member.TimeOnline !== '00:00:00').length
-    }));
-    const unclassified = {
-      type: 'unclassified',
-      data: guildData.filter(member => !member.Kind || !types.includes(member.Kind)),
-      onlineCount: guildData.filter(member => (!member.Kind || !types.includes(member.Kind)) && member.TimeOnline !== '00:00:00').length
-    };
-    return [...grouped, unclassified].filter(group => group.data.length > 0);
-  }, [guildData, types]);
-
   const handleClassificationChange = async (member: GuildMemberResponse, newClassification: string) => {
     if (!enemyGuildId) return;
   
     try {
-      const playerData: UpsertPlayerInput = {
+      const playerData = {
         guild_id: enemyGuildId,
         kind: newClassification,
         name: member.Name,
@@ -136,6 +165,19 @@ const Home: FC = () => {
     }
   };
 
+  const types = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
+  const groupedData = types.map(type => ({
+    type,
+    data: guildData.filter(member => member.Kind === type),
+    onlineCount: guildData.filter(member => member.Kind === type && member.TimeOnline !== '00:00:00').length
+  }));
+  const unclassified = {
+    type: 'unclassified',
+    data: guildData.filter(member => !member.Kind || !types.includes(member.Kind)),
+    onlineCount: guildData.filter(member => (!member.Kind || !types.includes(member.Kind)) && member.TimeOnline !== '00:00:00').length
+  };
+  const allGroupedData = [...groupedData, unclassified].filter(group => group.data.length > 0);
+
   if (status === 'loading') {
     return (
       <DashboardLayout>
@@ -148,23 +190,23 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout>
-      <Box ref={containerRef} maxWidth="100vw" overflow="hidden" fontSize={isLargerThan1600 ? "sm" : "xs"}>
-        <VStack spacing={2} align="stretch" style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '111.11%', padding: '1%' }}>
+      <Box maxWidth="100vw" overflow="hidden" fontSize={isLargerThan1600 ? "sm" : "xs"}>
+        <VStack spacing={2} align="stretch">
           <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" bg="blue.700" p={2} rounded="md">
             <Box>
               <Flex align="center">
                 <InfoIcon mr={1} />
                 <Text fontWeight="bold">Instruções:</Text>
               </Flex>
-              <Text fontSize="xs">• Clique no personagem: ver detalhes</Text>
               <Text fontSize="xs">• Campo Local: atualizar em qual local do jogo o personagem se encontra.</Text>
               <Text fontSize="xs">• Clique no nome: para copiar o exiva para o CTRL+C</Text>
+              <Text fontSize="xs">• Expanda o accordion abaixo para ver mortes recentes</Text>
             </Box>
             <Flex align="center" mt={{ base: 2, md: 0 }}>
               <Text mr={2}>Layout:</Text>
               <Switch
                 isChecked={!isVerticalLayout}
-                onChange={handleLayoutToggle}
+                onChange={() => setIsVerticalLayout(!isVerticalLayout)}
                 colorScheme="teal"
                 size="sm"
               />
@@ -205,7 +247,7 @@ const Home: FC = () => {
             </Box>
           ) : (
             <SimpleGrid columns={isLargerThan1600 ? 3 : (isLargerThan1280 ? 2 : 1)} spacing={2}>
-              {groupedData.map(({ type, data, onlineCount }) => (
+              {allGroupedData.map(({ type, data, onlineCount }) => (
                 <Box 
                   key={type} 
                   bg="gray.800" 
@@ -234,19 +276,40 @@ const Home: FC = () => {
                     </Badge>
                   )}
                   <Box flexGrow={1} overflowY="auto">
-                  <GuildMemberTable
-                        data={data}
-                        onLocalChange={handleLocalChange}
-                        onClassificationChange={handleClassificationChange}
-                        layout={isVerticalLayout ? 'vertical' : 'horizontal'}
-                        showExivaInput={type !== 'exitados'}
-                        fontSize={isLargerThan1600 ? "xs" : "xx-small"}
-                      />
+                    <GuildMemberTable
+                      data={data}
+                      onLocalChange={handleLocalChange}
+                      onClassificationChange={handleClassificationChange}
+                      layout={isVerticalLayout ? 'vertical' : 'horizontal'}
+                      showExivaInput={type !== 'exitados'}
+                      fontSize={isLargerThan1600 ? "xs" : "xx-small"}
+                    />
                   </Box>
                 </Box>
               ))}
             </SimpleGrid>
           )}
+
+          <Accordion allowToggle>
+            <AccordionItem>
+              <h2>
+                <AccordionButton>
+                  <Box flex="1" textAlign="left">
+                    Mortes Recentes
+                  </Box>
+                  <AccordionIcon />
+                  {newDeathCount > 0 && (
+                    <Badge ml={2} colorScheme="red" borderRadius="full">
+                      {newDeathCount}
+                    </Badge>
+                  )}
+                </AccordionButton>
+              </h2>
+              <AccordionPanel pb={4}>
+                <DeathTable deathList={deathList} onNewDeath={handleNewDeath} />
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
         </VStack>
       </Box>
     </DashboardLayout>
