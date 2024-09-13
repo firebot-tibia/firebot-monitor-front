@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect } from 'react';
 import { Box, Text, VStack, HStack, Spinner } from '@chakra-ui/react';
-import { getOrangeList } from '../../../services/guilds';
+import { getOrangeList } from '../../services/guilds';
 
 interface OrangeListProps {
   characterName: string;

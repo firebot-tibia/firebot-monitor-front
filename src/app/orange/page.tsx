@@ -13,7 +13,7 @@ import {
   Divider
 } from '@chakra-ui/react';
 import DashboardLayout from '../../components/dashboard';
-import { OrangeList } from '../../components/guild/orange-list';
+import { OrangeList } from '../../components/orange-list';
 
 
 const OrangeListPage: React.FC = () => {

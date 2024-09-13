@@ -158,7 +158,6 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
         <VStack spacing={4} align="stretch">
           <Center>
             <Text fontSize="2xl" fontWeight="bold">
-              Mortes Recentes
               {newDeathCount > 0 && (
                 <Badge ml={2} colorScheme="red" borderRadius="full">
                   {newDeathCount}

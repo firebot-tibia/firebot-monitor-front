@@ -31,7 +31,8 @@ import { useSession } from 'next-auth/react';
 import { upsertPlayer } from '../../services/guilds';
 import { BombaMakerMonitor } from '../../components/guild/character-monitor';
 import DeathTable from '../../components/death';
-import { GuildMemberTable } from '../../components/guild/guild-table';
+import { GuildMemberTable } from '../../components/guild';
+
 
 const Home: FC = () => {
   const [newDeathCount, setNewDeathCount] = useState(0);
@@ -43,8 +44,6 @@ const Home: FC = () => {
   const [isVerticalLayout, setIsVerticalLayout] = useState(false);
   const [showMonitor, setShowMonitor] = useState(false);
   const { data: session, status } = useSession();
-  const [isLargerThan1280] = useMediaQuery("(min-width: 1280px)");
-  const [isLargerThan1600] = useMediaQuery("(min-width: 1600px)");
 
   const handleNewDeath = useCallback((newDeath: Death) => {
     addDeath(newDeath);
@@ -190,17 +189,17 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout>
-      <Box maxWidth="100vw" overflow="hidden" fontSize={isLargerThan1600 ? "sm" : "xs"}>
-        <VStack spacing={2} align="stretch">
-          <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" bg="blue.700" p={2} rounded="md">
+      <Box maxWidth="100%" overflow="hidden" fontSize="xs">
+        <VStack spacing={1} align="stretch">
+          <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" bg="blue.900" p={2} mt={4} rounded="md">
             <Box>
               <Flex align="center">
                 <InfoIcon mr={1} />
                 <Text fontWeight="bold">Instruções:</Text>
               </Flex>
+              <Text fontSize="xs">• Clique no personagem: ver detalhes</Text>
               <Text fontSize="xs">• Campo Local: atualizar em qual local do jogo o personagem se encontra.</Text>
               <Text fontSize="xs">• Clique no nome: para copiar o exiva para o CTRL+C</Text>
-              <Text fontSize="xs">• Expanda o accordion abaixo para ver mortes recentes</Text>
             </Box>
             <Flex align="center" mt={{ base: 2, md: 0 }}>
               <Text mr={2}>Layout:</Text>
@@ -219,6 +218,9 @@ const Home: FC = () => {
             rightIcon={showMonitor ? <ChevronUpIcon /> : <ChevronDownIcon />}
             size="sm"
             width="100%"
+            variant="outline"
+            bg="gray.700"
+            _hover={{ bg: 'gray.600' }}
           >
             {showMonitor ? 'Esconder' : 'Mostrar'} Monitor de Masslog nas listas
           </Button>
@@ -246,7 +248,7 @@ const Home: FC = () => {
               <Text>Nenhum dado de guilda disponível.</Text>
             </Box>
           ) : (
-            <SimpleGrid columns={isLargerThan1600 ? 3 : (isLargerThan1280 ? 2 : 1)} spacing={2}>
+            <SimpleGrid columns={3} spacing={1}>
               {allGroupedData.map(({ type, data, onlineCount }) => (
                 <Box 
                   key={type} 
@@ -261,7 +263,7 @@ const Home: FC = () => {
                 >
                   <Flex justify="space-between" align="center" mb={1}>
                     <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
-                      <Text fontWeight="bold" cursor="help" fontSize={isLargerThan1600 ? "sm" : "xs"}>
+                      <Text fontWeight="bold" cursor="help" fontSize="xs">
                         {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
                         <Icon as={InfoIcon} ml={1} w={2} h={2} />
                       </Text>
@@ -282,7 +284,7 @@ const Home: FC = () => {
                       onClassificationChange={handleClassificationChange}
                       layout={isVerticalLayout ? 'vertical' : 'horizontal'}
                       showExivaInput={type !== 'exitados'}
-                      fontSize={isLargerThan1600 ? "xs" : "xx-small"}
+                      fontSize="xs"
                     />
                   </Box>
                 </Box>
@@ -294,7 +296,7 @@ const Home: FC = () => {
             <AccordionItem>
               <h2>
                 <AccordionButton>
-                  <Box flex="1" textAlign="left">
+                  <Box flex="1" textAlign="center">
                     Mortes Recentes
                   </Box>
                   <AccordionIcon />
