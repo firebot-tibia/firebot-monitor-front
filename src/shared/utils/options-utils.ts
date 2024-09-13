@@ -14,7 +14,6 @@ export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof u
   });
 };
 
-
 export function handleCopy(name: string | undefined, toast: ReturnType<typeof useToast>) {
   const displayName = getName(name);
   toast({

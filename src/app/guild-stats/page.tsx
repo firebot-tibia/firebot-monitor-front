@@ -29,6 +29,7 @@ import { getExperienceList } from '../../services/guilds';
 import { Vocations } from '../../constant/character';
 import { Pagination } from '../../components/pagination';
 import PlayerModal from '../../components/guild-stats/player-modal';
+import ExpStats from '../../components/guild-stats/exp-stats';
 
 interface GuildMemberResponse {
   experience: string;
@@ -158,16 +159,11 @@ const GuildStats: React.FC = () => {
     <Box>
       <Heading as="h2" size="md" mb={2}>{guildType === 'ally' ? 'Aliados' : 'Inimigos'}</Heading>
       <StatGroup mb={4}>
-        <Stat>
-          <StatLabel>Experiência Total</StatLabel>
-          <StatNumber>{guildData.totalExp.toLocaleString('pt-BR')}</StatNumber>
-          <StatHelpText>{filter}</StatHelpText>
-        </Stat>
-        <Stat>
-          <StatLabel>Experiência Média</StatLabel>
-          <StatNumber>{guildData.avgExp.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</StatNumber>
-          <StatHelpText>{filter}</StatHelpText>
-        </Stat>
+      <ExpStats 
+          totalExp={guildData.totalExp} 
+          avgExp={guildData.avgExp} 
+          filter={filter} 
+        />
       </StatGroup>
       <VStack spacing={0} align="stretch" style={{ transform: 'scale(0.9)', transformOrigin: 'top left', width: '100%' }}>
         <Table variant="simple" size="sm" style={{ borderCollapse: 'collapse' }}>

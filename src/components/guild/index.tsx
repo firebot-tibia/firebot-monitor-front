@@ -1,9 +1,10 @@
 import React, { FC } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, VStack, HStack, Text, Image, Box, Flex, IconButton, useToast, Tooltip } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, VStack, HStack, Text, Image, Box, Flex, useToast, Tooltip } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { vocationIcons, characterTypeIcons } from '../../constant/character';
-import { CopyIcon } from '@chakra-ui/icons';
 import { LocalInput } from './local-input';
+import { copyExivas } from '../../shared/utils/options-utils';
+import { getTimeColor } from '../../shared/utils/utils';
 
 interface GuildMemberTableProps {
   data: GuildMemberResponse[];
@@ -14,45 +15,22 @@ interface GuildMemberTableProps {
   fontSize: string;
 }
 
-const getTimeColor = (timeOnline: string) => {
-  const [hours, minutes] = timeOnline.split(':').map(Number);
-  const totalMinutes = hours * 60 + minutes;
-  
-  if (totalMinutes <= 5) return 'red.500';
-  if (totalMinutes <= 15) return 'orange.500';
-  if (totalMinutes <= 30) return 'yellow.500';
-  return 'inherit';
-};
-
-const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof useToast>) => {
-  const exivas = `exiva "${data.Name.trim().toLowerCase()}"`;
-  navigator.clipboard.writeText(exivas);
-  toast({
-    title: 'Exiva copiado para a área de transferência.',
-    status: 'success',
-    duration: 2000,
-    isClosable: true,
-  });
-};
-
 const ClassificationLegend: FC = () => (
-  <Tooltip label="Legenda de Classificação" placement="top">
-    <HStack spacing={2} fontSize="xs">
-      <Text>Classificação:</Text>
-      <HStack>
-        <Box w={2} h={2} bg="red.500" rounded="full" />
-        <Text>0-5min</Text>
-      </HStack>
-      <HStack>
-        <Box w={2} h={2} bg="orange.500" rounded="full" />
-        <Text>5-15min</Text>
-      </HStack>
-      <HStack>
-        <Box w={2} h={2} bg="yellow.500" rounded="full" />
-        <Text>15-30min</Text>
-      </HStack>
+  <HStack spacing={2} fontSize="xs" mb={1}>
+    <Text>Tempo online:</Text>
+    <HStack>
+      <Box w={2} h={2} bg="red.500" rounded="full" />
+      <Text>0-5min</Text>
     </HStack>
-  </Tooltip>
+    <HStack>
+      <Box w={2} h={2} bg="orange.500" rounded="full" />
+      <Text>5-15min</Text>
+    </HStack>
+    <HStack>
+      <Box w={2} h={2} bg="yellow.500" rounded="full" />
+      <Text>15-30min</Text>
+    </HStack>
+  </HStack>
 );
 
 export const GuildMemberTable: FC<GuildMemberTableProps> = ({ 
@@ -65,35 +43,34 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
 }) => {
   const toast = useToast();
 
+  const handleNameClick = (e: React.MouseEvent, member: GuildMemberResponse) => {
+    e.stopPropagation();
+    copyExivas(member, toast);
+  };
+
   if (layout === 'vertical') {
     return (
-      <VStack spacing={1} align="stretch">
+      <VStack spacing={0} align="stretch">
         <ClassificationLegend />
         {data.map((member, index) => (
           <Box 
             key={member.Name}
             bg={index % 2 === 0 ? 'gray.700' : 'gray.600'} 
             p={1}
-            rounded="md"
             onClick={() => onMemberClick(member)}
             cursor="pointer"
             fontSize={fontSize}
+            borderBottom="1px solid"
+            borderColor="gray.600"
           >
             <Flex justify="space-between" align="center">
               <HStack spacing={1}>
-                <Text fontWeight="bold" width="14px">#{index + 1}</Text>
+                <Text width="14px">{index + 1}</Text>
                 <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
-                <Text fontWeight="bold">{member.Name}</Text>
+                <Tooltip label="Clique para copiar exiva">
+                  <Text fontWeight="bold" onClick={(e) => handleNameClick(e, member)} cursor="pointer">{member.Name}</Text>
+                </Tooltip>
                 <Text>Lvl {member.Level}</Text>
-                <IconButton
-                  aria-label="Copy exiva"
-                  icon={<CopyIcon />}
-                  size="xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyExivas(member, toast);
-                  }}
-                />
               </HStack>
               <HStack spacing={1}>
                 <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="10px" />
@@ -118,14 +95,14 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   return (
     <Box>
       <ClassificationLegend />
-      <Table variant="simple" size="sm">
+      <Table variant="simple" size="sm" fontSize={fontSize}>
         <Thead>
           <Tr>
-            <Th fontSize={fontSize} width="30px">#</Th>
-            <Th fontSize={fontSize}>Personagem</Th>
-            <Th fontSize={fontSize}>Tipo</Th>
-            <Th fontSize={fontSize}>Tempo</Th>
-            {showExivaInput && <Th fontSize={fontSize}>Local</Th>}
+            <Th px={1} py={1}>#</Th>
+            <Th px={1} py={1}>Personagem</Th>
+            <Th px={1} py={1}>Tipo</Th>
+            <Th px={1} py={1}>Tempo</Th>
+            {showExivaInput && <Th px={1} py={1}>Local</Th>}
           </Tr>
         </Thead>
         <Tbody>
@@ -136,32 +113,25 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
               cursor="pointer"
               _hover={{ bg: 'gray.700' }}
             >
-              <Td fontSize={fontSize}>{index + 1}</Td>
-              <Td>
+              <Td px={1} py={1}>{index + 1}</Td>
+              <Td px={1} py={1}>
                 <HStack spacing={1}>
                   <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
-                  <Text fontSize={fontSize}>{member.Name}</Text>
-                  <Text fontSize={fontSize}>Lvl {member.Level}</Text>
-                  <IconButton
-                    aria-label="Copy exiva"
-                    icon={<CopyIcon />}
-                    size="xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      copyExivas(member, toast);
-                    }}
-                  />
+                  <Tooltip label="Clique para copiar exiva">
+                    <Text onClick={(e) => handleNameClick(e, member)} cursor="pointer">{member.Name}</Text>
+                  </Tooltip>
+                  <Text>Lvl {member.Level}</Text>
                 </HStack>
               </Td>
-              <Td>
+              <Td px={1} py={1}>
                 <HStack spacing={1}>
                   <Image src={characterTypeIcons[member.Kind]} alt={member.Kind} boxSize="10px" />
-                  <Text fontSize={fontSize}>{member.Kind || 'n/a'}</Text>
+                  <Text>{member.Kind || 'n/a'}</Text>
                 </HStack>
               </Td>
-              <Td fontSize={fontSize} color={getTimeColor(member.TimeOnline)}>{member.TimeOnline}</Td>
+              <Td px={1} py={1} color={getTimeColor(member.TimeOnline)}>{member.TimeOnline}</Td>
               {showExivaInput && (
-                <Td>
+                <Td px={1} py={1}>
                   <LocalInput
                     member={member}
                     onLocalChange={onLocalChange}

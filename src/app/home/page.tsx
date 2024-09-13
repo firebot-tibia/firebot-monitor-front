@@ -157,8 +157,9 @@ const Home: FC = () => {
                 <InfoIcon mr={1} />
                 <Text fontWeight="bold">Instruções:</Text>
               </Flex>
-              <Text fontSize="xs">• Clique: ver detalhes</Text>
+              <Text fontSize="xs">• Clique no personagem: ver detalhes</Text>
               <Text fontSize="xs">• Campo Local: atualizar em qual local do jogo o personagem se encontra.</Text>
+              <Text fontSize="xs">• Clique no nome: para copiar o exiva para o CTRL+C</Text>
             </Box>
             <Flex align="center" mt={{ base: 2, md: 0 }}>
               <Text mr={2}>Layout:</Text>
