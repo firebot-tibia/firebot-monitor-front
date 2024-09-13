@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, VStack, HStack, Text, Image, Box, Flex, useToast, Tooltip, Menu, MenuButton, MenuList, MenuItem, Button } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, VStack, HStack, Text, Image, Box, Flex, useToast, Menu, MenuButton, MenuList, MenuItem, Button } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { characterTypeIcons, vocationIcons } from '../../constant/character';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';

@@ -5,6 +5,6 @@ export interface Death {
     vocation: string;
     city: string;
     death: string;
-    date?: Date | string;
+    date?: Date;
     kind: string;
   }

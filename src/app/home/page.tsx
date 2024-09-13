@@ -64,7 +64,6 @@ const Home: FC = () => {
     if (data?.death) {
       const newDeath: Death = {
         ...data.death,
-        id: `${data.death.name}-${Date.now()}`,
         date: new Date(data.death.date || Date.now()),
         death: data.death.text,
       };
