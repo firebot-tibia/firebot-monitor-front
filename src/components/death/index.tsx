@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { 
   Box, 
   Button, 
@@ -53,7 +53,7 @@ const TruncatedText: React.FC<{ text: string }> = ({ text }) => {
       <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Death Details</ModalHeader>
+          <ModalHeader>Detalhes da Morte</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Text>{text}</Text>
@@ -69,6 +69,7 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
   const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
   const [newDeathCount, setNewDeathCount] = useState(0);
   const { audioEnabled, enableAudio, playAudio, initializeAudio } = useAudio('/assets/notification_sound.mp3');
+  const previousDeathListLength = useRef(deathList.length);
 
   const currentData = useMemo(() => {
     const lastIndex = currentPage * ITEMS_PER_PAGE;
@@ -87,14 +88,17 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
   }, []);
 
   useEffect(() => {
-    if (deathList.length > 0) {
-      const latestDeath = deathList[0];
-      onNewDeath(latestDeath);
-      setNewDeathCount((prevCount) => prevCount + 1);
-      if (audioEnabled) {
-        playAudio();
-      }
+    if (deathList.length > previousDeathListLength.current) {
+      const newDeaths = deathList.slice(0, deathList.length - previousDeathListLength.current);
+      newDeaths.forEach(death => {
+        onNewDeath(death);
+        setNewDeathCount((prevCount) => prevCount + 1);
+        if (audioEnabled) {
+          playAudio();
+        }
+      });
     }
+    previousDeathListLength.current = deathList.length;
   }, [deathList, onNewDeath, audioEnabled, playAudio]);
 
   const handleEnableAudio = useCallback(() => {

@@ -10,11 +10,6 @@ export const config = {
       href: '/home',
     },
     {
-      name: 'Monitorar Orange',
-      href: '/orange',
-      icon: IoSkullOutline,
-    },
-    {
       name: 'Estatísticas da Guild',
       href: '/guild-stats',
       icon: IoMdStats,

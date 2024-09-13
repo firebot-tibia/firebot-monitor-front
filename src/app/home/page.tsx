@@ -1,4 +1,5 @@
 'use client';
+
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
@@ -19,7 +20,6 @@ import {
   Badge,
   Icon,
   Tooltip,
-  useMediaQuery
 } from '@chakra-ui/react';
 import { InfoIcon, ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import DashboardLayout from '../../components/dashboard';
@@ -30,8 +30,8 @@ import { Death } from '../../shared/interface/death.interface';
 import { useSession } from 'next-auth/react';
 import { upsertPlayer } from '../../services/guilds';
 import { BombaMakerMonitor } from '../../components/guild/character-monitor';
-import DeathTable from '../../components/death';
 import { GuildMemberTable } from '../../components/guild';
+import { DeathTable } from '../../components/death';
 
 
 const Home: FC = () => {
@@ -46,7 +46,6 @@ const Home: FC = () => {
   const { data: session, status } = useSession();
 
   const handleNewDeath = useCallback((newDeath: Death) => {
-    addDeath(newDeath);
     setNewDeathCount((prev) => prev + 1);
     toast({
       title: "Nova morte registrada",
@@ -55,7 +54,7 @@ const Home: FC = () => {
       duration: 5000,
       isClosable: true,
     });
-  }, [addDeath, toast]);
+  }, [toast]);
 
   const handleMessage = useCallback((data: any) => {
     if (data?.enemy) {
@@ -67,10 +66,10 @@ const Home: FC = () => {
         date: new Date(data.death.date || Date.now()),
         death: data.death.text,
       };
-      handleNewDeath(newDeath);
+      addDeath(newDeath);
     }
     setIsLoading(false);
-  }, [handleNewDeath]);
+  }, [addDeath]);
 
   const { error } = useEventSource(
     status === 'authenticated' ? `https://api.firebot.run/subscription/enemy/` : null,
