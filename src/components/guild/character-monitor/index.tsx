@@ -1,9 +1,25 @@
 import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import {
-  Box, Input, VStack, HStack, Text, useToast, Checkbox, CheckboxGroup
+  Box,
+  VStack,
+  HStack,
+  Text,
+  useToast,
+  Checkbox,
+  CheckboxGroup,
+  Heading,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  Wrap,
+  WrapItem,
+  Badge,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useCharacterTypesView } from '../../../hooks/useTypeView';
 
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];
@@ -22,6 +38,10 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastAlertTimeRef = useRef<number>(0);
+  const types = useCharacterTypesView(characters);
+
+  const bgColor = useColorModeValue('gray.100', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'white');
 
   const filteredCharacters = useMemo(() => 
     characters.filter(char => monitoredLists.includes(char.Kind)),
@@ -76,7 +96,6 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
     if (audioRef.current) {
       audioRef.current.load();
     }
-    
   }, []);
 
   const handleListChange = (checkedLists: string[]) => {
@@ -84,42 +103,64 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   };
 
   return (
-    <Box>
+    <Box bg={bgColor} p={4} borderRadius="md" boxShadow="md">
       <audio ref={audioRef} src="/assets/notification_sound.mp3" />
-      <VStack spacing={4} align="stretch">
-        <HStack>
-          <Box>
-            <Text fontSize="sm">Número de personagens para alerta:</Text>
-            <Input
-              type="number"
+      <VStack spacing={6} align="stretch">
+        <Heading size="md" color={textColor}>Configurações de Monitoramento</Heading>
+        <HStack spacing={8} alignItems="flex-start">
+          <Box flex={1}>
+            <Text fontSize="sm" fontWeight="bold" mb={2}>Número de personagens para alerta:</Text>
+            <Slider
               value={threshold}
-              onChange={(e) => setThreshold(Number(e.target.value))}
+              onChange={(val) => setThreshold(val)}
               min={1}
-              size="sm"
-            />
+              max={10}
+              step={1}
+            >
+              <SliderTrack>
+                <SliderFilledTrack />
+              </SliderTrack>
+              <SliderThumb boxSize={6}>
+                <Box color="tomato" as="span" fontSize="sm" fontWeight="bold">
+                  {threshold}
+                </Box>
+              </SliderThumb>
+            </Slider>
           </Box>
-          <Box>
-            <Text fontSize="sm">Janela de tempo (segundos):</Text>
-            <Input
-              type="number"
+          <Box flex={1}>
+            <Text fontSize="sm" fontWeight="bold" mb={2}>Janela de tempo (segundos):</Text>
+            <Slider
               value={timeWindow}
-              onChange={(e) => setTimeWindow(Number(e.target.value))}
-              min={1}
-              size="sm"
-            />
+              onChange={(val) => setTimeWindow(val)}
+              min={30}
+              max={300}
+              step={30}
+            >
+              <SliderTrack>
+                <SliderFilledTrack />
+              </SliderTrack>
+              <SliderThumb boxSize={6}>
+                <Box color="tomato" as="span" fontSize="sm" fontWeight="bold">
+                  {timeWindow}
+                </Box>
+              </SliderThumb>
+            </Slider>
           </Box>
         </HStack>
         <Box>
-          <Text fontSize="sm">Listas para monitorar:</Text>
-          <CheckboxGroup colorScheme="green" defaultValue={monitoredLists} onChange={handleListChange}>
-            <HStack>
-              <Checkbox value="bomba">Bomba</Checkbox>
-              <Checkbox value="maker">Maker</Checkbox>
-              <Checkbox value="main">Main</Checkbox>
-              <Checkbox value="fracoks">Fracoks</Checkbox>
-              <Checkbox value="mwall">MWall</Checkbox>
-              <Checkbox value="exitados">Exitados</Checkbox>
-            </HStack>
+          <Text fontSize="sm" fontWeight="bold" mb={2}>Listas para monitorar:</Text>
+          <CheckboxGroup colorScheme="green" value={monitoredLists} onChange={handleListChange}>
+            <Wrap spacing={4}>
+              {types.map((type) => (
+                <WrapItem key={type}>
+                  <Checkbox value={type}>
+                    <Badge colorScheme="blue" fontSize="sm">
+                      {type}
+                    </Badge>
+                  </Checkbox>
+                </WrapItem>
+              ))}
+            </Wrap>
           </CheckboxGroup>
         </Box>
       </VStack>

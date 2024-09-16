@@ -9,7 +9,6 @@ import {
   Spinner, 
   useToast, 
   SimpleGrid, 
-  Switch, 
   Button, 
   Collapse, 
   Accordion, 
@@ -30,9 +29,9 @@ import { Death } from '../../shared/interface/death.interface';
 import { useSession } from 'next-auth/react';
 import { upsertPlayer } from '../../services/guilds';
 import { BombaMakerMonitor } from '../../components/guild/character-monitor';
-import { GuildMemberTable } from '../../components/guild';
 import { DeathTable } from '../../components/death';
-
+import { GuildMemberTable } from '../../components/guild/guild-table';
+import { useCharacterTypes } from '../../hooks/useType';
 
 const Home: FC = () => {
   const [newDeathCount, setNewDeathCount] = useState(0);
@@ -41,9 +40,9 @@ const Home: FC = () => {
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [enemyGuildId, setEnemyGuildId] = useState<string | null>(null);
-  const [isVerticalLayout, setIsVerticalLayout] = useState(false);
   const [showMonitor, setShowMonitor] = useState(false);
   const { data: session, status } = useSession();
+  const { types, addType } = useCharacterTypes(guildData);
 
   const handleNewDeath = useCallback((newDeath: Death) => {
     setNewDeathCount((prev) => prev + 1);
@@ -79,13 +78,6 @@ const Home: FC = () => {
   useEffect(() => {
     if (error) {
       console.error('Connection error:', error);
-      toast({
-        title: "Erro de conexão",
-        description: "Não foi possível conectar ao servidor de eventos.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
     }
   }, [error, toast]);
 
@@ -152,28 +144,40 @@ const Home: FC = () => {
       });
     } catch (error) {
       console.error('Failed to classify player:', error);
-      toast({
-        title: 'Erro',
-        description: 'Falha ao classificar o jogador.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
     }
   };
 
-  const types = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
-  const groupedData = types.map(type => ({
-    type,
-    data: guildData.filter(member => member.Kind === type),
-    onlineCount: guildData.filter(member => member.Kind === type && member.TimeOnline !== '00:00:00').length
-  }));
-  const unclassified = {
-    type: 'unclassified',
-    data: guildData.filter(member => !member.Kind || !types.includes(member.Kind)),
-    onlineCount: guildData.filter(member => (!member.Kind || !types.includes(member.Kind)) && member.TimeOnline !== '00:00:00').length
-  };
-  const allGroupedData = [...groupedData, unclassified].filter(group => group.data.length > 0);
+
+const normalizeTimeOnline = (timeOnline: string | null | undefined): string => {
+  return timeOnline && timeOnline.trim() !== '' ? timeOnline : '00:00:00';
+};
+
+const isOnline = (member: GuildMemberResponse): boolean => {
+  const normalizedTime = normalizeTimeOnline(member.TimeOnline);
+  return normalizedTime !== '00:00:00';
+};
+
+const groupedData = types.map(type => ({
+  type,
+  data: guildData.filter(member => member.Kind === type).map(member => ({
+    ...member,
+    TimeOnline: normalizeTimeOnline(member.TimeOnline)
+  })),
+  onlineCount: guildData.filter(member => member.Kind === type && isOnline(member)).length
+}));
+
+const unclassified = {
+  type: 'unclassified',
+  data: guildData.filter(member => !member.Kind || !types.includes(member.Kind)).map(member => ({
+    ...member,
+    TimeOnline: normalizeTimeOnline(member.TimeOnline)
+  })),
+  onlineCount: guildData.filter(member => 
+    (!member.Kind || !types.includes(member.Kind)) && isOnline(member)
+  ).length
+};
+
+const allGroupedData = [...groupedData, unclassified].filter(group => group.data.length > 0);
 
   if (status === 'loading') {
     return (
@@ -189,26 +193,15 @@ const Home: FC = () => {
     <DashboardLayout>
       <Box maxWidth="100%" overflow="hidden" fontSize="xs">
         <VStack spacing={1} align="stretch">
-          <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" bg="blue.900" p={2} mt={4} rounded="md">
+          <Flex justify="space-between" bg="blue.900" p={2} mt={4} rounded="md">
             <Box>
               <Flex align="center">
                 <InfoIcon mr={1} />
                 <Text fontWeight="bold">Instruções:</Text>
               </Flex>
-              <Text fontSize="xs">• Clique no personagem: ver detalhes</Text>
               <Text fontSize="xs">• Campo Local: atualizar em qual local do jogo o personagem se encontra.</Text>
               <Text fontSize="xs">• Clique no nome: para copiar o exiva para o CTRL+C</Text>
             </Box>
-            <Flex align="center" mt={{ base: 2, md: 0 }}>
-              <Text mr={2}>Layout:</Text>
-              <Switch
-                isChecked={!isVerticalLayout}
-                onChange={() => setIsVerticalLayout(!isVerticalLayout)}
-                colorScheme="teal"
-                size="sm"
-              />
-              <Text ml={2}>{isVerticalLayout ? 'Vertical' : 'Horizontal'}</Text>
-            </Flex>
           </Flex>
 
           <Button
@@ -247,47 +240,49 @@ const Home: FC = () => {
             </Box>
           ) : (
             <SimpleGrid columns={3} spacing={1}>
-              {allGroupedData.map(({ type, data, onlineCount }) => (
-                <Box 
-                  key={type} 
-                  bg="gray.800" 
-                  p={2} 
-                  rounded="lg" 
-                  shadow="md" 
-                  height="100%"
-                  minHeight="200px"
-                  display="flex"
-                  flexDirection="column"
-                >
-                  <Flex justify="space-between" align="center" mb={1}>
-                    <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
-                      <Text fontWeight="bold" cursor="help" fontSize="xs">
-                        {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
-                        <Icon as={InfoIcon} ml={1} w={2} h={2} />
-                      </Text>
-                    </Tooltip>
-                    <Badge colorScheme="green" fontSize="xx-small">
-                      {onlineCount} online
-                    </Badge>
-                  </Flex>
-                  {type === 'exitados' && (
-                    <Badge colorScheme="purple" mb={1} fontSize="xx-small">
-                      Geralmente em Robson Isle, Thais
-                    </Badge>
-                  )}
-                  <Box flexGrow={1} overflowY="auto">
-                    <GuildMemberTable
-                      data={data}
-                      onLocalChange={handleLocalChange}
-                      onClassificationChange={handleClassificationChange}
-                      layout={isVerticalLayout ? 'vertical' : 'horizontal'}
-                      showExivaInput={type !== 'exitados'}
-                      fontSize="xs"
-                    />
-                  </Box>
+            {allGroupedData.map(({ type, data, onlineCount }) => (
+              <Box 
+                key={type} 
+                bg="gray.800" 
+                p={2} 
+                rounded="lg" 
+                shadow="md" 
+                height="100%"
+                minHeight="200px"
+                display="flex"
+                flexDirection="column"
+              >
+                <Flex justify="space-between" align="center" mb={1}>
+                  <Tooltip label={`Personagens ${type === 'unclassified' ? 'não classificados' : `classificados como ${type}`}`} placement="top">
+                    <Text fontWeight="bold" cursor="help" fontSize="xs">
+                      {type === 'unclassified' ? 'Sem Classificação' : type.charAt(0).toUpperCase() + type.slice(1)}
+                      <Icon as={InfoIcon} ml={1} w={2} h={2} />
+                    </Text>
+                  </Tooltip>
+                  <Badge colorScheme="green" fontSize="xx-small">
+                    {onlineCount} online
+                  </Badge>
+                </Flex>
+                {type === 'exitados' && (
+                  <Badge colorScheme="purple" mb={1} fontSize="xx-small">
+                    Geralmente em Robson Isle, Thais
+                  </Badge>
+                )}
+                <Box flexGrow={1} overflowY="auto">
+                  <GuildMemberTable
+                    data={data}
+                    onLocalChange={handleLocalChange}
+                    onClassificationChange={handleClassificationChange}
+                    showExivaInput={type !== 'exitados'}
+                    fontSize="xs"
+                    types={types}
+                    addType={addType}
+                    isLoading={isLoading}
+                  />
                 </Box>
-              ))}
-            </SimpleGrid>
+              </Box>
+            ))}
+          </SimpleGrid>
           )}
 
           <Accordion allowToggle>

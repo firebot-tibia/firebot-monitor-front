@@ -24,6 +24,7 @@ export const LocalInput: FC<LocalInputProps> = ({
     return respawns.flatMap((city) =>
       city.spawns.map((spawn: any) => ({
         value: `[${city.city}] [${spawn.code}] ${spawn.name}`,
+        name: spawn.name,
         label: `[${city.city}] [${spawn.code}] ${spawn.name}`,
       }))
     );
@@ -45,13 +46,20 @@ export const LocalInput: FC<LocalInputProps> = ({
     onLocalChange(member, value);
   };
 
-  const handleOptionClick = (option: string) => {
-    setInputValue(option);
+  const handleOptionClick = (optionLabel: string) => {
+    const selectedOption = respawnOptions.find(
+      (option) => option.label === optionLabel
+    );
+
+    if (selectedOption) {
+      setInputValue(selectedOption.name);
+      onLocalChange(member, selectedOption.name);
+    }
+
     setFilteredOptions([]);
     setIsDropdownOpen(false);
-    onLocalChange(member, option);
   };
-
+  
   return (
     <Box position="relative" onClick={onClick} width="100%">
       <Input
