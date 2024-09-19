@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { GuildMemberResponse } from '../shared/interface/guild-member.interface';
+import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 
 const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
 

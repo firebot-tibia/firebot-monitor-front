@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
-import { useCharacterTypesView } from '../../../hooks/useTypeView';
+import { useCharacterTypesView } from '../../../hooks/characters/types/useTypeView';
 
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];

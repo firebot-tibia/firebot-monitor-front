@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getSession, signIn } from 'next-auth/react';
+import { getSession, signIn, signOut } from 'next-auth/react';
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -41,17 +41,22 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const session = await getSession();
+        await signIn('refresh');
+        
+        const newSession = await getSession();
 
-        if (session?.access_token) {
-          originalRequest.headers['Authorization'] = `Bearer ${session.access_token}`;
-          return api(originalRequest); 
+        if (newSession?.access_token) {
+          originalRequest.headers['Authorization'] = `Bearer ${newSession.access_token}`;
+          return api(originalRequest);
         } else {
-          signIn();
+          await signOut({ redirect: false });
+          window.location.href = '/';
+          return Promise.reject('Session expired');
         }
-      } catch (err) {
-        signIn();
-        return Promise.reject(err);
+      } catch (refreshError) {
+        await signOut({ redirect: false });
+        window.location.href = '/';
+        return Promise.reject(refreshError);
       }
     }
 

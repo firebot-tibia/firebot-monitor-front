@@ -4,7 +4,37 @@ import NextAuth from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { DecodedToken } from '../../../../shared/interface/auth.interface';
-import { refreshAccessToken } from '../../../../services/auth';
+
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+  try {
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, null, {
+      headers: {
+        'x-refresh-token': token.refresh_token,
+      },
+    });
+
+    const refreshedTokens = response.data;
+
+    if (!response.status || response.status !== 200) {
+      throw refreshedTokens;
+    }
+
+    const decoded = jwt.decode(refreshedTokens.access_token) as DecodedToken;
+
+    return {
+      ...token,
+      access_token: refreshedTokens.access_token,
+      refresh_token: refreshedTokens.refresh_token ?? token.refresh_token,
+      exp: decoded.exp,
+    };
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError',
+    };
+  }
+}
 
 const providers = [
   CredentialsProvider({

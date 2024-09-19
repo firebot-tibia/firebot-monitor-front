@@ -1,12 +1,15 @@
 export interface GuildMemberResponse {
-    Alias: string;
-    Kind: string;
-    Level: number;
-    Name: string;
-    OnlineStatus: boolean;
-    Status: string;
-    Vocation: string;
-    Local: string;
-    TimeOnline: string;
-  }
-  
+  Rank: string;
+  Name: string;
+  Alias: string;
+  Vocation: string;
+  Level: number;
+  JoiningDate: string;
+  OnlineStatus: boolean;
+  Kind: string;
+  Status: string;
+  Local: string;
+  Login: string;
+  TimeOnline: string;
+  LastLogin: string;
+}

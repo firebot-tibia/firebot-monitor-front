@@ -1,4 +1,4 @@
-import { Flex, IconButton, Spacer, HStack, Text } from "@chakra-ui/react";
+import { Flex, IconButton, Spacer, HStack, Text, Switch } from "@chakra-ui/react";
 import { FC, useCallback } from "react";
 import { FaSignOutAlt, FaBars } from "react-icons/fa";
 import { signOut } from "next-auth/react";
@@ -57,10 +57,17 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
         fontSize="24px"
       />
       <Text fontSize="2xl" fontWeight="bold" textAlign="center">
-        Enemy Monitor
+        {'enemy' ? 'Enemy' : 'Ally'} Monitor
       </Text>
       <Spacer />
       <HStack spacing={4}>
+        <HStack>
+          <Text fontSize="sm">Aliado</Text>
+          <Switch
+            colorScheme="red"
+          />
+          <Text fontSize="sm">Inimigo</Text>
+        </HStack>
         <IconButton
           aria-label="Logout"
           onClick={handleLogout}

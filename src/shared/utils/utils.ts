@@ -21,3 +21,21 @@ export const getTimeColor = (timeOnline: string) => {
   if (totalMinutes <= 30) return 'yellow.500';
   return 'inherit';
 };
+
+export const clearLocalStorage = () => {
+  if (typeof window !== 'undefined') {
+    const domain = 'monitor.firebot.run';
+
+    if (window.location.hostname === domain) {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          localStorage.removeItem(key);
+        }
+      }
+      console.log('LocalStorage cleared for', domain);
+    } else {
+      console.log('Not on the target domain. LocalStorage not cleared.');
+    }
+  }
+};
