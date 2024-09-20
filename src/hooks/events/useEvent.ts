@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { DecodedToken } from '../../shared/interface/auth.interface';
 
 export const useEventSource = (baseUrl: string | null, onMessage: (data: any) => void) => {
-  console.log('useEventSource hook initialized', { baseUrl });
-  const { data: session, status, update } = useSession();
+  const { data: session, update } = useSession();
   const [error, setError] = useState<Error | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const retryCount = useRef(0);
@@ -16,12 +15,9 @@ export const useEventSource = (baseUrl: string | null, onMessage: (data: any) =>
   const isSettingUp = useRef(false);
 
   const isTokenExpired = useCallback((token: string): boolean => {
-    console.log('Checking token expiration');
     try {
       const decoded = jwt.decode(token) as DecodedToken;
-      const currentTime = Math.floor(Date.now() / 1000);
-      const isExpired = decoded.exp <= currentTime;
-      console.log('Token expiration check result:', { isExpired, exp: decoded.exp, currentTime });
+      const isExpired = decoded.exp <= Math.floor(Date.now() / 1000);
       return isExpired;
     } catch (error) {
       console.error('Error decoding token:', error);
@@ -30,10 +26,8 @@ export const useEventSource = (baseUrl: string | null, onMessage: (data: any) =>
   }, []);
 
   const refreshToken = useCallback(async (): Promise<boolean> => {
-    console.log('Attempting to refresh token');
     try {
       const result = await update();
-      console.log('Token refresh result:', result);
       return !!result;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -41,88 +35,86 @@ export const useEventSource = (baseUrl: string | null, onMessage: (data: any) =>
     }
   }, [update]);
 
+  const getValidToken = useCallback(async (): Promise<string | null> => {
+    if (!session?.access_token) {
+      return null;
+    }
+
+    if (isTokenExpired(session.access_token)) {
+      const refreshSuccessful = await refreshToken();
+      if (!refreshSuccessful) {
+        router.push('/');
+        return null;
+      }
+    }
+
+    return session.access_token;
+  }, [session, isTokenExpired, refreshToken, router]);
+
   const setupEventSource = useCallback(async () => {
-    console.log('setupEventSource called', { isSettingUp: isSettingUp.current, baseUrl, sessionExists: !!session?.access_token });
-    if (isSettingUp.current || !baseUrl || !session?.access_token) {
-      console.log('Aborting setupEventSource');
+    if (isSettingUp.current || !baseUrl) {
       return;
     }
 
     isSettingUp.current = true;
-    console.log('Setting up EventSource');
 
     try {
-      if (isTokenExpired(session.access_token)) {
-        console.log('Token is expired, attempting refresh');
-        const refreshSuccessful = await refreshToken();
-        if (!refreshSuccessful) {
-          console.log('Token refresh failed, redirecting to home');
-          router.push('/');
-          return;
-        }
-        console.log('Token refresh successful');
+      const validToken = await getValidToken();
+      if (!validToken) {
+        return;
       }
 
       if (eventSourceRef.current) {
-        console.log('Closing existing EventSource connection');
         eventSourceRef.current.close();
       }
 
-      const fullUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(session.access_token)}`;
-      console.log('Creating new EventSource with URL:', fullUrl);
+      const fullUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(validToken)}`;
+
       eventSourceRef.current = new EventSource(fullUrl);
 
       eventSourceRef.current.onmessage = (event) => {
-        console.log('Received message from EventSource');
         try {
           const data = JSON.parse(event.data);
-          console.log('Parsed message data:', data);
           onMessage(data);
         } catch (parseError) {
           console.error('Error parsing event data:', parseError);
         }
       };
 
-      eventSourceRef.current.onerror = (event) => {
+      eventSourceRef.current.onerror = async (event) => {
         console.error('EventSource error:', event);
-        setError(new Error('Connection error'));
         eventSourceRef.current?.close();
 
         if (retryCount.current < maxRetries) {
           retryCount.current += 1;
-          console.log(`Scheduling retry... Attempt ${retryCount.current}`);
           setTimeout(() => {
-            console.log(`Retrying connection... Attempt ${retryCount.current}`);
             setupEventSource();
           }, retryDelay);
         } else {
-          console.log('Max retry attempts reached');
           setError(new Error('Max retry attempts reached'));
         }
       };
 
       eventSourceRef.current.onopen = () => {
-        console.log('EventSource connection opened successfully');
         retryCount.current = 0;
       };
+    } catch (setupError) {
+      console.error('Error in setupEventSource:', setupError);
+      setError(setupError as Error);
     } finally {
-      console.log('Finished setupEventSource');
       isSettingUp.current = false;
     }
-  }, [baseUrl, session, onMessage, isTokenExpired, refreshToken, router]);
+  }, [baseUrl, getValidToken, onMessage]);
 
   useEffect(() => {
-    console.log('useEffect triggered', { status, baseUrl });
-    if (status === 'authenticated' && baseUrl) {
-      console.log('Conditions met for setupEventSource');
+    if (session && baseUrl) {
       setupEventSource();
     }
 
     return () => {
-      console.log('Cleanup: closing EventSource connection');
       eventSourceRef.current?.close();
     };
-  }, [status, baseUrl, setupEventSource]);
+  }, [session, baseUrl, setupEventSource]);
 
   return { error };
 };

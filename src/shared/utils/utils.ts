@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 export const formatExp = (value: number): string => {
     const absValue = Math.abs(value);
     if (absValue >= 1e9) {
@@ -24,18 +26,13 @@ export const getTimeColor = (timeOnline: string) => {
 
 export const clearLocalStorage = () => {
   if (typeof window !== 'undefined') {
-    const domain = 'monitor.firebot.run';
-
-    if (window.location.hostname === domain) {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key) {
-          localStorage.removeItem(key);
-        }
-      }
-      console.log('LocalStorage cleared for', domain);
-    } else {
-      console.log('Not on the target domain. LocalStorage not cleared.');
+    try {
+      const currentDomain = window.location.hostname;
+      if (currentDomain === 'localhost' || currentDomain === 'monitor.firebot.run') {
+        localStorage.removeItem('deathList');
+      } 
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
     }
   }
 };

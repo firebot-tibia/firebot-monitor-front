@@ -11,9 +11,9 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
-import { characterTypeIcons } from '../../../../constant/character';
-import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
-import { CharacterTypesManager } from '../../character-type';
+import { characterTypeIcons } from '../../../constant/character';
+import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
+import { CharacterTypesManager } from '../character-type';
 
 interface CharacterClassificationProps {
   member: GuildMemberResponse;

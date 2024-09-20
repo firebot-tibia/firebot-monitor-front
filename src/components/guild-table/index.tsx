@@ -1,13 +1,13 @@
 import React, { FC } from 'react';
 import { 
   Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box, 
-  useToast, Spinner, useColorModeValue
+  useToast, Spinner, useColorModeValue, Badge
 } from '@chakra-ui/react';
-import { vocationIcons } from '../../../constant/character';
-import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
-import { copyExivas } from '../../../shared/utils/options-utils';
-import { getTimeColor } from '../../../shared/utils/utils';
-import { LocalInput } from '../local-input';
+import { vocationIcons } from '../../constant/character';
+import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
+import { copyExivas } from '../../shared/utils/options-utils';
+import { getTimeColor } from '../../shared/utils/utils';
+import { LocalInput } from './local-input';
 import { CharacterClassification } from './render-classification';
 
 interface GuildMemberTableProps {
@@ -19,6 +19,7 @@ interface GuildMemberTableProps {
   types: string[];
   addType: (newType: string) => void;
   isLoading: boolean;
+  onlineCount: number;
 }
 
 const ClassificationLegend: FC = () => (
@@ -47,7 +48,8 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   fontSize,
   types,
   addType,
-  isLoading
+  isLoading,
+  onlineCount
 }) => {
   const toast = useToast();
   const bgColor = useColorModeValue('gray.800', 'gray.900');
@@ -70,7 +72,12 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
 
   return (
     <Box bg={bgColor} p={4} borderRadius="md">
-      <ClassificationLegend />
+      <HStack justify="space-between" mb={2}>
+        <ClassificationLegend />
+        <Badge colorScheme="green" fontSize="xs">
+          {onlineCount} online
+        </Badge>
+      </HStack>
       <Table variant="simple" size="sm" fontSize={fontSize} color={textColor}>
         <Thead>
           <Tr>

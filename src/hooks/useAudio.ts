@@ -14,7 +14,7 @@ export const useAudio = (audioSrc: string) => {
   useEffect(() => {
     if (typeof window !== 'undefined' && !audioRef.current) {
       audioRef.current = new Audio(audioSrc);
-      audioRef.current.load();
+      audioRef.current.preload = 'auto';
     }
   }, [audioSrc]);
 
@@ -24,15 +24,10 @@ export const useAudio = (audioSrc: string) => {
 
   const initializeAudio = useCallback(() => {
     if (audioRef.current && !audioInitialized) {
-      const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADQgBtbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbW1t//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAYAAAAAAAAAQgvm6pPRAAAAAAAAAAAAAAAAAAAA//t8wAAAAAAAlgAAAAAAAAAAAAAAAAAAAAAAAACrJGHvAAAAAAABeZcvAAAAAAAL55vQz8wbO9jY2NjY2djY2H7zH0DYLSLKssM8ERBkzTcNO00TLIcWcILDROkOQERDH7D3H7ABxBBxHCDiAASgAADCgCHBY4fEAmAAB7mQF7GD7zgQgIgGIJiYfIxD/rCCBhxgcZCPwD5bE9DLjDPEhxB8hAQ4L3EcDjBxgAYAmfzIe8HYOQDW5sLt7kQc9kQ6YYZAYICCDnMFR4gAzGBATsYQAzLBMrOZg1TA5GBcSsTCrHfDxDhAOCxTAQMOGCdTA8IDEjBBaDBA7JQFA6IwzOJmWOZBUmM1xjMC0xkKEzMExNIwKCNzAQCzA8JjAwGgJjA0BBADMw4BRzAQCTTvlXZLGzqbOlmm1Dt5vOnjLfUMG7sM+Nq2ZlkWHn/Hg3OhHUgWopRqtjYtTWo02oA40YttQZNQXbM0SbE3C4cKjZXNgAKpASALOAQQVs8k+c79/87+c+/t///vYxm7GYmJGXmJicf85uY/zn");
-      silentAudio.play().then(() => {
-        setAudioInitialized(true);
-        if (audioEnabled && audioRef.current) {
-          audioRef.current.play().catch(error => console.error('Error playing audio:', error));
-        }
-      }).catch(error => console.error('Error initializing audio:', error));
+      audioRef.current.load();
+      setAudioInitialized(true);
     }
-  }, [audioEnabled, audioInitialized]);
+  }, [audioInitialized]);
 
   const enableAudio = useCallback(() => {
     setAudioEnabled(true);
@@ -41,17 +36,14 @@ export const useAudio = (audioSrc: string) => {
 
   const playAudio = useCallback(() => {
     if (audioEnabled && audioRef.current) {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.error('Error playing audio:', error);
-          if (error.name === 'NotAllowedError') {
-            initializeAudio();
-          }
-        });
-      }
+      audioRef.current.play().catch((error) => {
+        console.error('Error playing audio:', error);
+        if (error.name === 'NotAllowedError') {
+          console.log('Audio autoplay blocked. Waiting for user interaction.');
+        }
+      });
     }
-  }, [audioEnabled, initializeAudio]);
+  }, [audioEnabled]);
 
   return { audioEnabled, enableAudio, playAudio, initializeAudio };
 };

@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { useDeaths } from './useDeaths';
 import { Death } from '../../shared/interface/death.interface';
 import { useEventSource } from '../events/useEvent';
 
-export const useDeathData = () => {
+export const useDeathData = (mode: 'ally' | 'enemy') => {
   const [newDeathCount, setNewDeathCount] = useState(0);
   const { deathList, addDeath } = useDeaths();
   const toast = useToast();
@@ -32,14 +32,19 @@ export const useDeathData = () => {
     }
   }, [handleNewDeath]);
 
-  useEventSource(
-    'https://api.firebot.run/subscription/enemy/',
+  const { error } = useEventSource(
+    `https://api.firebot.run/subscription/${mode}/`,
     handleMessage
   );
+
+  useEffect(() => {
+    setNewDeathCount(0);
+  }, [mode]);
 
   return {
     newDeathCount,
     deathList,
-    handleNewDeath
+    handleNewDeath,
+    error
   };
 };

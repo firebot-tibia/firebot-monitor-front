@@ -1,26 +1,25 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 
 const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
 
 export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
-  const [types, setTypes] = useState<string[]>(fixedTypes);
+  const [customTypes, setCustomTypes] = useState<string[]>([]);
   const toast = useToast();
 
-  useEffect(() => {
+  const types = useMemo(() => {
     if (Array.isArray(guildData) && guildData.length > 0) {
       const allTypes = guildData.map(member => member.Kind);
       const uniqueTypes = Array.from(new Set(allTypes.filter(type => type && type.trim() !== '')));
-      const combinedTypes = Array.from(new Set([...fixedTypes, ...uniqueTypes]));
-      
-      setTypes(combinedTypes);
+      return Array.from(new Set([...fixedTypes, ...customTypes, ...uniqueTypes]));
     }
-  }, [guildData]);
+    return [...fixedTypes, ...customTypes];
+  }, [guildData, customTypes]);
 
   const addType = useCallback((newType: string) => {
-    setTypes(prevTypes => {
-      if (prevTypes.includes(newType)) {
+    setCustomTypes(prevTypes => {
+      if ([...fixedTypes, ...prevTypes].includes(newType)) {
         toast({
           title: "Tipo já existe",
           description: `O tipo "${newType}" já está na lista.`,

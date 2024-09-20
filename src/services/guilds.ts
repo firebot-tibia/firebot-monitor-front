@@ -32,3 +32,13 @@ export const getPlayerOnlineHistory = async (query: { character: string; }) => {
   }
 };
 
+export const getPlayersLifeTimeDeaths = async (query: { character: string; }) => {
+  try {
+    const response = await api.get(`/gamedata/players/deaths`, {
+      params: query,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

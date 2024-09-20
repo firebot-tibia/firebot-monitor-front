@@ -1,9 +1,4 @@
-export interface AuthDTO {
-    email?: string;
-    password?: string;
-}
-  
-  export interface DecodedToken {
+export interface DecodedToken {
     ally_guild: string;
     email: string;
     enemy_guild: string;

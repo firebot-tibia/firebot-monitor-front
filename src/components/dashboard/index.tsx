@@ -5,7 +5,13 @@ import { FC, useState } from "react";
 import Topbar from "./topbar";
 import { Navbar } from "./navbar";
 
-const DashboardLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+  mode?: 'ally' | 'enemy';
+  setMode?: (mode: 'ally' | 'enemy') => void;
+}
+
+const DashboardLayout: FC<DashboardLayoutProps> = ({ children, mode, setMode }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = () => {
@@ -14,7 +20,11 @@ const DashboardLayout: FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <Flex direction="column" h="100vh">
-      <Topbar onToggleMenu={handleToggle} />
+      <Topbar 
+        onToggleMenu={handleToggle} 
+        mode={mode} 
+        setMode={setMode}
+      />
       
       <Flex flex="1">
         <Navbar isOpen={isOpen} onToggle={handleToggle} />

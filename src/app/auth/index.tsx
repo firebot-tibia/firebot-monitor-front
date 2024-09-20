@@ -46,6 +46,7 @@ const LoginPage = () => {
 
     try {
       const data: AuthDTO = { email, password };
+      
       const signInResult = await signIn('credentials', {
         email: data.email.trim(),
         password: data.password.trim(),
@@ -77,6 +78,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (status === 'authenticated') {
+      localStorage.setItem('monitorMode', 'enemy');
       router.push('/home');
     }
   }, [status, router]);
