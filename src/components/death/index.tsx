@@ -10,7 +10,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Death } from "../../shared/interface/death.interface";
-import { useAudio } from "../../hooks/useAudio";
+import { useAudio } from "../../hooks/global/useAudio";
 import { Pagination } from "../pagination";
 import { DeathDetail } from "./death-detail";
 import { DeathTableContent } from "./death-table";

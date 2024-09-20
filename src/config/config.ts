@@ -1,5 +1,6 @@
 import { FaMap, FaDiscord } from "react-icons/fa";
 import { IoMdStats } from "react-icons/io";
+import { FaOptinMonster } from "react-icons/fa6";
 
 export const config = {
   titleNotFound: 'Página não encontrada',
@@ -12,6 +13,11 @@ export const config = {
       name: 'Estatísticas da Guild',
       href: '/guild-stats',
       icon: IoMdStats,
+    },
+    {
+      name: 'Respawns',
+      href: '/respawn',
+      icon: FaOptinMonster,
     },
     {
       name: 'Mapa Exiva',

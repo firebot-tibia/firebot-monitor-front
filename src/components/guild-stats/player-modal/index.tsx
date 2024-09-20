@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -13,232 +13,143 @@ import {
   Stat,
   StatLabel,
   StatNumber,
-  StatHelpText,
-  Select,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
   useColorModeValue,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Spinner,
 } from '@chakra-ui/react';
-import { Line, Bar } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { getPlayerOnlineHistory } from '../../../services/guilds';
+import { getPlayerOnlineHistory, getPlayersLifeTimeDeaths } from '../../../services/guilds';
+import { PlayerModalProps, OnlineTimeDay, PlayerDeaths, DeathData } from '../../../shared/interface/guild-stats-player.interface';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
-interface PlayerModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  characterName: string | null;
-}
-
-interface OnlineTimeMessage {
-  duration: string;
-  end_time: string;
-  start_time: string;
-}
-
-interface OnlineTimeDay {
-  date: string;
-  online_time_messages: OnlineTimeMessage[] | null;
-  total_online_time: number;
-  total_online_time_str: string;
-}
-
 const PlayerModal: React.FC<PlayerModalProps> = ({ isOpen, onClose, characterName }) => {
   const [onlineHistory, setOnlineHistory] = useState<OnlineTimeDay[]>([]);
+  const [deathData, setDeathData] = useState<PlayerDeaths | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState<string>('');
 
-  const barColor = useColorModeValue('#3182CE', '#63B3ED');
-  const lineColor = useColorModeValue('#38A169', '#68D391');
-  const textColor = useColorModeValue('gray.800', 'white');
+  const bgColor = useColorModeValue('gray.800', 'gray.900');
+  const textColor = useColorModeValue('gray.100', 'gray.50');
+  const lineColor = useColorModeValue('#68D391', '#38A169');
 
   useEffect(() => {
-    const fetchOnlineHistory = async () => {
+    const fetchData = async () => {
       if (characterName) {
         try {
           setLoading(true);
-          const data = await getPlayerOnlineHistory({ character: characterName });
-          setOnlineHistory(data.online_time.online_time_days);
-          if (data.online_time.online_time_days.length > 0) {
-            const sortedDays = [...data.online_time.online_time_days].sort((a, b) => 
-              new Date(b.date).getTime() - new Date(a.date).getTime()
-            );
-            setSelectedDay(sortedDays[0].date);
-          }
+          setError(null);
+          const [onlineData, deathsData] = await Promise.all([
+            getPlayerOnlineHistory({ character: characterName }),
+            getPlayersLifeTimeDeaths({ character: characterName })
+          ]);
+          setOnlineHistory(onlineData.online_time.online_time_days || []);
+          setDeathData(deathsData.deaths);
         } catch (err) {
-          setError('Falha ao buscar histórico online');
+          console.error('Error fetching player data:', err);
+          setError('Falha ao buscar dados do jogador');
         } finally {
           setLoading(false);
         }
       }
     };
 
-    fetchOnlineHistory();
+    fetchData();
   }, [characterName]);
 
-  const sortedOnlineHistory = useMemo(() => {
-    return [...onlineHistory].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  }, [onlineHistory]);
-
-  const prepareChartData = (day: OnlineTimeDay) => {
-    const data = new Array(24).fill(0).map((_, index) => ({
-      hour: index.toString().padStart(2, '0') + ':00',
-      online: 0,
-    }));
-
-    if (day.online_time_messages) {
-      day.online_time_messages.forEach(message => {
-        const startHour = new Date(message.start_time).getUTCHours();
-        const endHour = new Date(message.end_time).getUTCHours();
-        for (let i = startHour; i <= endHour; i++) {
-          data[i].online = 1;
-        }
-      });
-    }
-
-    return data;
-  };
-
   const prepareWeeklyData = () => {
-    const weeklyData = sortedOnlineHistory.slice(0, 7).map(day => ({
+    const weeklyData = (onlineHistory || []).slice(0, 7).map(day => ({
       date: new Date(day.date).toLocaleDateString('pt-BR', { weekday: 'short' }),
-      onlineTime: day.total_online_time / 3600, // Convert to hours
+      onlineTime: day.total_online_time / 3600,
     }));
     return weeklyData.reverse();
   };
 
-  const selectedDayData = onlineHistory.find(day => day.date === selectedDay);
+  const renderDeathsTable = () => {
+    if (!deathData || !Array.isArray(deathData.deaths) || deathData.deaths.length === 0) {
+      return <Text>Nenhum dado de morte disponível.</Text>;
+    }
 
-  const playerInfo = {
-    name: characterName,
-    vocation: 'Knight',
-    level: 250,
-    deaths: {
-      daily: 2,
-      weekly: 5,
-      monthly: 15
-    },
-  };
-
-  const expData = {
-    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
-    datasets: [
-      {
-        label: 'Experiência Diária',
-        data: Array.from({length: 30}, () => Math.floor(Math.random() * 1000000)),
-        borderColor: lineColor,
-        tension: 0.1
-      }
-    ]
+    return (
+      <Table variant="simple" size="sm">
+        <Thead>
+          <Tr>
+            <Th>Data</Th>
+            <Th>Nível</Th>
+            <Th>Assassinos</Th>
+            <Th>Descrição</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {deathData.deaths.map((death: DeathData, index: number) => (
+            <Tr key={index}>
+              <Td>{new Date(death.date).toLocaleDateString('pt-BR')}</Td>
+              <Td>{death.text.match(/Level (\d+)/)?.[1] || 'N/A'}</Td>
+              <Td>{death.killers.slice(0, 3).join(', ')}{death.killers.length > 3 ? ` e mais ${death.killers.length - 3}` : ''}</Td>
+              <Td>{death.text}</Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+    );
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
-      <ModalContent maxWidth="90vw">
+      <ModalContent maxWidth="90vw" bg={bgColor} color={textColor}>
         <ModalHeader>{characterName}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Tabs>
-            <TabList>
-              <Tab>Informações Gerais</Tab>
-              <Tab>Histórico Online</Tab>
-              <Tab>Experiência</Tab>
-            </TabList>
+          {loading ? (
+            <VStack spacing={4}>
+              <Spinner size="xl" />
+              <Text>Carregando...</Text>
+            </VStack>
+          ) : error ? (
+            <Text color="red.500">{error}</Text>
+          ) : (
+            <Tabs variant="soft-rounded" colorScheme="green">
+              <TabList>
+                <Tab>Informações Gerais</Tab>
+                <Tab>Histórico Online</Tab>
+                <Tab>Histórico de Mortes</Tab>
+              </TabList>
 
-            <TabPanels>
-              <TabPanel>
-                <VStack spacing={4} align="stretch">
-                  <HStack justify="space-between">
-                    <Text>Vocação: {playerInfo.vocation}</Text>
-                    <Text>Nível: {playerInfo.level}</Text>
-                  </HStack>
-                  
-                  <Box>
-                    <Text fontWeight="bold">Mortes:</Text>
+              <TabPanels>
+                <TabPanel>
+                  <VStack spacing={4} align="stretch">
                     <HStack justify="space-between">
                       <Stat>
-                        <StatLabel>Diária</StatLabel>
-                        <StatNumber>{playerInfo.deaths.daily}</StatNumber>
+                        <StatLabel>Mortes (Último Dia)</StatLabel>
+                        <StatNumber>{deathData?.last_day || 0}</StatNumber>
                       </Stat>
                       <Stat>
-                        <StatLabel>Semanal</StatLabel>
-                        <StatNumber>{playerInfo.deaths.weekly}</StatNumber>
+                        <StatLabel>Mortes (Última Semana)</StatLabel>
+                        <StatNumber>{deathData?.last_week || 0}</StatNumber>
                       </Stat>
                       <Stat>
-                        <StatLabel>Mensal</StatLabel>
-                        <StatNumber>{playerInfo.deaths.monthly}</StatNumber>
+                        <StatLabel>Mortes (Último Mês)</StatLabel>
+                        <StatNumber>{deathData?.last_month || 0}</StatNumber>
                       </Stat>
                     </HStack>
-                  </Box>
-                </VStack>
-              </TabPanel>
+                  </VStack>
+                </TabPanel>
 
-              <TabPanel>
-                <VStack spacing={4} align="stretch">
-                  <Select
-                    value={selectedDay}
-                    onChange={(e) => setSelectedDay(e.target.value)}
-                    color={textColor}
-                  >
-                    {sortedOnlineHistory.map(day => (
-                      <option key={day.date} value={day.date}>
-                        {new Date(day.date).toLocaleDateString()} - Total: {day.total_online_time_str}
-                      </option>
-                    ))}
-                  </Select>
-                  {selectedDayData && (
-                    <Box height="400px" width="100%">
-                      <Bar
-                        data={{
-                          labels: prepareChartData(selectedDayData).map(d => d.hour),
-                          datasets: [{
-                            label: 'Status Online',
-                            data: prepareChartData(selectedDayData).map(d => d.online),
-                            backgroundColor: barColor,
-                          }]
-                        }}
-                        options={{
-                          responsive: true,
-                          scales: {
-                            y: {
-                              beginAtZero: true,
-                              max: 1,
-                              ticks: {
-                                stepSize: 1,
-                                callback: function(value) {
-                                  if (value === 0) return 'Offline';
-                                  if (value === 1) return 'Online';
-                                  return '';
-                                }
-                              }
-                            }
-                          },
-                          plugins: {
-                            legend: {
-                              display: false
-                            },
-                            tooltip: {
-                              callbacks: {
-                                label: function(context) {
-                                  return context.parsed.y === 1 ? 'Online' : 'Offline';
-                                }
-                              }
-                            }
-                          }
-                        }}
-                      />
-                    </Box>
-                  )}
+                <TabPanel>
                   <Box height="300px" width="100%">
-                    <Text fontWeight="bold" mb={2}>Tempo Online nos Últimos 7 Dias</Text>
+                    <Text fontWeight="bold" mb={2}>Tempo Online (Últimos 7 Dias)</Text>
                     <Line
                       data={{
                         labels: prepareWeeklyData().map(d => d.date),
@@ -263,28 +174,14 @@ const PlayerModal: React.FC<PlayerModalProps> = ({ isOpen, onClose, characterNam
                       }}
                     />
                   </Box>
-                </VStack>
-              </TabPanel>
+                </TabPanel>
 
-              <TabPanel>
-                <Box height="400px" width="100%">
-                  <Text fontWeight="bold" mb={2}>Gráfico de Experiência Mensal</Text>
-                  <Line data={expData} options={{
-                    responsive: true,
-                    plugins: {
-                      legend: {
-                        position: 'top' as const,
-                      },
-                      title: {
-                        display: true,
-                        text: 'Experiência Diária no Último Mês'
-                      }
-                    }
-                  }} />
-                </Box>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+                <TabPanel>
+                  {renderDeathsTable()}
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          )}
         </ModalBody>
       </ModalContent>
     </Modal>

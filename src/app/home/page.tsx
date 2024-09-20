@@ -13,7 +13,7 @@ import DeathSection from '../../components/guild/death-section';
 import GuildDataSection from '../../components/guild/guild-data-section';
 import InstructionsSection from '../../components/guild/instructions-section';
 import MonitorToggleSection from '../../components/guild/monitor-toggle-section';
-import { useLocalStorageMode } from '../../hooks/useLocalStorageParse';
+import { useLocalStorageMode } from '../../hooks/global/useLocalStorageParse';
 import { useDeathData } from '../../hooks/deaths/useDeathHook';
 
 
