@@ -171,7 +171,11 @@ const PlayerExperience: React.FC<PlayerExperienceProps> = ({ characterName }) =>
               label += ': ';
             }
             if (context.parsed.y !== null) {
-              label += formatLargeNumber(context.parsed.y);
+              if (context.dataset.label === 'Experiência Total') {
+                label += formatLargeNumber(context.parsed.y);
+              } else {
+                label += context.parsed.y;
+              }
             }
             return label;
           }

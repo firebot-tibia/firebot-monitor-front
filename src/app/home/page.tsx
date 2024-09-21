@@ -52,7 +52,24 @@ const Home: FC = () => {
     }
   }, [status, session, mode]);
 
+
+  const checkPermission = useCallback(() => {
+    const userStatus = session?.user?.status;
+    if (userStatus !== 'admin' && userStatus !== 'editor') {
+      toast({
+        title: 'Permissão negada',
+        description: 'Você não tem permissão para editar estas informações.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return false;
+    }
+    return true;
+  }, [session, toast]);
+
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
+    if (!checkPermission()) return;
     if (!guildId) return;
 
     try {
@@ -76,6 +93,7 @@ const Home: FC = () => {
   }, [guildId]);
 
   const handleClassificationChange = useCallback(async (member: GuildMemberResponse, newClassification: string) => {
+    if (!checkPermission()) return;
     if (!guildId) return;
   
     try {
