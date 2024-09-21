@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
 import { Box, Heading } from '@chakra-ui/react';
-import DashboardLayout from '../../components/dashboard';
-import GuildStatsContainer from '../../components/guild-stats/container';
+import DashboardLayout from '../../components/layout';
+import GuildStatsContainer from '../../components/guild/guild-stats/container';
 
 const GuildStats: React.FC = () => {
   return (

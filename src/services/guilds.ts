@@ -44,6 +44,17 @@ export const getPlayersLifeTimeDeaths = async (query: { character: string; }) =>
   }
 };
 
+export const getPlayerExperienceHistory = async (query: { character: string; }) => {
+  try {
+    const response = await api.get(`/gamedata/players/experience-history`, {
+      params: query,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getGuildStats = async (query: { guild_id: string; }) => {
   try {
     const response = await api.get(`/gamedata/guilds/statistics`, {

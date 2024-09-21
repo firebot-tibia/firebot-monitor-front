@@ -2,19 +2,19 @@
 
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Spinner, VStack, useToast } from '@chakra-ui/react';
-import DashboardLayout from '../../components/dashboard';
+import DashboardLayout from '../../components/layout';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { useSession } from 'next-auth/react';
 import { upsertPlayer } from '../../services/guilds';
 import { useEventSource } from '../../hooks/events/useEvent';
 import { useCharacterTypes } from '../../hooks/characters/types/useType';
-import { normalizeTimeOnline, isOnline } from '../../shared/utils/guild-utils';
-import DeathSection from '../../components/guild/death-section';
-import GuildDataSection from '../../components/guild/guild-data-section';
-import InstructionsSection from '../../components/guild/instructions-section';
-import MonitorToggleSection from '../../components/guild/monitor-toggle-section';
+import GuildDataSection from '../../components/guild/sections/guild-data-section';
+import InstructionsSection from '../../components/guild/sections/instructions-section';
+import MonitorToggleSection from '../../components/guild/sections/monitor-toggle-section';
 import { useLocalStorageMode } from '../../hooks/global/useLocalStorageParse';
 import { useDeathData } from '../../hooks/deaths/useDeathHook';
+import DeathSection from '../../components/guild/sections/death-section';
+import { normalizeTimeOnline, isOnline } from '../../shared/utils/utils';
 
 
 const Home: FC = () => {  

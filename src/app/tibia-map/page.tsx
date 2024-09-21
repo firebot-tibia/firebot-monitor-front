@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import DashboardLayout from '../../components/dashboard';
+import DashboardLayout from '../../components/layout';
 
 const GulpHtmlPage: React.FC = () => {
   const [htmlContent, setHtmlContent] = useState<string>('');

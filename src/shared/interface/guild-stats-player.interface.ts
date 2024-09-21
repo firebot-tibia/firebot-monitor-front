@@ -4,13 +4,6 @@ export interface PlayerModalProps {
     characterName: string | null;
   }
   
-export interface OnlineTimeDay {
-    date: string;
-    online_time_messages: { duration: string; end_time: string; start_time: string; }[] | null;
-    total_online_time: number;
-    total_online_time_str: string;
-}
-  
 export interface DeathData {
     date: string;
     killers: string[];
@@ -25,3 +18,9 @@ export interface PlayerDeaths {
     name: string;
 }
   
+export interface OnlineTimeDay {
+    date: string;
+    online_time_messages: { duration: string; end_time: string; start_time: string; }[] | null;
+    total_online_time: number;
+    total_online_time_str: string;
+  }
