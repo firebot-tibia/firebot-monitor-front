@@ -1,7 +1,7 @@
 'use client';
 
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { Box, Spinner, VStack, useToast } from '@chakra-ui/react';
+import { Box, Flex, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, VStack, useToast } from '@chakra-ui/react';
 import DashboardLayout from '../../components/layout';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { useSession } from 'next-auth/react';
@@ -151,33 +151,45 @@ const Home: FC = () => {
   if (status === 'loading' || isLoading) {
     return (
       <DashboardLayout mode={mode} setMode={setMode}>
-        <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <Flex justify="center" align="center" height="100vh">
           <Spinner size="xl" />
-        </Box>
+        </Flex>
       </DashboardLayout>
     );
   }
 
   return (
-   <DashboardLayout mode={mode} setMode={setMode}>
-      <Box maxWidth="100%" overflow="hidden" fontSize="xs">
-        <VStack spacing={1} align="stretch">
+    <DashboardLayout mode={mode} setMode={setMode}>
+      <Box maxWidth="100%" overflow="hidden" fontSize={["xs", "sm", "md"]}>
+        <VStack spacing={4} align="stretch">
           <InstructionsSection />
           <MonitorToggleSection guildData={guildData} isLoading={isLoading} />
-          <GuildDataSection
-            isLoading={isLoading}
-            guildData={guildData}
-            groupedData={groupedData}
-            handleLocalChange={handleLocalChange}
-            handleClassificationChange={handleClassificationChange}
-            types={types}
-            addType={addType}
-          />
-          <DeathSection
-            deathList={deathList}
-            newDeathCount={newDeathCount}
-            handleNewDeath={handleNewDeath}
-          />
+          <Tabs isFitted variant="enclosed">
+            <TabList mb="1em">
+              <Tab>Monitoramento de Guilds</Tab>
+              <Tab>Lista de Mortes</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <GuildDataSection
+                  isLoading={isLoading}
+                  guildData={guildData}
+                  groupedData={groupedData}
+                  handleLocalChange={handleLocalChange}
+                  handleClassificationChange={handleClassificationChange}
+                  types={types}
+                  addType={addType}
+                />
+              </TabPanel>
+              <TabPanel>
+                <DeathSection
+                  deathList={deathList}
+                  newDeathCount={newDeathCount}
+                  handleNewDeath={handleNewDeath}
+                />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
         </VStack>
       </Box>
     </DashboardLayout>

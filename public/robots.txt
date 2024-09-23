@@ -1,0 +1,5 @@
+user-agent: 
+*Disallow: /admin/
+Disallow: /privado/
+Allow: /
+Sitemap: https://monitor.firebot.run/sitemap.xml

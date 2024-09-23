@@ -1,5 +1,6 @@
 import { UpsertPlayerInput } from '../shared/interface/character-upsert.interface';
 import { ExperienceListQuery } from '../shared/interface/guild-stats.interface';
+import { CreateReservationData, ReservationsListResponse } from '../shared/interface/reservations.interface';
 import api from './api';
 
 export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
@@ -60,6 +61,44 @@ export const getGuildStats = async (query: { guild_id: string; }) => {
     const response = await api.get(`/gamedata/guilds/statistics`, {
       params: query,
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getReservationsList = async (query: { 
+  guild_id: string;
+  status?: 'reserved' | 'canceled' | 'free';
+  start_time_greater?: string;
+  start_time_less?: string;
+  end_time_greater?: string;
+  end_time_less?: string;
+}): Promise<ReservationsListResponse> => {
+  try {
+    const response = await api.get<ReservationsListResponse>('/api/reservations/list', {
+      params: query,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createReservation = async (reservationData: CreateReservationData) => {
+  try {
+    const response = await api.post('/reservations/create', {
+      reservation: reservationData
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteReservation = async (id: number) => {
+  try {
+    const response = await api.delete(`/reservations/${id}`);
     return response.data;
   } catch (error) {
     throw error;

@@ -95,7 +95,6 @@ const LoginPage = () => {
         display={{ base: "none", md: "flex" }}
       >
         <VStack spacing={4}>
-          <Image src="assets/logo.png" alt="" maxW={{ base: "20%", md: "20%", lg: "20%" }} />
           <Heading as="h2" size="xl" textAlign="center">
             Bem vindo,
           </Heading>

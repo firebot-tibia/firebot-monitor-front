@@ -1,5 +1,5 @@
 import React from 'react';
-import { Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Box, Badge } from '@chakra-ui/react';
+import { Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Box, Badge, Flex, Heading } from '@chakra-ui/react';
 import { Death } from '../../../../shared/interface/death.interface';
 import DeathTable from '../../../death-list';
 
@@ -9,29 +9,22 @@ interface DeathSectionProps {
   handleNewDeath: (newDeath: Death) => void;
 }
 
-const DeathSection: React.FC<DeathSectionProps> = React.memo(({ deathList, newDeathCount, handleNewDeath }) => (
-  <Accordion allowToggle>
-    <AccordionItem>
-      <h2>
-        <AccordionButton>
-          <Box flex="1" textAlign="center">
-            Mortes Recentes
-          </Box>
-          <AccordionIcon />
-          {newDeathCount > 0 && (
-            <Badge ml={2} colorScheme="red" borderRadius="full">
-              {newDeathCount}
-            </Badge>
-          )}
-        </AccordionButton>
-      </h2>
-      <AccordionPanel pb={4}>
-        <DeathTable deathList={deathList} onNewDeath={handleNewDeath} />
-      </AccordionPanel>
-    </AccordionItem>
-  </Accordion>
-));
-
-DeathSection.displayName = 'DeathSection';
+const DeathSection: React.FC<DeathSectionProps> = ({ deathList, newDeathCount, handleNewDeath }) => {
+  return (
+    <Box>
+      <Flex align="center" justify="center" mb={4}>
+        <Heading as="h2" size="md">
+          Mortes Recentes
+        </Heading>
+        {newDeathCount > 0 && (
+          <Badge ml={2} colorScheme="red" borderRadius="full">
+            {newDeathCount}
+          </Badge>
+        )}
+      </Flex>
+      <DeathTable deathList={deathList} onNewDeath={handleNewDeath} />
+    </Box>
+  );
+};
 
 export default DeathSection;
