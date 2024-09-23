@@ -89,7 +89,7 @@ const capitalizeWords = (str: string) => {
 
 export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof useToast>) => {
   const capitalizedName = capitalizeWords(data.Name.trim());
-  const exivas = `exiva "${capitalizedName}"`;
+  const exivas = `exiva "${capitalizedName}`;
   navigator.clipboard.writeText(exivas);
   toast({
     title: 'Exiva copiado para a área de transferência.',
