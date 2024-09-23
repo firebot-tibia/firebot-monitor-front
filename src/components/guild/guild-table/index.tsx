@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { 
   Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box, 
-  useToast, Spinner, useColorModeValue, Badge
+  useToast, Spinner, useColorModeValue, Badge, Flex
 } from '@chakra-ui/react';
 
 import { LocalInput } from './local-input';
@@ -56,8 +56,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   const hoverBgColor = useColorModeValue('gray.700', 'gray.800');
   const textColor = useColorModeValue('white', 'gray.100');
 
-  const handleNameClick = (e: React.MouseEvent, member: GuildMemberResponse) => {
-    e.stopPropagation();
+  const handleNameClick = (member: GuildMemberResponse) => {
     copyExivas(member, toast);
   };
 
@@ -82,7 +81,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         <Thead>
           <Tr>
             <Th px={1} py={1} color={textColor}>#</Th>
-            <Th px={1} py={1} color={textColor}>Personagem</Th>
+            <Th px={1} py={1} color={textColor} width="40%">Personagem</Th>
             <Th px={1} py={1} color={textColor}>Lvl</Th>
             <Th px={1} py={1} color={textColor}>Tipo</Th>
             <Th px={1} py={1} color={textColor}>Tempo</Th>
@@ -94,21 +93,21 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             data.map((member, index) => (
               <Tr 
                 key={member.Name}
-                cursor="pointer"
                 _hover={{ bg: hoverBgColor }}
               >
                 <Td px={1} py={1}>{index + 1}</Td>
                 <Td px={1} py={1}>
-                  <HStack spacing={1}>
-                    <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" />
+                  <Flex alignItems="center" maxWidth="100%">
+                    <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" mr={1} flexShrink={0} />
                     <Box 
-                      onClick={(e) => handleNameClick(e, member)} 
+                      onClick={() => handleNameClick(member)}
                       cursor="pointer"
                       title="Clique para copiar exiva"
+                      isTruncated
                     >
                       {member.Name}
                     </Box>
-                  </HStack>
+                  </Flex>
                 </Td>
                 <Td px={1} py={1}>{member.Level}</Td>
                 <Td px={1} py={1}>
