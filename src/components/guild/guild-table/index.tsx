@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { 
   Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box, 
   useToast, Spinner, useColorModeValue, Badge, Flex
