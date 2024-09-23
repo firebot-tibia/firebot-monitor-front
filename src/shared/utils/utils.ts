@@ -83,8 +83,13 @@ export const isOnline = (member: GuildMemberResponse): boolean => {
   return normalizedTime !== '00:00:00';
 };
 
+const capitalizeWords = (str: string) => {
+  return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+};
+
 export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof useToast>) => {
-  const exivas = `exiva "${data.Name.trim().toLowerCase()}"`;
+  const capitalizedName = capitalizeWords(data.Name.trim());
+  const exivas = `exiva "${capitalizedName}"`;
   navigator.clipboard.writeText(exivas);
   toast({
     title: 'Exiva copiado para a área de transferência.',
@@ -93,17 +98,6 @@ export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof u
     isClosable: true,
   });
 };
-
-export function handleCopy(name: string | undefined, toast: ReturnType<typeof useToast>) {
-  const displayName = getName(name);
-  toast({
-    title: `"${displayName}" copiado para a área de transferência.`,
-    status: 'success',
-    duration: 2000,
-    isClosable: true,
-  });
-}
-
 export function getName(name: string | undefined): string {
   return name || 'Desconhecido';
 }
