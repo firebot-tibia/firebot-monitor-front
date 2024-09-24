@@ -38,3 +38,21 @@ html {
 body {
   @apply bg-dark-gradient text-white font-sans;
 }
+
+@media screen and (max-width: 1200px) {
+  .chakra-table th, .chakra-table td {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .chakra-table {
+    font-size: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .chakra-table {
+    font-size: 0.7rem;
+  }
+}
