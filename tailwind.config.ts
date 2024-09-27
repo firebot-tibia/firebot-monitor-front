@@ -10,14 +10,10 @@ const config: Config = {
   theme: {
     extend: {
       backgroundImage: {
-        'custom-image': "url('/assets/bg.png')",
         'dark-gradient': 'linear-gradient(135deg, #1f2937 0%, #4b5563 100%)',
       },
       colors: {
         white: '#ffffff',
-      },
-      fontFamily: {
-        neueRegrade: ['Neue Regrade', 'sans-serif'],
       },
     },
   },

@@ -10,16 +10,28 @@ const styles = {
     body: {
       bg: '#1c1c1c',
       color: 'white',
-      fontFamily: 'Neue Regrade, sans-serif',
+      fontFamily: 'var(--font-sans)',
     },
   },
 };
 
 const fonts = {
-  heading: 'Neue Regrade, sans-serif',
-  body: 'Neue Regrade, sans-serif',
+  heading: 'var(--font-sans)',
+  body: 'var(--font-sans)',
 };
 
-const theme = extendTheme({ config, styles, fonts });
+const colors = {
+  geist: {
+    background: '#000',
+    foreground: '#fff',
+    primary: '#0070f3',
+    secondary: '#666',
+    success: '#0070f3',
+    error: '#e00',
+    warning: '#f5a623',
+  },
+};
+
+const theme = extendTheme({ config, styles, fonts, colors });
 
 export default theme;

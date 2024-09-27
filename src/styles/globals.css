@@ -2,41 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
-:root {
-  --pause-on-hover: running;
-  --pause-on-click: running;
-  --play: running;
-  --direction: normal;
-  --duration: 21.3675s;
-  --delay: 0s;
-  --iteration-count: infinite;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-  background: #f5f5f5;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #8b949e;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #6e7681;
-}
 
 html {
   scroll-behavior: smooth;
 }
 
-
-
 body {
   @apply bg-dark-gradient text-white font-sans;
+  scrollbar-width: thin;
+  scrollbar-color: #8B949E #F5F5F5;
 }
 
 @media screen and (max-width: 1200px) {

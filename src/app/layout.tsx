@@ -5,6 +5,8 @@ import { FC, ReactNode } from 'react'
 import '../styles/globals.css'
 import theme from '../styles/theme'
 import { SessionProvider } from "next-auth/react";
+import { GeistProvider } from '@geist-ui/core';
+
 interface RootLayoutProps {
   children: ReactNode
 }
@@ -27,11 +29,13 @@ const RootLayout: FC<RootLayoutProps> = ({ children }) => {
         />
       </head>
       <body>
+      <GeistProvider>
         <SessionProvider>
           <ChakraProvider theme={theme}>
             {children}
           </ChakraProvider>
         </SessionProvider>
+        </GeistProvider>
       </body>
     </html>
   )
