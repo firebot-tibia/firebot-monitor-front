@@ -12,6 +12,43 @@
         this.hoverTile = null;
     }
 
+    const cityAreas = [
+        { name: "Thais", x: 32369, y: 32241, floor: 7 },
+        { name: "Carlin", x: 32343, y: 31791, floor: 7 },
+        { name: "Kazordoon", x: 32629, y: 31925, floor: 7 },
+        { name: "Kazordoon", x: 32826, y: 31762, floor: 7 },
+        { name: "Ab'Dendriel", x: 32681, y: 31637, floor: 7 },
+        { name: "Edron", x: 33205, y: 31819, floor: 7 },
+        { name: "Darashia", x: 33238, y: 32435, floor: 7 },
+        { name: "Venore", x: 32957, y: 32076, floor: 7 },
+        { name: "Ankrahmun", x: 33158, y: 32829, floor: 7 },
+        { name: "Port Hope", x: 32623, y: 32763, floor: 7 },
+        { name: "Liberty Bay", x: 32317, y: 32826, floor: 7 },
+        { name: "Svargrond", x: 32273, y: 31149, floor: 7 },
+        { name: "Yalahar", x: 32802, y: 31206, floor: 7 },
+        { name: "Travora", x: 32067, y: 32354, floor: 7 },
+        { name: "Farmine", x: 33023, y: 31453, floor: 7 },
+        { name: "Gray Beach", x: 33447, y: 31323, floor: 7 },
+        { name: "Roshamuul", x: 33553, y: 32379, floor: 7 },
+        { name: "Rathleton", x: 33627, y: 31913, floor: 7 },
+    ];
+
+    const huntAreas = [
+        { name: "GS Tomb", x: 33136, y: 32587, floor: 7 },
+        { name: "Hydra (Passage)", x: 32978, y: 32636, floor: 7 },
+        { name: "Lion's Rock", x: 33146, y: 32357, floor: 7 },
+        { name: "Mahrdis", x: 33255, y: 32833, floor: 7 },
+        { name: "Oasis Tomb", x: 33133, y: 32640, floor: 7 },
+        { name: "Peninsula Tomb", x: 33027, y: 32869, floor: 7 },
+        { name: "Rahemons", x: 33133, y: 32640, floor: 7 },
+        { name: "Stone Tomb", x: 33282, y: 32743, floor: 7 },
+        { name: "Terramite", x: 33041, y: 32692, floor: 7 },
+        { name: "Vashresamun", x: 33208, y: 32591, floor: 7 },
+        { name: "Mother of Scarab Lair", x: 33290, y: 32603, floor: 7 },
+        { name: "Gold Token", x: 32128, y: 31369, floor: 7 },
+        { name: "Cobra Bastion (-1)", x: 33393, y: 32666, floor: 7 },
+    ];
+
     const fetchKnownTiles = function() {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', URL_PREFIX + 'mapper/tiles.json', true);
@@ -199,24 +236,11 @@
             doubleClickZoom: true  
         });
     
-        if (L.control && L.control.zoom) {
-            L.control.zoom({ position: 'topright' }).addTo(map);
-        } else {
-            console.warn('Zoom control not available');
-        }
-    
         const baseMaps = {};
         for (let i = 0; i <= 15; i++) {
             const floorName = i <= 7 ? `Floor +${7 - i}` : `Floor -${i - 7}`;
             _this.mapFloors[i] = _this._createMapFloorLayer(i);
             baseMaps[floorName] = _this.mapFloors[i];
-        }
-    
-        const layersControl = L.control.layers(baseMaps);
-        if (L.control && L.control.layers) {
-            layersControl.addTo(map);
-        } else {
-            console.warn('Layers control not available');
         }
     
         const current = getUrlPosition();
@@ -266,6 +290,13 @@
                 zoom: zoom
             }, true);
         });
+
+
+        if (L.control && L.control.zoom) {
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+        } else {
+            console.warn('Zoom control not available');
+        }
     
         if (L.crosshairs) {
             this.crosshairs = L.crosshairs().addTo(map);
@@ -299,49 +330,11 @@
         if (L.LevelButtons) {
             const levelButtons = new L.LevelButtons({ position: 'bottomright' }).addTo(map);
             levelButtons.setTibiaMap(this);
-            levelButtons.options.layers_widget = layersControl;
         } else {
             console.warn('LevelButtons not available');
         }
     
         _this._showHoverTile();
-
-        const cityAreas = [
-            { name: "Thais", x: 32369, y: 32241, floor: 7 },
-            { name: "Carlin", x: 32343, y: 31791, floor: 7 },
-            { name: "Kazordoon", x: 32629, y: 31925, floor: 7 },
-            { name: "Kazordoon", x: 32826, y: 31762, floor: 7 },
-            { name: "Ab'Dendriel", x: 32681, y: 31637, floor: 7 },
-            { name: "Edron", x: 33205, y: 31819, floor: 7 },
-            { name: "Darashia", x: 33238, y: 32435, floor: 7 },
-            { name: "Venore", x: 32957, y: 32076, floor: 7 },
-            { name: "Ankrahmun", x: 33158, y: 32829, floor: 7 },
-            { name: "Port Hope", x: 32623, y: 32763, floor: 7 },
-            { name: "Liberty Bay", x: 32317, y: 32826, floor: 7 },
-            { name: "Svargrond", x: 32273, y: 31149, floor: 7 },
-            { name: "Yalahar", x: 32802, y: 31206, floor: 7 },
-            { name: "Travora", x: 32067, y: 32354, floor: 7 },
-            { name: "Farmine", x: 33023, y: 31453, floor: 7 },
-            { name: "Gray Beach", x: 33447, y: 31323, floor: 7 },
-            { name: "Roshamuul", x: 33553, y: 32379, floor: 7 },
-            { name: "Rathleton", x: 33627, y: 31913, floor: 7 },
-        ];
-    
-        const huntAreas = [
-            { name: "GS Tomb", x: 33136, y: 32587, floor: 7 },
-            { name: "Hydra (Passage)", x: 32978, y: 32636, floor: 7 },
-            { name: "Lion's Rock", x: 33146, y: 32357, floor: 7 },
-            { name: "Mahrdis", x: 33255, y: 32833, floor: 7 },
-            { name: "Oasis Tomb", x: 33133, y: 32640, floor: 7 },
-            { name: "Peninsula Tomb", x: 33027, y: 32869, floor: 7 },
-            { name: "Rahemons", x: 33133, y: 32640, floor: 7 },
-            { name: "Stone Tomb", x: 33282, y: 32743, floor: 7 },
-            { name: "Terramite", x: 33041, y: 32692, floor: 7 },
-            { name: "Vashresamun", x: 33208, y: 32591, floor: 7 },
-            { name: "Mother of Scarab Lair", x: 33290, y: 32603, floor: 7 },
-            { name: "Gold Token", x: 32128, y: 31369, floor: 7 },
-            { name: "Cobra Bastion (-1)", x: 33393, y: 32666, floor: 7 },
-        ];
     
         huntAreas.forEach(area => {
             const latLng = map.unproject([area.x, area.y], 0);
@@ -372,5 +365,126 @@
             tibiaMap.crosshairs._toggleExiva();
         }
     });
+
+    createCityButtons();
+
+    const processExivaButton = document.getElementById('processExiva');
+    if (processExivaButton) {
+        processExivaButton.addEventListener('click', processExiva);
+        console.log('Evento de clique adicionado ao botão de processar Exiva');
+    } else {
+        console.error('Botão de processar Exiva não encontrado');
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'e' || event.key === 'E') {
+            processExiva();
+        }
+    });
+    console.log('Evento de tecla E adicionado');
+
+    tibiaMap.map.on('click', function(event) {
+        const direction = determineDirection(event);
+        findHuntAreas(direction);
+    });
+    console.log('Evento de clique adicionado ao mapa');
+
+    console.log('Todos os eventos foram inicializados');
+        
+    function findHuntAreas(direction) {
+        const map = tibiaMap.map;
+        const bounds = map.getBounds();
+        const center = map.getCenter();
+        
+        const relevantAreas = window.huntAreas.filter(area => {
+            const areaLatLng = map.unproject([area.x, area.y], 0);
+            const areaDirection = determineDirection({latlng: areaLatLng});
+            return areaDirection === direction;
+        });
+    
+        const visibleAreas = relevantAreas.filter(area => 
+            bounds.contains(map.unproject([area.x, area.y], 0))
+        );
+    
+        const invisibleAreas = relevantAreas.filter(area => 
+            !bounds.contains(map.unproject([area.x, area.y], 0))
+        );
+    
+        let resultText = "";
+        if (visibleAreas.length > 0) {
+            resultText += "Áreas visíveis: " + visibleAreas.map(area => area.name).join(", ") + "\n\n";
+        }
+        if (invisibleAreas.length > 0) {
+            resultText += "Áreas fora da visão: " + invisibleAreas.map(area => area.name).join(", ");
+        }
+        
+        if (resultText === "") {
+            resultText = "Nenhuma área de caça encontrada nessa direção.";
+        }
+    
+        document.getElementById('results').value = resultText;
+    }
+    
+    function determineDirection(event) {
+        const map = tibiaMap.map; 
+        const center = map.getCenter();
+        const clickPoint = event.latlng;
+        
+        const dx = clickPoint.lng - center.lng;
+        const dy = clickPoint.lat - center.lat;
+        
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        
+        if (angle > -22.5 && angle <= 22.5) return "East";
+        if (angle > 22.5 && angle <= 67.5) return "North-east";
+        if (angle > 67.5 && angle <= 112.5) return "North";
+        if (angle > 112.5 && angle <= 157.5) return "North-west";
+        if (angle > 157.5 || angle <= -157.5) return "West";
+        if (angle > -157.5 && angle <= -112.5) return "South-west";
+        if (angle > -112.5 && angle <= -67.5) return "South";
+        if (angle > -67.5 && angle <= -22.5) return "South-east";
+    }
+    
+    function createCityButtons() {
+        const cityButtonsContainer = document.getElementById('city-buttons');
+        if (!cityButtonsContainer) {
+            console.error('Container de botões de cidade não encontrado');
+            return;
+        }
+    
+        cityButtonsContainer.innerHTML = '';
+    
+        if (Array.isArray(cityAreas) && cityAreas.length > 0) {
+            cityAreas.forEach(city => {
+                const button = document.createElement('button');
+                button.textContent = city.name;
+                button.className = 'btn btn-sm btn-outline-light city-btn';
+                button.onclick = function() {
+                    console.log(`Movendo para ${city.name}: x=${city.x}, y=${city.y}, floor=${city.floor}`);
+                    if (tibiaMap && tibiaMap.map) {
+                        tibiaMap.map.c([city.y, city.x], 0);
+                    } else {
+                        console.error('Mapa não está disponível');
+                    }
+                };
+                cityButtonsContainer.appendChild(button);
+            });
+        } 
+    }
+    
+    function processExiva() {
+        console.log('Processando Exiva');
+        const exivaText = document.getElementById('exiva').value;
+        const direction = exivaText.match(/to the (\w+(-\w+)?)\./);
+        
+        if (direction) {
+            const directionStr = direction[1].charAt(0).toUpperCase() + direction[1].slice(1);
+            findHuntAreas(directionStr);
+        } else {
+            document.getElementById('results').value = "Direção não encontrada no exiva.";
+        }
+    }
+    console.log('Script HTML carregado completamente');
+
 })();
 
