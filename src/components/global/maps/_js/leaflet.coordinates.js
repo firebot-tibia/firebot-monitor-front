@@ -1,7 +1,6 @@
-// Custom code.
 L.Control.Coordinates = L.Control.extend({
 	options: {
-		position: 'bottomright',
+		position: 'topleft',
 		decimals: 4,
 		decimalSeparator: '.',
 		labelTemplateLat: 'X: {y}',

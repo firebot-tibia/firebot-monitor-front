@@ -1,6 +1,6 @@
 L.ExivaButton = L.Control.extend({
 	options: {
-		position: 'topleft',
+		position: 'bottomright',
 		autoZIndex: true,
 		crosshairs: null,
 	},

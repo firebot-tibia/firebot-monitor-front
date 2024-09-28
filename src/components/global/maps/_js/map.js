@@ -29,6 +29,9 @@
         const url = '#' + coords.x + ',' + coords.y + ',' + coords.floor + ':' + coords.zoom;
         if (forceHash || location.hash !== url) {
             window.history.pushState(null, null, url);
+            if (this.floor !== undefined) {
+                this.floor = coords.floor;
+            }
         }
     };
 
@@ -191,7 +194,9 @@
             maxZoom: 4,
             maxBounds: maxBounds,
             attributionControl: false,
-            zoomControl: false
+            zoomControl: false,
+            scrollWheelZoom: true, 
+            doubleClickZoom: true  
         });
     
         if (L.control && L.control.zoom) {
@@ -207,8 +212,9 @@
             baseMaps[floorName] = _this.mapFloors[i];
         }
     
+        const layersControl = L.control.layers(baseMaps);
         if (L.control && L.control.layers) {
-            L.control.layers(baseMaps).addTo(map);
+            layersControl.addTo(map);
         } else {
             console.warn('Layers control not available');
         }
@@ -218,8 +224,7 @@
         map.setView(map.unproject([current.x, current.y], 0), current.zoom);
         _this.mapFloors[_this.floor].addTo(map);
     
-        // Atualiza a URL inicial
-        setUrlPosition({
+        setUrlPosition.call(_this, {
             x: current.x,
             y: current.y,
             floor: current.floor,
@@ -228,12 +233,20 @@
     
         map.on('baselayerchange', function(layer) {
             _this.floor = layer.layer.options.floor;
+            const center = map.getCenter();
+            const coords = L.CRS.CustomZoom.latLngToPoint(center, 0);
+            setUrlPosition.call(_this, {
+                x: Math.floor(Math.abs(coords.x)),
+                y: Math.floor(Math.abs(coords.y)),
+                floor: _this.floor,
+                zoom: map.getZoom()
+            }, true);
         });
     
         map.on('moveend', function() {
             const center = map.getCenter();
             const coords = L.CRS.CustomZoom.latLngToPoint(center, 0);
-            setUrlPosition({
+            setUrlPosition.call(_this, {
                 x: Math.floor(Math.abs(coords.x)),
                 y: Math.floor(Math.abs(coords.y)),
                 floor: _this.floor,
@@ -246,11 +259,10 @@
             const zoom = map.getZoom();
             const coordX = Math.floor(Math.abs(coords.x));
             const coordY = Math.floor(Math.abs(coords.y));
-            const coordZ = _this.floor;
-            setUrlPosition({
+            setUrlPosition.call(_this, {
                 x: coordX,
                 y: coordY,
-                floor: coordZ,
+                floor: _this.floor,
                 zoom: zoom
             }, true);
         });
@@ -282,6 +294,14 @@
             }).addTo(map);
         } else {
             console.warn('Exiva button not available');
+        }
+    
+        if (L.LevelButtons) {
+            const levelButtons = new L.LevelButtons({ position: 'bottomright' }).addTo(map);
+            levelButtons.setTibiaMap(this);
+            levelButtons.options.layers_widget = layersControl;
+        } else {
+            console.warn('LevelButtons not available');
         }
     
         _this._showHoverTile();
@@ -353,3 +373,4 @@
         }
     });
 })();
+

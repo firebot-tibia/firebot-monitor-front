@@ -4,6 +4,7 @@ L.Crosshairs = L.LayerGroup.extend({
 		style: {
 			opacity: 1,
 			fillOpacity: 0,
+			position: 'bottomleft',
 			weight: 2,
 			color: '#333',
 			clickable: false,
