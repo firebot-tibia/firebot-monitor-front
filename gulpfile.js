@@ -39,7 +39,7 @@ gulp.task('js', function() {
     'src/components/global/maps/_js/leaflet.crosshairs.js',
     'src/components/global/maps/_js/leaflet.levelbuttons.js',
     'src/components/global/maps/_js/leaflet.exivabutton.js',
-    'src/components/global/maps/_js/map.js'
+    'src/components/global/maps/_js/map.js',
   ])
     .pipe(concat('map.js'))
     .pipe(terser())

@@ -1,14 +1,16 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { 
   Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box, 
   useToast, Spinner, useColorModeValue, Badge, Flex,
-  TableContainer, useMediaQuery, VStack
+  TableContainer, useMediaQuery, VStack,
+  IconButton
 } from '@chakra-ui/react';
 import { LocalInput } from './local-input';
 import { CharacterClassification } from './render-classification';
 import { vocationIcons } from '../../../constant/character';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
 import { copyExivas, getTimeColor } from '../../../shared/utils/utils';
+import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
 interface GuildMemberTableProps {
   data: GuildMemberResponse[];
@@ -21,6 +23,10 @@ interface GuildMemberTableProps {
   isLoading: boolean;
   onlineCount: number;
 }
+
+type SortField = 'Level' | 'TimeOnline' | 'Vocation';
+type SortOrder = 'asc' | 'desc';
+
 
 const ClassificationLegend: FC = () => (
   <VStack spacing={1} fontSize="xs" mb={2} align="flex-start">
@@ -53,6 +59,9 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   isLoading,
   onlineCount
 }) => {
+  const [sortField, setSortField] = useState<SortField>('TimeOnline');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+
   const toast = useToast();
   const bgColor = useColorModeValue('gray.800', 'gray.900');
   const hoverBgColor = useColorModeValue('gray.700', 'gray.800');
@@ -68,6 +77,43 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   const handleNameClick = (member: GuildMemberResponse) => {
     copyExivas(member, toast);
   };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortedData = useMemo(() => {
+    return [...data].sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'Level':
+          comparison = a.Level - b.Level;
+          break;
+        case 'TimeOnline':
+          comparison = a.TimeOnline.localeCompare(b.TimeOnline);
+          break;
+        case 'Vocation':
+          comparison = a.Vocation.localeCompare(b.Vocation);
+          break;
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }, [data, sortField, sortOrder]);
+
+  const SortIcon: FC<{ field: SortField }> = ({ field }) => (
+    <IconButton
+      aria-label={`Sort by ${field}`}
+      icon={sortField === field ? (sortOrder === 'asc' ? <ChevronUpIcon /> : <ChevronDownIcon />) : <ChevronUpIcon />}
+      size="xs"
+      variant="ghost"
+      onClick={() => handleSort(field)}
+    />
+  );
 
   if (isLoading) {
     return (
@@ -137,16 +183,20 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
             <Thead>
               <Tr>
                 <Th px={responsivePadding} py={responsivePadding} color={textColor}>#</Th>
-                <Th px={responsivePadding} py={responsivePadding} color={textColor}>Personagem</Th>
-                <Th px={responsivePadding} py={responsivePadding} color={textColor} isNumeric>Lvl</Th>
+                <Th px={responsivePadding} py={responsivePadding} color={textColor}>Personagem <SortIcon field="Vocation" /></Th>
+                <Th px={responsivePadding} py={responsivePadding} color={textColor} isNumeric>
+                  Lvl <SortIcon field="Level" />
+                </Th>
                 <Th px={responsivePadding} py={responsivePadding} color={textColor}>Tipo</Th>
-                <Th px={responsivePadding} py={responsivePadding} color={textColor}>Tempo</Th>
+                <Th px={responsivePadding} py={responsivePadding} color={textColor}>
+                  Tempo <SortIcon field="TimeOnline" />
+                </Th>
                 {showExivaInput && <Th px={responsivePadding} py={responsivePadding} color={textColor}>Local</Th>}
               </Tr>
             </Thead>
             <Tbody>
-              {Array.isArray(data) && data.length > 0 ? (
-                data.map((member, index) => (
+              {Array.isArray(sortedData) && sortedData.length > 0 ? (
+                sortedData.map((member, index) => (
                   <Tr 
                     key={member.Name}
                     _hover={{ bg: hoverBgColor }}
@@ -202,8 +252,8 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         </TableContainer>
       ) : (
         <VStack spacing={2} align="stretch">
-          {Array.isArray(data) && data.length > 0 ? (
-            data.map((member, index) => renderMobileView(member, index))
+          {Array.isArray(sortedData) && sortedData.length > 0 ? (
+            sortedData.map((member, index) => renderMobileView(member, index))
           ) : (
             <Box textAlign="center" p={2}>
               Sem dados para exibir

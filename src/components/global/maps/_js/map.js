@@ -1,4 +1,7 @@
 (function() {
+    const URL_PREFIX = 'https://tibiamaps.github.io/tibia-map-data/';
+    let KNOWN_TILES = null;
+
     function TibiaMap() {
         this.map = null;
         this.crosshairs = null;
@@ -6,10 +9,9 @@
         this.mapFloors = [];
         this.options = {};
         this.isColorMap = true;
+        this.hoverTile = null;
     }
-    const URL_PREFIX = 'https://tibiamaps.github.io/tibia-map-data/';
 
-    let KNOWN_TILES = null;
     const fetchKnownTiles = function() {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', URL_PREFIX + 'mapper/tiles.json', true);
@@ -22,14 +24,14 @@
         xhr.send();
     };
     fetchKnownTiles();
-    const isEmbed = location.pathname.indexOf('/embed') !== -1 || location.pathname.indexOf('/poi') !== -1;
+
     const setUrlPosition = function(coords, forceHash) {
         const url = '#' + coords.x + ',' + coords.y + ',' + coords.floor + ':' + coords.zoom;
-        if (forceHash && location.hash != url) {
+        if (forceHash || location.hash !== url) {
             window.history.pushState(null, null, url);
         }
     };
-    TibiaMap.prototype.setUrlPosition = setUrlPosition;
+
     const getUrlPosition = function() {
         const position = {
             'x': 32368,
@@ -61,100 +63,97 @@
         }
         return position;
     };
-    TibiaMap.prototype.getUrlPosition = getUrlPosition;
+
     const modifyLeaflet = function() {
         L.CRS.CustomZoom = L.extend({}, L.CRS.Simple, {
-            'scale': function(zoom) {
+            scale: function(zoom) {
                 switch (zoom) {
-                    case 0:
-                        return 256;
-                    case 1:
-                        return 512;
-                    case 2:
-                        return 1792;
-                    case 3:
-                        return 5120;
-                    case 4:
-                        return 10240;
-                    default:
-                        return 256;
+                    case 0: return 256;
+                    case 1: return 512;
+                    case 2: return 1792;
+                    case 3: return 5120;
+                    case 4: return 10240;
+                    default: return 256;
                 }
             },
-            'latLngToPoint': function(latlng, zoom) {
+            zoom: function(scale) {
+                switch (scale) {
+                    case 256: return 0;
+                    case 512: return 1;
+                    case 1792: return 2;
+                    case 5120: return 3;
+                    case 10240: return 4;
+                    default: return 0;
+                }
+            },
+            latLngToPoint: function(latlng, zoom) {
                 const projectedPoint = this.projection.project(latlng);
                 const scale = this.scale(zoom);
                 return this.transformation._transform(projectedPoint, scale);
             },
-            'pointToLatLng': function(point, zoom) {
+            pointToLatLng: function(point, zoom) {
                 const scale = this.scale(zoom);
                 const untransformedPoint = this.transformation.untransform(point, scale);
                 return this.projection.unproject(untransformedPoint);
             }
         });
     };
+
     TibiaMap.prototype._createMapFloorLayer = function(floor) {
         const _this = this;
-        const mapLayer = _this.mapFloors[floor] = new L.GridLayer({
-            'floor': floor
-        });
-        mapLayer.getTileSize = function() {
-            const tileSize = L.GridLayer.prototype.getTileSize.call(this);
-            const zoom = this._tileZoom;
+        const mapLayer = L.GridLayer.extend({
+            createTile: function(coords, done) {
+                const tile = document.createElement('canvas');
+                const ctx = tile.getContext('2d');
+                tile.width = tile.height = 256;
 
-            if (zoom > 0) {
-                return tileSize.divideBy(this._map.getZoomScale(0, zoom)).round();
-            }
-            return tileSize;
-        };
-        mapLayer._setZoomTransform = function(level, center, zoom) {
-            const coords = getUrlPosition();
-            coords.zoom = zoom;
-            setUrlPosition(coords, true);
-            const scale = this._map.getZoomScale(zoom, level.zoom);
-            const translate = level.origin.multiplyBy(scale).subtract(
-                this._map._getNewPixelOrigin(center, zoom)
-            ).round();
-            L.DomUtil.setTransform(level.el, translate, scale);
-        };
-        mapLayer.createTile = function(coords, done) {
-            const tile = document.createElement('canvas');
-            const ctx = tile.getContext('2d');
-            tile.width = tile.height = 256;
+                const latlng = this._map.project({ lng: coords.x, lat: coords.y }, 0);
+                Object.keys(latlng).forEach(function(key) {
+                    latlng[key] = Math.abs(latlng[key]);
+                });
 
-            const latlng = this._map.project({ lng: coords.x, lat: coords.y }, 0);
-            Object.keys(latlng).map(function(key) {
-                latlng[key] = Math.abs(latlng[key]);
-            });
+                const tileId = `${Math.floor(latlng.x)}_${Math.floor(latlng.y)}_${floor}`;
 
-            const tileId = latlng.x + '_' + latlng.y + '_' + this.options.floor;
+                if (KNOWN_TILES && !KNOWN_TILES.has(tileId)) {
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, 256, 256);
+                    done(null, tile);
+                    return tile;
+                }
 
-            if (KNOWN_TILES && !KNOWN_TILES.has(tileId)) {
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, 256, 256);
+                ctx.imageSmoothingEnabled = false;
+                const image = new Image();
+                image.crossOrigin = "Anonymous";
+                image.onload = function() {
+                    ctx.drawImage(image, 0, 0, 256, 256);
+                    done(null, tile);
+                };
+                image.onerror = function() {
+                    console.error('Failed to load tile:', tileId);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, 256, 256);
+                    done(null, tile);
+                };
+                image.src = URL_PREFIX + 'mapper/Minimap_' + (
+                    _this.isColorMap ? 'Color' : 'WaypointCost'
+                ) + '_' + tileId + '.png';
+
                 return tile;
-            }
-            ctx.imageSmoothingEnabled = false;
-            const image = new Image();
-            image.onload = function() {
-                ctx.drawImage(image, 0, 0, 256, 256);
-                done(null, tile);
-            };
-            image.src = URL_PREFIX + 'mapper/Minimap_' + (
-                _this.isColorMap ? 'Color' : 'WaypointCost'
-            ) + '_' + tileId + '.png';
-            return tile;
-        };
-        return mapLayer;
+            },
+            floor: floor,
+            minZoom: 0,
+            maxZoom: 4,
+            tileSize: 256,
+            bounds: L.latLngBounds(L.latLng(-65536, 0), L.latLng(0, 65536)),
+            noWrap: true
+        });
+
+        return new mapLayer();
     };
+
     TibiaMap.prototype._showHoverTile = function() {
         const map = this.map;
         const _this = this;
-        map.on('mouseout', function(event) {
-            _this.hoverTile.setBounds([
-                [0, 0],
-                [0, 0]
-            ]);
-        });
         map.on('mousemove', function(event) {
             const pos = map.project(event.latlng, 0);
             const x = Math.floor(pos.x);
@@ -173,78 +172,75 @@
         });
     };
 
-    TibiaMap.prototype._toggleMapType = function() {
-        this.isColorMap = !this.isColorMap;
-
-        const map = this.map;
-        map._resetView(map.getCenter(), map.getZoom(), true);
-    };
-
     TibiaMap.prototype.init = function(options) {
         const _this = this;
         _this.options = options;
         modifyLeaflet();
-
+    
         const bounds = { xMin: 124, xMax: 133, yMin: 121, yMax: 128 };
-        const xPadding = window.innerWidth / 256 / 2;
-        const yPadding = window.innerHeight / 256 / 2;
-        const yMin = bounds.yMin - yPadding;
-        const xMin = bounds.xMin - xPadding;
-        const yMax = bounds.yMax + 1 + yPadding;
-        const xMax = bounds.xMax + 1 + xPadding;
-        const maxBounds = L.latLngBounds(L.latLng(-yMin, xMin), L.latLng(-yMax, xMax));
+        const maxBounds = L.latLngBounds(
+            L.latLng(-bounds.yMax - 1, bounds.xMin),
+            L.latLng(-bounds.yMin, bounds.xMax + 1)
+        );
+    
         const map = _this.map = L.map('map', {
-            'attributionControl': false,
-            'crs': L.CRS.CustomZoom,
-            'fadeAnimation': false,
-            'keyboardPanOffset': 400,
-            'maxBounds': maxBounds,
-            'maxNativeZoom': 0,
-            'maxZoom': 4,
-            'minZoom': 0,
-            'scrollWheelZoom': !isEmbed,
-            'unloadInvisibleTiles': false,
-            'updateWhenIdle': true,
-            'zoomAnimationThreshold': 4,
-            'touchZoom': false
+            crs: L.CRS.CustomZoom,
+            center: [32768, 32768],
+            zoom: 2,
+            minZoom: 0,
+            maxZoom: 4,
+            maxBounds: maxBounds,
+            attributionControl: false,
+            zoomControl: false
         });
-        const baseMaps = {
-            'Floor +7': _this._createMapFloorLayer(0),
-            'Floor +6': _this._createMapFloorLayer(1),
-            'Floor +5': _this._createMapFloorLayer(2),
-            'Floor +4': _this._createMapFloorLayer(3),
-            'Floor +3': _this._createMapFloorLayer(4),
-            'Floor +2': _this._createMapFloorLayer(5),
-            'Floor +1': _this._createMapFloorLayer(6),
-            'Ground floor': _this._createMapFloorLayer(7),
-            'Floor -1': _this._createMapFloorLayer(8),
-            'Floor -2': _this._createMapFloorLayer(9),
-            'Floor -3': _this._createMapFloorLayer(10),
-            'Floor -4': _this._createMapFloorLayer(11),
-            'Floor -5': _this._createMapFloorLayer(12),
-            'Floor -6': _this._createMapFloorLayer(13),
-            'Floor -7': _this._createMapFloorLayer(14),
-            'Floor -8': _this._createMapFloorLayer(15)
-        };
-        const layers_widget = L.control.layers(baseMaps, {}).addTo(map);
+    
+        if (L.control && L.control.zoom) {
+            L.control.zoom({ position: 'topright' }).addTo(map);
+        } else {
+            console.warn('Zoom control not available');
+        }
+    
+        const baseMaps = {};
+        for (let i = 0; i <= 15; i++) {
+            const floorName = i <= 7 ? `Floor +${7 - i}` : `Floor -${i - 7}`;
+            _this.mapFloors[i] = _this._createMapFloorLayer(i);
+            baseMaps[floorName] = _this.mapFloors[i];
+        }
+    
+        if (L.control && L.control.layers) {
+            L.control.layers(baseMaps).addTo(map);
+        } else {
+            console.warn('Layers control not available');
+        }
+    
         const current = getUrlPosition();
         _this.floor = current.floor;
         map.setView(map.unproject([current.x, current.y], 0), current.zoom);
-        _this.mapFloors[current.floor].addTo(map);
-        window.addEventListener('popstate', function(event) {
-            const current = getUrlPosition();
-            if (current.floor !== _this.floor) {
-                _this.floor = current.floor;
-                _this.mapFloors[_this.floor].addTo(map);
-            }
-            if (current.zoom !== map.getZoom()) {
-                map.setZoom(current.zoom);
-            }
-            map.panTo(map.unproject([current.x, current.y], 0));
-        });
+        _this.mapFloors[_this.floor].addTo(map);
+    
+        // Atualiza a URL inicial
+        setUrlPosition({
+            x: current.x,
+            y: current.y,
+            floor: current.floor,
+            zoom: current.zoom
+        }, true);
+    
         map.on('baselayerchange', function(layer) {
             _this.floor = layer.layer.options.floor;
         });
+    
+        map.on('moveend', function() {
+            const center = map.getCenter();
+            const coords = L.CRS.CustomZoom.latLngToPoint(center, 0);
+            setUrlPosition({
+                x: Math.floor(Math.abs(coords.x)),
+                y: Math.floor(Math.abs(coords.y)),
+                floor: _this.floor,
+                zoom: map.getZoom()
+            }, false);
+        });
+    
         map.on('click', function(event) {
             const coords = L.CRS.CustomZoom.latLngToPoint(event.latlng, 0);
             const zoom = map.getZoom();
@@ -257,26 +253,37 @@
                 floor: coordZ,
                 zoom: zoom
             }, true);
-            if (window.console) {
-                const xID = Math.floor(coordX / 256) * 256;
-                const yID = Math.floor(coordY / 256) * 256;
-                const id = xID + '_' + yID + '_' + coordZ;
-            }
         });
-        this.crosshairs = L.crosshairs().addTo(map);
-        L.control.coordinates({
-            position: 'bottomleft',
-            enableUserInput: false,
-            labelFormatterLat: function(lat) {
-                return '<b>Y</b>: ' + Math.floor(lat) + ' <b>Z</b>: ' + _this.floor;
-            },
-            labelFormatterLng: function(lng) {
-                return '<b>X</b>: ' + Math.floor(lng);
-            }
-        }).addTo(map);
-        L.ExivaButton.btns = L.exivaButton({
-            crosshairs: this.crosshairs
-        }).addTo(map);
+    
+        if (L.crosshairs) {
+            this.crosshairs = L.crosshairs().addTo(map);
+        } else {
+            console.warn('Crosshairs not available');
+        }
+    
+        if (L.control && L.control.coordinates) {
+            L.control.coordinates({
+                position: 'bottomleft',
+                enableUserInput: false,
+                labelFormatterLat: function(lat) {
+                    return '<b>Y</b>: ' + Math.floor(-lat) + ' <b>Z</b>: ' + _this.floor;
+                },
+                labelFormatterLng: function(lng) {
+                    return '<b>X</b>: ' + Math.floor(lng);
+                }
+            }).addTo(map);
+        } else {
+            console.warn('Coordinates control not available');
+        }
+    
+        if (L.ExivaButton && L.exivaButton) {
+            L.ExivaButton.btns = L.exivaButton({
+                crosshairs: this.crosshairs
+            }).addTo(map);
+        } else {
+            console.warn('Exiva button not available');
+        }
+    
         _this._showHoverTile();
 
         const cityAreas = [
@@ -297,9 +304,32 @@
             { name: "Farmine", x: 33023, y: 31453, floor: 7 },
             { name: "Gray Beach", x: 33447, y: 31323, floor: 7 },
             { name: "Roshamuul", x: 33553, y: 32379, floor: 7 },
-            { name: "Rathleton", x: 33627, y: 31913, floor: 7 }
+            { name: "Rathleton", x: 33627, y: 31913, floor: 7 },
         ];
-
+    
+        const huntAreas = [
+            { name: "GS Tomb", x: 33136, y: 32587, floor: 7 },
+            { name: "Hydra (Passage)", x: 32978, y: 32636, floor: 7 },
+            { name: "Lion's Rock", x: 33146, y: 32357, floor: 7 },
+            { name: "Mahrdis", x: 33255, y: 32833, floor: 7 },
+            { name: "Oasis Tomb", x: 33133, y: 32640, floor: 7 },
+            { name: "Peninsula Tomb", x: 33027, y: 32869, floor: 7 },
+            { name: "Rahemons", x: 33133, y: 32640, floor: 7 },
+            { name: "Stone Tomb", x: 33282, y: 32743, floor: 7 },
+            { name: "Terramite", x: 33041, y: 32692, floor: 7 },
+            { name: "Vashresamun", x: 33208, y: 32591, floor: 7 },
+            { name: "Mother of Scarab Lair", x: 33290, y: 32603, floor: 7 },
+            { name: "Gold Token", x: 32128, y: 31369, floor: 7 },
+            { name: "Cobra Bastion (-1)", x: 33393, y: 32666, floor: 7 },
+        ];
+    
+        huntAreas.forEach(area => {
+            const latLng = map.unproject([area.x, area.y], 0);
+            L.marker(latLng)
+                .addTo(map)
+                .bindPopup(area.name);
+        });
+    
         cityAreas.forEach(area => {
             const latLng = map.unproject([area.x, area.y], 0);
             L.marker(latLng)
@@ -307,21 +337,19 @@
                 .bindPopup(area.name);
         });
     };
-
+    
     const mapContainer = document.querySelector('#map');
-    const map = new TibiaMap();
-    map.init(mapContainer.dataset);
+    const tibiaMap = new TibiaMap();
+    tibiaMap.init(mapContainer.dataset);
+    window.tibiaMap = tibiaMap;
 
-    document.documentElement.addEventListener('keydown', function(event) {
-        const _map = map.map;
+    document.addEventListener('keydown', function(event) {
         if (event.key === 'c') {
             const current = getUrlPosition();
-            _map.panTo(_map.unproject([current.x, current.y], 0));
+            tibiaMap.map.panTo(tibiaMap.map.unproject([current.x, current.y], 0));
         }
-
         if (event.key === 'e') {
-            map.crosshairs._toggleExiva();
+            tibiaMap.crosshairs._toggleExiva();
         }
     });
-
-}());
+})();
