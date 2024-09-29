@@ -84,7 +84,7 @@ export const isOnline = (member: GuildMemberResponse): boolean => {
 };
 
 const capitalizeWords = (str: string) => {
-  return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+  return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
 export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof useToast>) => {
@@ -98,6 +98,7 @@ export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof u
     isClosable: true,
   });
 };
+
 export function getName(name: string | undefined): string {
   return name || 'Desconhecido';
 }

@@ -65,19 +65,26 @@
             background-color: #3c3c3c;
             color: #ffffff;
         }
+        .alert-info {
+            background-color: #1e2a38;
+            border-color: #2a3f5f;
+            color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
 
     <div class="container-fluid">
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
             <h4 class="alert-heading">Instruções de Uso:</h4>
             <ul>
                 <li>O sistema de exiva está em desenvolvimento e inclui gradualmente os respawns do jogo.</li>
                 <li>A ferramenta oferece orientação aproximada, não 100% precisa. Use seu conhecimento sobre nível e vocação do personagem para interpretar os resultados.</li>
                 <li>Atualmente, suporta a busca de apenas um personagem por vez.</li>
             </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         </div>
+        
 
         <div class="row flex-grow-1">
             <div class="col-12 p-0" id="map-container">
