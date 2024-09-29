@@ -36,18 +36,14 @@ L.LevelButtons = L.Control.extend({
     _onUpButton: function(event) {
         const upper_floor_index = this._tibia_map_obj.floor - 1;
         if (upper_floor_index >= 0) {
-            this._bringToFront(upper_floor_index);
-            this._setFloor(upper_floor_index);
-            this._updateUrl(upper_floor_index);
+            this._changeFloor(upper_floor_index);
         }
         event.preventDefault();
     },
     _onDownButton: function(event) {
         const lower_floor_index = this._tibia_map_obj.floor + 1;
         if (lower_floor_index <= 15) {
-            this._bringToFront(lower_floor_index);
-            this._setFloor(lower_floor_index);
-            this._updateUrl(lower_floor_index);
+            this._changeFloor(lower_floor_index);
         }
         event.preventDefault();
     },
@@ -55,9 +51,11 @@ L.LevelButtons = L.Control.extend({
         this._tibia_map_obj = tibia_map_obj;
         this._setFloor(this._tibia_map_obj.floor);
     },
-    _bringToFront: function(layer_index) {
-        if (this.options.layers_widget && this.options.layers_widget._layerControlInputs) {
-            this.options.layers_widget._layerControlInputs[layer_index].click();
+    _changeFloor: function(newFloor) {
+        if (this._tibia_map_obj && this._tibia_map_obj.changeFloor) {
+            this._tibia_map_obj.changeFloor(newFloor);
+            this._setFloor(newFloor);
+            this._updateUrl(newFloor);
         }
     },
     _setFloor: function(floor) {
@@ -72,7 +70,6 @@ L.LevelButtons = L.Control.extend({
             text = '-' + String(floor - ground_floor);
         }
         floor_button.textContent = text;
-        this._tibia_map_obj.floor = floor;
     },
     _updateUrl: function(floor) {
         if (this._map && typeof this._map.getCenter === 'function') {

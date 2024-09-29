@@ -141,6 +141,28 @@
         }
     };
 
+    TibiaMap.prototype.changeFloor = function(newFloor) {
+        if (newFloor >= 0 && newFloor <= 15) {
+            if (this.mapFloors[this.floor]) {
+                this.map.removeLayer(this.mapFloors[this.floor]);
+            }
+            
+            this.floor = newFloor;
+            this.mapFloors[this.floor].addTo(this.map);
+
+            const center = this.map.getCenter();
+            const coords = L.CRS.CustomZoom.latLngToPoint(center, 0);
+            setUrlPosition.call(this, {
+                x: Math.floor(Math.abs(coords.x)),
+                y: Math.floor(Math.abs(coords.y)),
+                floor: this.floor,
+                zoom: this.map.getZoom()
+            }, true);
+            
+            this.map.fire('floorchange', { floor: this.floor });
+        }
+    };
+
 
     TibiaMap.prototype._createMapFloorLayer = function(floor) {
         const _this = this;
@@ -337,7 +359,7 @@
         } 
     
         if (L.LevelButtons) {
-            const levelButtons = new L.LevelButtons({ position: 'bottomright' }).addTo(map);
+            const levelButtons = new L.LevelButtons({ position: 'bottomright' }).addTo(this.map);
             levelButtons.setTibiaMap(this);
         } 
         // const layersControl = L.control.layers(baseMaps, null, { position: 'bottomright' });
