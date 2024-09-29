@@ -1,5 +1,4 @@
 import { useToast, VStack } from "@chakra-ui/react";
-import { Heading } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { getReservationsList, createReservation, deleteReservation } from "../../services/guilds";
@@ -40,11 +39,7 @@ const respawns = [
   { name: "Jaded Roots", image: "" }
 ];
 
-interface ReservationsManagerProps {
-  mode: string;
-}
-
-export const ReservationsManager: React.FC<ReservationsManagerProps> = ({ mode }) => {
+export const ReservationsManager: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
@@ -54,14 +49,14 @@ export const ReservationsManager: React.FC<ReservationsManagerProps> = ({ mode }
     if (status === 'authenticated' && session?.access_token) {
       try {
         const decoded = JSON.parse(atob(session.access_token.split('.')[1]));
-        if (decoded?.[`${mode}_guild`]) {
-          setGuildId(decoded[`${mode}_guild`]);
+        if (decoded?.ally_guild) {
+          setGuildId(decoded.ally_guild);
         }
       } catch (error) {
         console.error('Error decoding access token:', error);
       }
     }
-  }, [status, session, mode, toast]);
+  }, [status, session, toast]);
 
   useEffect(() => {
     if (guildId) {
