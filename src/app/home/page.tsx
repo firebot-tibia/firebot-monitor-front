@@ -1,6 +1,6 @@
 'use client';
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { Box, Flex, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, VStack, useToast } from '@chakra-ui/react';
 import DashboardLayout from '../../components/layout';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
@@ -15,7 +15,6 @@ import { useLocalStorageMode } from '../../hooks/global/useLocalStorageParse';
 import { useDeathData } from '../../hooks/deaths/useDeathHook';
 import DeathSection from '../../components/guild/sections/death-section';
 import { normalizeTimeOnline, isOnline } from '../../shared/utils/utils';
-import { DecodedToken } from '../../shared/interface/auth.interface';
 
 
 const Home: FC = () => {  

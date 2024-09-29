@@ -16,7 +16,7 @@ export const config = {
     },
     {
       name: 'Respawns',
-      href: '/respawn',
+      href: '/reservations',
       icon: FaOptinMonster,
     },
     {
