@@ -186,6 +186,7 @@ const Home: FC = () => {
             <TabList mb="1em">
               <Tab>Monitoramento de Guilds</Tab>
               <Tab>Lista de Mortes</Tab>
+              <Tab>Lista de Level Up</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>

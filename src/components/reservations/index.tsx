@@ -1,16 +1,19 @@
-import { useToast, VStack } from "@chakra-ui/react";
+'use client';
+import { Box, Button, Divider, HStack, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, useDisclosure, useToast, VStack } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { getReservationsList, createReservation, deleteReservation } from "../../services/guilds";
 import { Reservation, CreateReservationData } from "../../shared/interface/reservations.interface";
 import { ReservationTable } from "./table";
+import { AddIcon } from "@chakra-ui/icons";
+import { DeleteIcon } from "lucide-react";
 
-const timeSlots = [
+const defaultTimeSlots = [
   "SS - 9:30", "9:30 - 12:40", "12:40 - 15:50", "15:50 - 19:00",
   "19:00 - 22:10", "22:10 - 1:20", "1:20 - SS"
 ];
 
-const respawns = [
+const defaultRespawns = [
   { name: "Issavi", image: "goanna.gif" },
   { name: "Ingol -3", image: "carnivostrich.gif" },
   { name: "Livraria Ice", image: "icecold_book.gif" },
@@ -41,9 +44,13 @@ const respawns = [
 
 export const ReservationsManager: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [timeSlots, setTimeSlots] = useState(defaultTimeSlots);
+  const [respawns, setRespawns] = useState(defaultRespawns);
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const toast = useToast();
+  const { isOpen: isTimeModalOpen, onOpen: onTimeModalOpen, onClose: onTimeModalClose } = useDisclosure();
+  const { isOpen: isRespawnModalOpen, onOpen: onRespawnModalOpen, onClose: onRespawnModalClose } = useDisclosure();
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -104,8 +111,147 @@ export const ReservationsManager: React.FC = () => {
     }
   };
 
+
+  const addTimeSlot = (newSlot: string) => {
+    setTimeSlots([...timeSlots, newSlot]);
+  };
+
+  const removeTimeSlot = (slotToRemove: string) => {
+    setTimeSlots(timeSlots.filter((slot: any) => slot !== slotToRemove));
+  };
+
+  const addRespawn = (newRespawn: { name: string; image: string }) => {
+    setRespawns([...respawns, newRespawn]);
+  };
+
+  const removeRespawn = (respawnToRemove: string) => {
+    setRespawns(respawns.filter((respawn: any) => respawn.name !== respawnToRemove));
+  };
+
+  const TimeSlotModal = () => {
+    const [newSlot, setNewSlot] = useState("");
+
+    return (
+      <Modal isOpen={isTimeModalOpen} onClose={onTimeModalClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Gerenciar Horários</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              {timeSlots.map((slot: any) => (
+                <HStack key={slot}>
+                  <Input value={slot} isReadOnly />
+                  <Button onClick={() => removeTimeSlot(slot)}>Remover</Button>
+                </HStack>
+              ))}
+              <HStack>
+                <Input
+                  value={newSlot}
+                  onChange={(e) => setNewSlot(e.target.value)}
+                  placeholder="Novo horário"
+                />
+                <Button onClick={() => {
+                  addTimeSlot(newSlot);
+                  setNewSlot("");
+                }}>
+                  Adicionar
+                </Button>
+              </HStack>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    );
+  };
+
+  const RespawnModal = () => {
+    const [newRespawn, setNewRespawn] = useState({ name: "", image: "" });
+    const [searchTerm, setSearchTerm] = useState("");
+  
+    const filteredRespawns = respawns.filter(respawn => 
+      respawn.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  
+    return (
+      <Modal isOpen={isRespawnModalOpen} onClose={onRespawnModalClose} size="xl">
+        <ModalOverlay />
+        <ModalContent bg="gray.900" color="white">
+          <ModalHeader>Gerenciar Respawns</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4} align="stretch">
+              <Input
+                placeholder="Buscar respawn..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                bg="gray.800"
+                borderColor="gray.700"
+              />
+              <Box maxHeight="300px" overflowY="auto">
+                {filteredRespawns.map(respawn => (
+                  <HStack key={respawn.name} p={2} bg="gray.800" borderRadius="md" mb={2}>
+                    <Image
+                      src={`/assets/images/creatures/${respawn.image}`}
+                      alt={respawn.name}
+                      boxSize="30px"
+                      mr={2}
+                    />
+                    <Text flex={1}>{respawn.name}</Text>
+                    <IconButton
+                      aria-label="Remove respawn"
+                      icon={<DeleteIcon />}
+                      onClick={() => removeRespawn(respawn.name)}
+                      size="sm"
+                      colorScheme="red"
+                      variant="ghost"
+                    />
+                  </HStack>
+                ))}
+              </Box>
+              <Divider />
+              <HStack as="form" onSubmit={(e) => {
+                e.preventDefault();
+                if (newRespawn.name && newRespawn.image) {
+                  addRespawn(newRespawn);
+                  setNewRespawn({ name: "", image: "" });
+                }
+              }}>
+                <Input
+                  placeholder="Nome do respawn"
+                  value={newRespawn.name}
+                  onChange={(e) => setNewRespawn({ ...newRespawn, name: e.target.value })}
+                  bg="gray.800"
+                  borderColor="gray.700"
+                />
+                <Input
+                  placeholder="Nome da imagem"
+                  value={newRespawn.image}
+                  onChange={(e) => setNewRespawn({ ...newRespawn, image: e.target.value })}
+                  bg="gray.800"
+                  borderColor="gray.700"
+                />
+                <IconButton
+                  aria-label="Add respawn"
+                  icon={<AddIcon />}
+                  type="submit"
+                  colorScheme="green"
+                  variant="solid"
+                />
+              </HStack>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    );
+  };
+
   return (
     <VStack spacing={8} align="stretch">
+      <HStack>
+        <Button onClick={onTimeModalOpen}>Gerenciar Horários</Button>
+        <Button onClick={onRespawnModalOpen}>Gerenciar Respawns</Button>
+      </HStack>
       <ReservationTable 
         reservations={reservations} 
         timeSlots={timeSlots} 
@@ -113,6 +259,8 @@ export const ReservationsManager: React.FC = () => {
         onAddReservation={handleAddReservation}
         onDeleteReservation={handleDeleteReservation}
       />
+      <TimeSlotModal />
+      <RespawnModal />
     </VStack>
   );
 };
