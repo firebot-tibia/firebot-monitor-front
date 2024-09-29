@@ -46,7 +46,7 @@
         { name: "Vashresamun", x: 33208, y: 32591, floor: 7 },
         { name: "Mother of Scarab Lair", x: 33290, y: 32603, floor: 7 },
         { name: "Gold Token", x: 32128, y: 31369, floor: 7 },
-        { name: "Cobra Bastion (-1)", x: 33393, y: 32666, floor: 7 },
+        { name: "Cobra Bastion", x: 33393, y: 32666, floor: 7 },
     ];
 
     const fetchKnownTiles = function() {
@@ -403,78 +403,25 @@
         }
     });
 
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'c') {
-            const current = getUrlPosition();
-            tibiaMap.map.panTo(tibiaMap.map.unproject([current.x, current.y], 0));
-        }
-        if (event.key === 'e') {
-            tibiaMap.crosshairs._toggleExiva();
-        }
-    });
-
     createCityButtons();
 
     const processExivaButton = document.getElementById('processExiva');
     if (processExivaButton) {
-        processExivaButton.addEventListener('click', processExiva);
-        console.log('Evento de clique adicionado ao botão de processar Exiva');
-    }
-
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'e' || event.key === 'E') {
-            processExiva();
-        }
-    });
-
-    tibiaMap.map.on('click', function(event) {
-        if (event && event.latlng) {
-            console.log('Click event:', event.latlng);
-            const direction = determineDirection(event.latlng);
-            if (direction) {
-                findHuntAreas(direction);
-            } else {
-                console.error('Não foi possível determinar a direção');
+        processExivaButton.addEventListener('click', function() {
+            if (tibiaMap.crosshairs && typeof tibiaMap.crosshairs._toggleExiva === 'function') {
+                tibiaMap.crosshairs._toggleExiva();
             }
-        }
-    });
     
-    function determineDirection(clickPoint) {
-        const map = tibiaMap.map;
-        if (!map) {
-            console.error('Mapa não está disponível');
-            return null;
-        }
-    
-        const center = map.getCenter();
-        if (!center) {
-            console.error('Centro do mapa inválido:', center);
-            return null;
-        }
-    
-        if (!clickPoint) {
-            console.error('Ponto de clique inválido:', clickPoint);
-            return null;
-        }
-    
-        console.log('Center:', center);
-        console.log('Click point:', clickPoint);
-    
-        const dx = clickPoint.lng - center.lng;
-        const dy = clickPoint.lat - center.lat;
-    
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-    
-        if (angle > -22.5 && angle <= 22.5) return "East";
-        if (angle > 22.5 && angle <= 67.5) return "North-east";
-        if (angle > 67.5 && angle <= 112.5) return "North";
-        if (angle > 112.5 && angle <= 157.5) return "North-west";
-        if (angle > 157.5 || angle <= -157.5) return "West";
-        if (angle > -157.5 && angle <= -112.5) return "South-west";
-        if (angle > -112.5 && angle <= -67.5) return "South";
-        if (angle > -67.5 && angle <= -22.5) return "South-east";
-    
-        return null;
+            const exivaText = document.getElementById('exiva').value;
+            const direction = exivaText.match(/to the (\w+(-\w+)?)\./);
+            
+            if (direction) {
+                const directionStr = direction[1].charAt(0).toUpperCase() + direction[1].slice(1);
+                findHuntAreas(directionStr);
+            } else {
+                document.getElementById('results').value = "Direção não encontrada no exiva.";
+            }
+        });
     }
     
     function findHuntAreas(direction) {
@@ -532,6 +479,46 @@
         }
     }
 
+    
+    function determineDirection(clickPoint) {
+        const map = tibiaMap.map;
+        if (!map) {
+            console.error('Mapa não está disponível');
+            return null;
+        }
+    
+        const center = map.getCenter();
+        if (!center) {
+            console.error('Centro do mapa inválido:', center);
+            return null;
+        }
+    
+        if (!clickPoint) {
+            console.error('Ponto de clique inválido:', clickPoint);
+            return null;
+        }
+    
+        console.log('Center:', center);
+        console.log('Click point:', clickPoint);
+    
+        const dx = clickPoint.lng - center.lng;
+        const dy = clickPoint.lat - center.lat;
+    
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    
+        if (angle > -22.5 && angle <= 22.5) return "East";
+        if (angle > 22.5 && angle <= 67.5) return "North-east";
+        if (angle > 67.5 && angle <= 112.5) return "North";
+        if (angle > 112.5 && angle <= 157.5) return "North-west";
+        if (angle > 157.5 || angle <= -157.5) return "West";
+        if (angle > -157.5 && angle <= -112.5) return "South-west";
+        if (angle > -112.5 && angle <= -67.5) return "South";
+        if (angle > -67.5 && angle <= -22.5) return "South-east";
+    
+        return null;
+    }
+    
+
     function createCityButtons() {
         const cityButtonsContainer = document.getElementById('city-buttons');
         if (!cityButtonsContainer) {
@@ -566,18 +553,6 @@
         } 
     }
     
-    function processExiva() {
-        const exivaText = document.getElementById('exiva').value;
-        const direction = exivaText.match(/to the (\w+(-\w+)?)\./);
-        
-        if (direction) {
-            const directionStr = direction[1].charAt(0).toUpperCase() + direction[1].slice(1);
-            findHuntAreas(directionStr);
-        } else {
-            document.getElementById('results').value = "Direção não encontrada no exiva.";
-        }
-    }
-
 })();
 
 
