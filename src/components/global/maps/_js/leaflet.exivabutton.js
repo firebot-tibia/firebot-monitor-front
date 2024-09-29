@@ -25,10 +25,3 @@ L.ExivaButton = L.Control.extend({
 L.exivaButton = function(options) {
 	return new L.ExivaButton(options);
 };
-
-        // const layersControl = L.control.layers(baseMaps);
-        // if (L.control && L.control.layers) {
-        //     layersControl.addTo(map);
-        // } else {
-        //     console.warn('Layers control not available');
-        // }
