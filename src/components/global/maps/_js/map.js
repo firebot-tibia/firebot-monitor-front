@@ -268,8 +268,6 @@
             maxBounds: maxBounds,
             attributionControl: false,
             zoomControl: false,
-            scrollWheelZoom: true, 
-            doubleClickZoom: true  
         });
     
         const baseMaps = {};
