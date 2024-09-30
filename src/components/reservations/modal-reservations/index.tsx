@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
-  VStack, HStack, Input, Box, Text, Image, IconButton, Divider,
-  Tabs, TabList, TabPanels, Tab, TabPanel, useColorModeValue, useToast
+  VStack, HStack, Input, Box, Text, Image, IconButton,
+  useColorModeValue, useToast
 } from "@chakra-ui/react";
-import { AddIcon, DeleteIcon, TimeIcon, RepeatIcon } from "@chakra-ui/icons";
+import { AddIcon, DeleteIcon } from "@chakra-ui/icons";
 import { Respawn } from '../../../shared/interface/reservations.interface';
-import { formatTimeSlotEnd } from '../../../shared/utils/utils';
 
 interface ManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  timeSlots: string[];
   respawns: Respawn[];
-  addTimeSlot: (slot: string) => void;
-  removeTimeSlot: (slot: string) => void;
   addRespawn: (respawn: { name: string; image: string }) => void;
   removeRespawn: (id: string) => void;
 }
@@ -22,15 +18,10 @@ interface ManagementModalProps {
 export const ManagementModal: React.FC<ManagementModalProps> = ({
   isOpen,
   onClose,
-  timeSlots,
   respawns,
-  addTimeSlot,
-  removeTimeSlot,
   addRespawn,
   removeRespawn
 }) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [newTimeSlot, setNewTimeSlot] = useState("");
   const [newRespawn, setNewRespawn] = useState({ name: "", image: "" });
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -44,115 +35,83 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
     respawn.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleAddRespawn = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newRespawn.name) {
+      addRespawn(newRespawn);
+      setNewRespawn({ name: "", image: "" });
+      toast({
+        title: "Respawn adicionado",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleRemoveRespawn = (id: string) => {
+    removeRespawn(id);
+    toast({
+      title: "Respawn removido",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
       <ModalContent bg={bgColor} color="white">
-        <ModalHeader>Gerenciar Horários e Respawns</ModalHeader>
+        <ModalHeader>Gerenciar Respawns</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Tabs isFitted variant="enclosed" onChange={(index) => setActiveTab(index)}>
-            <TabList mb="1em">
-              <Tab><TimeIcon mr={2} />Horários</Tab>
-              <Tab><RepeatIcon mr={2} />Respawns</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <VStack spacing={4} align="stretch">
-                  {timeSlots.map((slot: string) => (
-                    <HStack key={slot} p={2} bg={inputBgColor} borderRadius="md">
-                      <Text flex={1}>{formatTimeSlotEnd(slot)}</Text>
-                      <IconButton
-                        aria-label="Remove time slot"
-                        icon={<DeleteIcon />}
-                        onClick={() => removeTimeSlot(slot)}
-                        size="sm"
-                        colorScheme="red"
-                        variant="ghost"
-                      />
-                    </HStack>
-                  ))}
-                  <HStack as="form" onSubmit={(e) => {
-                    e.preventDefault();
-                    if (newTimeSlot) {
-                      addTimeSlot(newTimeSlot);
-                      setNewTimeSlot("");
-                    }
-                  }}>
-                    <Input
-                      placeholder="Novo horário"
-                      value={newTimeSlot}
-                      onChange={(e) => setNewTimeSlot(e.target.value)}
-                      bg={inputBgColor}
-                      borderColor={borderColor}
-                    />
-                    <IconButton
-                      aria-label="Add time slot"
-                      icon={<AddIcon />}
-                      type="submit"
-                      colorScheme="green"
-                      variant="solid"
-                    />
-                  </HStack>
-                </VStack>
-              </TabPanel>
-              <TabPanel>
-                <VStack spacing={4} align="stretch">
-                  <Input
-                    placeholder="Buscar respawn..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    bg={inputBgColor}
-                    borderColor={borderColor}
+          <VStack spacing={4} align="stretch">
+            <Input
+              placeholder="Buscar respawn..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              bg={inputBgColor}
+              borderColor={borderColor}
+            />
+            <Box maxHeight="300px" overflowY="auto">
+              {filteredRespawns.map(respawn => (
+                <HStack key={respawn.name} p={2} bg={inputBgColor} borderRadius="md" mb={2}>
+                  <Image 
+                    src={`/assets/images/creatures/${respawn.image}`} 
+                    alt={respawn.name} 
+                    boxSize="50px"
+                    mr={2}
                   />
-                  <Box maxHeight="300px" overflowY="auto">
-                    {filteredRespawns.map(respawn => (
-                      <HStack key={respawn.name} p={2} bg={inputBgColor} borderRadius="md" mb={2}>
-                        <Image 
-                          src={`/assets/images/creatures/${respawn.image}`} 
-                          alt={respawn.name} 
-                          boxSize="50px"
-                          mr={2}
-                        />
-                        <Text flex={1}>{respawn.name}</Text>
-                        <IconButton
-                          aria-label="Remove respawn"
-                          icon={<DeleteIcon />}
-                          onClick={() => removeRespawn(respawn.id || '')}
-                          size="sm"
-                          colorScheme="red"
-                          variant="ghost"
-                        />
-                      </HStack>
-                    ))}
-                  </Box>
-                  <Divider />
-                  <HStack as="form" onSubmit={(e) => {
-                    e.preventDefault();
-                    if (newRespawn.name) {
-                      addRespawn(newRespawn);
-                      setNewRespawn({ name: "", image: "" });
-                    }
-                  }}>
-                    <Input
-                      placeholder="Nome do respawn"
-                      value={newRespawn.name}
-                      onChange={(e) => setNewRespawn({ ...newRespawn, name: e.target.value })}
-                      bg={inputBgColor}
-                      borderColor={borderColor}
-                    />
-                    <IconButton
-                      aria-label="Add respawn"
-                      icon={<AddIcon />}
-                      type="submit"
-                      colorScheme="green"
-                      variant="solid"
-                    />
-                  </HStack>
-                </VStack>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+                  <Text flex={1}>{respawn.name}</Text>
+                  <IconButton
+                    aria-label="Remove respawn"
+                    icon={<DeleteIcon />}
+                    onClick={() => handleRemoveRespawn(respawn.id || '')}
+                    size="sm"
+                    colorScheme="red"
+                    variant="ghost"
+                  />
+                </HStack>
+              ))}
+            </Box>
+            <HStack as="form" onSubmit={handleAddRespawn}>
+              <Input
+                placeholder="Nome do respawn"
+                value={newRespawn.name}
+                onChange={(e) => setNewRespawn({ ...newRespawn, name: e.target.value })}
+                bg={inputBgColor}
+                borderColor={borderColor}
+              />
+              <IconButton
+                aria-label="Add respawn"
+                icon={<AddIcon />}
+                type="submit"
+                colorScheme="green"
+                variant="solid"
+              />
+            </HStack>
+          </VStack>
         </ModalBody>
       </ModalContent>
     </Modal>

@@ -8,7 +8,7 @@ import { Reservation, CreateReservationData, Respawn } from "../../shared/interf
 import { ReservationTable } from "./table";
 import { ManagementModal } from "./modal-reservations";
 import { SettingsIcon } from "@chakra-ui/icons";
-import { defaultTimeSlots, formatTimeSlot } from "../../shared/utils/utils";
+import { defaultTimeSlots } from "../../shared/utils/utils";
 import { endOfDay, format, lastDayOfMonth } from 'date-fns';
 
 
@@ -103,6 +103,7 @@ export const ReservationsManager: React.FC = () => {
     try {
       const createdRespawn = await createRespawn({
         name: newRespawn.name,
+        description: newRespawn.name,
         premium: true,
       });
       setRespawns([...respawns, createdRespawn]);
@@ -159,18 +160,10 @@ export const ReservationsManager: React.FC = () => {
     }
   };
 
-  const addTimeSlot = (newSlot: string) => {
-    setTimeSlots([...timeSlots, formatTimeSlot(newSlot)]);
-  };
-
-  const removeTimeSlot = (slotToRemove: string) => {
-    setTimeSlots(timeSlots.filter((slot: string) => slot !== slotToRemove));
-  };
-
   return (
     <VStack spacing={8} align="stretch">
       <Button onClick={onManagementModalOpen} leftIcon={<SettingsIcon />}>
-        Gerenciar Horários e Respawns
+        Gerenciar Respawns
       </Button>
       <ReservationTable 
         reservations={reservations} 
@@ -182,10 +175,7 @@ export const ReservationsManager: React.FC = () => {
       <ManagementModal 
         isOpen={isManagementModalOpen}
         onClose={onManagementModalClose}
-        timeSlots={timeSlots}
         respawns={respawns}
-        addTimeSlot={addTimeSlot}
-        removeTimeSlot={removeTimeSlot}
         addRespawn={addRespawn}
         removeRespawn={removeRespawn}
       />
