@@ -1,31 +1,33 @@
 export interface DeletedAt {
-    time: string;
-    valid: boolean;
+    Time: string;
+    Valid: boolean;
 }
-  
+
 export interface Respawn {
-    description?: string;
     id?: string;
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: DeletedAt;
     name: string;
+    description?: string;
     premium?: boolean;
-    image?: string; 
+    image?: string;
 }
-  
+
 export interface Reservation {
-    created_at: string;
-    deleted_at: DeletedAt;
-    end_time: string;
-    guild_id: string;
     id: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at: DeletedAt;
+    respawn_id: string;
+    ally_guild_id: string;
+    enemy_guild_id: string;
+    start_time: string;
+    end_time: string;
+    status: string;
+    respawn: Respawn;
     reserved_by: string;
     reserved_for: string;
-    respawn: Respawn;
-    start_time: string; 
-    status: 'reserved' | 'canceled' | 'free';
-}
-  
-export interface ReservationsListResponse {
-    reservations: Reservation[];
 }
 
 export interface CreateReservationData {

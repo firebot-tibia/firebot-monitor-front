@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Table, Thead, Tbody, Tr, Th, Td, Text, Image, Flex, Button, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, VStack } from '@chakra-ui/react';
 import { Reservation, CreateReservationData, Respawn } from '../../../shared/interface/reservations.interface';
 import { AddReservationForm } from '../add-reservations';
@@ -9,12 +9,20 @@ interface ReservationTableProps {
   timeSlots: string[];
   respawns: Respawn[];
   onAddReservation: (data: CreateReservationData & { respawnId: string }) => Promise<void>;
-  onDeleteReservation: (id: number) => Promise<void>;
+  onDeleteReservation: (id: string) => Promise<void>;
+  onFetchReservation: () => Promise<void>; 
 }
 
 const RESPAWNS_PER_TABLE = 6;
 
-export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations, timeSlots, respawns, onAddReservation, onDeleteReservation }) => {
+export const ReservationTable: React.FC<ReservationTableProps> = ({ 
+  reservations, 
+  timeSlots, 
+  respawns, 
+  onAddReservation, 
+  onDeleteReservation,
+  onFetchReservation,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedSlot, setSelectedSlot] = useState<{ time: string, respawn: Respawn } | null>(null);
 
@@ -23,9 +31,39 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations
     onOpen();
   };
 
-  const handleDeleteClick = async (id: number) => {
+  const handleDeleteClick = async (id: string) => {
     await onDeleteReservation(id);
   };
+
+  const handleReservations = async () => {
+    await onFetchReservation();
+  };
+
+  const allSlots = useMemo(() => {
+    const slots: Record<string, Record<string, Reservation | 'free'>> = {};
+    timeSlots.forEach((timeSlot: string) => {
+      slots[timeSlot] = {};
+      respawns.forEach(respawn => {
+        slots[timeSlot][respawn.id || ''] = 'free';
+      });
+    });
+
+    console.log(reservations);
+    
+    if (reservations && reservations.length > 0) {
+      reservations.forEach(reservation => {
+        const startTime = new Date(reservation.start_time).toLocaleString('en-GB').replace(',', '-');
+        const timeSlot = timeSlots.find(slot => slot.startsWith(startTime)) || startTime;
+        console.log(timeSlot);
+        console.log(slots);
+        if (slots[timeSlot] && reservation.respawn_id) {
+          slots[timeSlot][reservation.respawn_id] = reservation;
+        }
+      });
+    }
+    
+    return slots;
+  }, [timeSlots, respawns, reservations]);
 
   const renderTable = (startIndex: number, endIndex: number) => (
     <Table variant="simple" key={startIndex}>
@@ -33,7 +71,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations
         <Tr>
           <Th>Horário</Th>
           {respawns.slice(startIndex, endIndex).map(respawn => (
-            <Th key={respawn.name}>
+            <Th key={respawn.id}>
               <Flex direction="column" align="center">
                 {respawn.image && (
                   <Image 
@@ -52,20 +90,17 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations
       <Tbody>
         {timeSlots.map(timeSlot => (
           <Tr key={timeSlot}>
-          <Td>{formatTimeSlotEnd(timeSlot)}</Td>
+            <Td>{formatTimeSlotEnd(timeSlot)}</Td>
             {respawns.slice(startIndex, endIndex).map(respawn => {
-              const reservation = reservations.find(r => 
-                r.respawn.name === respawn.name && 
-                r.start_time === timeSlot
-              );
+              const slot = allSlots[timeSlot][respawn.id || ''];
               return (
-                <Td key={`${respawn.name}-${timeSlot}`}>
-                  {reservation ? (
+                <Td key={`${respawn.id}-${timeSlot}`}>
+                  {slot !== 'free' ? (
                     <Flex direction="column" align="center">
-                      <Text color={reservation.status === 'reserved' ? 'red.500' : 'green.500'}>
-                        {reservation.reserved_for}
+                      <Text color={slot.status === 'reserved' ? 'red.500' : 'green.500'}>
+                        {slot.reserved_for}
                       </Text>
-                      <Button size="sm" colorScheme="red" onClick={() => handleDeleteClick(Number(reservation.id))}>
+                      <Button size="sm" colorScheme="red" onClick={() => handleDeleteClick(slot.id)}>
                         Remover
                       </Button>
                     </Flex>
@@ -104,8 +139,9 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations
                 onSubmit={async (data) => {
                   await onAddReservation({
                     ...data,
-                    respawnId: selectedSlot.respawn.id || ''
+                    respawnId: selectedSlot.respawn.id || '',
                   });
+                  handleReservations();
                   onClose();
                 }}
                 respawnName={selectedSlot.respawn.name}

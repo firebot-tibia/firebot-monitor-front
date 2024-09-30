@@ -4,12 +4,13 @@ import { Button, useDisclosure, useToast, VStack } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { getReservationsList, createReservation, deleteReservation, createRespawn, getAllRespawnsPremiums, removeRespawnApi } from "../../services/guilds";
-import { Reservation, CreateReservationData, Respawn } from "../../shared/interface/reservations.interface";
+import { CreateReservationData, Respawn } from "../../shared/interface/reservations.interface";
 import { ReservationTable } from "./table";
 import { ManagementModal } from "./modal-reservations";
 import { SettingsIcon } from "@chakra-ui/icons";
 import { defaultTimeSlots } from "../../shared/utils/utils";
 import { endOfDay, format, lastDayOfMonth } from 'date-fns';
+import { usePermissionCheck } from "../../hooks/global/usePermissionCheck";
 
 
 const defaultRespawns = [
@@ -40,12 +41,13 @@ const defaultRespawns = [
 ];
 
 export const ReservationsManager: React.FC = () => {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [timeSlots, setTimeSlots] = useState(defaultTimeSlots);
+  const [reservations, setReservations] = useState<any[]>([]);
+  const [timeSlots] = useState(defaultTimeSlots);
   const [respawns, setRespawns] = useState<Respawn[]>([]);
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const toast = useToast();
+  const checkPermission = usePermissionCheck();
   const { isOpen: isManagementModalOpen, onOpen: onManagementModalOpen, onClose: onManagementModalClose } = useDisclosure();
 
   useEffect(() => {
@@ -78,9 +80,10 @@ export const ReservationsManager: React.FC = () => {
       const response = await getReservationsList({
         guild_id: guildId,
         start_time_greater: firstDayOfMonth,
-        end_time_less: lastDayOfCurrentMonth
+        end_time_less: lastDayOfCurrentMonth,
+        kind: "ally"
       });
-      setReservations(response.reservations);
+      setReservations(response);
     } catch (error) {
       console.error('Failed to fetch reservations:', error);
     }
@@ -100,6 +103,7 @@ export const ReservationsManager: React.FC = () => {
   };
 
   const addRespawn = async (newRespawn: { name: string; image: string }) => {
+    if (!checkPermission()) return;
     try {
       const createdRespawn = await createRespawn({
         name: newRespawn.name,
@@ -107,14 +111,23 @@ export const ReservationsManager: React.FC = () => {
         premium: true,
       });
       setRespawns([...respawns, createdRespawn]);
+      fetchRespawns();
+      toast({
+        title: "Respawn criado com sucesso",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error('Failed to create respawn:', error);
     }
   };
 
   const removeRespawn = async (id: string) => {
+    if (!checkPermission()) return;
     if (id) {
         await removeRespawnApi(id);
+        fetchRespawns();
         toast({
           title: "Respawn removido com sucesso",
           status: "success",
@@ -125,6 +138,7 @@ export const ReservationsManager: React.FC = () => {
   };
 
   const handleAddReservation = async (data: CreateReservationData & { respawnId: string }) => {
+    if (!checkPermission()) return;
     try {
       await createReservation({
         start_time: data.start_time,
@@ -145,7 +159,8 @@ export const ReservationsManager: React.FC = () => {
     }
   };
 
-  const handleDeleteReservation = async (id: number) => {
+  const handleDeleteReservation = async (id: string) => {
+    if (!checkPermission()) return;
     try {
       await deleteReservation(id);
       fetchReservations();
@@ -171,6 +186,7 @@ export const ReservationsManager: React.FC = () => {
         respawns={respawns}
         onAddReservation={handleAddReservation}
         onDeleteReservation={handleDeleteReservation}
+        onFetchReservation={fetchReservations}
       />
       <ManagementModal 
         isOpen={isManagementModalOpen}

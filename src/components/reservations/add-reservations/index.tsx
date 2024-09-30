@@ -13,13 +13,16 @@ export const AddReservationForm: React.FC<AddReservationFormProps> = ({ onSubmit
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const [start_time, end_time] = timeSlot.split(' - ');
+    
+    const start_time = timeSlot.split(' - ')[0];
+    const end_time = timeSlot.split(' - ')[1];
+
     onSubmit({
       start_time,
       end_time,
       reserved_for: reservedFor,
       respawn_id: respawnName,
-      kind: "ally"
+      kind: 'ally'
     });
   };
 
@@ -27,8 +30,8 @@ export const AddReservationForm: React.FC<AddReservationFormProps> = ({ onSubmit
     <Box as="form" onSubmit={handleSubmit}>
       <FormControl>
         <FormLabel>Reservado para</FormLabel>
-        <Input 
-          value={reservedFor} 
+        <Input
+          value={reservedFor}
           onChange={(e) => setReservedFor(e.target.value)}
           placeholder="Nome do jogador"
         />

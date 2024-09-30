@@ -15,6 +15,7 @@ import { useLocalStorageMode } from '../../hooks/global/useLocalStorageParse';
 import { useDeathData } from '../../hooks/deaths/useDeathHook';
 import DeathSection from '../../components/guild/sections/death-section';
 import { normalizeTimeOnline, isOnline } from '../../shared/utils/utils';
+import { usePermissionCheck } from '../../hooks/global/usePermissionCheck';
 
 
 const Home: FC = () => {  
@@ -26,6 +27,8 @@ const Home: FC = () => {
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const { types, addType } = useCharacterTypes(guildData);
+  const checkPermission = usePermissionCheck();
+
 
   const handleMessage = useCallback((data: any) => {
     if (data?.[mode]) {
@@ -52,39 +55,6 @@ const Home: FC = () => {
     }
   }, [status, session, mode]);
 
-  const checkPermission = useCallback(() => {
-    if (!session?.access_token) {
-      toast({
-        title: 'Erro de autenticação',
-        description: 'Sua sessão não é válida. Por favor, faça login novamente.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      return false;
-    }
-  
-    try {
-      const payload = session.access_token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      const userStatus = decoded?.status;
-  
-      if (userStatus !== 'admin' && userStatus !== 'editor') {
-        toast({
-          title: 'Permissão negada',
-          description: 'Você não tem permissão para editar estas informações.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.error('Erro ao decodificar o token:', error);
-      return false;
-    }
-  }, [session, toast]);
 
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
     if (!checkPermission()) return;
