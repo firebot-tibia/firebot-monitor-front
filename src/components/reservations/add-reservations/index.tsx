@@ -13,11 +13,13 @@ export const AddReservationForm: React.FC<AddReservationFormProps> = ({ onSubmit
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const [start_time, end_time] = timeSlot.split(' - ');
     onSubmit({
-      start_time: timeSlot,
-      end_time: timeSlot,
+      start_time,
+      end_time,
       reserved_for: reservedFor,
       respawn_id: respawnName,
+      kind: "ally"
     });
   };
 

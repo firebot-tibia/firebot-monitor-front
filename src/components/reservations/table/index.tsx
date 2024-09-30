@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Table, Thead, Tbody, Tr, Th, Td, Text, Image, Flex, Button, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, VStack } from '@chakra-ui/react';
-import { Reservation, CreateReservationData } from '../../../shared/interface/reservations.interface';
+import { Reservation, CreateReservationData, Respawn } from '../../../shared/interface/reservations.interface';
 import { AddReservationForm } from '../add-reservations';
+import { formatTimeSlotEnd } from '../../../shared/utils/utils';
 
 interface ReservationTableProps {
   reservations: Reservation[];
   timeSlots: string[];
-  respawns: { name: string; image: string }[];
-  onAddReservation: (data: CreateReservationData) => Promise<void>;
+  respawns: Respawn[];
+  onAddReservation: (data: CreateReservationData & { respawnId: string }) => Promise<void>;
   onDeleteReservation: (id: number) => Promise<void>;
 }
 
@@ -15,9 +16,9 @@ const RESPAWNS_PER_TABLE = 6;
 
 export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations, timeSlots, respawns, onAddReservation, onDeleteReservation }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedSlot, setSelectedSlot] = useState<{ time: string, respawn: string } | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{ time: string, respawn: Respawn } | null>(null);
 
-  const handleAddClick = (time: string, respawn: string) => {
+  const handleAddClick = (time: string, respawn: Respawn) => {
     setSelectedSlot({ time, respawn });
     onOpen();
   };
@@ -51,7 +52,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations
       <Tbody>
         {timeSlots.map(timeSlot => (
           <Tr key={timeSlot}>
-            <Td>{timeSlot}</Td>
+          <Td>{formatTimeSlotEnd(timeSlot)}</Td>
             {respawns.slice(startIndex, endIndex).map(respawn => {
               const reservation = reservations.find(r => 
                 r.respawn.name === respawn.name && 
@@ -69,7 +70,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations
                       </Button>
                     </Flex>
                   ) : (
-                    <Button size="sm" colorScheme="green" onClick={() => handleAddClick(timeSlot, respawn.name)}>
+                    <Button size="sm" colorScheme="green" onClick={() => handleAddClick(timeSlot, respawn)}>
                       Adicionar
                     </Button>
                   )}
@@ -101,10 +102,13 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({ reservations
             {selectedSlot && (
               <AddReservationForm
                 onSubmit={async (data) => {
-                  await onAddReservation(data);
+                  await onAddReservation({
+                    ...data,
+                    respawnId: selectedSlot.respawn.id || ''
+                  });
                   onClose();
                 }}
-                respawnName={selectedSlot.respawn}
+                respawnName={selectedSlot.respawn.name}
                 timeSlot={selectedSlot.time}
               />
             )}

@@ -1,25 +1,40 @@
 import React, { useState } from 'react';
 import {
   Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton,
-  VStack, HStack, Input, Button, Box, Text, Image, IconButton, Divider,
-  Tabs, TabList, TabPanels, Tab, TabPanel, useColorModeValue
+  VStack, HStack, Input, Box, Text, Image, IconButton, Divider,
+  Tabs, TabList, TabPanels, Tab, TabPanel, useColorModeValue, useToast
 } from "@chakra-ui/react";
 import { AddIcon, DeleteIcon, TimeIcon, RepeatIcon } from "@chakra-ui/icons";
+import { Respawn } from '../../../shared/interface/reservations.interface';
+import { formatTimeSlotEnd } from '../../../shared/utils/utils';
 
-export const ManagementModal: React.FC<{
+interface ManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
   timeSlots: string[];
-  respawns: { name: string; image: string }[];
+  respawns: Respawn[];
   addTimeSlot: (slot: string) => void;
   removeTimeSlot: (slot: string) => void;
   addRespawn: (respawn: { name: string; image: string }) => void;
-  removeRespawn: (name: string) => void;
-}> = ({ isOpen, onClose, timeSlots, respawns, addTimeSlot, removeTimeSlot, addRespawn, removeRespawn }) => {
+  removeRespawn: (id: string) => void;
+}
+
+export const ManagementModal: React.FC<ManagementModalProps> = ({
+  isOpen,
+  onClose,
+  timeSlots,
+  respawns,
+  addTimeSlot,
+  removeTimeSlot,
+  addRespawn,
+  removeRespawn
+}) => {
   const [activeTab, setActiveTab] = useState(0);
   const [newTimeSlot, setNewTimeSlot] = useState("");
   const [newRespawn, setNewRespawn] = useState({ name: "", image: "" });
   const [searchTerm, setSearchTerm] = useState("");
+
+  const toast = useToast();
 
   const bgColor = useColorModeValue("gray.900", "gray.900");
   const borderColor = useColorModeValue("gray.700", "gray.700");
@@ -46,7 +61,7 @@ export const ManagementModal: React.FC<{
                 <VStack spacing={4} align="stretch">
                   {timeSlots.map((slot: string) => (
                     <HStack key={slot} p={2} bg={inputBgColor} borderRadius="md">
-                      <Text flex={1}>{slot}</Text>
+                      <Text flex={1}>{formatTimeSlotEnd(slot)}</Text>
                       <IconButton
                         aria-label="Remove time slot"
                         icon={<DeleteIcon />}
@@ -103,7 +118,7 @@ export const ManagementModal: React.FC<{
                         <IconButton
                           aria-label="Remove respawn"
                           icon={<DeleteIcon />}
-                          onClick={() => removeRespawn(respawn.name)}
+                          onClick={() => removeRespawn(respawn.id || '')}
                           size="sm"
                           colorScheme="red"
                           variant="ghost"

@@ -1,6 +1,7 @@
 import { useToast } from "@chakra-ui/react";
 import { vocationIcons } from "../../constant/character";
 import { GuildMemberResponse } from "../interface/guild-member.interface";
+import { format, parse } from 'date-fns';
 
 export const formatExp = (value: number): string => {
     const absValue = Math.abs(value);
@@ -106,3 +107,31 @@ export function getName(name: string | undefined): string {
 export function getVocationIcon(vocation: string) {
   return vocationIcons[vocation] || '';
 }
+
+
+export const formatTimeSlot = (timeString: string): string => {
+  const [start, end] = timeString.split(' - ');
+  const currentDate = new Date();
+  const startDate = new Date(currentDate.setHours(parseInt(start.split(':')[0]), parseInt(start.split(':')[1])));
+  const endDate = new Date(currentDate.setHours(parseInt(end.split(':')[0]), parseInt(end.split(':')[1])));
+  
+  return `${format(startDate, 'dd/MM/yyyy-HH:mm')} - ${format(endDate, 'dd/MM/yyyy-HH:mm')}`;
+};
+
+export const defaultTimeSlots = [
+  "05:10 - 09:30", "09:30 - 12:40", "12:40 - 15:50", "15:50 - 19:00",
+  "19:00 - 22:10", "22:10 - 01:20", "01:20 - 04:50"
+].map(formatTimeSlot);
+
+export const formatTimeSlotEnd = (timeSlot: string) => {
+  const [startTime, endTime] = timeSlot.split(' - ');
+  
+  const parseTimeString = (timeString: string) => {
+    return parse(timeString, 'dd/MM/yyyy-HH:mm', new Date());
+  };
+
+  const formattedStart = format(parseTimeString(startTime), 'HH:mm');
+  const formattedEnd = format(parseTimeString(endTime), 'HH:mm');
+  
+  return `${formattedStart} - ${formattedEnd}`;
+};

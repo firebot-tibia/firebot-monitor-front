@@ -1,6 +1,6 @@
 import { UpsertPlayerInput } from '../shared/interface/character-upsert.interface';
 import { ExperienceListQuery } from '../shared/interface/guild-stats.interface';
-import { CreateReservationData, ReservationsListResponse } from '../shared/interface/reservations.interface';
+import { CreateReservationData, ReservationsListResponse, Respawn } from '../shared/interface/reservations.interface';
 import api from './api';
 
 export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
@@ -79,6 +79,35 @@ export const getReservationsList = async (query: {
     const response = await api.get<ReservationsListResponse>('/api/reservations/list', {
       params: query,
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createRespawn = async (respawnData: Respawn) => {
+  try {
+    const response = await api.post('/respawns/create', {
+      respawn: { ...respawnData, premium: true }
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const removeRespawnApi = async ( id: string) => {
+  try {
+    const response = await api.delete(`/respawns/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllRespawnsPremiums  = async () => {
+  try {
+    const response = await api.get(`/respawns/list-premium`);
     return response.data;
   } catch (error) {
     throw error;

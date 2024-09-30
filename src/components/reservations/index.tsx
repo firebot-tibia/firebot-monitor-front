@@ -1,18 +1,16 @@
 'use client';
+
 import { Button, useDisclosure, useToast, VStack } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { getReservationsList, createReservation, deleteReservation } from "../../services/guilds";
-import { Reservation, CreateReservationData } from "../../shared/interface/reservations.interface";
+import { getReservationsList, createReservation, deleteReservation, createRespawn, getAllRespawnsPremiums, removeRespawnApi } from "../../services/guilds";
+import { Reservation, CreateReservationData, Respawn } from "../../shared/interface/reservations.interface";
 import { ReservationTable } from "./table";
 import { ManagementModal } from "./modal-reservations";
 import { SettingsIcon } from "@chakra-ui/icons";
+import { defaultTimeSlots, formatTimeSlot } from "../../shared/utils/utils";
+import { endOfDay, format, lastDayOfMonth } from 'date-fns';
 
-
-const defaultTimeSlots = [
-  "SS - 9:30", "9:30 - 12:40", "12:40 - 15:50", "15:50 - 19:00",
-  "19:00 - 22:10", "22:10 - 1:20", "1:20 - SS"
-];
 
 const defaultRespawns = [
   { name: "Issavi", image: "goanna.gif" },
@@ -22,31 +20,29 @@ const defaultRespawns = [
   { name: "Livraria Energy", image: "energy_book.gif" },
   { name: "Wardragon -1", image: "wardragon.gif" },
   { name: "Wardragon -2", image: "wardragon.gif" },
-  { name: "Piolho -1", image: "" },
-  { name: "Piolho -2", image: "" },
+  { name: "Piolho -1", image: "piolho.gif" },
+  { name: "Piolho -2", image: "piolho2.gif" },
   { name: "Cobra", image: "cobra_assassin.gif" },
-  { name: "Soul War", image: "" },
   { name: "Rotten Esquerda", image: "rotten_golem.gif" },
   { name: "Rotten Direita", image: "rotten_golem.gif" },
-  { name: "Furious Crater (Cloak)", image: "" },
-  { name: "Dark Thais", image: "" },
-  { name: "Ebb and Flow (Fear)", image: "" },
+  { name: "Furious Crater (Cloak)", image: "cloak.gif" },
+  { name: "Dark Thais", image: "manyfaces.gif" },
+  { name: "Ebb and Flow (Fear)", image: "bony.gif" },
   { name: "Brachiodemon", image: "brachiodemon.gif" },
-  { name: "Crystal Enigma Sul", image: "" },
-  { name: "Crystal Enigma Norte", image: "" },
-  { name: "Sparkling Pools Sul", image: "" },
-  { name: "Sparkling Pools Norte", image: "" },
-  { name: "Monster Graveyard", image: "" },
+  { name: "Crystal Enigma Sul", image: "mantosaurus.gif" },
+  { name: "Crystal Enigma Norte", image: "mantosaurus.gif" },
+  { name: "Sparkling Pools Sul", image: "gorerilla.gif" },
+  { name: "Sparkling Pools Norte", image: "gorerilla.gif" },
+  { name: "Monster Graveyard", image: "nighthunter.gif" },
   { name: "Darklight Core", image: "darklight.gif" },
   { name: "Gloom Pillars", image: "pillar.gif" },
-  { name: "Putrefactory", image: "" },
-  { name: "Jaded Roots", image: "" }
+  { name: "Putrefactory", image: "rotten_man.gif" },
 ];
 
 export const ReservationsManager: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [timeSlots, setTimeSlots] = useState(defaultTimeSlots);
-  const [respawns, setRespawns] = useState(defaultRespawns);
+  const [respawns, setRespawns] = useState<Respawn[]>([]);
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const toast = useToast();
@@ -68,22 +64,74 @@ export const ReservationsManager: React.FC = () => {
   useEffect(() => {
     if (guildId) {
       fetchReservations();
+      fetchRespawns();
     }
   }, [guildId]);
 
   const fetchReservations = async () => {
     if (!guildId) return;
+    const now = new Date();
+    const firstDayOfMonth = format(now, '01/MM/yyyy-00:00');
+    const lastDayOfCurrentMonth = format(endOfDay(lastDayOfMonth(now)), 'dd/MM/yyyy-HH:mm');
+  
     try {
-      const response = await getReservationsList({ guild_id: guildId });
+      const response = await getReservationsList({
+        guild_id: guildId,
+        start_time_greater: firstDayOfMonth,
+        end_time_less: lastDayOfCurrentMonth
+      });
       setReservations(response.reservations);
     } catch (error) {
       console.error('Failed to fetch reservations:', error);
     }
   };
 
-  const handleAddReservation = async (data: CreateReservationData) => {
+  const fetchRespawns = async () => {
     try {
-      await createReservation(data);
+      const respawnsData = await getAllRespawnsPremiums();
+      const respawnsWithImages = respawnsData.map((respawn: Respawn) => ({
+        ...respawn,
+        image: respawn.image || defaultRespawns.find(r => r.name === respawn.name)?.image || "deer.gif"
+      }));
+      setRespawns(respawnsWithImages);
+    } catch (error) {
+      console.error('Failed to fetch respawns:', error);
+    }
+  };
+
+  const addRespawn = async (newRespawn: { name: string; image: string }) => {
+    try {
+      const createdRespawn = await createRespawn({
+        name: newRespawn.name,
+        premium: true,
+      });
+      setRespawns([...respawns, createdRespawn]);
+    } catch (error) {
+      console.error('Failed to create respawn:', error);
+    }
+  };
+
+  const removeRespawn = async (id: string) => {
+    if (id) {
+        await removeRespawnApi(id);
+        toast({
+          title: "Respawn removido com sucesso",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+  };
+
+  const handleAddReservation = async (data: CreateReservationData & { respawnId: string }) => {
+    try {
+      await createReservation({
+        start_time: data.start_time,
+        end_time: data.end_time,
+        reserved_for: data.reserved_for,
+        respawn_id: data.respawnId,
+        kind: "ally"
+      });
       fetchReservations();
       toast({
         title: "Reserva adicionada com sucesso",
@@ -111,45 +159,38 @@ export const ReservationsManager: React.FC = () => {
     }
   };
 
-
   const addTimeSlot = (newSlot: string) => {
-    setTimeSlots([...timeSlots, newSlot]);
+    setTimeSlots([...timeSlots, formatTimeSlot(newSlot)]);
   };
 
   const removeTimeSlot = (slotToRemove: string) => {
-    setTimeSlots(timeSlots.filter((slot: any) => slot !== slotToRemove));
+    setTimeSlots(timeSlots.filter((slot: string) => slot !== slotToRemove));
   };
 
-  const addRespawn = (newRespawn: { name: string; image: string }) => {
-    setRespawns([...respawns, newRespawn]);
-  };
+  return (
+    <VStack spacing={8} align="stretch">
+      <Button onClick={onManagementModalOpen} leftIcon={<SettingsIcon />}>
+        Gerenciar Horários e Respawns
+      </Button>
+      <ReservationTable 
+        reservations={reservations} 
+        timeSlots={timeSlots} 
+        respawns={respawns}
+        onAddReservation={handleAddReservation}
+        onDeleteReservation={handleDeleteReservation}
+      />
+      <ManagementModal 
+        isOpen={isManagementModalOpen}
+        onClose={onManagementModalClose}
+        timeSlots={timeSlots}
+        respawns={respawns}
+        addTimeSlot={addTimeSlot}
+        removeTimeSlot={removeTimeSlot}
+        addRespawn={addRespawn}
+        removeRespawn={removeRespawn}
+      />
+    </VStack>
+  );
+};
 
-  const removeRespawn = (respawnToRemove: string) => {
-    setRespawns(respawns.filter((respawn: any) => respawn.name !== respawnToRemove));
-  };
 
-    return (
-      <VStack spacing={8} align="stretch">
-        <Button onClick={onManagementModalOpen} leftIcon={<SettingsIcon />}>
-          Gerenciar Horários e Respawns
-        </Button>
-        <ReservationTable 
-          reservations={reservations} 
-          timeSlots={timeSlots} 
-          respawns={respawns}
-          onAddReservation={handleAddReservation}
-          onDeleteReservation={handleDeleteReservation}
-        />
-        <ManagementModal 
-          isOpen={isManagementModalOpen}
-          onClose={onManagementModalClose}
-          timeSlots={timeSlots}
-          respawns={respawns}
-          addTimeSlot={addTimeSlot}
-          removeTimeSlot={removeTimeSlot}
-          addRespawn={addRespawn}
-          removeRespawn={removeRespawn}
-        />
-      </VStack>
-    );
-  };

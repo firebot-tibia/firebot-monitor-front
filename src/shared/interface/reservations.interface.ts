@@ -4,11 +4,11 @@ export interface DeletedAt {
 }
   
 export interface Respawn {
-    created_at: string;
-    deleted_at: DeletedAt;
-    description: string;
-    id: string;
+    description?: string;
+    id?: string;
     name: string;
+    premium?: boolean;
+    image?: string; 
 }
   
 export interface Reservation {
@@ -33,4 +33,5 @@ export interface CreateReservationData {
   reserved_for: string;
   respawn_id: string;
   start_time: string;
+  kind: string;
 }
