@@ -3,7 +3,7 @@ import { Flex } from '@chakra-ui/react';
 import InstructionsBox from './instructions-box';
 
 const InstructionsSection: React.FC = React.memo(() => (
-  <Flex justify="space-between" bg="blue.900" p={2} mt={4} rounded="md">
+  <Flex justify="space-between" bg="black.900" p={2} mt={4} rounded="md">
     <InstructionsBox />
   </Flex>
 ));
