@@ -29,6 +29,11 @@ export const useAudio = (audioSrc: string) => {
     }
   }, [audioInitialized]);
 
+  const toggleAudio = useCallback(() => {
+    setAudioEnabled(prev => !prev);
+    initializeAudio();
+  }, [initializeAudio]);
+
   const enableAudio = useCallback(() => {
     setAudioEnabled(true);
     initializeAudio();
@@ -45,5 +50,5 @@ export const useAudio = (audioSrc: string) => {
     }
   }, [audioEnabled]);
 
-  return { audioEnabled, enableAudio, playAudio, initializeAudio };
+  return { audioEnabled, toggleAudio, enableAudio, playAudio, initializeAudio };
 };

@@ -41,9 +41,10 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   const lastAlertTimeRef = useRef<number>(0);
   const types = useCharacterTypesView(characters);
 
-  const bgColor = useColorModeValue('gray.100', 'gray.700');
-  const textColor = useColorModeValue('gray.800', 'white');
-
+  const bgColor = useColorModeValue('gray.800', 'gray.900');
+  const textColor = useColorModeValue('gray.100', 'gray.200');
+  const accentColor = useColorModeValue('blue.400', 'blue.300');
+  
   const filteredCharacters = useMemo(() => 
     characters.filter(char => monitoredLists.includes(char.Kind)),
     [characters, monitoredLists]
@@ -99,71 +100,69 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
     }
   }, []);
 
-  const handleListChange = (checkedLists: string[]) => {
-    setMonitoredLists(checkedLists);
-  };
-
   return (
     <Box bg={bgColor} p={4} borderRadius="md" boxShadow="md">
-      <audio ref={audioRef} src="/assets/notification_sound.mp3" />
-      <VStack spacing={6} align="stretch">
-        <Heading size="md" color={textColor}>Configurações de Monitoramento</Heading>
-        <HStack spacing={8} alignItems="flex-start">
-          <Box flex={1}>
-            <Text fontSize="sm" fontWeight="bold" mb={2}>Número de personagens para alerta:</Text>
-            <Slider
-              value={threshold}
-              onChange={(val) => setThreshold(val)}
-              min={1}
-              max={10}
-              step={1}
-            >
-              <SliderTrack>
-                <SliderFilledTrack />
-              </SliderTrack>
-              <SliderThumb boxSize={6}>
-                <Box color="tomato" as="span" fontSize="sm" fontWeight="bold">
-                  {threshold}
-                </Box>
-              </SliderThumb>
-            </Slider>
-          </Box>
-          <Box flex={1}>
-            <Text fontSize="sm" fontWeight="bold" mb={2}>Janela de tempo (segundos):</Text>
-            <Slider
-              value={timeWindow}
-              onChange={(val) => setTimeWindow(val)}
-              min={30}
-              max={300}
-              step={30}
-            >
-              <SliderTrack>
-                <SliderFilledTrack />
-              </SliderTrack>
-              <SliderThumb boxSize={6}>
-                <Box color="tomato" as="span" fontSize="sm" fontWeight="bold">
-                  {timeWindow}
-                </Box>
-              </SliderThumb>
-            </Slider>
-          </Box>
+      <VStack spacing={4} align="stretch">
+        <Heading size="sm" color={textColor}>Configurações de Monitoramento</Heading>
+        
+        <HStack spacing={4} align="center">
+          <Text fontSize="xs" color={textColor} width="60px">Personagens:</Text>
+          <Slider
+            value={threshold}
+            onChange={(val) => setThreshold(val)}
+            min={1}
+            max={10}
+            step={1}
+            flex={1}
+          >
+            <SliderTrack bg="gray.600">
+              <SliderFilledTrack bg={accentColor} />
+            </SliderTrack>
+            <SliderThumb boxSize={4} bg={accentColor}>
+              <Text fontSize="xs" fontWeight="bold" color="gray.800">{threshold}</Text>
+            </SliderThumb>
+          </Slider>
         </HStack>
-        <Box>
-          <Text fontSize="sm" fontWeight="bold" mb={2}>Listas para monitorar:</Text>
-          <CheckboxGroup colorScheme="green" value={monitoredLists} onChange={handleListChange}>
-            <Wrap spacing={4}>
-              {types.map((type) => (
-                <WrapItem key={type}>
-                  <Checkbox value={type}>
-                    <Badge colorScheme="blue" fontSize="sm">
-                      {type}
-                    </Badge>
-                  </Checkbox>
-                </WrapItem>
-              ))}
-            </Wrap>
-          </CheckboxGroup>
-        </Box>
+        
+        <HStack spacing={4} align="center">
+          <Text fontSize="xs" color={textColor} width="60px">Tempo (s):</Text>
+          <Slider
+            value={timeWindow}
+            onChange={(val) => setTimeWindow(val)}
+            min={30}
+            max={300}
+            step={30}
+            flex={1}
+          >
+            <SliderTrack bg="gray.600">
+              <SliderFilledTrack bg={accentColor} />
+            </SliderTrack>
+            <SliderThumb boxSize={4} bg={accentColor}>
+              <Text fontSize="xs" fontWeight="bold" color="gray.800">{timeWindow}</Text>
+            </SliderThumb>
+          </Slider>
+        </HStack>
+        
+        <Wrap spacing={2}>
+          {types.map((type) => (
+            <WrapItem key={type}>
+              <Checkbox
+                size="sm"
+                colorScheme="blue"
+                isChecked={monitoredLists.includes(type)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setMonitoredLists([...monitoredLists, type]);
+                  } else {
+                    setMonitoredLists(monitoredLists.filter(t => t !== type));
+                  }
+                }}
+              >
+                <Text fontSize="xs" color={textColor}>{type}</Text>
+              </Checkbox>
+            </WrapItem>
+          ))}
+        </Wrap>
       </VStack>
     </Box>
   );

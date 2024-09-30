@@ -1,7 +1,7 @@
 'use client';
 
 import { FC, useState, useEffect, useCallback, useMemo } from 'react';
-import { Box, Flex, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, VStack, useToast } from '@chakra-ui/react';
+import { Badge, Box, Flex, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, VStack, useToast } from '@chakra-ui/react';
 import DashboardLayout from '../../components/layout';
 import { GuildMemberResponse } from '../../shared/interface/guild-member.interface';
 import { useSession } from 'next-auth/react';
@@ -13,9 +13,10 @@ import InstructionsSection from '../../components/guild/sections/instructions-se
 import MonitorToggleSection from '../../components/guild/sections/monitor-toggle-section';
 import { useLocalStorageMode } from '../../hooks/global/useLocalStorageParse';
 import { useDeathData } from '../../hooks/deaths/useDeathHook';
-import DeathSection from '../../components/guild/sections/death-section';
 import { normalizeTimeOnline, isOnline } from '../../shared/utils/utils';
 import { usePermissionCheck } from '../../hooks/global/usePermissionCheck';
+import { useAudio } from '../../hooks/global/useAudio';
+import { DeathSection } from '../../components/guild/sections/death-section';
 
 
 const Home: FC = () => {  
@@ -28,6 +29,7 @@ const Home: FC = () => {
   const { data: session, status } = useSession();
   const { types, addType } = useCharacterTypes(guildData);
   const checkPermission = usePermissionCheck();
+  const { audioEnabled, playAudio } = useAudio('/assets/notification_sound.mp3');
 
 
   const handleMessage = useCallback((data: any) => {
@@ -148,14 +150,21 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout mode={mode} setMode={setMode}>
+      <InstructionsSection />
       <Box maxWidth="100%" overflow="hidden" fontSize={["xs", "sm", "md"]}>
         <VStack spacing={4} align="stretch">
-          <InstructionsSection />
           <MonitorToggleSection guildData={guildData} isLoading={isLoading} />
           <Tabs isFitted variant="enclosed">
-            <TabList mb="1em">
+          <TabList mb="1em">
               <Tab>Monitoramento de Guilds</Tab>
-              <Tab>Lista de Mortes</Tab>
+              <Tab>
+                Lista de Mortes
+                {newDeathCount > 0 && (
+                  <Badge ml={2} colorScheme="red" borderRadius="full">
+                    {newDeathCount}
+                  </Badge>
+                )}
+              </Tab>
               <Tab>Lista de Level Up</Tab>
             </TabList>
             <TabPanels>
@@ -171,11 +180,12 @@ const Home: FC = () => {
                 />
               </TabPanel>
               <TabPanel>
-                <DeathSection
-                  deathList={deathList}
-                  newDeathCount={newDeathCount}
-                  handleNewDeath={handleNewDeath}
-                />
+              <DeathSection
+                deathList={deathList}
+                handleNewDeath={handleNewDeath}
+                playAudio={playAudio}
+                audioEnabled={audioEnabled}
+              />
               </TabPanel>
             </TabPanels>
           </Tabs>

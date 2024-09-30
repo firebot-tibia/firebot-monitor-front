@@ -5,7 +5,6 @@ import {
   Flex,
   Badge,
   Text,
-  Button,
   Center,
   useToast,
   IconButton,
@@ -13,23 +12,23 @@ import {
 } from "@chakra-ui/react";
 import { CopyIcon } from "@chakra-ui/icons";
 import { Death } from "../../shared/interface/death.interface";
-import { useAudio } from "../../hooks/global/useAudio";
 import { Pagination } from "../global/pagination";
 import { DeathDetail } from "./death-detail";
 import { DeathTableContent } from "./death-table";
 
-const ITEMS_PER_PAGE = 50;
-
 interface DeathTableProps {
   deathList: Death[];
   onNewDeath?: (newDeath: Death) => void;
+  playAudio: () => void;
+  audioEnabled: boolean;
 }
 
-export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath }) => {
+const ITEMS_PER_PAGE = 50;
+
+export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath, playAudio, audioEnabled }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
   const [newDeathCount, setNewDeathCount] = useState(0);
-  const { audioEnabled, enableAudio, playAudio, initializeAudio } = useAudio('/assets/notification_sound.mp3');
   const previousDeathListLength = useRef(deathList.length);
   const totalPages = Math.max(1, Math.ceil(deathList.length / ITEMS_PER_PAGE));
   const toast = useToast();
@@ -50,19 +49,7 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
       }
     }
     previousDeathListLength.current = deathList.length;
-  }, [deathList, audioEnabled, playAudio, onNewDeath]);
-
-  const handleEnableAudio = useCallback(() => {
-    enableAudio();
-    initializeAudio();
-    toast({
-      title: "Alerta sonoro habilitado",
-      description: "Você receberá notificações sonoras para novas mortes.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-  }, [enableAudio, initializeAudio, toast]);
+  }, [deathList, onNewDeath, audioEnabled, playAudio]);
 
   const handleCopyAllDeaths = useCallback(() => {
     const textToCopy = deathList.map(death => `${death.name}: ${death.death}`).join('\n');
@@ -100,15 +87,6 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath })
                   mr={2}
                 />
               </Tooltip>
-              {!audioEnabled && (
-                <Button
-                  onClick={handleEnableAudio}
-                  colorScheme="blue"
-                  size="sm"
-                >
-                  Habilitar Alerta Sonoro
-                </Button>
-              )}
             </Flex>
           </Flex>
           <DeathTableContent
