@@ -30,7 +30,7 @@ export const useAudio = (audioSrc: string) => {
   }, [audioInitialized]);
 
   const toggleAudio = useCallback(() => {
-    setAudioEnabled(prev => !prev);
+    setAudioEnabled((prev: any) => !prev);
     initializeAudio();
   }, [initializeAudio]);
 
