@@ -1,12 +1,25 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
+import { upsertPlayer } from '../../../services/guilds';
+import { UpsertPlayerInput } from '../../../shared/interface/character-upsert.interface';
 
 const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
 
-export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
+export const useCharacterTypes = (guildData: GuildMemberResponse[], session: any | null | undefined, mode: 'enemy' | 'ally') => {
   const [customTypes, setCustomTypes] = useState<string[]>([]);
   const toast = useToast();
+
+  const guildId = useMemo(() => {
+    if (session?.user) {
+      if (mode === 'enemy') {
+        return session.user.enemy_guild;
+      } else if (mode === 'ally') {
+        return session.user.ally_guild;
+      }
+    }
+    return null;
+  }, [session, mode]);
 
   const types = useMemo(() => {
     if (Array.isArray(guildData) && guildData.length > 0) {
@@ -17,19 +30,39 @@ export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
     return [...fixedTypes, ...customTypes];
   }, [guildData, customTypes]);
 
-  const addType = useCallback((newType: string) => {
-    setCustomTypes(prevTypes => {
-      if ([...fixedTypes, ...prevTypes].includes(newType)) {
-        toast({
-          title: "Tipo já existe",
-          description: `O tipo "${newType}" já está na lista.`,
-          status: "warning",
-          duration: 3000,
-          isClosable: true,
-        });
-        return prevTypes;
-      }
-      
+  const addType = useCallback(async (newType: string) => {
+    if (!guildId) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível adicionar o tipo. Sessão não iniciada.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if ([...fixedTypes, ...customTypes].includes(newType)) {
+      toast({
+        title: "Tipo já existe",
+        description: `O tipo "${newType}" já está na lista.`,
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const playerData: UpsertPlayerInput = {
+      guild_id: guildId,
+      kind: newType,
+    };
+
+    try {
+      await upsertPlayer(playerData);
+
+      setCustomTypes(prevTypes => [...prevTypes, newType]);
+
       toast({
         title: "Novo tipo adicionado",
         description: `O tipo "${newType}" foi adicionado com sucesso.`,
@@ -37,9 +70,17 @@ export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
         duration: 3000,
         isClosable: true,
       });
-      return [...prevTypes, newType];
-    });
-  }, [toast]);
+    } catch (error) {
+      console.error('Erro ao adicionar novo tipo:', error);
+      toast({
+        title: "Erro ao adicionar tipo",
+        description: "Ocorreu um erro ao tentar adicionar o novo tipo. Por favor, tente novamente.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }, [toast, guildId, customTypes]);
 
   return { types, addType };
 };

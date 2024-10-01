@@ -2,40 +2,32 @@ import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   Box,
   VStack,
-  HStack,
   Text,
   useToast,
   Checkbox,
-  CheckboxGroup,
   Heading,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-  Wrap,
-  WrapItem,
-  Badge,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  SimpleGrid,
   useColorModeValue
 } from '@chakra-ui/react';
 import { useCharacterTypesView } from '../../../../hooks/characters/types/useTypeView';
 import { useLocalStorage } from '../../../../hooks/global/useLocalStorage';
 import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
-
+import { parseTimeOnline } from '../../../../shared/utils/utils';
 
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];
   isLoading: boolean;
 }
 
-const parseTimeOnline = (timeOnline: string): number => {
-  const parts = timeOnline.split(':').map(Number);
-  return parts.length === 3 ? parts[0] * 3600 + parts[1] * 60 + parts[2] : 0;
-};
-
 export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters }) => {
-  const [threshold, setThreshold] = useLocalStorage('bomba-maker-threshold', 3);
-  const [timeWindow, setTimeWindow] = useLocalStorage('bomba-maker-timeWindow', 120);
-  const [monitoredLists, setMonitoredLists] = useLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
+  const [threshold, setThreshold] = useLocalStorage<number>('bomba-maker-threshold', 3);
+  const [timeWindow, setTimeWindow] = useLocalStorage<number>('bomba-maker-timeWindow', 120);
+  const [monitoredLists, setMonitoredListsRaw] = useLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
   const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastAlertTimeRef = useRef<number>(0);
@@ -43,8 +35,17 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
 
   const bgColor = useColorModeValue('gray.800', 'gray.900');
   const textColor = useColorModeValue('gray.100', 'gray.200');
-  const accentColor = useColorModeValue('blue.400', 'blue.300');
+  const inputBgColor = useColorModeValue('gray.700', 'gray.800');
   
+  const setMonitoredLists = useCallback((value: string[] | ((prev: string[]) => string[])) => {
+    setMonitoredListsRaw(prev => {
+      if (typeof value === 'function') {
+        return value(prev);
+      }
+      return value;
+    });
+  }, [setMonitoredListsRaw]);
+
   const filteredCharacters = useMemo(() => 
     characters.filter(char => monitoredLists.includes(char.Kind)),
     [characters, monitoredLists]
@@ -91,7 +92,8 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   }, [filteredCharacters, threshold, timeWindow, toast, monitoredLists]);
 
   useEffect(() => {
-    checkThreshold();
+    const timer = setInterval(checkThreshold, 60000);
+    return () => clearInterval(timer);
   }, [checkThreshold]);
 
   useEffect(() => {
@@ -100,69 +102,79 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
     }
   }, []);
 
+  useEffect(() => {
+    setMonitoredLists(prev => prev.filter(type => types.includes(type)));
+  }, [types, setMonitoredLists]);
+
+  const handleCheckboxChange = useCallback((type: string, isChecked: boolean) => {
+    setMonitoredLists(prev => 
+      isChecked 
+        ? [...prev, type]
+        : prev.filter(t => t !== type)
+    );
+  }, [setMonitoredLists]);
+
   return (
     <Box bg={bgColor} p={4} borderRadius="md" boxShadow="md">
-      <VStack spacing={4} align="stretch">
+      <VStack spacing={6} align="stretch">
         <Heading size="sm" color={textColor}>Configurações de Monitoramento</Heading>
         
-        <HStack spacing={4} align="center">
-          <Text fontSize="xs" color={textColor} width="60px">Personagens:</Text>
-          <Slider
-            value={threshold}
-            onChange={(val) => setThreshold(val)}
-            min={1}
-            max={10}
-            step={1}
-            flex={1}
-          >
-            <SliderTrack bg="gray.600">
-              <SliderFilledTrack bg={accentColor} />
-            </SliderTrack>
-            <SliderThumb boxSize={4} bg={accentColor}>
-              <Text fontSize="xs" fontWeight="bold" color="gray.800">{threshold}</Text>
-            </SliderThumb>
-          </Slider>
-        </HStack>
+        <SimpleGrid columns={2} spacing={4}>
+          <Box>
+            <Text fontSize="sm" color={textColor} mb={2}>Personagens:</Text>
+            <NumberInput
+              value={threshold}
+              onChange={(_, val) => setThreshold(val)}
+              min={1}
+              max={10}
+              step={1}
+              bg={inputBgColor}
+              borderRadius="md"
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </Box>
+          
+          <Box>
+            <Text fontSize="sm" color={textColor} mb={2}>Tempo (s):</Text>
+            <NumberInput
+              value={timeWindow}
+              onChange={(_, val) => setTimeWindow(val)}
+              min={30}
+              max={300}
+              step={30}
+              bg={inputBgColor}
+              borderRadius="md"
+            >
+              <NumberInputField />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+          </Box>
+        </SimpleGrid>
         
-        <HStack spacing={4} align="center">
-          <Text fontSize="xs" color={textColor} width="60px">Tempo (s):</Text>
-          <Slider
-            value={timeWindow}
-            onChange={(val) => setTimeWindow(val)}
-            min={30}
-            max={300}
-            step={30}
-            flex={1}
-          >
-            <SliderTrack bg="gray.600">
-              <SliderFilledTrack bg={accentColor} />
-            </SliderTrack>
-            <SliderThumb boxSize={4} bg={accentColor}>
-              <Text fontSize="xs" fontWeight="bold" color="gray.800">{timeWindow}</Text>
-            </SliderThumb>
-          </Slider>
-        </HStack>
-        
-        <Wrap spacing={2}>
-          {types.map((type) => (
-            <WrapItem key={type}>
+        <Box>
+          <Text fontSize="sm" color={textColor} mb={2}>Tipos monitorados:</Text>
+          <SimpleGrid columns={3} spacing={2}>
+            {types.map((type) => (
               <Checkbox
-                size="sm"
+                key={type}
+                size="md"
                 colorScheme="blue"
                 isChecked={monitoredLists.includes(type)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setMonitoredLists([...monitoredLists, type]);
-                  } else {
-                    setMonitoredLists(monitoredLists.filter(t => t !== type));
-                  }
-                }}
+                onChange={(e) => handleCheckboxChange(type, e.target.checked)}
               >
-                <Text fontSize="xs" color={textColor}>{type}</Text>
+                <Text fontSize="sm" color={textColor}>{type}</Text>
               </Checkbox>
-            </WrapItem>
-          ))}
-        </Wrap>
+            ))}
+          </SimpleGrid>
+        </Box>
       </VStack>
     </Box>
   );

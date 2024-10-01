@@ -27,22 +27,9 @@ const Home: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
-  const { types, addType } = useCharacterTypes(guildData);
   const checkPermission = usePermissionCheck();
   const { audioEnabled, playAudio } = useAudio('/assets/notification_sound.mp3');
-
-
-  const handleMessage = useCallback((data: any) => {
-    if (data?.[mode]) {
-      setGuildData(data[mode]);
-    }
-    setIsLoading(false);
-  }, [mode]);
-
-  const { error } = useEventSource(
-    status === 'authenticated' ? `https://api.firebot.run/subscription/${mode}/` : null,
-    handleMessage
-  );
+  const { types, addType } = useCharacterTypes(guildData, session, mode);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -57,6 +44,18 @@ const Home: FC = () => {
     }
   }, [status, session, mode]);
 
+
+  const handleMessage = useCallback((data: any) => {
+    if (data?.[mode]) {
+      setGuildData(data[mode]);
+    }
+    setIsLoading(false);
+  }, [mode]);
+
+  const { error } = useEventSource(
+    status === 'authenticated' ? `https://api.firebot.run/subscription/${mode}/` : null,
+    handleMessage
+  );
 
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
     if (!checkPermission()) return;

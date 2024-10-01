@@ -1,4 +1,3 @@
-// components/GuildDataSection.tsx
 import React from 'react';
 import { Box, Text, Spinner, SimpleGrid } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';

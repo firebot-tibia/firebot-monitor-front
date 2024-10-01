@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Collapse, Box, Switch, Flex, Text, useToast } from '@chakra-ui/react';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
@@ -13,26 +13,23 @@ interface MonitorToggleSectionProps {
 const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = React.memo(({ guildData, isLoading }) => {
   const [showMonitor, setShowMonitor] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { audioEnabled, toggleAudio, initializeAudio } = useAudio('/assets/notification_sound.mp3');
+  const { audioEnabled, toggleAudio } = useAudio('/assets/notification_sound.mp3');
   const toast = useToast();
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const handleToggleAudio = () => {
+  const handleToggleAudio = useCallback(() => {
     toggleAudio();
-    initializeAudio();
     toast({
-      title: audioEnabled ? "Alerta sonoro desabilitado" : "Alerta sonoro habilitado",
-      description: audioEnabled
-        ? "Você não receberá mais notificações sonoras para novas mortes."
-        : "Você receberá notificações sonoras para novas mortes.",
+      title: "Alerta sonoro alterado",
+      description: "O estado do alerta sonoro foi alterado.",
       status: "info",
       duration: 3000,
       isClosable: true,
     });
-  };
+  }, [toggleAudio, toast]);
 
   if (!isClient) {
     return null;
@@ -41,7 +38,7 @@ const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = React.memo(({ 
   return (
     <Box p={4} borderRadius="xl" boxShadow="xl">
       <Button
-        onClick={() => setShowMonitor(!showMonitor)}
+        onClick={() => setShowMonitor(prev => !prev)}
         rightIcon={showMonitor ? <ChevronUpIcon /> : <ChevronDownIcon />}
         size="md"
         width="100%"
