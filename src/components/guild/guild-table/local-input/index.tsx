@@ -69,7 +69,7 @@ export const LocalInput: FC<LocalInputProps> = ({
         onFocus={() => setIsDropdownOpen(true)}
         onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} 
         bg="gray.800"
-        size="xs"
+        size="xl"
         fontSize={fontSize}
         width="100%"
         minWidth="80px"
