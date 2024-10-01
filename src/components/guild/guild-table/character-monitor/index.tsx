@@ -18,6 +18,7 @@ import { useCharacterTypesView } from '../../../../hooks/characters/types/useTyp
 import { useLocalStorage } from '../../../../hooks/global/useLocalStorage';
 import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
 import { parseTimeOnline } from '../../../../shared/utils/utils';
+import { useFlexibleLocalStorage } from '../../../../hooks/global/useFlexLocalStorage';
 
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];
@@ -25,9 +26,9 @@ interface BombaMakerMonitorProps {
 }
 
 export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters }) => {
-  const [threshold, setThreshold] = useLocalStorage<number>('bomba-maker-threshold', 3);
-  const [timeWindow, setTimeWindow] = useLocalStorage<number>('bomba-maker-timeWindow', 120);
-  const [monitoredLists, setMonitoredListsRaw] = useLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
+  const [threshold, setThreshold] = useFlexibleLocalStorage<number>('bomba-maker-threshold', 3);
+  const [timeWindow, setTimeWindow] = useFlexibleLocalStorage<number>('bomba-maker-timeWindow', 120);
+  const [monitoredLists, setMonitoredListsRaw] = useFlexibleLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
   const toast = useToast();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastAlertTimeRef = useRef<number>(0);
@@ -38,7 +39,7 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   const inputBgColor = useColorModeValue('gray.700', 'gray.800');
   
   const setMonitoredLists = useCallback((value: string[] | ((prev: string[]) => string[])) => {
-    setMonitoredListsRaw(prev => {
+    setMonitoredListsRaw((prev) => {
       if (typeof value === 'function') {
         return value(prev);
       }
