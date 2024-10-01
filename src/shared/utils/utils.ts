@@ -84,13 +84,11 @@ export const isOnline = (member: GuildMemberResponse): boolean => {
   return normalizedTime !== '00:00:00';
 };
 
-const capitalizeWords = (str: string) => {
-  return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-};
-
 export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof useToast>) => {
-  const capitalizedName = capitalizeWords(data.Name.trim());
-  const exivas = `exiva "${capitalizedName}`;
+  const cleanName = data.Name.trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[^\x20-\x7E]/g, '');
+  const exivas = `exiva "${cleanName}"`;
   navigator.clipboard.writeText(exivas);
   toast({
     title: 'Exiva copiado para a área de transferência.',
