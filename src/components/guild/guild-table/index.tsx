@@ -71,8 +71,8 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   const [isLargerThan992] = useMediaQuery("(min-width: 992px)");
   const [isLargerThan768] = useMediaQuery("(min-width: 768px)");
 
-  const responsiveFontSize = isLargerThan1200 ? fontSize : isLargerThan992 ? "sm" : isLargerThan768 ? "xs" : "2xs";
-  const responsivePadding = isLargerThan1200 ? 2 : 1;
+  const responsiveFontSize = isLargerThan1200 ? "xs" : isLargerThan992 ? "2xs" : "3xs";
+  const responsivePadding = isLargerThan1200 ? 1 : 0.5;
 
   const handleNameClick = (member: GuildMemberResponse) => {
     copyExivas(member, toast);
@@ -170,86 +170,79 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   );
 
   return (
-    <Box bg={bgColor} p={responsivePadding} borderRadius="md">
-    <VStack spacing={2} align="stretch" mb={4}>
-      <ClassificationLegend />
-      <Badge colorScheme="green" fontSize={responsiveFontSize} alignSelf="flex-end">
-        {onlineCount} online
-      </Badge>
-    </VStack>
-    {isLargerThan768 ? (
-      <TableContainer overflowX="auto" maxWidth="100%">
-        <Table variant="simple" size="sm" fontSize={responsiveFontSize} color={textColor}>
-          <Thead>
-            <Tr>
-              <Th px={1} py={responsivePadding} color={textColor} width="3%">#</Th>
-              <Th px={1} py={responsivePadding} color={textColor} width="20%">Personagem <SortIcon field="Vocation" /></Th>
-              <Th px={1} py={responsivePadding} color={textColor} isNumeric width="7%">
-                Lvl <SortIcon field="Level" />
-              </Th>
-              <Th px={1} py={responsivePadding} color={textColor} width="8%">Tipo</Th>
-              <Th px={1} py={responsivePadding} color={textColor} width="12%">
-                Tempo <SortIcon field="TimeOnline" />
-              </Th>
-              {showExivaInput && <Th px={1} py={responsivePadding} color={textColor} width="50%">Local</Th>}
-            </Tr>
-          </Thead>
-          <Tbody>
-            {Array.isArray(sortedData) && sortedData.length > 0 ? (
-              sortedData.map((member, index) => (
-                <Tr 
-                  key={member.Name}
-                  _hover={{ bg: hoverBgColor }}
-                >
-                  <Td px={0.8} py={responsivePadding} width="3%">{index + 1}</Td>
-                  <Td px={0.3} py={responsivePadding} width="10%">
-                    <Flex alignItems="center" maxWidth="100%">
-                      <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "12px" : "10px"} mr={1} flexShrink={0} />
-                      <Box 
-                        onClick={() => handleNameClick(member)}
-                        cursor="pointer"
-                        title="Clique para copiar exiva"
-                        isTruncated
-                        maxWidth="calc(100% - 20px)"
-                      >
-                        {member.Name}
-                      </Box>
-                    </Flex>
-                  </Td>
-                  <Td px={1} py={responsivePadding} isNumeric width="7%">{member.Level}</Td>
-                  <Td px={1} py={responsivePadding} width="8%">
-                    <CharacterClassification
-                      member={member}
-                      types={types}
-                      onClassificationChange={onClassificationChange}
-                      addType={addType}
-                    />
-                  </Td>
-                  <Td px={1} py={responsivePadding} color={getTimeColor(member.TimeOnline)} width="12%">{member.TimeOnline}</Td>
-                  {showExivaInput && (
-                    <Td px={1} py={responsivePadding} width="50%">
-                      <Box title="Escreva para autocompletar com os respawns ou customize" width="100%">
-                        <LocalInput
-                          member={member}
-                          onLocalChange={onLocalChange}
-                          fontSize={responsiveFontSize}
-                          onClick={(e) => e.stopPropagation()} 
-                        />
-                      </Box>
-                    </Td>
-                  )}
-                </Tr>
-              ))
-            ) : (
+    <Box bg={bgColor} p={2} borderRadius="md" maxWidth="100%" overflow="hidden">
+      <VStack spacing={1} align="stretch" mb={2}>
+        <ClassificationLegend />
+        <Badge colorScheme="green" fontSize={responsiveFontSize} alignSelf="flex-end">
+          {onlineCount} online
+        </Badge>
+      </VStack>
+      {isLargerThan768 ? (
+        <TableContainer overflowX="auto" maxHeight="70vh">
+          <Table variant="simple" size="sm" fontSize={responsiveFontSize} color={textColor}>
+            <Thead position="sticky" top={0} bg={bgColor} zIndex={1}>
               <Tr>
-                <Td colSpan={showExivaInput ? 6 : 5} textAlign="center">
-                  Sem dados para exibir
-                </Td>
+                <Th px={1} py={responsivePadding} color={textColor} width="3%">#</Th>
+                <Th px={1} py={responsivePadding} color={textColor} width="20%">Personagem <SortIcon field="Vocation" /></Th>
+                <Th px={1} py={responsivePadding} color={textColor} isNumeric width="7%">Lvl <SortIcon field="Level" /></Th>
+                <Th px={1} py={responsivePadding} color={textColor} width="8%">Tipo</Th>
+                <Th px={1} py={responsivePadding} color={textColor} width="12%">Tempo <SortIcon field="TimeOnline" /></Th>
+                {showExivaInput && <Th px={1} py={responsivePadding} color={textColor} width="50%">Local</Th>}
               </Tr>
-            )}
-          </Tbody>
-        </Table>
-      </TableContainer>
+            </Thead>
+            <Tbody>
+              {Array.isArray(sortedData) && sortedData.length > 0 ? (
+                sortedData.map((member, index) => (
+                  <Tr key={member.Name} _hover={{ bg: hoverBgColor }}>
+                    <Td px={0.5} py={responsivePadding} width="3%">{index + 1}</Td>
+                    <Td px={0.5} py={responsivePadding} width="20%">
+                      <Flex alignItems="center" maxWidth="100%">
+                        <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "10px" : "8px"} mr={1} flexShrink={0} />
+                        <Box 
+                          onClick={() => handleNameClick(member)}
+                          cursor="pointer"
+                          title="Clique para copiar exiva"
+                          isTruncated
+                          maxWidth="calc(100% - 15px)"
+                        >
+                          {member.Name}
+                        </Box>
+                      </Flex>
+                    </Td>
+                    <Td px={0.5} py={responsivePadding} isNumeric width="7%">{member.Level}</Td>
+                    <Td px={0.5} py={responsivePadding} width="8%">
+                      <CharacterClassification
+                        member={member}
+                        types={types}
+                        onClassificationChange={onClassificationChange}
+                        addType={addType}
+                      />
+                    </Td>
+                    <Td px={0.5} py={responsivePadding} color={getTimeColor(member.TimeOnline)} width="12%">{member.TimeOnline}</Td>
+                    {showExivaInput && (
+                      <Td px={0.5} py={responsivePadding} width="50%">
+                        <Box title="Escreva para autocompletar com os respawns ou customize" width="100%">
+                          <LocalInput
+                            member={member}
+                            onLocalChange={onLocalChange}
+                            fontSize={responsiveFontSize}
+                            onClick={(e) => e.stopPropagation()} 
+                          />
+                        </Box>
+                      </Td>
+                    )}
+                  </Tr>
+                ))
+              ) : (
+                <Tr>
+                  <Td colSpan={showExivaInput ? 6 : 5} textAlign="center">
+                    Sem dados para exibir
+                  </Td>
+                </Tr>
+              )}
+            </Tbody>
+          </Table>
+        </TableContainer>
       ) : (
         <VStack spacing={2} align="stretch">
           {Array.isArray(sortedData) && sortedData.length > 0 ? (
