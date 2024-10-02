@@ -101,7 +101,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
           comparison = a.Vocation.localeCompare(b.Vocation);
           break;
       }
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return sortOrder === 'desc' ? comparison : -comparison;
     });
   }, [data, sortField, sortOrder]);
 
