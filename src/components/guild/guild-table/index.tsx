@@ -178,7 +178,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         </Badge>
       </VStack>
       {isLargerThan768 ? (
-        <TableContainer overflowX="auto" maxHeight="70vh">
+        <TableContainer overflowX="auto">
           <Table variant="simple" size="sm" fontSize={responsiveFontSize} color={textColor}>
             <Thead position="sticky" top={0} bg={bgColor} zIndex={1}>
               <Tr>
