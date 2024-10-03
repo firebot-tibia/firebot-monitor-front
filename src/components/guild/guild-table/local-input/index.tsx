@@ -115,7 +115,7 @@ export const LocalInput: FC<LocalInputProps> = ({
           updateDropdownPosition();
         }}
         bg="gray.800"
-        size="sm"
+        size="xs"
         fontSize={fontSize}
         width="100%"
         color="white"
