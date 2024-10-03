@@ -11,8 +11,8 @@ interface TopbarProps {
 }
 
 const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode }) => {
-  clearLocalStorage();
   const handleLogout = useCallback(() => {
+    clearLocalStorage();
     signOut({ redirect: true, callbackUrl: '/' });
   }, []);
 
