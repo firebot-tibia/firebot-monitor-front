@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text, VStack, HStack, Image } from '@chakra-ui/react';
-import { GuildMember } from '../../../../../shared/interface/guild-stats.interface';
+import { GuildMember } from '../../../../../shared/interface/guild/guild-stats.interface';
 import { Vocations } from '../../../../../constant/character';
 
 const CharacterTooltip: React.FC<GuildMember> = ({

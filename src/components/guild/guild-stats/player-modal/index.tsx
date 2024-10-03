@@ -17,7 +17,7 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { getPlayerOnlineHistory, getPlayersLifeTimeDeaths } from '../../../../services/guilds';
-import { PlayerModalProps, OnlineTimeDay, PlayerDeaths } from '../../../../shared/interface/guild-stats-player.interface';
+import { PlayerModalProps, OnlineTimeDay, PlayerDeaths } from '../../../../shared/interface/guild/guild-stats-player.interface';
 import OnlineTimeChart from './online-time-chart';
 import PlayerExperience from './player-experience-history';
 import DeathHistory from './death-history';

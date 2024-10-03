@@ -1,38 +1,38 @@
-import axios from 'axios';
-import jwt from 'jsonwebtoken';
-import NextAuth from 'next-auth';
-import { JWT } from 'next-auth/jwt';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { jwtDecode } from 'jwt-decode';
+import { JWT } from 'next-auth/jwt';
+import axios from 'axios';
+import { useAuthStore } from '../../../../store/auth-store';
 import { DecodedToken } from '../../../../shared/interface/auth.interface';
+import NextAuth from 'next-auth/next';
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, null, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {
+      method: 'POST',
       headers: {
-        'x-refresh-token': token.refresh_token,
+        'x-refresh-token': token.refreshToken as string,
       },
     });
 
-    const refreshedTokens = response.data;
+    if (!response.ok) throw new Error('Failed to refresh token');
 
-    if (!response.status || response.status !== 200) {
-      throw refreshedTokens;
-    }
+    const refreshedTokens = await response.json();
+    const decoded = jwtDecode<{ exp: number }>(refreshedTokens.accessToken);
 
-    const decoded = jwt.decode(refreshedTokens.access_token) as DecodedToken;
+    useAuthStore.getState().setTokens(refreshedTokens.accessToken, refreshedTokens.refreshToken);
 
     return {
       ...token,
-      access_token: refreshedTokens.access_token,
-      refresh_token: refreshedTokens.refresh_token ?? token.refresh_token,
+      accessToken: refreshedTokens.accessToken,
+      refreshToken: refreshedTokens.refreshToken,
       exp: decoded.exp,
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);
-    return {
-      ...token,
-      error: 'RefreshAccessTokenError',
-    };
+    useAuthStore.getState().clearTokens();
+    return { ...token, error: 'RefreshAccessTokenError' };
   }
 }
 
@@ -66,7 +66,7 @@ const providers = [
   }),
 ];
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers,
   callbacks: {
     async jwt({ token, user }: { token: JWT, user?: any }) {
@@ -74,20 +74,16 @@ const handler = NextAuth({
         token.access_token = user.access_token;
         token.refresh_token = user.refresh_token;
 
-        const decoded = jwt.decode(user.access_token) as DecodedToken;
+        const decoded = jwtDecode(user.access_token) as DecodedToken;
         token.exp = decoded.exp;
       }
 
       const nowUnix = Math.floor(Date.now() / 1000);
-      const isExpired = token.exp && nowUnix >= token.exp;
-
-      if (isExpired) {
+      if (token.exp && nowUnix >= token.exp - 60) {
         return refreshAccessToken(token);
       }
-
       return token;
     },
-
     async session({ session, token }: { session: any, token: JWT }) {
       session.access_token = token.access_token;
       session.refresh_token = token.refresh_token;
@@ -107,6 +103,8 @@ const handler = NextAuth({
   pages: {
     signIn: '/auth/signin',
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Box, VStack, Button, Icon, Text, Tooltip, useMediaQuery, Flex } from '@chakra-ui/react';
 import { FaHome } from 'react-icons/fa';
 import Link from 'next/link';
-import { config } from '../../../config/config';
+import { config } from '../../../constant/config';
 
 interface NavbarProps {
   isOpen: boolean;

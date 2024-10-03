@@ -1,7 +1,7 @@
 import { Box, Input, List, ListItem } from "@chakra-ui/react";
 import { FC, useState, useMemo } from "react";
 import { respawns } from "../../../../constant/respawn";
-import { GuildMemberResponse } from "../../../../shared/interface/guild-member.interface";
+import { GuildMemberResponse } from "../../../../shared/interface/guild/guild-member.interface";
 
 interface LocalInputProps {
   member: GuildMemberResponse;

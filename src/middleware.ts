@@ -3,10 +3,8 @@ export { default } from 'next-auth/middleware'
 export const config = {
   matcher: [
     '/home/:path*', 
-    '/soulwar/:path*', 
-    '/orange/:path*', 
-    '/enemy/:path*', 
-    '/deathlist/:path*', 
+    '/tibia-map/:path*', 
+    '/reservations/:path*', 
     '/guild-stats/:path*'
   ],
 };

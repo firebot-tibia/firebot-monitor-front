@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Box, Text, VStack, Select, Tooltip, Flex, useColorModeValue } from '@chakra-ui/react';
 import { Bar } from 'react-chartjs-2';
 import { ChartOptions } from 'chart.js';
-import { OnlineTimeDay } from '../../../../../shared/interface/guild-stats-player.interface';
+import { OnlineTimeDay } from '../../../../../shared/interface/guild/guild-stats-player.interface';
 
 interface OnlineTimeChartProps {
   onlineHistory: OnlineTimeDay[];

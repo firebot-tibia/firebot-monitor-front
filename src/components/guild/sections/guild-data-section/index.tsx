@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text, Spinner, SimpleGrid } from '@chakra-ui/react';
-import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
+import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { GuildMemberTable } from '../../guild-table';
 
 interface GuildDataSectionProps {
@@ -52,7 +52,6 @@ const GuildDataSection: React.FC<GuildDataSectionProps> = React.memo(({
           onLocalChange={handleLocalChange}
           onClassificationChange={handleClassificationChange}
           showExivaInput={type !== 'exitados'}
-          fontSize="xs"
           types={types}
           addType={addType}
           isLoading={false}

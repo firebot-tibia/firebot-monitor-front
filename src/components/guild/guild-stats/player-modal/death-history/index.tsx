@@ -15,7 +15,7 @@ import {
   Box,
   useColorModeValue
 } from '@chakra-ui/react';
-import { DeathData, PlayerDeaths } from '../../../../../shared/interface/guild-stats-player.interface';
+import { DeathData, PlayerDeaths } from '../../../../../shared/interface/guild/guild-stats-player.interface';
 
 interface DeathHistoryProps {
   deathData: PlayerDeaths | null;

@@ -1,5 +1,4 @@
 'use client';
-
 import {
   Box,
   Button,
@@ -11,7 +10,6 @@ import {
   Stack,
   Text,
   Icon,
-  Image,
   useToast,
   VStack,
   Heading,
@@ -19,8 +17,9 @@ import {
 import { FaUserCircle, FaSignInAlt } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { AuthSchema, AuthDTO } from './schema/auth.schema';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../store/auth-store';
 
 
 const LoginPage = () => {
@@ -30,6 +29,7 @@ const LoginPage = () => {
   const toast = useToast();
   const { status } = useSession();
   const router = useRouter();
+  const { setTokens } = useAuthStore();
 
   const handleLogin = async () => {
     const result = AuthSchema.safeParse({ email, password });
@@ -57,6 +57,12 @@ const LoginPage = () => {
         throw new Error(signInResult.error);
       }
 
+      if (signInResult?.ok) {
+        const session = await getSession();
+        if (session?.access_token && session?.refresh_token) {
+          setTokens(session.access_token, session.refresh_token);
+        }
+      
       toast({
         title: 'Logado com sucesso',
         description: 'Você será redirecionado para a página principal.',
@@ -64,6 +70,7 @@ const LoginPage = () => {
         duration: 5000,
         isClosable: true,
       });
+    }
     } catch (error) {
       setErrors({ password: 'E-mail ou senha incorretos' });
       toast({
@@ -82,6 +89,7 @@ const LoginPage = () => {
       router.push('/home');
     }
   }, [status, router]);
+
 
   return (
     <Flex minH="100vh" direction={{ base: "column", md: "row" }} bg="gray.900">

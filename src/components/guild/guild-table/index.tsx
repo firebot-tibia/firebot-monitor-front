@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { 
   Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box, 
   useToast, Spinner, useColorModeValue, Badge, Flex,
@@ -8,7 +8,7 @@ import {
 import { LocalInput } from './local-input';
 import { CharacterClassification } from './render-classification';
 import { vocationIcons } from '../../../constant/character';
-import { GuildMemberResponse } from '../../../shared/interface/guild-member.interface';
+import { GuildMemberResponse } from '../../../shared/interface/guild/guild-member.interface';
 import { copyExivas, getTimeColor } from '../../../shared/utils/utils';
 import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
@@ -17,7 +17,6 @@ interface GuildMemberTableProps {
   onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
   onClassificationChange: (member: GuildMemberResponse, newClassification: string) => void;
   showExivaInput: boolean;
-  fontSize: string;
   types: string[];
   addType: (newType: string) => void;
   isLoading: boolean;
@@ -53,7 +52,6 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   onLocalChange, 
   onClassificationChange,
   showExivaInput,
-  fontSize,
   types,
   addType,
   isLoading,
@@ -178,7 +176,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         </Badge>
       </VStack>
       {isLargerThan768 ? (
-        <TableContainer overflowX="auto">
+        <TableContainer overflowX="auto" maxHeight="70vh">
           <Table variant="simple" size="sm" fontSize={responsiveFontSize} color={textColor}>
             <Thead position="sticky" top={0} bg={bgColor} zIndex={1}>
               <Tr>

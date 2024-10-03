@@ -1,10 +1,10 @@
-import React from 'react';
-import { Box, Flex, Spinner, Text, Tooltip } from '@chakra-ui/react';
+import React, { useCallback, useEffect } from 'react';
+import { Box, Flex, Spinner, Text, Tooltip, useDisclosure } from '@chakra-ui/react';
 import FilterBar from '../filter-bar';
 import GuildTable from '../table';
-import useGuildStats from '../../../../hooks/guild-stats/useGuildStats';
 import CharacterTooltip from './character-tooltip';
-import { GuildMember } from '../../../../shared/interface/guild-stats.interface';
+import { GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
+import { useGuildStatsStore } from '../../../../store/guild-stats-store';
 
 const GuildStatsContainer: React.FC = () => {
   const {
@@ -16,25 +16,43 @@ const GuildStatsContainer: React.FC = () => {
     allyCurrentPage,
     enemyCurrentPage,
     loading,
-    handleFilterChange,
-    handleVocationFilterChange,
-    handleNameFilterChange,
-    handlePageChange,
-    handleCharacterClick,
-  } = useGuildStats();
+    setFilter,
+    setVocationFilter,
+    setNameFilter,
+    setPage,
+    setSelectedCharacter,
+    fetchGuildStats,
+  } = useGuildStatsStore();
 
-  if (loading) {
-    return (
-      <Flex justify="center" align="center" height="100vh">
-        <Box textAlign="center">
-          <Spinner size="xl" />
-          <Text mt={4}>Carregando...</Text>
-        </Box>
-      </Flex>
-    );
-  }
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const renderCharacterName = (character: GuildMember) => (
+  useEffect(() => {
+    fetchGuildStats('ally');
+    fetchGuildStats('enemy');
+  }, [fetchGuildStats]);
+
+  const handleFilterChange = useCallback((selectedFilter: string) => {
+    setFilter(selectedFilter);
+  }, [setFilter]);
+
+  const handleVocationFilterChange = useCallback((selectedVocation: string) => {
+    setVocationFilter(selectedVocation);
+  }, [setVocationFilter]);
+
+  const handleNameFilterChange = useCallback((name: string) => {
+    setNameFilter(name);
+  }, [setNameFilter]);
+
+  const handlePageChange = useCallback((guildType: 'ally' | 'enemy', pageNumber: number) => {
+    setPage(guildType, pageNumber);
+  }, [setPage]);
+
+  const handleCharacterClick = useCallback((characterName: string) => {
+    setSelectedCharacter(characterName);
+    onOpen();
+  }, [setSelectedCharacter, onOpen]);
+
+  const renderCharacterName = useCallback((character: GuildMember) => (
     <Tooltip 
       label={
         <CharacterTooltip 
@@ -56,8 +74,18 @@ const GuildStatsContainer: React.FC = () => {
         {character.name}
       </Text>
     </Tooltip>
-  );
+  ), [handleCharacterClick]);
 
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Box textAlign="center">
+          <Spinner size="xl" />
+          <Text mt={4}>Carregando...</Text>
+        </Box>
+      </Flex>
+    );
+  }
 
   return (
     <Flex direction="column" align="center" width="100%" maxWidth="1400px" mx="auto">
@@ -97,4 +125,4 @@ const GuildStatsContainer: React.FC = () => {
   );
 };
 
-export default GuildStatsContainer;
+export default React.memo(GuildStatsContainer);

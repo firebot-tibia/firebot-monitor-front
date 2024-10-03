@@ -9,7 +9,7 @@ import {
   BarElement, Title, Tooltip as ChartTooltip, Legend, ChartData, ChartOptions
 } from 'chart.js';
 import { getPlayerExperienceHistory } from '../../../../../services/guilds';
-import { PlayerExperienceProps, ExperienceDataItem } from '../../../../../shared/interface/guild-stats-experience-history.interface';
+import { PlayerExperienceProps, ExperienceDataItem } from '../../../../../shared/interface/guild/guild-stats-experience-history.interface';
 
 ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement, BarElement,

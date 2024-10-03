@@ -13,7 +13,7 @@ import {
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { CharacterTypesManager } from '../character-type';
 import { characterTypeIcons } from '../../../../constant/character';
-import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
+import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 
 interface CharacterClassificationProps {
   member: GuildMemberResponse;

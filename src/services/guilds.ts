@@ -1,7 +1,7 @@
 import { UpsertPlayerInput } from '../shared/interface/character-upsert.interface';
-import { ExperienceListQuery } from '../shared/interface/guild-stats.interface';
+import { ExperienceListQuery } from '../shared/interface/guild/guild-stats.interface';
 import { CreateReservationData, Respawn } from '../shared/interface/reservations.interface';
-import api from './api';
+import api from '../lib/api';
 
 export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
   try {

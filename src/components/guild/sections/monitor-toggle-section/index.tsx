@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Collapse, Box, Switch, Flex, Text, useToast } from '@chakra-ui/react';
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
+import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { BombaMakerMonitor } from '../../guild-table/character-monitor';
-import { useAudio } from '../../../../hooks/global/useAudio';
+import { useAudio } from '../../../../shared/hooks/global/useAudio';
 
 interface MonitorToggleSectionProps {
   guildData: GuildMemberResponse[];

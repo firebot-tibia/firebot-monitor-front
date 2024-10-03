@@ -1,6 +1,6 @@
 import { useToast } from "@chakra-ui/react";
 import { vocationIcons } from "../../constant/character";
-import { GuildMemberResponse } from "../interface/guild-member.interface";
+import { GuildMemberResponse } from "../interface/guild/guild-member.interface";
 import { format, parse } from 'date-fns';
 
 export const formatExp = (value: number): string => {

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Death } from '../../shared/interface/death.interface';
+import { Death } from '../../interface/death.interface';
 
 export const useDeaths = () => {
   const [deathList, setDeathList] = useState<Death[]>(() => {

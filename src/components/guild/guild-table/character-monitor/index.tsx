@@ -14,11 +14,10 @@ import {
   SimpleGrid,
   useColorModeValue
 } from '@chakra-ui/react';
-import { useCharacterTypesView } from '../../../../hooks/characters/types/useTypeView';
-import { useLocalStorage } from '../../../../hooks/global/useLocalStorage';
-import { GuildMemberResponse } from '../../../../shared/interface/guild-member.interface';
+import { useCharacterTypesView } from '../../../../shared/hooks/types/useTypeView';
+import { useFlexibleLocalStorage } from '../../../../shared/hooks/global/useFlexLocalStorage';
+import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { parseTimeOnline } from '../../../../shared/utils/utils';
-import { useFlexibleLocalStorage } from '../../../../hooks/global/useFlexLocalStorage';
 
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];

@@ -16,7 +16,6 @@ const Custom404 = () => {
       direction="column"
     >
     <Center>
-        <Image src="assets/logo.png" alt="" maxW="5%" />
     </Center>
       <Text fontSize="6xl" fontWeight="bold" mb={4}>
         404
