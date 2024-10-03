@@ -1,5 +1,5 @@
-import { Box, Input, List, ListItem } from "@chakra-ui/react";
-import { FC, useState, useMemo } from "react";
+import React, { FC, useState, useMemo, useRef, useEffect } from "react";
+import { Box, Input, List, ListItem, Portal } from "@chakra-ui/react";
 import { respawns } from "../../../../constant/respawn";
 import { GuildMemberResponse } from "../../../../shared/interface/guild/guild-member.interface";
 
@@ -19,13 +19,16 @@ export const LocalInput: FC<LocalInputProps> = ({
   const [inputValue, setInputValue] = useState(member.Local || "");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const respawnOptions = useMemo(() => {
     return respawns.flatMap((city) =>
       city.spawns.map((spawn: any) => ({
-        value: `[${city.city}] [${spawn.code}] ${spawn.name}`,
+        value: `${spawn.name}`,
         name: spawn.name,
-        label: `[${city.city}] [${spawn.code}] ${spawn.name}`,
+        label: `${spawn.name}`,
       }))
     );
   }, []);
@@ -41,7 +44,7 @@ export const LocalInput: FC<LocalInputProps> = ({
       .map((option) => option.label);
 
     setFilteredOptions(filtered);
-    setIsDropdownOpen(true);
+    setIsDropdownOpen(filtered.length > 0);
 
     onLocalChange(member, value);
   };
@@ -59,52 +62,97 @@ export const LocalInput: FC<LocalInputProps> = ({
     setFilteredOptions([]);
     setIsDropdownOpen(false);
   };
-  
+
+  const updateDropdownPosition = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    const handleScroll = () => {
+      if (isDropdownOpen) {
+        updateDropdownPosition();
+      }
+    };
+
+    updateDropdownPosition();
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", updateDropdownPosition);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateDropdownPosition);
+    };
+  }, [isDropdownOpen]);
+
   return (
     <Box position="relative" onClick={onClick} width="100%">
       <Input
+        ref={inputRef}
         value={inputValue}
         onChange={handleInputChange}
         placeholder="Local Hunt"
-        onFocus={() => setIsDropdownOpen(true)}
-        onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)} 
+        onFocus={() => {
+          setIsDropdownOpen(true);
+          updateDropdownPosition();
+        }}
         bg="gray.800"
-        size="xl"
+        size="sm"
         fontSize={fontSize}
         width="100%"
-        minWidth="80px"
-        overflowY="auto"
         color="white"
         _placeholder={{ color: "gray.400" }}
       />
-
-      {isDropdownOpen && filteredOptions.length > 0 && (
-        <List
-          position="absolute"
-          zIndex={1}
-          bg="gray.900"
-          width="100%"
-          maxHeight="250px"
-          overflowY="auto"
-          border="1px solid gray"
-          boxShadow="md"
-          borderRadius="md"
-          p={2}
-        >
-          {filteredOptions.map((option) => (
-            <ListItem
-              key={option}
-              onClick={() => handleOptionClick(option)}
-              p={2}
-              borderRadius="md"
-              _hover={{ bg: "gray.700", cursor: "pointer" }}
-              _focus={{ bg: "gray.600" }}
-              color="white"
-            >
-              {option}
-            </ListItem>
-          ))}
-        </List>
+      {isDropdownOpen && (
+        <Portal>
+          <Box
+            ref={dropdownRef}
+            position="absolute"
+            zIndex={1000}
+            bg="gray.900"
+            borderColor="gray.700"
+            borderWidth="1px"
+            borderRadius="md"
+            maxHeight="200px"
+            overflowY="auto"
+            width="200px"
+            top={`${dropdownPosition.top}px`}
+            left={`${dropdownPosition.left}px`}
+          >
+            <List>
+              {filteredOptions.map((option) => (
+                <ListItem
+                  key={option}
+                  onClick={() => handleOptionClick(option)}
+                  p={2}
+                  _hover={{ bg: "gray.700", cursor: "pointer" }}
+                  _focus={{ bg: "gray.600" }}
+                  color="white"
+                >
+                  {option}
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Portal>
       )}
     </Box>
   );
