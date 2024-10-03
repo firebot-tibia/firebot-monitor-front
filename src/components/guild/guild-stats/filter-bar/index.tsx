@@ -1,6 +1,7 @@
-import React from 'react';
-import { SimpleGrid, Select, Input } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import { SimpleGrid, Select, Input, Button, Flex, useToast } from '@chakra-ui/react';
 import { Vocations } from '../../../../constant/character';
+import { z } from 'zod';
 
 interface FilterBarProps {
   filter: string;
@@ -11,6 +12,8 @@ interface FilterBarProps {
   onNameFilterChange: (name: string) => void;
 }
 
+const searchSchema = z.string().min(3, "O nome deve ter pelo menos 3 caracteres");
+
 const FilterBar: React.FC<FilterBarProps> = ({
   filter,
   vocationFilter,
@@ -19,6 +22,32 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onVocationFilterChange,
   onNameFilterChange,
 }) => {
+  const [searchInput, setSearchInput] = useState(nameFilter);
+  const toast = useToast();
+
+  const handleSearch = () => {
+    try {
+      searchSchema.parse(searchInput);
+      onNameFilterChange(searchInput);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Erro de validação",
+          description: error.errors[0].message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    }
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} mb={4}>
       <Select 
@@ -40,12 +69,16 @@ const FilterBar: React.FC<FilterBarProps> = ({
           </option>
         ))}
       </Select>
-      <Input
-        placeholder="Buscar personagem por nome"
-        value={nameFilter}
-        width={{ base: '100%', md: 'auto' }}
-        onChange={(e) => onNameFilterChange(e.target.value)}
-      />
+      <Flex>
+        <Input
+          placeholder="Buscar personagem por nome"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          mr={2}
+        />
+        <Button onClick={handleSearch}>Buscar</Button>
+      </Flex>
     </SimpleGrid>
   );
 };

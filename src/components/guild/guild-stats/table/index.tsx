@@ -13,6 +13,7 @@ import {
   useDisclosure,
   Spinner,
   Center,
+  Text,
 } from '@chakra-ui/react';
 import { Vocations } from '../../../../constant/character';
 import { GuildData, GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
@@ -53,6 +54,18 @@ const GuildTable: React.FC<GuildTableProps> = ({
           <Td colSpan={5}>
             <Center py={4}>
               <Spinner size="xl" />
+            </Center>
+          </Td>
+        </Tr>
+      );
+    }
+
+    if (guildData.data.length === 0) {
+      return (
+        <Tr>
+          <Td colSpan={5}>
+            <Center py={4}>
+              <Text>Nenhum dado disponível</Text>
             </Center>
           </Td>
         </Tr>
