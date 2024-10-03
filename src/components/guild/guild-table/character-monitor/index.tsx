@@ -2,22 +2,23 @@ import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   Box,
   VStack,
+  HStack,
   Text,
   useToast,
   Checkbox,
   Heading,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
+  Input,
   SimpleGrid,
-  useColorModeValue
+  useColorModeValue,
+  Flex,
+  FormControl,
+  FormLabel
 } from '@chakra-ui/react';
-import { useCharacterTypesView } from '../../../../shared/hooks/types/useTypeView';
-import { useFlexibleLocalStorage } from '../../../../shared/hooks/global/useFlexLocalStorage';
 import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { parseTimeOnline } from '../../../../shared/utils/utils';
+import { useFlexibleLocalStorage } from '../../../../shared/hooks/useFlexLocalStorage';
+import { useCharacterTypesView } from '../../../../shared/hooks/useTypeView';
+import { useAudio } from '../../../../shared/hooks/useAudio';
 
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];
@@ -29,9 +30,9 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   const [timeWindow, setTimeWindow] = useFlexibleLocalStorage<number>('bomba-maker-timeWindow', 120);
   const [monitoredLists, setMonitoredListsRaw] = useFlexibleLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
   const toast = useToast();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastAlertTimeRef = useRef<number>(0);
   const types = useCharacterTypesView(characters);
+  const { audioEnabled, playAudio } = useAudio('/assets/notification_sound.mp3');
 
   const bgColor = useColorModeValue('gray.800', 'gray.900');
   const textColor = useColorModeValue('gray.100', 'gray.200');
@@ -84,23 +85,13 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
         utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'pt-BR') || null;
         speechSynthesis.speak(utterance);
       }
-
-      if (audioRef.current) {
-        audioRef.current.play().catch(error => console.error('Failed to play audio:', error));
-      }
     }
-  }, [filteredCharacters, threshold, timeWindow, toast, monitoredLists]);
+  }, [filteredCharacters, threshold, timeWindow, toast, monitoredLists, audioEnabled, playAudio]);
 
   useEffect(() => {
-    const timer = setInterval(checkThreshold, 60000);
+    const timer = setInterval(checkThreshold, 10000);
     return () => clearInterval(timer);
   }, [checkThreshold]);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.load();
-    }
-  }, []);
 
   useEffect(() => {
     setMonitoredLists(prev => prev.filter(type => types.includes(type)));
@@ -115,60 +106,49 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   }, [setMonitoredLists]);
 
   return (
-    <Box bg={bgColor} p={4} borderRadius="md" boxShadow="md">
+    <Box bg={bgColor} p={6} borderRadius="lg" boxShadow="xl">
       <VStack spacing={6} align="stretch">
-        <Heading size="sm" color={textColor}>Configurações de Monitoramento</Heading>
+        <Heading size="md" color={textColor}>Configurações de Monitoramento</Heading>
         
-        <SimpleGrid columns={2} spacing={4}>
-          <Box>
-            <Text fontSize="sm" color={textColor} mb={2}>Personagens:</Text>
-            <NumberInput
+        <Flex direction={{ base: "column", md: "row" }} gap={4}>
+          <FormControl>
+            <FormLabel htmlFor="threshold" color={textColor}>Número de Personagens</FormLabel>
+            <Input
+              id="threshold"
               value={threshold}
-              onChange={(_, val) => setThreshold(val)}
-              min={1}
+              onChange={(e) => setThreshold(Number(e.target.value))}
+              type="number"
+              min={0}
               max={10}
-              step={1}
               bg={inputBgColor}
-              borderRadius="md"
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </Box>
+              color={textColor}
+            />
+          </FormControl>
           
-          <Box>
-            <Text fontSize="sm" color={textColor} mb={2}>Tempo (s):</Text>
-            <NumberInput
+          <FormControl>
+            <FormLabel htmlFor="timeWindow" color={textColor}>Tempo (segundos)</FormLabel>
+            <Input
+              id="timeWindow"
               value={timeWindow}
-              onChange={(_, val) => setTimeWindow(val)}
+              onChange={(e) => setTimeWindow(Number(e.target.value))}
+              type="number"
               min={30}
               max={300}
-              step={30}
               bg={inputBgColor}
-              borderRadius="md"
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </Box>
-        </SimpleGrid>
+              color={textColor}
+            />
+          </FormControl>
+        </Flex>
         
         <Box>
-          <Text fontSize="sm" color={textColor} mb={2}>Tipos monitorados:</Text>
-          <SimpleGrid columns={3} spacing={2}>
+          <Text fontSize="sm" color={textColor} mb={2} fontWeight="bold">Tipos monitorados:</Text>
+          <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={2}>
             {types.map((type) => (
               <Checkbox
                 key={type}
-                size="md"
-                colorScheme="blue"
                 isChecked={monitoredLists.includes(type)}
                 onChange={(e) => handleCheckboxChange(type, e.target.checked)}
+                colorScheme="blue"
               >
                 <Text fontSize="sm" color={textColor}>{type}</Text>
               </Checkbox>

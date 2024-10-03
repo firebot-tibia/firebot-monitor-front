@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GuildMemberResponse } from '../../interface/guild/guild-member.interface';
+import { GuildMemberResponse } from '../interface/guild/guild-member.interface';
 
 const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
 

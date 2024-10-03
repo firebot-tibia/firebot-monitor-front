@@ -2,35 +2,14 @@ export const respawns = [
     {
       city: "Ankrahmun",
       spawns: [
-        { code: "B3", name: "GS Tomb" },
-        { code: "B4", name: "Hydra (Passage)" },
-        { code: "B5", name: "Lion's Rock" },
-        { code: "B6", name: "Mahrdis" },
-        { code: "B7", name: "Oasis Tomb" },
-        { code: "B8", name: "Peninsula Tomb" },
-        { code: "B9", name: "Rahemons" },
-        { code: "B10", name: "Stone Tomb" },
-        { code: "B11", name: "Terramite" },
-        { code: "B12", name: "Vashresamun" },
-        { code: "B13", name: "Mother of Scarab Lair" },
         { code: "B14", name: "Gold Token" },
-        { code: "B15", name: "Cobra Bastion (-1)" },
+        { code: "B15", name: "Cobra Bastion" },
         { code: "B16", name: "Cobra Bastion (0 & +1 flask)" },
-        { code: "B17", name: "Cobra Bastion (+1 after flask, +2, +3 & +4)" },
-        { code: "B18", name: "Cobra Bastion (Mini Boss Fire)" },
-        { code: "B19", name: "Cobra Bastion (Mini Boss Smoke)" },
-        { code: "B20", name: "Cobra Bastion (0 and +1)" },
-        { code: "B21", name: "Cobra Bastion (+2, +3 & +4)" },
-        { code: "B22", name: "Cobra Bastion (+3 & +4)" }
       ]
     },
     {
       city: "Carlin",
       spawns: [
-        { code: "C1", name: "Corym" },
-        { code: "C2", name: "Demona" },
-        { code: "C3", name: "Dragon" },
-        { code: "C4", name: "Cults" },
         { code: "C5", name: "Secret Library (Fire Area)" },
         { code: "C6", name: "Secret Library (Ice Area)" },
         { code: "C7", name: "Secret Library (Energy Area)" },

@@ -13,7 +13,7 @@ gulp.task('clean', function() {
 
 gulp.task('html', function() {
   return gulp.src([
-    'src/components/global/maps/index.html',
+    'src/components/maps/index.html',
   ])
     .pipe(replace(/\.\.\/dist\//g, ''))
     .pipe(gulp.dest('public/dist/'));
@@ -22,9 +22,9 @@ gulp.task('html', function() {
 gulp.task('css', function() {
   return gulp.src([
     require.resolve('leaflet/dist/leaflet.css'),
-    'src/components/global/maps/_css/leaflet.coordinates.css',
-    'src/components/global/maps/_css/leaflet.buttons.css',
-    'src/components/global/maps/_css/map.css'
+    'src/components/maps/_css/leaflet.coordinates.css',
+    'src/components/maps/_css/leaflet.buttons.css',
+    'src/components/maps/_css/map.css'
   ])
     .pipe(concat('map.css'))
     .pipe(autoprefixer())
@@ -35,11 +35,11 @@ gulp.task('css', function() {
 gulp.task('js', function() {
   return gulp.src([
     require.resolve('leaflet'),
-    'src/components/global/maps/_js/leaflet.coordinates.js',
-    'src/components/global/maps/_js/leaflet.crosshairs.js',
-    'src/components/global/maps/_js/leaflet.levelbuttons.js',
-    'src/components/global/maps/_js/leaflet.exivabutton.js',
-    'src/components/global/maps/_js/map.js',
+    'src/components/maps/_js/leaflet.coordinates.js',
+    'src/components/maps/_js/leaflet.crosshairs.js',
+    'src/components/maps/_js/leaflet.levelbuttons.js',
+    'src/components/maps/_js/leaflet.exivabutton.js',
+    'src/components/maps/_js/map.js',
   ])
     .pipe(concat('map.js'))
     .pipe(terser())
@@ -48,8 +48,8 @@ gulp.task('js', function() {
 
 gulp.task('images', function() {
   return gulp.src([
-    'src/components/global/maps/_css/*.png',
-    'src/components/global/maps/_img/*.png'
+    'src/components/maps/_css/*.png',
+    'src/components/maps/_img/*.png'
   ])
     .pipe(imagemin({
       optimizationLevel: 7

@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { CopyIcon } from "@chakra-ui/icons";
 import { Death } from "../../shared/interface/death.interface";
-import { Pagination } from "../global/pagination";
+import { Pagination } from "../pagination";
 import { DeathDetail } from "./death-detail";
 import { DeathTableContent } from "./death-table";
 

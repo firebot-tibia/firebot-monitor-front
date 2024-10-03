@@ -16,17 +16,25 @@
         }
         .container-fluid {
             height: 100%;
+            padding: 20px;
+        }
+        .main-content {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         #map-container {
             flex: 1;
-            width: 100%;
-            height: 70vh;
+            min-width: 300px;
+            height: 600px;
         }
         #map {
             width: 100%;
             height: 100%;
+        }
+        #info-container {
+            flex: 1;
+            min-width: 300px;
         }
         #inputs-container {
             background-color: #1c1c1c;
@@ -34,9 +42,9 @@
             color: #e0e0e0;
         }
         .form-control, .btn-primary {
-        background-color: #2c2c2c;
-        color: #e0e0e0;
-        border-color: #444;
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border-color: #444;
         }
         .form-control:focus {
             background-color: #3c3c3c;
@@ -73,9 +81,8 @@
     </style>
 </head>
 <body>
-
     <div class="container-fluid">
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
             <h4 class="alert-heading">Instruções de Uso:</h4>
             <ul>
                 <li>O sistema de exiva está em desenvolvimento e inclui gradualmente os respawns do jogo.</li>
@@ -84,43 +91,46 @@
             </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         </div>
-        
 
-        <div class="row flex-grow-1">
-            <div class="col-12 p-0" id="map-container">
+        <div class="main-content">
+            <div id="map-container">
                 <div id="map"></div>
             </div>
-        </div>
-    
-        <div class="row mt-3" id="inputs-container">
-            <div class="col-md-4">
-                <div class="card bg-dark text-light mb-3">
-                    <div class="card-header">Exiva</div>
-                    <div class="card-body">
-                        <textarea class="form-control" id="exiva" rows="8" placeholder="22:16:33 Brenszk is very far to the east."></textarea>
-                        <button type="button" class="btn btn-primary mt-2 w-100" id="processExiva">Processar Exiva</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-dark text-light mb-3">
-                    <div class="card-header">Resultados</div>
-                    <div class="card-body">
-                        <textarea class="form-control" id="results" rows="8" readonly></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-dark text-light mb-3">
-                    <div class="card-header">Cidades</div>
-                    <div class="card-body">
-                        <div id="city-buttons" class="d-flex flex-wrap justify-content-start">
+            
+            <div id="info-container">
+                <div id="inputs-container">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="card bg-dark text-light">
+                                <div class="card-header">Exiva</div>
+                                <div class="card-body">
+                                    <textarea class="form-control" id="exiva" rows="4" placeholder="22:16:33 Brenszk is very far to the east."></textarea>
+                                    <button type="button" class="btn btn-primary mt-2 w-100" id="processExiva">Processar Exiva</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="card bg-dark text-light">
+                                <div class="card-header">Resultados</div>
+                                <div class="card-body">
+                                    <textarea class="form-control" id="results" rows="4" readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="card bg-dark text-light">
+                                <div class="card-header">Cidades</div>
+                                <div class="card-body">
+                                    <div id="city-buttons" class="d-flex flex-wrap justify-content-start">
+                                        <!-- City buttons will be added here dynamically -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 </body>
 </html>

@@ -3,7 +3,7 @@ import { Button, Collapse, Box, Switch, Flex, Text, useToast } from '@chakra-ui/
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { BombaMakerMonitor } from '../../guild-table/character-monitor';
-import { useAudio } from '../../../../shared/hooks/global/useAudio';
+import { useAudio } from '../../../../shared/hooks/useAudio';
 
 interface MonitorToggleSectionProps {
   guildData: GuildMemberResponse[];

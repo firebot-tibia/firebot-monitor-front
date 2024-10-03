@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { upsertPlayer } from '../../../services/guilds';
-import { UpsertPlayerInput } from '../../interface/character-upsert.interface';
-import { GuildMemberResponse } from '../../../interface/guild-member.interface';
+import { upsertPlayer } from '../../services/guilds';
+import { UpsertPlayerInput } from '../interface/character-upsert.interface';
+import { GuildMemberResponse } from '../interface/guild/guild-member.interface';
 
 const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
 

@@ -10,8 +10,7 @@ import { ManagementModal } from "./modal-reservations";
 import { SettingsIcon } from "@chakra-ui/icons";
 import { defaultTimeSlots } from "../../shared/utils/utils";
 import { endOfDay, format, lastDayOfMonth } from 'date-fns';
-import { usePermissionCheck } from "../../shared/hooks/global/usePermissionCheck";
-
+import { usePermissionCheck } from "../../shared/hooks/usePermissionCheck";
 
 const defaultRespawns = [
   { name: "Issavi", image: "goanna.gif" },

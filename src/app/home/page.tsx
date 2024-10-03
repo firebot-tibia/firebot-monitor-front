@@ -1,64 +1,34 @@
 'use client';
 
-import { useToast, Flex, Spinner, VStack, Tabs, TabList, Tab, TabPanels, TabPanel } from "@chakra-ui/react";
-import { Box, Badge } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { FC, useState, useEffect, useCallback, useMemo } from "react";
-import { DeathSection } from "../../components/guild/sections/death-section";
-import GuildDataSection from "../../components/guild/sections/guild-data-section";
-import InstructionsSection from "../../components/guild/sections/instructions-section";
-import MonitorToggleSection from "../../components/guild/sections/monitor-toggle-section";
-import DashboardLayout from "../../components/layout";
-import { upsertPlayer } from "../../services/guilds";
-import { useCharacterTypes } from "../../shared/hooks/types/useType";
-import { useAudio } from "../../shared/hooks/global/useAudio";
-import { usePermissionCheck } from "../../shared/hooks/global/usePermissionCheck";
-import { GuildMemberResponse } from "../../shared/interface/guild/guild-member.interface";
-import { normalizeTimeOnline, isOnline } from "../../shared/utils/utils";
-import { useGuildStore } from "../../store/guild-store";
-import useSSEStore from "../../store/sse-store";
-import { useAuthStore } from "../../store/auth-store";
-
+import { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import { Badge, Box, Flex, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, VStack, useToast } from '@chakra-ui/react';
+import DashboardLayout from '../../components/layout';
+import { useSession } from 'next-auth/react';
+import { upsertPlayer } from '../../services/guilds';
+import { useAudio } from '../../shared/hooks/useAudio';
+import { usePermissionCheck } from '../../shared/hooks/usePermissionCheck';
+import { useCharacterTypes } from '../../shared/hooks/useType';
+import { GuildMemberResponse } from '../../shared/interface/guild/guild-member.interface';
+import { normalizeTimeOnline, isOnline } from '../../shared/utils/utils';
+import { DeathSection } from '../../components/guild/sections/death-section';
+import GuildDataSection from '../../components/guild/sections/guild-data-section';
+import InstructionsSection from '../../components/guild/sections/instructions-section';
+import MonitorToggleSection from '../../components/guild/sections/monitor-toggle-section';
+import { useEventSource } from '../../shared/hooks/useEvent';
+import { useLocalStorageMode } from '../../shared/hooks/useStorage';
+import { useDeathData } from '../../shared/hooks/useDeath';
 
 const Home: FC = () => {  
+  const [mode, setMode] = useLocalStorageMode('monitorMode', 'enemy');
+  const { newDeathCount, deathList, handleNewDeath } = useDeathData(mode);
   const toast = useToast();
+  const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
   const checkPermission = usePermissionCheck();
   const { audioEnabled, playAudio } = useAudio('/assets/notification_sound.mp3');
-
-  const { enemyGuildData: guildEnemyData, allyGuildData: guildAllyData, setEnemyGuildData, setAllyGuildData } = useGuildStore();
-  const { 
-    enemyGuildData: sseEnemyData, 
-    allyGuildData: sseAllyData, 
-    error: sseError, 
-    deathList,
-    newDeathCount,
-    setupEventSource,
-    mode,
-    setMode
-  } = useSSEStore();
-
-  const guildData = mode === 'enemy' ? guildEnemyData : guildAllyData;
-  const setGuildData = mode === 'enemy' ? setEnemyGuildData : setAllyGuildData;
   const { types, addType } = useCharacterTypes(guildData, session, mode);
-  const { accessToken, refreshToken, setTokens, isTokenExpired } = useAuthStore();
-
-  const refreshTokenFunc = useCallback(async () => {
-    if (!refreshToken) return;
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {
-        method: 'POST',
-        headers: { 'x-refresh-token': refreshToken },
-      });
-      if (!response.ok) throw new Error('Failed to refresh token');
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await response.json();
-      setTokens(newAccessToken, newRefreshToken);
-    } catch (error) {
-      console.error('Failed to refresh token:', error);
-    }
-  }, [refreshToken, setTokens]);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -67,33 +37,24 @@ const Home: FC = () => {
         if (decoded?.[`${mode}_guild`]) {
           setGuildId(decoded[`${mode}_guild`]);
         }
-        console.log('Setting up SSE connection');
-        setupEventSource(`${process.env.NEXT_PUBLIC_API_URL}/subscription`,
-          () => accessToken,
-          () => refreshToken,
-          refreshTokenFunc
-        );
       } catch (error) {
-        console.error('Error setting up SSE:', error);
+        console.error('Error decoding access token:', error);
       }
     }
-  }, [status, accessToken, refreshToken, mode, setupEventSource, refreshTokenFunc]);
+  }, [status, session, mode]);
 
-  useEffect(() => {
-    if (guildData.length > 0) {
-      setIsLoading(false);
+
+  const handleMessage = useCallback((data: any) => {
+    if (data?.[mode]) {
+      setGuildData(data[mode]);
     }
-  }, [guildData]);
+    setIsLoading(false);
+  }, [mode]);
 
-  useEffect(() => {
-    if (mode === 'enemy' && sseEnemyData) {
-      setEnemyGuildData(sseEnemyData);
-    } else if (mode === 'ally' && sseAllyData) {
-      setAllyGuildData(sseAllyData);
-    }
-  }, [sseEnemyData, sseAllyData, mode, setEnemyGuildData, setAllyGuildData]);
-
-
+  const { error } = useEventSource(
+    status === 'authenticated' ? `https://api.firebot.run/subscription/${mode}/` : null,
+    handleMessage
+  );
 
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
     if (!checkPermission()) return;
@@ -109,14 +70,15 @@ const Home: FC = () => {
       };
 
       await upsertPlayer(playerData);
-      const updatedGuildData = guildData.map((m) =>
-        m.Name === member.Name ? { ...m, Local: newLocal } : m
+      setGuildData(prevData =>
+        prevData.map(m =>
+          m.Name === member.Name ? { ...m, Local: newLocal } : m
+        )
       );
-      setGuildData(updatedGuildData);
     } catch (error) {
       console.error('Failed to update player:', error);
     }
-  }, [guildId, checkPermission, guildData, setGuildData]);
+  }, [guildId]);
 
   const handleClassificationChange = useCallback(async (member: GuildMemberResponse, newClassification: string) => {
     if (!checkPermission()) return;
@@ -132,10 +94,11 @@ const Home: FC = () => {
       };
   
       await upsertPlayer(playerData);
-      const updatedGuildData = guildData.map((m) => 
-        m.Name === member.Name ? { ...m, Kind: newClassification } : m
+      setGuildData(prevData => 
+        prevData.map(m => 
+          m.Name === member.Name ? { ...m, Kind: newClassification } : m
+        )
       );
-      setGuildData(updatedGuildData);
       toast({
         title: 'Sucesso',
         description: `${member.Name} classificado como ${newClassification}.`,
@@ -146,7 +109,7 @@ const Home: FC = () => {
     } catch (error) {
       console.error('Failed to classify player:', error);
     }
-  }, [guildId, checkPermission, guildData, setGuildData, toast]);
+  }, [guildId, toast]);
 
   const groupedData = useMemo(() => {
     const typedData = types.map(type => ({
@@ -172,6 +135,7 @@ const Home: FC = () => {
     return [...typedData, unclassified].filter(group => group.data.length > 0);
   }, [types, guildData]);
 
+
   if (status === 'loading' || isLoading) {
     return (
       <DashboardLayout mode={mode} setMode={setMode}>
@@ -185,7 +149,7 @@ const Home: FC = () => {
   return (
     <DashboardLayout mode={mode} setMode={setMode}>
       <InstructionsSection />
-      <Box overflow="hidden">
+      <Box maxWidth="100%" overflow="hidden" fontSize={["xs", "sm", "md"]}>
         <VStack spacing={4} align="stretch">
           <MonitorToggleSection guildData={guildData} isLoading={isLoading} />
           <Tabs isFitted variant="enclosed">

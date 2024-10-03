@@ -11,31 +11,31 @@ import {
   Td,
   Image,
   useDisclosure,
+  Spinner,
+  Center,
 } from '@chakra-ui/react';
 import { Vocations } from '../../../../constant/character';
 import { GuildData, GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
-import { Pagination } from '../../../global/pagination';
 import ExpStats from '../exp-stats';
 import PlayerModal from '../player-modal';
 
 interface GuildTableProps {
-  guildType: 'ally' | 'enemy';
+  guildType: 'allyGain' | 'allyLoss' | 'enemyGain' | 'enemyLoss';
   guildData: GuildData;
   currentPage: number;
   filter: string;
-  onPageChange: (page: number) => void;
   onCharacterClick: (characterName: string) => void;
   renderCharacterName: (character: GuildMember) => React.ReactNode;
+  isLoading: boolean;
 }
 
 const GuildTable: React.FC<GuildTableProps> = ({
   guildType,
   guildData,
-  currentPage,
   filter,
-  onPageChange,
   onCharacterClick,
   renderCharacterName,
+  isLoading,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
@@ -47,6 +47,18 @@ const GuildTable: React.FC<GuildTableProps> = ({
   };
 
   const tableRows = useMemo(() => {
+    if (isLoading) {
+      return (
+        <Tr>
+          <Td colSpan={5}>
+            <Center py={4}>
+              <Spinner size="xl" />
+            </Center>
+          </Td>
+        </Tr>
+      );
+    }
+
     return guildData.data.map((item: GuildMember, index: number) => (
       <Tr
         key={item.name}
@@ -73,12 +85,12 @@ const GuildTable: React.FC<GuildTableProps> = ({
         </Td>
       </Tr>
     ));
-  }, [guildData.data, handleRowClick, renderCharacterName]);
+  }, [guildData.data, handleRowClick, renderCharacterName, isLoading]);
 
   return (
     <Box width="100%">
-      <Heading as="h2" size="md" mb={2} textAlign="left">
-        {guildType === 'ally' ? 'Aliados' : 'Inimigos'}
+      <Heading as="h2" size="sm" mb={2} textAlign="left">
+        {guildType.includes('ally') ? 'Aliados' : 'Inimigos'} - {guildType.includes('Gain') ? 'Ganho' : 'Perda'} de XP
       </Heading>
       <StatGroup mb={4}>
         <ExpStats totalExp={guildData.totalExp} avgExp={guildData.avgExp} filter={filter} />
@@ -98,13 +110,6 @@ const GuildTable: React.FC<GuildTableProps> = ({
             {tableRows}
           </Tbody>
         </Table>
-      </Box>
-      <Box mt={4}>
-        <Pagination
-          currentPage={currentPage}
-          totalPages={guildData.totalPages}
-          onPageChange={onPageChange}
-        />
       </Box>
       <PlayerModal
         isOpen={isOpen}

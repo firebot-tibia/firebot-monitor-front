@@ -9,6 +9,7 @@ import {
   Image,
   Text,
   useColorModeValue,
+  Portal,
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { CharacterTypesManager } from '../character-type';
@@ -48,7 +49,7 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
   );
 
   return (
-    <Menu isOpen={isOpen} onClose={() => setIsOpen(false)}>
+    <Menu isOpen={isOpen} onClose={() => setIsOpen(false)} placement="top-start">
       <MenuButton
         as={Button}
         rightIcon={<ChevronDownIcon />}
@@ -61,29 +62,31 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
       >
         {renderTypeContent(member.Kind || 'n/a')}
       </MenuButton>
-      <MenuList bg={bgColor} borderColor="gray.700">
-        {Array.isArray(types) && types.length > 0 ? (
-          types.map((type: string) => (
-            <MenuItem 
-              key={type} 
-              onClick={() => handleClassificationClick(type)}
-              bg={bgColor}
-              _hover={{ bg: hoverBgColor }}
-            >
-              {renderTypeContent(type)}
-            </MenuItem>
-          ))
-        ) : (
-          <MenuItem isDisabled bg={bgColor}>Sem tipos para exibir</MenuItem>
-        )}
-        <CharacterTypesManager 
-          addType={(newType) => {
-            addType(newType);
-            onClassificationChange(member, newType);
-            setIsOpen(false);
-          }}
-        />
-      </MenuList>
+      <Portal>
+        <MenuList bg={bgColor} borderColor="gray.700" zIndex={1000}>
+          {Array.isArray(types) && types.length > 0 ? (
+            types.map((type: string) => (
+              <MenuItem 
+                key={type} 
+                onClick={() => handleClassificationClick(type)}
+                bg={bgColor}
+                _hover={{ bg: hoverBgColor }}
+              >
+                {renderTypeContent(type)}
+              </MenuItem>
+            ))
+          ) : (
+            <MenuItem isDisabled bg={bgColor}>Sem tipos para exibir</MenuItem>
+          )}
+          <CharacterTypesManager 
+            addType={(newType) => {
+              addType(newType);
+              onClassificationChange(member, newType);
+              setIsOpen(false);
+            }}
+          />
+        </MenuList>
+      </Portal>
     </Menu>
   );
 };

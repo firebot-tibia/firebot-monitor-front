@@ -58,8 +58,8 @@ const GulpHtmlPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div style={{ height: '100vh', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div ref={mapContainerRef} style={{ height: '70vh', width: '100%', position: 'relative' }} />
+      <div style={{ height: '40vh', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div ref={mapContainerRef} style={{ height: '40vh', width: '100%', position: 'relative' }} />
       </div>
     </DashboardLayout>
   );
