@@ -21,8 +21,8 @@ const PlayerExperience: React.FC<PlayerExperienceProps> = ({ characterName }) =>
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const bgColor = useColorModeValue('gray.900', 'gray.900');
-  const cardBgColor = useColorModeValue('gray.800', 'gray.800');
+  const bgColor = useColorModeValue('black.900', 'black.900');
+  const cardBgColor = useColorModeValue('black.800', 'black.800');
   const textColor = useColorModeValue('white', 'white');
   const lineColor = useColorModeValue('#68D391', '#68D391');
   const barColor = useColorModeValue('#4299E1', '#4299E1');

@@ -16,7 +16,7 @@ const Respawns: React.FC = () => {
       <Box p={4}>
         <Heading as="h1" mb={6} textAlign="center">Respawns Planilhados - {currentMonth}</Heading>
         <Text textAlign="center">
-          Próxima rotação em {daysUntilRotation} dias ({format(nextRotation, 'dd/MM/yyyy')})
+            Próxima rotação em {daysUntilRotation} dias ({format(nextRotation, 'dd/MM/yyyy')})
         </Text>
         <ReservationsManager />
       </Box>

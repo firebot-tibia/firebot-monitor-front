@@ -13,14 +13,12 @@ import { formatDate } from "../../../shared/utils/utils";
 
 interface DeathTableRowProps {
   death: Death;
-  onClick: () => void;
 }
 
-export const DeathTableRow: React.FC<DeathTableRowProps> = ({ death, onClick }) => {
+export const DeathTableRow: React.FC<DeathTableRowProps> = ({ death }) => {
   const toast = useToast();
 
   const handleClick = () => {
-    onClick();
     const textToCopy = `${death.name}: ${death.death}`;
     navigator.clipboard.writeText(textToCopy).then(() => {
       toast({

@@ -15,14 +15,12 @@ interface DeathTableContentProps {
   deathList: Death[];
   currentPage: number;
   itemsPerPage: number;
-  onDeathClick: (death: Death) => void;
 }
 
 export const DeathTableContent: React.FC<DeathTableContentProps> = ({ 
   deathList, 
   currentPage, 
   itemsPerPage, 
-  onDeathClick 
 }) => {
   const currentData = useMemo(() => {
     const lastIndex = currentPage * itemsPerPage;
@@ -53,7 +51,7 @@ export const DeathTableContent: React.FC<DeathTableContentProps> = ({
         </Thead>
         <Tbody>
           {currentData.map((death) => (
-            <DeathTableRow key={death.id} death={death} onClick={() => onDeathClick(death)} />
+            <DeathTableRow key={death.id} death={death} />
           ))}
         </Tbody>
       </Table>

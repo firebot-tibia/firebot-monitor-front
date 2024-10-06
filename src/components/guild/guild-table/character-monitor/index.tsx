@@ -2,8 +2,6 @@ import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import {
   Box,
   VStack,
-  HStack,
-  Text,
   useToast,
   Checkbox,
   Heading,
@@ -12,13 +10,13 @@ import {
   useColorModeValue,
   Flex,
   FormControl,
-  FormLabel
+  FormLabel,
+  Text
 } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { parseTimeOnline } from '../../../../shared/utils/utils';
 import { useFlexibleLocalStorage } from '../../../../shared/hooks/useFlexLocalStorage';
 import { useCharacterTypesView } from '../../../../shared/hooks/useTypeView';
-import { useAudio } from '../../../../shared/hooks/useAudio';
 
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];
@@ -26,17 +24,15 @@ interface BombaMakerMonitorProps {
 }
 
 export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters }) => {
-  const [threshold, setThreshold] = useFlexibleLocalStorage<number>('bomba-maker-threshold', 3);
+  const [threshold, setThreshold] = useFlexibleLocalStorage<number>('bomba-maker-threshold', 5);
   const [timeWindow, setTimeWindow] = useFlexibleLocalStorage<number>('bomba-maker-timeWindow', 120);
   const [monitoredLists, setMonitoredListsRaw] = useFlexibleLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
   const toast = useToast();
   const lastAlertTimeRef = useRef<number>(0);
   const types = useCharacterTypesView(characters);
-  const { audioEnabled, playAudio } = useAudio('/assets/notification_sound.mp3');
 
-  const bgColor = useColorModeValue('gray.800', 'gray.900');
   const textColor = useColorModeValue('gray.100', 'gray.200');
-  const inputBgColor = useColorModeValue('gray.700', 'gray.800');
+  const inputBgColor = useColorModeValue('black.700', 'black.800');
   
   const setMonitoredLists = useCallback((value: string[] | ((prev: string[]) => string[])) => {
     setMonitoredListsRaw((prev) => {
@@ -60,16 +56,21 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
       char.OnlineStatus && parseTimeOnline(char.TimeOnline) <= timeWindow
     );
     
-    const recentCounts = monitoredLists.reduce((acc, list) => {
-      acc[list] = recentCharacters.filter(char => char.Kind === list).length;
-      return acc;
-    }, {} as Record<string, number>);
+    const totalRecentCount = recentCharacters.length;
 
-    if (Object.values(recentCounts).some(count => count >= threshold)) {
+    if (totalRecentCount >= threshold) {
       lastAlertTimeRef.current = now;
-      const msg = `Alerta! ${Object.entries(recentCounts)
-        .map(([type, count]) => `${count} ${type}`)
-        .join(' e ')} logaram nos últimos ${timeWindow} segundos!`;
+      const recentCounts = monitoredLists.reduce((acc, list) => {
+        acc[list] = recentCharacters.filter(char => char.Kind === list).length;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const msg = `Alerta! Total de ${totalRecentCount} personagens logaram nos últimos ${timeWindow} segundos! Detalhes: ${
+        Object.entries(recentCounts)
+          .filter(([_, count]) => count > 0)
+          .map(([type, count]) => `${count} ${type}`)
+          .join(', ')
+      }`;
 
       toast({
         title: 'Alerta de Personagens!',
@@ -86,7 +87,7 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
         speechSynthesis.speak(utterance);
       }
     }
-  }, [filteredCharacters, threshold, timeWindow, toast, monitoredLists, audioEnabled, playAudio]);
+  }, [filteredCharacters, threshold, timeWindow, toast, monitoredLists]);
 
   useEffect(() => {
     const timer = setInterval(checkThreshold, 10000);
@@ -106,20 +107,19 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
   }, [setMonitoredLists]);
 
   return (
-    <Box bg={bgColor} p={6} borderRadius="lg" boxShadow="xl">
       <VStack spacing={6} align="stretch">
         <Heading size="md" color={textColor}>Configurações de Monitoramento</Heading>
         
         <Flex direction={{ base: "column", md: "row" }} gap={4}>
           <FormControl>
-            <FormLabel htmlFor="threshold" color={textColor}>Número de Personagens</FormLabel>
+            <FormLabel htmlFor="threshold" color={textColor}>Número Total de Personagens</FormLabel>
             <Input
               id="threshold"
               value={threshold}
               onChange={(e) => setThreshold(Number(e.target.value))}
               type="number"
-              min={0}
-              max={10}
+              min={1}
+              max={50}
               bg={inputBgColor}
               color={textColor}
             />
@@ -156,6 +156,5 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
           </SimpleGrid>
         </Box>
       </VStack>
-    </Box>
   );
 };

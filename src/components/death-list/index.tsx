@@ -13,21 +13,18 @@ import {
 import { CopyIcon } from "@chakra-ui/icons";
 import { Death } from "../../shared/interface/death.interface";
 import { Pagination } from "../pagination";
-import { DeathDetail } from "./death-detail";
 import { DeathTableContent } from "./death-table";
 
 interface DeathTableProps {
   deathList: Death[];
-  onNewDeath?: (newDeath: Death) => void;
   playAudio: () => void;
   audioEnabled: boolean;
 }
 
 const ITEMS_PER_PAGE = 50;
 
-export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath, playAudio, audioEnabled }) => {
+export const DeathTable: React.FC<DeathTableProps> = ({ deathList, playAudio, audioEnabled }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedDeath, setSelectedDeath] = useState<Death | null>(null);
   const [newDeathCount, setNewDeathCount] = useState(0);
   const previousDeathListLength = useRef(deathList.length);
   const totalPages = Math.max(1, Math.ceil(deathList.length / ITEMS_PER_PAGE));
@@ -44,12 +41,9 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath, p
       if (audioEnabled) {
         playAudio();
       }
-      for (let i = previousDeathListLength.current; i < deathList.length; i++) {
-        onNewDeath && onNewDeath(deathList[i]);
-      }
     }
     previousDeathListLength.current = deathList.length;
-  }, [deathList, onNewDeath, audioEnabled, playAudio]);
+  }, [deathList, audioEnabled, playAudio]);
 
   const handleCopyAllDeaths = useCallback(() => {
     const textToCopy = deathList.map(death => `${death.name}: ${death.death}`).join('\n');
@@ -93,7 +87,6 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath, p
             deathList={deathList}
             currentPage={currentPage}
             itemsPerPage={ITEMS_PER_PAGE}
-            onDeathClick={setSelectedDeath}
           />
           {deathList.length > 0 && (
             <Pagination
@@ -101,11 +94,6 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, onNewDeath, p
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />
-          )}
-          {selectedDeath && (
-            <Box mt={4}>
-              <DeathDetail death={selectedDeath} />
-            </Box>
           )}
         </VStack>
       </Box>

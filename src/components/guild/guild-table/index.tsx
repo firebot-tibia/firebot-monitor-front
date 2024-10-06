@@ -168,7 +168,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   );
 
   return (
-    <Box bg={bgColor} p={2} borderRadius="md" maxWidth="100%" overflow="hidden">
+    <Box bg={bgColor} p={2} borderRadius="xs" maxWidth="100%" overflow="hidden">
       <VStack spacing={1} align="stretch" mb={2}>
         <ClassificationLegend />
         <Badge colorScheme="green" fontSize={responsiveFontSize} alignSelf="flex-end">
@@ -176,8 +176,8 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         </Badge>
       </VStack>
       {isLargerThan768 ? (
-        <TableContainer overflowX="auto" maxHeight="70vh">
-          <Table variant="simple" size="sm" fontSize={responsiveFontSize} color={textColor}>
+        <TableContainer overflowX="auto">
+          <Table variant="simple" size="xs" fontSize={responsiveFontSize} color={textColor}>
             <Thead position="sticky" top={0} bg={bgColor} zIndex={1}>
               <Tr>
                 <Th px={1} py={responsivePadding} color={textColor} width="3%">#</Th>

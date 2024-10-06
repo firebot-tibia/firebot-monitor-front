@@ -24,6 +24,7 @@ const InstructionsBox = () => {
             </Flex>
             <Text fontSize="sm">• Campo Local: Atualize a localização atual do seu personagem no jogo.</Text>
             <Text fontSize="sm">• Clique no nome: Copie o comando exiva para a área de transferência (CTRL+C).</Text>
+            <Text fontSize="sm">• Bugs ou erros: Por favor, relate-nos no Discord.</Text>
           </VStack>
         </Box>
         <Box flex={1}>
@@ -34,8 +35,7 @@ const InstructionsBox = () => {
             </Flex>
             <Text fontSize="sm">• Respawn Planilhado: Em desenvolvimento, pode apresentar inconsistências.</Text>
             <Text fontSize="sm">• Mapa Exiva: Versão inicial disponível, em constante aprimoramento.</Text>
-            <Text fontSize="sm">• Bugs ou erros: Por favor, relate-nos no Discord.</Text>
-            <Text fontSize="sm">• Próxima atualização: Acompanhamento de Level Up em tempo real.</Text>
+            <Text fontSize="sm">• Próxima atualização: Liberação completa do respawn planilhado</Text>
           </VStack>
         </Box>
         <Box flex={1}>
@@ -47,6 +47,7 @@ const InstructionsBox = () => {
             <Text fontSize="sm">• O acompanhamento de level up e morte requer que o site permaneça aberto constantemente.</Text>
             <Text fontSize="sm">• Atualmente, não registramos mortes ocorridas com o site fechado.</Text>
             <Text fontSize="sm">• Mantenha o site aberto para garantir o registro preciso de todas as atividades.</Text>
+            <Text fontSize="sm" color={"red"}>• Clicar no X acima para fechar essa caixa</Text>
           </VStack>
         </Box>
       </HStack>

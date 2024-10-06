@@ -18,7 +18,14 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode }) => {
 
   const handleModeChange = useCallback(() => {
     if (setMode && mode) {
-      setMode(mode === 'ally' ? 'enemy' : 'ally');
+      clearLocalStorage();
+      const newMode = mode === 'ally' ? 'enemy' : 'ally';
+      setMode(newMode);
+      
+      // Atualiza a URL e recarrega a página
+      const url = new URL(window.location.href);
+      url.searchParams.set('mode', newMode);
+      window.location.href = url.toString();
     }
   }, [mode, setMode]);
 

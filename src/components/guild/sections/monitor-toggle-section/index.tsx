@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Collapse, Box, Switch, Flex, Text, useToast } from '@chakra-ui/react';
-import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { Switch, Flex, Text, useToast, Box, useColorModeValue, VStack, Button } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { BombaMakerMonitor } from '../../guild-table/character-monitor';
-import { useAudio } from '../../../../shared/hooks/useAudio';
+import { AudioControl, useAudio } from '../../../../shared/hooks/useAudio';
 
 interface MonitorToggleSectionProps {
   guildData: GuildMemberResponse[];
@@ -11,59 +10,118 @@ interface MonitorToggleSectionProps {
 }
 
 const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = React.memo(({ guildData, isLoading }) => {
-  const [showMonitor, setShowMonitor] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const { audioEnabled, toggleAudio } = useAudio('/assets/notification_sound.mp3');
+  const [deathAudio, levelUpAudio] = useAudio([
+    '/assets/notification_sound.mp3',
+    '/assets/notification_sound2.wav'
+  ]) as [AudioControl, AudioControl];
+
   const toast = useToast();
+
+  const bgColor = useColorModeValue('black.900', 'black.900');
+  const textColor = useColorModeValue('gray.100', 'gray.200');
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const handleToggleAudio = useCallback(() => {
-    toggleAudio();
+  const handleToggleDeathAudio = useCallback(() => {
+    deathAudio.toggleAudio();
     toast({
-      title: "Alerta sonoro alterado",
-      description: "O estado do alerta sonoro foi alterado.",
+      title: "Alerta sonoro de mortes alterado",
+      description: "O estado do alerta sonoro de mortes foi alterado.",
       status: "info",
       duration: 3000,
       isClosable: true,
     });
-  }, [toggleAudio, toast]);
+  }, [deathAudio, toast]);
+
+  const handleToggleLevelUpAudio = useCallback(() => {
+    levelUpAudio.toggleAudio();
+    toast({
+      title: "Alerta sonoro de level up alterado",
+      description: "O estado do alerta sonoro de level up foi alterado.",
+      status: "info",
+      duration: 3000,
+      isClosable: true,
+    });
+  }, [levelUpAudio, toast]);
+
+  const testDeathAudio = useCallback(() => {
+    deathAudio.playAudio();
+    const msg = "Teste de alerta de morte!";
+    toast({
+      title: "Teste de Alerta de Morte",
+      description: msg,
+      status: "warning",
+      duration: 3000,
+      isClosable: true,
+    });
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(msg);
+      utterance.lang = 'pt-BR';
+      utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'pt-BR') || null;
+      speechSynthesis.speak(utterance);
+    }
+  }, [deathAudio, toast]);
+
+  const testLevelUpAudio = useCallback(() => {
+    levelUpAudio.playAudio();
+    const msg = "Teste de alerta de level up!";
+    toast({
+      title: "Teste de Alerta de Level Up",
+      description: msg,
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(msg);
+      utterance.lang = 'pt-BR';
+      utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'pt-BR') || null;
+      speechSynthesis.speak(utterance);
+    }
+  }, [levelUpAudio, toast]);
 
   if (!isClient) {
     return null;
   }
 
   return (
-    <Box p={4} borderRadius="xl" boxShadow="xl">
-      <Button
-        onClick={() => setShowMonitor(prev => !prev)}
-        rightIcon={showMonitor ? <ChevronUpIcon /> : <ChevronDownIcon />}
-        size="md"
-        width="100%"
-        variant="outline"
-        bg="gray.800"
-        color="white"
-        _hover={{ bg: 'gray.700' }}
-        mb={4}
-      >
-        {showMonitor ? 'Esconder' : 'Mostrar'} Gerenciamento de alertas
-      </Button>
-      <Collapse in={showMonitor} animateOpacity>
-        <Box p={4} color="white" bg="gray.800" rounded="md" shadow="md" mt={2}>
-          <Flex justify="space-between" align="center" mb={4}>
-            <Text fontSize="md" fontWeight="semibold">Alerta sonoro de mortes</Text>
+    <Box bg={bgColor} p={6} borderRadius="lg" boxShadow="xl" width="100%">
+      <VStack spacing={6} align="stretch" width="100%">
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text fontSize="md" fontWeight="semibold" color={textColor}>Alerta sonoro de mortes</Text>
+          <Flex alignItems="center">
             <Switch
-              isChecked={audioEnabled}
-              onChange={handleToggleAudio}
-              colorScheme="blue"
+              isChecked={deathAudio.audioEnabled}
+              onChange={handleToggleDeathAudio}
+              colorScheme="red"
               size="lg"
+              mr={4}
             />
+            <Button onClick={testDeathAudio} colorScheme="red" size="sm">
+              Testar
+            </Button>
           </Flex>
-          <BombaMakerMonitor characters={guildData} isLoading={isLoading} />
-        </Box>
-      </Collapse>
+        </Flex>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text fontSize="md" fontWeight="semibold" color={textColor}>Alerta sonoro de level up</Text>
+          <Flex alignItems="center">
+            <Switch
+              isChecked={levelUpAudio.audioEnabled}
+              onChange={handleToggleLevelUpAudio}
+              colorScheme="green"
+              size="lg"
+              mr={4}
+            />
+            <Button onClick={testLevelUpAudio} colorScheme="green" size="sm">
+              Testar
+            </Button>
+          </Flex>
+        </Flex>
+        <BombaMakerMonitor characters={guildData} isLoading={isLoading} />
+      </VStack>
     </Box>
   );
 });

@@ -56,17 +56,6 @@ export const getPlayerExperienceHistory = async (query: { character: string; }) 
   }
 };
 
-export const getGuildStats = async (query: { guild_id: string; }) => {
-  try {
-    const response = await api.get(`/gamedata/guilds/statistics`, {
-      params: query,
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 export const getReservationsList = async (query: { 
   guild_id: string;
   status?: 'reserved' | 'canceled' | 'free';

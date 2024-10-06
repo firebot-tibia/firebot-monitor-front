@@ -5,12 +5,11 @@ import DeathTable from '../../../death-list';
 
 interface DeathSectionProps {
   deathList: Death[];
-  handleNewDeath: (newDeath: Death) => void;
   playAudio: () => void;
   audioEnabled: boolean;
 }
 
-export const DeathSection: React.FC<DeathSectionProps> = ({ deathList, handleNewDeath, playAudio, audioEnabled }) => {
+export const DeathSection: React.FC<DeathSectionProps> = ({ deathList, playAudio, audioEnabled }) => {
   return (
     <Box>
       <Flex align="center" justify="center" mb={4}>
@@ -20,7 +19,6 @@ export const DeathSection: React.FC<DeathSectionProps> = ({ deathList, handleNew
       </Flex>
       <DeathTable 
         deathList={deathList} 
-        onNewDeath={handleNewDeath} 
         playAudio={playAudio}
         audioEnabled={audioEnabled}
       />
