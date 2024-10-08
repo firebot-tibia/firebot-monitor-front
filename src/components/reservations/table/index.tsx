@@ -1,111 +1,103 @@
-import React, { useState, useMemo } from 'react';
-import { Table, Thead, Tbody, Tr, Th, Td, Text, Image, Flex, Button, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, VStack } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Text,
+  Image,
+  Button,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  VStack,
+  Box,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { Reservation, CreateReservationData, Respawn } from '../../../shared/interface/reservations.interface';
 import { AddReservationForm } from '../add-reservations';
 import { formatTimeSlotEnd } from '../../../shared/utils/utils';
+import { useReservationTable } from '../hooks/useTableHook';
 
 interface ReservationTableProps {
   reservations: Reservation[];
   timeSlots: string[];
   respawns: Respawn[];
-  onAddReservation: (data: CreateReservationData & { respawnId: string }) => Promise<void>;
+  onAddReservation: (data: CreateReservationData & { respawn_id: string }) => Promise<void>;
   onDeleteReservation: (id: string) => Promise<void>;
-  onFetchReservation: () => Promise<void>; 
+  onFetchReservation: () => Promise<void>;
 }
 
 const RESPAWNS_PER_TABLE = 6;
 
-export const ReservationTable: React.FC<ReservationTableProps> = ({ 
-  reservations, 
-  timeSlots, 
-  respawns, 
-  onAddReservation, 
-  onDeleteReservation,
-  onFetchReservation,
-}) => {
+export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedSlot, setSelectedSlot] = useState<{ time: string, respawn: Respawn } | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{ time: string; respawn: Respawn } | null>(null);
+  const { findReservationForSlot, handleAddReservation, handleDeleteReservation } = useReservationTable(props);
+
+  const bgColor = useColorModeValue('gray.800', 'gray.900');
+  const textColor = useColorModeValue('gray.100', 'gray.200');
+  const buttonBgColor = useColorModeValue('green.500', 'green.400');
+  const buttonHoverBgColor = useColorModeValue('green.600', 'green.500');
 
   const handleAddClick = (time: string, respawn: Respawn) => {
     setSelectedSlot({ time, respawn });
     onOpen();
   };
 
-  const handleDeleteClick = async (id: string) => {
-    await onDeleteReservation(id);
-  };
-
-  const handleReservations = async () => {
-    await onFetchReservation();
-  };
-
-  const allSlots = useMemo(() => {
-    const slots: Record<string, Record<string, Reservation | 'free'>> = {};
-    timeSlots.forEach((timeSlot: string) => {
-      slots[timeSlot] = {};
-      respawns.forEach(respawn => {
-        slots[timeSlot][respawn.id || ''] = 'free';
-      });
-    });
-
-    console.log(reservations);
-    
-    if (reservations && reservations.length > 0) {
-      reservations.forEach(reservation => {
-        const startTime = new Date(reservation.start_time).toLocaleString('en-GB').replace(',', '-');
-        const timeSlot = timeSlots.find(slot => slot.startsWith(startTime)) || startTime;
-        console.log(timeSlot);
-        console.log(slots);
-        if (slots[timeSlot] && reservation.respawn_id) {
-          slots[timeSlot][reservation.respawn_id] = reservation;
-        }
-      });
-    }
-    
-    return slots;
-  }, [timeSlots, respawns, reservations]);
-
   const renderTable = (startIndex: number, endIndex: number) => (
-    <Table variant="simple" key={startIndex}>
+    <Table variant="simple" key={startIndex} size="sm">
       <Thead>
         <Tr>
-          <Th>Horário</Th>
-          {respawns.slice(startIndex, endIndex).map(respawn => (
-            <Th key={respawn.id}>
-              <Flex direction="column" align="center">
+          <Th color={textColor}>Horário</Th>
+          {props.respawns.slice(startIndex, endIndex).map(respawn => (
+            <Th key={respawn.id} textAlign="center">
+              <VStack spacing={2}>
                 {respawn.image && (
-                  <Image 
-                    src={`/assets/images/creatures/${respawn.image}`} 
-                    alt={respawn.name} 
-                    boxSize="50px"
-                    mb={2}
+                  <Image
+                    src={`/assets/images/creatures/${respawn.image}`}
+                    alt={respawn.name}
+                    boxSize="40px"
+                    objectFit="contain"
                   />
                 )}
-                {respawn.name}
-              </Flex>
+                <Text fontSize="xs" color={textColor}>{respawn.name}</Text>
+              </VStack>
             </Th>
           ))}
         </Tr>
       </Thead>
       <Tbody>
-        {timeSlots.map(timeSlot => (
+        {props.timeSlots.map(timeSlot => (
           <Tr key={timeSlot}>
-            <Td>{formatTimeSlotEnd(timeSlot)}</Td>
-            {respawns.slice(startIndex, endIndex).map(respawn => {
-              const slot = allSlots[timeSlot][respawn.id || ''];
+            <Td color={textColor}>{formatTimeSlotEnd(timeSlot)}</Td>
+            {props.respawns.slice(startIndex, endIndex).map(respawn => {
+              const reservation = findReservationForSlot(timeSlot, respawn.id || '');
               return (
-                <Td key={`${respawn.id}-${timeSlot}`}>
-                  {slot !== 'free' ? (
-                    <Flex direction="column" align="center">
-                      <Text color={slot.status === 'reserved' ? 'red.500' : 'green.500'}>
-                        {slot.reserved_for}
+                <Td key={`${respawn.id}-${timeSlot}`} textAlign="center">
+                  {reservation && reservation.status === 'reserved' ? (
+                    <VStack spacing={1}>
+                      <Text fontSize="xs" color="red.400">
+                        {reservation.reserved_for}
                       </Text>
-                      <Button size="sm" colorScheme="red" onClick={() => handleDeleteClick(slot.id)}>
+                      <Button size="xs" colorScheme="red" onClick={() => handleDeleteReservation(reservation.id)}>
                         Remover
                       </Button>
-                    </Flex>
+                    </VStack>
                   ) : (
-                    <Button size="sm" colorScheme="green" onClick={() => handleAddClick(timeSlot, respawn)}>
+                    <Button
+                      size="xs"
+                      bg={buttonBgColor}
+                      color="white"
+                      _hover={{ bg: buttonHoverBgColor }}
+                      onClick={() => handleAddClick(timeSlot, respawn)}
+                    >
                       Adicionar
                     </Button>
                   )}
@@ -119,12 +111,12 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({
   );
 
   const tables = [];
-  for (let i = 0; i < respawns.length; i += RESPAWNS_PER_TABLE) {
+  for (let i = 0; i < props.respawns.length; i += RESPAWNS_PER_TABLE) {
     tables.push(renderTable(i, i + RESPAWNS_PER_TABLE));
   }
 
   return (
-    <>
+    <Box bg={bgColor} p={4} borderRadius="md" overflowX="auto">
       <VStack spacing={8} align="stretch">
         {tables}
       </VStack>
@@ -137,20 +129,19 @@ export const ReservationTable: React.FC<ReservationTableProps> = ({
             {selectedSlot && (
               <AddReservationForm
                 onSubmit={async (data) => {
-                  await onAddReservation({
+                  await handleAddReservation({
                     ...data,
-                    respawnId: selectedSlot.respawn.id || '',
+                    respawn_id: selectedSlot.respawn.id || '',
                   });
-                  handleReservations();
                   onClose();
                 }}
-                respawnName={selectedSlot.respawn.name}
+                respawnId={selectedSlot.respawn.id || ''}
                 timeSlot={selectedSlot.time}
               />
             )}
           </ModalBody>
         </ModalContent>
       </Modal>
-    </>
+    </Box>
   );
 };

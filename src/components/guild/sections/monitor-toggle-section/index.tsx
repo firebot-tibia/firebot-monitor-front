@@ -7,10 +7,12 @@ import { AudioControl, useAudio } from '../../../../shared/hooks/useAudio';
 interface MonitorToggleSectionProps {
   guildData: GuildMemberResponse[];
   isLoading: boolean;
+  onStartMonitoring: () => void;
 }
 
-const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = React.memo(({ guildData, isLoading }) => {
+const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = React.memo(({ guildData, isLoading, onStartMonitoring }) => {
   const [isClient, setIsClient] = useState(false);
+  const [monitoringStarted, setMonitoringStarted] = useState(false);
   const [deathAudio, levelUpAudio] = useAudio([
     '/assets/notification_sound.mp3',
     '/assets/notification_sound2.wav'
@@ -83,6 +85,22 @@ const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = React.memo(({ 
     }
   }, [levelUpAudio, toast]);
 
+  const handleStartMonitoring = useCallback(() => {
+    if (!monitoringStarted) {
+      setMonitoringStarted(true);
+      deathAudio.markUserInteraction();
+      levelUpAudio.markUserInteraction();
+      onStartMonitoring();
+      toast({
+        title: "Monitoramento iniciado",
+        description: "O monitoramento foi iniciado com sucesso.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }, [monitoringStarted, deathAudio, levelUpAudio, onStartMonitoring, toast]);
+
   if (!isClient) {
     return null;
   }
@@ -120,6 +138,14 @@ const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = React.memo(({ 
             </Button>
           </Flex>
         </Flex>
+        <Button 
+          onClick={handleStartMonitoring} 
+          colorScheme="blue" 
+          size="lg" 
+          isDisabled={monitoringStarted}
+        >
+          {monitoringStarted ? "Monitoramento Ativo" : "Iniciar Monitoramento"}
+        </Button>
         <BombaMakerMonitor characters={guildData} isLoading={isLoading} />
       </VStack>
     </Box>

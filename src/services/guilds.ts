@@ -113,7 +113,9 @@ export const createReservation = async (reservationData: CreateReservationData) 
 
 export const deleteReservation = async (id: string) => {
   try {
-    const response = await api.delete(`/reservations/${id}`);
+    const response = await api.delete(`/reservations/${id}`, {
+      params: { kind: 'ally' },
+    });
     return response.data;
   } catch (error) {
     throw error;

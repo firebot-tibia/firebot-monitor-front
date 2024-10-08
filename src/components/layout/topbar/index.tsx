@@ -1,5 +1,5 @@
-import { Flex, IconButton, Spacer, HStack, Text, Switch } from "@chakra-ui/react";
-import { FC, useCallback } from "react";
+import { Flex, IconButton, Spacer, HStack, Text, Switch, Select } from "@chakra-ui/react";
+import { FC, useCallback, useState, useEffect } from "react";
 import { FaSignOutAlt, FaBars } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import { clearLocalStorage } from "../../../shared/utils/utils";
@@ -8,9 +8,22 @@ interface TopbarProps {
   onToggleMenu: () => void;
   mode?: 'ally' | 'enemy';
   setMode?: (mode: 'ally' | 'enemy') => void;
+  onWorldChange?: (world: string) => void;
 }
 
-const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode }) => {
+const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode, onWorldChange }) => {
+  const [worlds, setWorlds] = useState<string[]>([]);
+  const [selectedWorld, setSelectedWorld] = useState<string>('');
+
+  useEffect(() => {
+    const fetchWorlds = async () => {
+      const fetchedWorlds = ['Mundo 1', 'Mundo 2', 'Mundo 3'];
+      setWorlds(fetchedWorlds);
+      setSelectedWorld(fetchedWorlds[0]);
+    };
+    fetchWorlds();
+  }, []);
+
   const handleLogout = useCallback(() => {
     clearLocalStorage();
     signOut({ redirect: true, callbackUrl: '/' });
@@ -22,12 +35,19 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode }) => {
       const newMode = mode === 'ally' ? 'enemy' : 'ally';
       setMode(newMode);
       
-      // Atualiza a URL e recarrega a página
       const url = new URL(window.location.href);
       url.searchParams.set('mode', newMode);
       window.location.href = url.toString();
     }
   }, [mode, setMode]);
+
+  const handleWorldChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newWorld = event.target.value;
+    setSelectedWorld(newWorld);
+    if (onWorldChange) {
+      onWorldChange(newWorld);
+    }
+  }, [onWorldChange]);
 
   return (
     <Flex
@@ -59,6 +79,22 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode }) => {
       </Text>
       <Spacer />
       <HStack spacing={4}>
+        <Select
+          value={selectedWorld}
+          onChange={handleWorldChange}
+          width="150px"
+          size="sm"
+          variant="filled"
+          bg="gray.700"
+          color="white"
+          _hover={{ bg: "gray.600" }}
+        >
+          {worlds.map((world) => (
+            <option key={world} value={world}>
+              {world}
+            </option>
+          ))}
+        </Select>
         {mode && setMode && (
           <HStack>
             <Text fontSize="sm">Aliado</Text>

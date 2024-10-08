@@ -1,7 +1,7 @@
 import { useToast } from "@chakra-ui/react";
 import { vocationIcons } from "../../constant/character";
 import { GuildMemberResponse } from "../interface/guild/guild-member.interface";
-import { format, parse } from 'date-fns';
+import { format, parse, parseISO } from 'date-fns';
 
 export const formatExp = (value: number): string => {
     const absValue = Math.abs(value);
@@ -137,4 +137,10 @@ export const formatTimeSlotEnd = (timeSlot: string) => {
 export const parseTimeOnline = (timeOnline: string): number => {
   const parts = timeOnline.split(':').map(Number);
   return parts.length === 3 ? parts[0] * 3600 + parts[1] * 60 + parts[2] : 0;
+};
+
+export const convertFrontEndDateToISO = (frontEndDate: string): string => {
+  const [datePart, timePart] = frontEndDate.split('-');
+  const [day, month, year] = datePart.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}:00Z`;
 };

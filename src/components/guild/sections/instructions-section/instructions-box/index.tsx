@@ -1,9 +1,24 @@
-import { useState } from 'react';
-import { Box, Flex, Text, CloseButton, VStack, HStack } from '@chakra-ui/react';
+import { useState, useEffect } from 'react';
+import { Box, Flex, Text, CloseButton, VStack, HStack, keyframes } from '@chakra-ui/react';
 import { InfoIcon, ClockIcon, AlertTriangle } from 'lucide-react';
+
+const blinkAnimation = keyframes`
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+`;
 
 const InstructionsBox = () => {
   const [isVisible, setIsVisible] = useState(true);
+  const [isBlinking, setIsBlinking] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsBlinking(false);
+    }, 10000); // Stop blinking after 10 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!isVisible) return null;
 
@@ -22,6 +37,7 @@ const InstructionsBox = () => {
               <InfoIcon size={20} className="mr-2" />
               <Text fontWeight="bold" fontSize="lg">Instruções:</Text>
             </Flex>
+            <Text fontSize="sm" fontWeight="bold" color="red.500">• Apenas contas de administrador podem editar os campos.</Text>
             <Text fontSize="sm">• Campo Local: Atualize a localização atual do seu personagem no jogo.</Text>
             <Text fontSize="sm">• Clique no nome: Copie o comando exiva para a área de transferência (CTRL+C).</Text>
             <Text fontSize="sm">• Bugs ou erros: Por favor, relate-nos no Discord.</Text>
@@ -33,9 +49,17 @@ const InstructionsBox = () => {
               <ClockIcon size={20} className="mr-2" />
               <Text fontWeight="bold" fontSize="lg">Atualizações Recentes:</Text>
             </Flex>
-            <Text fontSize="sm">• Respawn Planilhado: Em desenvolvimento, pode apresentar inconsistências.</Text>
-            <Text fontSize="sm">• Mapa Exiva: Versão inicial disponível, em constante aprimoramento.</Text>
-            <Text fontSize="sm">• Próxima atualização: Liberação completa do respawn planilhado</Text>
+            <Text
+              fontSize="sm"
+              animation={isBlinking ? `${blinkAnimation} 1s infinite` : 'none'}
+              fontWeight="bold"
+              color="green.500"
+            >
+              • Respawn Planilhado: Lançado
+            </Text>
+            <Text fontSize="sm">• Próxima atualização: Guilds Leave - Quem saiu / entrou na guild alida e inimiga</Text>
+            <Text fontSize="sm">• Próxima atualização: Aprimoramento do Mapa de Exiva com triangulaçáo automática</Text>
+            <Text fontSize="sm">• Próxima atualização: Multi-World - Alterar o mundo, sem precisar entrar em outra conta</Text>
           </VStack>
         </Box>
         <Box flex={1}>
@@ -44,10 +68,15 @@ const InstructionsBox = () => {
               <AlertTriangle size={20} className="mr-2" />
               <Text fontWeight="bold" fontSize="lg">Avisos:</Text>
             </Flex>
+            <Text
+              fontSize="sm"
+              animation={isBlinking ? `${blinkAnimation} 1s infinite` : 'none'}
+              fontWeight="bold"
+              color="red.500"
+            >• Clique no X acima para fechar essa caixa</Text>
             <Text fontSize="sm">• O acompanhamento de level up e morte requer que o site permaneça aberto constantemente.</Text>
             <Text fontSize="sm">• Atualmente, não registramos mortes ocorridas com o site fechado.</Text>
             <Text fontSize="sm">• Mantenha o site aberto para garantir o registro preciso de todas as atividades.</Text>
-            <Text fontSize="sm" color={"red"}>• Clicar no X acima para fechar essa caixa</Text>
           </VStack>
         </Box>
       </HStack>

@@ -6,6 +6,7 @@ export interface AudioControl {
   enableAudio: () => void;
   playAudio: () => void;
   initializeAudio: () => void;
+  markUserInteraction: () => void;
 }
 
 export const useAudio = (audioSources: string | string[]): AudioControl | AudioControl[] => {
@@ -23,6 +24,7 @@ export const useAudio = (audioSources: string | string[]): AudioControl | AudioC
 
   const [audioInitialized, setAudioInitialized] = useState<boolean[]>(sources.map(() => false));
   const audioRefs = useRef<(HTMLAudioElement | null)[]>(sources.map(() => null));
+  const [userInteracted, setUserInteracted] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -70,16 +72,19 @@ export const useAudio = (audioSources: string | string[]): AudioControl | AudioC
     initializeAudio(index);
   }, [initializeAudio]);
 
+  const markUserInteraction = useCallback(() => {
+    setUserInteracted(true);
+  }, []);
+
   const playAudio = useCallback((index: number) => {
-    if (audioStates[index] && audioRefs.current[index]) {
+    if (audioStates[index] && audioRefs.current[index] && userInteracted) {
       audioRefs.current[index]!.play().catch((error) => {
         console.error('Error playing audio:', error);
-        if (error.name === 'NotAllowedError') {
-          console.log('Audio autoplay blocked. Waiting for user interaction.');
-        }
       });
+    } else if (!userInteracted) {
+      console.log('Waiting for user interaction before playing audio.');
     }
-  }, [audioStates]);
+  }, [audioStates, userInteracted]);
 
   const audioControls: AudioControl[] = sources.map((_, index) => ({
     audioEnabled: audioStates[index],
@@ -87,6 +92,7 @@ export const useAudio = (audioSources: string | string[]): AudioControl | AudioC
     enableAudio: () => enableAudio(index),
     playAudio: () => playAudio(index),
     initializeAudio: () => initializeAudio(index),
+    markUserInteraction,
   }));
 
   return Array.isArray(audioSources) ? audioControls : audioControls[0];

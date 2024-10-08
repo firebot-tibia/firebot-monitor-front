@@ -40,12 +40,6 @@ export const ManagementModal: React.FC<ManagementModalProps> = ({
     if (newRespawn.name) {
       addRespawn(newRespawn);
       setNewRespawn({ name: "", image: "" });
-      toast({
-        title: "Respawn adicionado",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
     }
   };
 

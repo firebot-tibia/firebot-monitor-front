@@ -31,8 +31,10 @@ const Home: FC = () => {
     addType,
     handleLocalChange,
     handleClassificationChange,
-    groupedData
+    groupedData,
+    handleStartMonitoring
   } = useHomeLogic();
+
 
   if (status === 'loading' || isLoading) {
     return (
@@ -83,14 +85,14 @@ const Home: FC = () => {
                 />
               </TabPanel>
               <TabPanel>
-              <DeathSection
+                <DeathSection
                   deathList={deathList}
                   playAudio={playFirstAudio}
                   audioEnabled={firstAudioEnabled}
                 />
               </TabPanel>
               <TabPanel>
-              <LevelUpSection
+                <LevelUpSection
                   levelUpList={levelUpList}
                   levelDownList={levelDownList}
                   playAudio={playSecondAudio}
@@ -98,7 +100,11 @@ const Home: FC = () => {
                 />
               </TabPanel>
               <TabPanel>
-                <MonitorToggleSection guildData={guildData} isLoading={isLoading} />
+                <MonitorToggleSection
+                  guildData={guildData}
+                  isLoading={isLoading}
+                  onStartMonitoring={handleStartMonitoring}
+                />
               </TabPanel>
             </TabPanels>
           </Tabs>

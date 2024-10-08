@@ -45,8 +45,23 @@ export const LocalInput: FC<LocalInputProps> = ({
 
     setFilteredOptions(filtered);
     setIsDropdownOpen(filtered.length > 0);
+  };
 
-    onLocalChange(member, value);
+  const applyChange = () => {
+    onLocalChange(member, inputValue);
+    setIsDropdownOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      applyChange();
+    }
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      applyChange();
+    }, 200);
   };
 
   const handleOptionClick = (optionLabel: string) => {
@@ -110,6 +125,8 @@ export const LocalInput: FC<LocalInputProps> = ({
         ref={inputRef}
         value={inputValue}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
         placeholder="Local Hunt"
         onFocus={() => {
           setIsDropdownOpen(true);
