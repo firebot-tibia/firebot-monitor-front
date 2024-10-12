@@ -1,37 +1,39 @@
 import { useToast } from "@chakra-ui/react";
-import { getSession, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { upsertPlayer } from "../../../services/guilds";
 import { AudioControl, useAudio } from "../../../shared/hooks/useAudio";
 import { usePermissionCheck } from "../../../shared/hooks/usePermissionCheck";
-import { useLocalStorageMode } from "../../../shared/hooks/useStorage";
 import { useCharacterTypes } from "../../../shared/hooks/useType";
 import { GuildMemberResponse } from "../../../shared/interface/guild/guild-member.interface";
 import { Death } from '../../../shared/interface/death.interface';
 import { Level } from '../../../shared/interface/level.interface';
 import { normalizeTimeOnline, isOnline } from "../../../shared/utils/utils";
-import useEventSourceGlobal from "../../../store/event-source-store";
 import { useGlobalStore } from '../../../store/death-level-store';
+import { useTokenStore } from "../../../store/token-decoded-store";
+import { useStorage } from "../../../store/storage-store";
 
 export const useHomeLogic = () => {
-  const [mode, setMode] = useLocalStorageMode('monitorMode', 'enemy');
+  const [value, setValue] = useStorage('monitorMode', 'enemy');
   const toast = useToast();
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
+  const { decodedToken, selectedWorld, getSelectedGuild, initializeSSE, setMode, setSelectedWorld, decodeAndSetToken } = useTokenStore();
   const checkPermission = usePermissionCheck();
   const audioControls = useAudio([
     '/assets/notification_sound.mp3',
     '/assets/notification_sound2.wav'
   ]) as AudioControl[];
   
+  
   const [firstAudio, secondAudio] = audioControls;
   
   const { audioEnabled: firstAudioEnabled, playAudio: playFirstAudio, markUserInteraction: markFirstAudioInteraction } = firstAudio;
   const { audioEnabled: secondAudioEnabled, playAudio: playSecondAudio, markUserInteraction: markSecondAudioInteraction } = secondAudio;
   
-  const { types, addType } = useCharacterTypes(guildData, session, mode);
+  const { types, addType } = useCharacterTypes(guildData, session, value);
 
   const {
     deathList,
@@ -65,8 +67,8 @@ export const useHomeLogic = () => {
   }, [addLevelUp, addLevelDown, secondAudioEnabled, playSecondAudio]);
 
   const handleMessage = useCallback((data: any) => {
-    if (data?.[mode]) {
-      setGuildData(data[mode]);
+    if (data?.[value]) {
+      setGuildData(data[value]);
     }
     if (data?.death) {
       const newDeath: Death = {
@@ -86,42 +88,43 @@ export const useHomeLogic = () => {
       handleNewLevel(newLevel);
     }
     setIsLoading(false);
-  }, [mode, handleNewDeath, handleNewLevel]);
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      const baseUrl = `https://api.firebot.run/subscription/${mode}/`;
-      const setupSource = async () => {
-        await useEventSourceGlobal.getState().setupEventSource(
-          baseUrl,
-          getSession,
-          handleMessage
-        );
-      };
-      setupSource();
-  
-      return () => {
-        useEventSourceGlobal.getState().closeEventSource();
-      };
-    }
-  }, [status, mode]);
+  }, [value, handleNewDeath, handleNewLevel]);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
-      try {
-        const decoded = JSON.parse(atob(session.access_token.split('.')[1]));
-        if (decoded?.[`${mode}_guild`]) {
-          setGuildId(decoded[`${mode}_guild`]);
-        }
-      } catch (error) {
-        console.error('Error decoding access token:', error);
-      }
+      decodeAndSetToken(session.access_token);
     }
-  }, [status, session, mode]);
+  }, [status, session]);
+
+  useEffect(() => {
+    if (session && decodedToken && selectedWorld) {
+      setMode(value as 'ally' | 'enemy');
+      initializeSSE(handleMessage);
+    }
+  }, [decodedToken, selectedWorld, value, setMode, initializeSSE]);
+
+  useEffect(() => {
+    const selectedGuild = getSelectedGuild();
+    if (selectedGuild) {
+      setGuildId(selectedGuild.id);
+    }
+  }, [getSelectedGuild]);
 
   useEffect(() => {
     resetNewCounts();
-  }, [mode, resetNewCounts]);
+  }, [value, resetNewCounts]);
+
+  const handleWorldChange = useCallback((newWorld: string) => {
+    setSelectedWorld(newWorld);
+    initializeSSE(handleMessage);
+  }, [setSelectedWorld, initializeSSE, handleMessage]);
+
+  const handleModeChange = useCallback((newMode: 'ally' | 'enemy') => {
+    setValue(newMode);
+    setMode(newMode);
+    initializeSSE(handleMessage);
+  }, [setValue, setMode, initializeSSE, handleMessage]);
+
 
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
     if (!checkPermission()) return;
@@ -213,8 +216,9 @@ export const useHomeLogic = () => {
   }, [markUserInteraction]);
 
   return {
-    mode,
-    setMode,
+    value,
+    handleModeChange,
+    handleWorldChange,
     newDeathCount,
     newLevelUpCount,
     newLevelDownCount,

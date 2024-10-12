@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Table,
   Thead,
@@ -29,7 +29,7 @@ interface ReservationTableProps {
   reservations: Reservation[];
   timeSlots: string[];
   respawns: Respawn[];
-  onAddReservation: (data: CreateReservationData & { respawn_id: string }) => Promise<void>;
+  onAddReservation: (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => Promise<void>;
   onDeleteReservation: (id: string) => Promise<void>;
   onFetchReservation: () => Promise<void>;
 }
@@ -46,12 +46,12 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
   const buttonBgColor = useColorModeValue('green.500', 'green.400');
   const buttonHoverBgColor = useColorModeValue('green.600', 'green.500');
 
-  const handleAddClick = (time: string, respawn: Respawn) => {
+  const handleAddClick = useCallback((time: string, respawn: Respawn) => {
     setSelectedSlot({ time, respawn });
     onOpen();
-  };
+  }, [onOpen]);
 
-  const renderTable = (startIndex: number, endIndex: number) => (
+  const renderTable = useCallback((startIndex: number, endIndex: number) => (
     <Table variant="simple" key={startIndex} size="sm">
       <Thead>
         <Tr>
@@ -81,7 +81,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
               const reservation = findReservationForSlot(timeSlot, respawn.id || '');
               return (
                 <Td key={`${respawn.id}-${timeSlot}`} textAlign="center">
-                  {reservation && reservation.status === 'reserved' ? (
+                  {reservation ? (
                     <VStack spacing={1}>
                       <Text fontSize="xs" color="red.400">
                         {reservation.reserved_for}
@@ -108,7 +108,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
         ))}
       </Tbody>
     </Table>
-  );
+  ), [props.respawns, props.timeSlots, textColor, buttonBgColor, buttonHoverBgColor, findReservationForSlot, handleDeleteReservation, handleAddClick]);
 
   const tables = [];
   for (let i = 0; i < props.respawns.length; i += RESPAWNS_PER_TABLE) {

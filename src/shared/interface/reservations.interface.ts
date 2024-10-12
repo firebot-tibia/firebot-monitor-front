@@ -36,4 +36,5 @@ export interface CreateReservationData {
   respawn_id: string;
   start_time: string;
   kind: string;
+world: string;
 }

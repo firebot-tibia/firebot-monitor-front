@@ -7,7 +7,7 @@ import {
 } from '@chakra-ui/react';
 import { LocalInput } from './local-input';
 import { CharacterClassification } from './render-classification';
-import { vocationIcons } from '../../../constant/character';
+import { TableVocationIcons } from '../../../constant/character';
 import { GuildMemberResponse } from '../../../shared/interface/guild/guild-member.interface';
 import { copyExivas, getTimeColor } from '../../../shared/utils/utils';
 import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
@@ -133,7 +133,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
       <Flex justifyContent="space-between" alignItems="center" mb={1}>
         <HStack>
           <Text fontWeight="bold">{index + 1}.</Text>
-          <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize="12px" mr={1} />
+          <Image src={TableVocationIcons[member.Vocation]} alt={member.Vocation} boxSize="20px" mr={1} />
           <Text 
             fontWeight="bold" 
             onClick={() => handleNameClick(member)}
@@ -195,7 +195,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                     <Td px={0.5} py={responsivePadding} width="3%">{index + 1}</Td>
                     <Td px={0.5} py={responsivePadding} width="20%">
                       <Flex alignItems="center" maxWidth="100%">
-                        <Image src={vocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "10px" : "8px"} mr={1} flexShrink={0} />
+                        <Image src={TableVocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "20px" : "17px"} mr={1} flexShrink={0} />
                         <Box 
                           onClick={() => handleNameClick(member)}
                           cursor="pointer"

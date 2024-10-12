@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { Box, Flex, SimpleGrid, Text, Tooltip, useDisclosure } from '@chakra-ui/react';
-import FilterBar from '../filter-bar';
+import FilterBar from './filter-bar';
 import GuildTable from '../table';
 import CharacterTooltip from './character-tooltip';
 import { GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
@@ -29,7 +29,7 @@ const GuildStatsContainer: React.FC = () => {
     fetchGuildStats,
   } = useGuildStatsStore();
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { onOpen } = useDisclosure();
 
   useEffect(() => {
     fetchGuildStats('ally');

@@ -17,7 +17,7 @@ import {
 } from '@chakra-ui/react';
 import { Vocations } from '../../../../constant/character';
 import { GuildData, GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
-import ExpStats from '../exp-stats';
+import ExpStats from '../container/exp-stats';
 import PlayerModal from '../player-modal';
 
 interface GuildTableProps {

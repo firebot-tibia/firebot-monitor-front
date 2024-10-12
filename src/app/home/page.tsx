@@ -12,8 +12,6 @@ import { useHomeLogic } from './hooks/useHome';
 
 const Home: FC = () => {
   const {
-    mode,
-    setMode,
     newDeathCount,
     newLevelUpCount,
     newLevelDownCount,
@@ -38,7 +36,7 @@ const Home: FC = () => {
 
   if (status === 'loading' || isLoading) {
     return (
-      <DashboardLayout mode={mode} setMode={setMode}>
+      <DashboardLayout>
         <Flex justify="center" align="center" height="100vh">
           <Spinner size="xl" />
         </Flex>
@@ -47,7 +45,7 @@ const Home: FC = () => {
   }
 
   return (
-    <DashboardLayout mode={mode} setMode={setMode}>
+    <DashboardLayout>
       <InstructionsSection />
       <Box maxWidth="100%" overflow="hidden" fontSize={["xs", "sm", "md"]}>
         <VStack spacing={4} align="stretch">

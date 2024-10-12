@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stat, StatLabel, StatNumber, StatHelpText } from '@chakra-ui/react';
-import { formatExp } from '../../../../shared/utils/utils';
+import { formatExp } from '../../../../../shared/utils/utils';
 
 interface ExpStatsProps {
   totalExp: number;

@@ -6,7 +6,7 @@ import { GuildMemberResponse } from '../interface/guild/guild-member.interface';
 
 const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
 
-export const useCharacterTypes = (guildData: GuildMemberResponse[], session: any | null | undefined, mode: 'enemy' | 'ally') => {
+export const useCharacterTypes = (guildData: GuildMemberResponse[], session: any | null | undefined, mode: string) => {
   const [customTypes, setCustomTypes] = useState<string[]>([]);
   const toast = useToast();
 

@@ -1,28 +1,17 @@
-import { Flex, IconButton, Spacer, HStack, Text, Switch, Select } from "@chakra-ui/react";
-import { FC, useCallback, useState, useEffect } from "react";
+import { Flex, IconButton, Spacer, HStack, Text, Switch } from "@chakra-ui/react";
+import { FC, useCallback } from "react";
 import { FaSignOutAlt, FaBars } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import { clearLocalStorage } from "../../../shared/utils/utils";
+import WorldSelect from "../world-select";
+import { useTokenStore } from "../../../store/token-decoded-store";
 
 interface TopbarProps {
   onToggleMenu: () => void;
-  mode?: 'ally' | 'enemy';
-  setMode?: (mode: 'ally' | 'enemy') => void;
-  onWorldChange?: (world: string) => void;
 }
 
-const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode, onWorldChange }) => {
-  const [worlds, setWorlds] = useState<string[]>([]);
-  const [selectedWorld, setSelectedWorld] = useState<string>('');
-
-  useEffect(() => {
-    const fetchWorlds = async () => {
-      const fetchedWorlds = ['Mundo 1', 'Mundo 2', 'Mundo 3'];
-      setWorlds(fetchedWorlds);
-      setSelectedWorld(fetchedWorlds[0]);
-    };
-    fetchWorlds();
-  }, []);
+const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
+  const { mode, setMode } = useTokenStore();
 
   const handleLogout = useCallback(() => {
     clearLocalStorage();
@@ -30,24 +19,10 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode, onWorldChange })
   }, []);
 
   const handleModeChange = useCallback(() => {
-    if (setMode && mode) {
-      clearLocalStorage();
-      const newMode = mode === 'ally' ? 'enemy' : 'ally';
-      setMode(newMode);
-      
-      const url = new URL(window.location.href);
-      url.searchParams.set('mode', newMode);
-      window.location.href = url.toString();
-    }
+    clearLocalStorage();
+    const newMode = mode === 'ally' ? 'enemy' : 'ally';
+    setMode(newMode);
   }, [mode, setMode]);
-
-  const handleWorldChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newWorld = event.target.value;
-    setSelectedWorld(newWorld);
-    if (onWorldChange) {
-      onWorldChange(newWorld);
-    }
-  }, [onWorldChange]);
 
   return (
     <Flex
@@ -75,37 +50,20 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu, mode, setMode, onWorldChange })
         fontSize="24px"
       />
       <Text fontSize="2xl" fontWeight="bold" textAlign="center">
-        {mode ? (mode === 'enemy' ? 'Enemy' : 'Ally') : ''} Monitor
+        Firebot Monitor
       </Text>
       <Spacer />
       <HStack spacing={4}>
-        <Select
-          value={selectedWorld}
-          onChange={handleWorldChange}
-          width="150px"
-          size="sm"
-          variant="filled"
-          bg="gray.700"
-          color="white"
-          _hover={{ bg: "gray.600" }}
-        >
-          {worlds.map((world) => (
-            <option key={world} value={world}>
-              {world}
-            </option>
-          ))}
-        </Select>
-        {mode && setMode && (
-          <HStack>
-            <Text fontSize="sm">Aliado</Text>
-            <Switch
-              colorScheme="red"
-              isChecked={mode === 'enemy'}
-              onChange={handleModeChange}
-            />
-            <Text fontSize="sm">Inimigo</Text>
-          </HStack>
-        )}
+        <WorldSelect />
+        <HStack>
+          <Text fontSize="sm">Aliado</Text>
+          <Switch
+            colorScheme="red"
+            isChecked={mode === 'enemy'}
+            onChange={handleModeChange}
+          />
+          <Text fontSize="sm">Inimigo</Text>
+        </HStack>
         <IconButton
           aria-label="Logout"
           onClick={handleLogout}

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { getExperienceList } from '../services/guilds';
 import { ExperienceListQuery, GuildData } from '../shared/interface/guild/guild-stats.interface';
-
+import { useStorageStore } from './storage-store';
 interface GuildStatsState {
   filter: string;
   sort: string;
@@ -76,8 +76,11 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
     set({ loading: true });
   
     try {
+      const selectedWorld = useStorageStore.getState().getItem('selectedWorld', '');
+
       const query: ExperienceListQuery = {
         kind: guildType,
+        world: selectedWorld,
         vocation: vocationFilter,
         name: nameFilter,
         sort: sort,

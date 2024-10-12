@@ -64,6 +64,7 @@ export const getReservationsList = async (query: {
   end_time_greater?: string;
   end_time_less?: string;
   kind?: 'ally' | 'enemy';
+  world?: string
 }): Promise<any> => {
   try {
     const response = await api.get('/reservations/list', {
@@ -102,18 +103,19 @@ export const getAllRespawnsPremiums  = async () => {
   }
 };
 
-export const createReservation = async (reservationData: CreateReservationData) => {
+export const createReservation = async (reservationData: Omit<CreateReservationData, 'world'>, world: string) => {
   try {
-    const response = await api.post('/reservations/create', reservationData);
+    const response = await api.post(`/reservations/create?world=${encodeURIComponent(world)}`, reservationData);
     return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-export const deleteReservation = async (id: string) => {
+
+export const deleteReservation = async (id: string, world: string) => {
   try {
-    const response = await api.delete(`/reservations/${id}`, {
+    const response = await api.delete(`/reservations/${id}?world=${encodeURIComponent(world)}`, {
       params: { kind: 'ally' },
     });
     return response.data;

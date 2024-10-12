@@ -15,7 +15,7 @@ const InstructionsBox = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsBlinking(false);
-    }, 10000); // Stop blinking after 10 seconds
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -57,9 +57,17 @@ const InstructionsBox = () => {
             >
               • Respawn Planilhado: Lançado
             </Text>
+            <Text
+              fontSize="sm"
+              animation={isBlinking ? `${blinkAnimation} 1s infinite` : 'none'}
+              fontWeight="bold"
+              color="green.500"
+            >
+              • Multi-World: Lançado, altere entre os mundos
+            </Text>
             <Text fontSize="sm">• Próxima atualização: Guilds Leave - Quem saiu / entrou na guild alida e inimiga</Text>
             <Text fontSize="sm">• Próxima atualização: Aprimoramento do Mapa de Exiva com triangulaçáo automática</Text>
-            <Text fontSize="sm">• Próxima atualização: Multi-World - Alterar o mundo, sem precisar entrar em outra conta</Text>
+            <Text fontSize="sm">• Próxima atualização: Recorrencia no Respawn Planilhado</Text>
           </VStack>
         </Box>
         <Box flex={1}>

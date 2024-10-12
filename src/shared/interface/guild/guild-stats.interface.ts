@@ -15,6 +15,7 @@ export interface GuildData {
 
 export interface ExperienceListQuery {
   kind: 'ally' | 'enemy';
+  world: string;
   vocation: string;
   name: string;
   sort: string;

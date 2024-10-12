@@ -1,7 +1,6 @@
 import { useToast } from "@chakra-ui/react";
-import { vocationIcons } from "../../constant/character";
 import { GuildMemberResponse } from "../interface/guild/guild-member.interface";
-import { format, parse, parseISO } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export const formatExp = (value: number): string => {
     const absValue = Math.abs(value);
@@ -37,16 +36,6 @@ export const clearLocalStorage = () => {
     } catch (error) {
       console.error('Error clearing localStorage:', error);
     }
-  }
-};
-
-export const parseDuration = (durationStr: string): number => {
-  try {
-    const [hours, minutes, seconds] = durationStr.split(/[hms]/).map(Number);
-    return (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
-  } catch (error) {
-    console.error(`Error parsing duration: ${durationStr}`, error);
-    return 0;
   }
 };
 
@@ -98,15 +87,6 @@ export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof u
   });
 };
 
-export function getName(name: string | undefined): string {
-  return name || 'Desconhecido';
-}
-
-export function getVocationIcon(vocation: string) {
-  return vocationIcons[vocation] || '';
-}
-
-
 export const formatTimeSlot = (timeString: string): string => {
   const [start, end] = timeString.split(' - ');
   const currentDate = new Date();
@@ -143,4 +123,13 @@ export const convertFrontEndDateToISO = (frontEndDate: string): string => {
   const [datePart, timePart] = frontEndDate.split('-');
   const [day, month, year] = datePart.split('/');
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}:00Z`;
+};
+
+
+export const capitalizeFirstLetter = (string: string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+export const formatDateForAPI = (date: Date): string => {
+  return format(date, 'dd/MM/yyyy-HH:mm');
 };

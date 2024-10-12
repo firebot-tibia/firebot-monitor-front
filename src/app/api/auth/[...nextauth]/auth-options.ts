@@ -25,7 +25,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       exp: decoded.exp,
     };
   } catch (error) {
-    console.error('Error refreshing access token:', error);
+    console.error('Error refreshing access token:', error)
     useAuthStore.getState().clearTokens();
     return { ...token, error: 'RefreshAccessTokenError' };
   }

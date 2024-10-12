@@ -1,12 +1,12 @@
 import { useMemo, useCallback } from 'react';
-import { Reservation, Respawn, CreateReservationData } from '../../../shared/interface/reservations.interface';
+import { Reservation, CreateReservationData, Respawn } from '../../../shared/interface/reservations.interface';
 import { convertFrontEndDateToISO } from '../../../shared/utils/utils';
 
 interface UseReservationTableProps {
   reservations: Reservation[];
   timeSlots: string[];
   respawns: Respawn[];
-  onAddReservation: (data: CreateReservationData & { respawn_id: string }) => Promise<void>;
+  onAddReservation: (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => Promise<void>;
   onDeleteReservation: (id: string) => Promise<void>;
   onFetchReservation: () => Promise<void>;
 }
@@ -19,7 +19,6 @@ export const useReservationTable = ({
 }: UseReservationTableProps) => {
   const reservationMap = useMemo(() => {
     const map: Record<string, Record<string, Reservation>> = {};
-    
     reservations.forEach(reservation => {
       const startTime = reservation.start_time;
       if (!map[startTime]) {
@@ -27,24 +26,16 @@ export const useReservationTable = ({
       }
       map[startTime][reservation.respawn_id] = reservation;
     });
-
     return map;
   }, [reservations]);
 
   const findReservationForSlot = useCallback((timeSlot: string, respawnId: string): Reservation | undefined => {
     const [slotStartStr] = timeSlot.split(' - ');
     const slotStart = convertFrontEndDateToISO(slotStartStr);
-    
-    for (const [startTime, reservations] of Object.entries(reservationMap)) {
-      if (startTime === slotStart) {
-        return reservations[respawnId];
-      }
-    }
-    
-    return undefined;
+    return reservationMap[slotStart]?.[respawnId];
   }, [reservationMap]);
 
-  const handleAddReservation = useCallback(async (data: CreateReservationData & { respawn_id: string }) => {
+  const handleAddReservation = useCallback(async (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => {
     await onAddReservation(data);
     await onFetchReservation();
   }, [onAddReservation, onFetchReservation]);

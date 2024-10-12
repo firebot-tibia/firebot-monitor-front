@@ -1,10 +1,7 @@
 import { create } from 'zustand';
 import { Session } from 'next-auth';
 
-type MonitorMode = 'ally' | 'enemy';
-
 interface GlobalState {
-  mode: MonitorMode;
   error: Error | null;
   eventSource: EventSource | null;
   isSettingUp: boolean;
@@ -12,18 +9,16 @@ interface GlobalState {
   onMessage: (data: any) => void;
   reconnectTimeout: NodeJS.Timeout | null;
   reconnectAttempts: number;
-  setMode: (mode: MonitorMode) => void;
   setError: (error: Error | null) => void;
   setEventSource: (eventSource: EventSource | null) => void;
   setIsSettingUp: (isSettingUp: boolean) => void;
   setReconnectTimeout: (timeout: NodeJS.Timeout | null) => void;
-  setupEventSource: (baseUrl: string, getSession: () => Promise<Session | null>, onMessage: (data: any) => void) => Promise<void>;
+  setupEventSource: (baseUrl: string, getSession: () => Promise<Session | null>, onMessage: (data: any) => void, selectedWorld: string) => Promise<void>;
   closeEventSource: () => void;
-  init: () => void;
+  initializeEventSource: (baseUrl: string, getSession: () => Promise<Session | null>, onMessage: (data: any) => void, selectedWorld: string) => void;
 }
 
 const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
-  mode: 'enemy',
   error: null,
   eventSource: null,
   isSettingUp: false,
@@ -32,22 +27,14 @@ const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
   reconnectTimeout: null,
   reconnectAttempts: 0,
 
-  setMode: (mode) => {
-    set({ mode });
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('monitorMode', mode);
-    }
-    get().closeEventSource();
-  },
-
   setError: (error) => set({ error }),
   setEventSource: (eventSource) => set({ eventSource }),
   setIsSettingUp: (isSettingUp) => set({ isSettingUp }),
   setReconnectTimeout: (timeout) => set({ reconnectTimeout: timeout }),
 
-  setupEventSource: async (baseUrl, getSession, onMessage) => {
+  setupEventSource: async (baseUrl, getSession, onMessage, selectedWorld) => {
     const { isSettingUp, isConnected, reconnectTimeout, reconnectAttempts } = get();
-    
+ 
     if (isSettingUp || isConnected) {
       return;
     }
@@ -65,31 +52,28 @@ const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
         throw new Error('No valid session');
       }
 
-      const fullUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(session.access_token)}`;
-
+      const fullUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(session.access_token)}&world=${selectedWorld}`;
       const newEventSource = new EventSource(fullUrl);
 
       newEventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.log('Received SSE data:', data);
           onMessage(data);
         } catch (parseError) {
           console.error('Error parsing event data:', parseError);
         }
       };
 
-      newEventSource.onerror = (event) => {
-        console.error('EventSource error:', event);
+      newEventSource.onerror = () => {
         newEventSource.close();
         set({ isConnected: false, isSettingUp: false });
 
         const nextAttempt = reconnectAttempts + 1;
         const delay = Math.min(1000 * (2 ** nextAttempt), 30000);
 
-        console.log(`Attempting to reconnect in ${delay}ms (attempt ${nextAttempt})`);
-
         const newTimeout = setTimeout(() => {
-          get().setupEventSource(baseUrl, getSession, onMessage);
+          get().setupEventSource(baseUrl, getSession, onMessage, selectedWorld);
         }, delay);
 
         set({ reconnectAttempts: nextAttempt });
@@ -104,16 +88,11 @@ const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
       set({ eventSource: newEventSource, onMessage });
 
     } catch (setupError) {
-      console.error('Error in setupEventSource:', setupError);
       set({ error: setupError as Error, isSettingUp: false });
-      
       const nextAttempt = reconnectAttempts + 1;
       const delay = Math.min(1000 * (2 ** nextAttempt), 30000);
-
-      console.log(`Attempting to reconnect in ${delay}ms (attempt ${nextAttempt})`);
-
       const newTimeout = setTimeout(() => {
-        get().setupEventSource(baseUrl, getSession, onMessage);
+        get().setupEventSource(baseUrl, getSession, onMessage, selectedWorld);
       }, delay);
 
       set({ reconnectAttempts: nextAttempt });
@@ -133,13 +112,12 @@ const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
     }
   },
 
-  init: () => {
-    if (typeof window !== 'undefined') {
-      const storedMode = window.localStorage.getItem('monitorMode');
-      if (storedMode === 'ally' || storedMode === 'enemy') {
-        set({ mode: storedMode as MonitorMode });
-      }
+  initializeEventSource: (baseUrl, getSession, onMessage, selectedWorld) => {
+    const { isConnected, eventSource } = get();
+    if (isConnected || eventSource) {
+      get().closeEventSource();
     }
+    get().setupEventSource(baseUrl, getSession, onMessage, selectedWorld);
   },
 }));
 
