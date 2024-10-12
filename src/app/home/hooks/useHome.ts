@@ -11,16 +11,16 @@ import { Level } from '../../../shared/interface/level.interface';
 import { normalizeTimeOnline, isOnline } from "../../../shared/utils/utils";
 import { useGlobalStore } from '../../../store/death-level-store';
 import { useTokenStore } from "../../../store/token-decoded-store";
-import { useStorage } from "../../../store/storage-store";
+import { useStorage, useStorageStore } from "../../../store/storage-store";
 
 export const useHomeLogic = () => {
   const [value, setValue] = useStorage('monitorMode', 'enemy');
   const toast = useToast();
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [guildId, setGuildId] = useState<string | null>(null);
   const { data: session, status } = useSession();
-  const { decodedToken, selectedWorld, getSelectedGuild, initializeSSE, setMode, setSelectedWorld, decodeAndSetToken } = useTokenStore();
+  const guildId = useStorageStore.getState().getItem('selectedGuildId', '');
+  const { decodedToken, selectedWorld, initializeSSE, setMode, setSelectedWorld, decodeAndSetToken } = useTokenStore();
   const checkPermission = usePermissionCheck();
   const audioControls = useAudio([
     '/assets/notification_sound.mp3',
@@ -33,7 +33,7 @@ export const useHomeLogic = () => {
   const { audioEnabled: firstAudioEnabled, playAudio: playFirstAudio, markUserInteraction: markFirstAudioInteraction } = firstAudio;
   const { audioEnabled: secondAudioEnabled, playAudio: playSecondAudio, markUserInteraction: markSecondAudioInteraction } = secondAudio;
   
-  const { types, addType } = useCharacterTypes(guildData, session, value);
+  const { types, addType } = useCharacterTypes(guildData);
 
   const {
     deathList,
@@ -104,13 +104,6 @@ export const useHomeLogic = () => {
   }, [decodedToken, selectedWorld, value, setMode, initializeSSE]);
 
   useEffect(() => {
-    const selectedGuild = getSelectedGuild();
-    if (selectedGuild) {
-      setGuildId(selectedGuild.id);
-    }
-  }, [getSelectedGuild]);
-
-  useEffect(() => {
     resetNewCounts();
   }, [value, resetNewCounts]);
 
@@ -127,19 +120,20 @@ export const useHomeLogic = () => {
 
 
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
+    console.log(guildId)
     if (!checkPermission()) return;
     if (!guildId) return;
 
     try {
       const playerData = {
-        guild_id: guildId,
+        guild_id: guildId || '',
         kind: member.Kind,
         name: member.Name,
         status: member.Status,
         local: newLocal,
       };
 
-      await upsertPlayer(playerData);
+      await upsertPlayer(playerData, selectedWorld);
       setGuildData(prevData =>
         prevData.map(m =>
           m.Name === member.Name ? { ...m, Local: newLocal } : m
@@ -163,7 +157,7 @@ export const useHomeLogic = () => {
         local: member.Local || '',
       };
   
-      await upsertPlayer(playerData);
+      await upsertPlayer(playerData, selectedWorld);
       setGuildData(prevData => 
         prevData.map(m => 
           m.Name === member.Name ? { ...m, Kind: newClassification } : m

@@ -32,24 +32,27 @@
             width: 100%;
             height: 100%;
         }
-        #info-container {
-            flex: 1;
-            min-width: 300px;
-        }
         #inputs-container {
             background-color: #1c1c1c;
             padding: 20px;
             color: #e0e0e0;
         }
+        #info-container {
+            flex: 1;
+            min-width: 300px;
+            background-color: #2c2f33;
+            padding: 15px;
+            border-top: 2px solid #b9230c;
+        }
         .form-control, .btn-primary {
-            background-color: #2c2c2c;
-            color: #e0e0e0;
-            border-color: #444;
+            background-color: #40444b;
+            color: #ffffff;
+            border-color: #b9230c;
         }
         .form-control:focus {
-            background-color: #3c3c3c;
-            border-color: #555;
-            color: #e0e0e0;
+            background-color: #4f545c;
+            border-color: #ffa726;
+            color: #ffffff;
         }
         .form-control:read-only {
             background-color: #2c2c2c;
@@ -60,23 +63,33 @@
             color: #e0e0e0;
         }
         .btn-primary:hover {
-            background-color: #3c3c3c;
-            border-color: #555;
+            background-color: #ffa726;
+            border-color: #b9230c;
         }
         .city-btn {
             margin: 5px;
-            background-color: #2c2c2c;
-            color: #e0e0e0;
-            border-color: #444;
+            background-color: #b9230c;
+            color: #1e2124;
+            border: none;
         }
         .city-btn:hover {
-            background-color: #3c3c3c;
-            color: #ffffff;
+            background-color: #ffa726;
+            color: #1e2124;
         }
         .alert-info {
-            background-color: #1e2a38;
-            border-color: #2a3f5f;
+            background-color: #b3310d;
+            border-color: #cb7819;
             color: #e0e0e0;
+        }
+        .leaflet-control-zoom {
+            border: 2px solid #b9230c !important;
+        }
+        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+            background-color: #2c2f33 !important;
+            color: #b9230c !important;
+        }
+        .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
+            background-color: #4f545c !important;
         }
     </style>
 </head>
@@ -85,9 +98,10 @@
         <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
             <h4 class="alert-heading">Instruções de Uso:</h4>
             <ul>
-                <li>O sistema de exiva está em desenvolvimento e inclui gradualmente os respawns do jogo.</li>
                 <li>A ferramenta oferece orientação aproximada, não 100% precisa. Use seu conhecimento sobre nível e vocação do personagem para interpretar os resultados.</li>
                 <li>Atualmente, suporta a busca de apenas um personagem por vez.</li>
+                <li><strong>Atenção:</strong> No momento, apenas respawns <strong>META</strong> estão marcados. Caso identifique que algum respawn META esteja faltando, por favor, entre em contato com a equipe via <a href="https://discord.com/invite/5eUrDejn" target="_blank" rel="noopener noreferrer" style="color: yellow;">Discord</a>.</li>
+                <li>Baseado na estrutura fornecida pelo <a href="https://github.com/tibiamaps/tibia-map" target="_blank" rel="noopener noreferrer" style="color: yellow;">Tibia Maps</a>.</li>
             </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         </div>

@@ -3,9 +3,9 @@ import { ExperienceListQuery } from '../shared/interface/guild/guild-stats.inter
 import { CreateReservationData, Respawn } from '../shared/interface/reservations.interface';
 import api from '../lib/api';
 
-export const upsertPlayer = async (playerData: UpsertPlayerInput) => {
+export const upsertPlayer = async (playerData: UpsertPlayerInput, world: string) => {
   try {
-    const response = await api.post('/gamedata/insert-player-editor', playerData);
+    const response = await api.post(`/gamedata/insert-player-editor?world=${encodeURIComponent(world)}`, playerData);
     return response.data;
   } catch (error) {
     throw error;

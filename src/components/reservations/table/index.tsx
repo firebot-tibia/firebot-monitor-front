@@ -19,27 +19,38 @@ import {
   VStack,
   Box,
   useColorModeValue,
+  Spinner,
 } from '@chakra-ui/react';
 import { Reservation, CreateReservationData, Respawn } from '../../../shared/interface/reservations.interface';
 import { AddReservationForm } from '../add-reservations';
 import { formatTimeSlotEnd } from '../../../shared/utils/utils';
 import { useReservationTable } from '../hooks/useTableHook';
+import { DeleteReservationModal } from '../delete-reservations-modal';
+import { useReservationsManager } from '../hooks/useReservations';
 
 interface ReservationTableProps {
   reservations: Reservation[];
   timeSlots: string[];
   respawns: Respawn[];
   onAddReservation: (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => Promise<void>;
-  onDeleteReservation: (id: string) => Promise<void>;
+  onDeleteReservation: (reservation: Reservation) => void;
   onFetchReservation: () => Promise<void>;
 }
 
 const RESPAWNS_PER_TABLE = 6;
 
 export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isAddModalOpen, onOpen: openAddModal, onClose: closeAddModal } = useDisclosure();
   const [selectedSlot, setSelectedSlot] = useState<{ time: string; respawn: Respawn } | null>(null);
-  const { findReservationForSlot, handleAddReservation, handleDeleteReservation } = useReservationTable(props);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { findReservationForSlot } = useReservationTable(props);
+  const { 
+    handleAddReservation,
+    handleDeleteReservation,
+    confirmDeleteReservation,
+    isDeleteModalOpen,
+    closeDeleteModal
+  } = useReservationsManager();
 
   const bgColor = useColorModeValue('gray.800', 'gray.900');
   const textColor = useColorModeValue('gray.100', 'gray.200');
@@ -48,8 +59,20 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
 
   const handleAddClick = useCallback((time: string, respawn: Respawn) => {
     setSelectedSlot({ time, respawn });
-    onOpen();
-  }, [onOpen]);
+    openAddModal();
+  }, [openAddModal]);
+
+  const handleDelete = useCallback((reservation: Reservation) => {
+    handleDeleteReservation(reservation);
+  }, [handleDeleteReservation]);
+
+  const handleConfirmDelete = useCallback(async (deleteAll: boolean) => {
+    setIsDeleting(true);
+    await confirmDeleteReservation(deleteAll);
+    setIsDeleting(false);
+    closeDeleteModal();
+    props.onFetchReservation();
+  }, [confirmDeleteReservation, closeDeleteModal, props.onFetchReservation]);
 
   const renderTable = useCallback((startIndex: number, endIndex: number) => (
     <Table variant="simple" key={startIndex} size="sm">
@@ -86,7 +109,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
                       <Text fontSize="xs" color="red.400">
                         {reservation.reserved_for}
                       </Text>
-                      <Button size="xs" colorScheme="red" onClick={() => handleDeleteReservation(reservation.id)}>
+                      <Button size="xs" colorScheme="red" onClick={() => handleDelete(reservation)}>
                         Remover
                       </Button>
                     </VStack>
@@ -108,7 +131,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
         ))}
       </Tbody>
     </Table>
-  ), [props.respawns, props.timeSlots, textColor, buttonBgColor, buttonHoverBgColor, findReservationForSlot, handleDeleteReservation, handleAddClick]);
+  ), [props.respawns, props.timeSlots, textColor, buttonBgColor, buttonHoverBgColor, findReservationForSlot, handleDelete, handleAddClick]);
 
   const tables = [];
   for (let i = 0; i < props.respawns.length; i += RESPAWNS_PER_TABLE) {
@@ -116,11 +139,27 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
   }
 
   return (
-    <Box bg={bgColor} p={4} borderRadius="md" overflowX="auto">
+    <Box bg={bgColor} p={4} borderRadius="md" overflowX="auto" position="relative">
+      {isDeleting && (
+        <Box
+          position="absolute"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          bg="rgba(0, 0, 0, 0.5)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          zIndex="1000"
+        >
+          <Spinner size="xl" color="white" />
+        </Box>
+      )}
       <VStack spacing={8} align="stretch">
         {tables}
       </VStack>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isAddModalOpen} onClose={closeAddModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Adicionar Reserva</ModalHeader>
@@ -133,7 +172,8 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
                     ...data,
                     respawn_id: selectedSlot.respawn.id || '',
                   });
-                  onClose();
+                  closeAddModal();
+                  props.onFetchReservation();
                 }}
                 respawnId={selectedSlot.respawn.id || ''}
                 timeSlot={selectedSlot.time}
@@ -142,6 +182,12 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
           </ModalBody>
         </ModalContent>
       </Modal>
+      <DeleteReservationModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+      />
     </Box>
   );
 };

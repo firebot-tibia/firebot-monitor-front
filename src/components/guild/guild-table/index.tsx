@@ -183,7 +183,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                 <Th px={1} py={responsivePadding} color={textColor} width="3%">#</Th>
                 <Th px={1} py={responsivePadding} color={textColor} width="20%">Personagem <SortIcon field="Vocation" /></Th>
                 <Th px={1} py={responsivePadding} color={textColor} isNumeric width="7%">Lvl <SortIcon field="Level" /></Th>
-                <Th px={1} py={responsivePadding} color={textColor} width="8%">Tipo</Th>
+                <Th px={1} py={responsivePadding} color={textColor} width="10%">Tipo</Th>
                 <Th px={1} py={responsivePadding} color={textColor} width="12%">Tempo <SortIcon field="TimeOnline" /></Th>
                 {showExivaInput && <Th px={1} py={responsivePadding} color={textColor} width="50%">Local</Th>}
               </Tr>
@@ -208,7 +208,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                       </Flex>
                     </Td>
                     <Td px={0.5} py={responsivePadding} isNumeric width="7%">{member.Level}</Td>
-                    <Td px={0.5} py={responsivePadding} width="8%">
+                    <Td px={0.5} py={responsivePadding} width="15%">
                       <CharacterClassification
                         member={member}
                         types={types}

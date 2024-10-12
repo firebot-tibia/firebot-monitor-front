@@ -40,7 +40,95 @@
     const huntAreas = [
         { name: "Gold Token", x: 32128, y: 31369, floor: 7 },
         { name: "Cobra Bastion", x: 33393, y: 32666, floor: 7 },
+        { name: "Ankrahmun Gold Token", x: 32141, y: 31353, floor: 12 },
+        { name: "Cobra Bastion", x: 33391, y: 32667, floor: 7 },
+        { name: "(0 & +1 flask) Cobra Bastion", x: 33397, y: 32653, floor: 5 },
+        { name: "(-1) Cobra Bastion", x: 33362, y: 32749, floor: 8 },
+        { name: "Weretiger", x: 33012, y: 32919, floor: 8 },
+        { name: "Fire Secret Library", x: 32639, y: 32676, floor: 12 },
+        { name: "Ice Secret Library", x: 32480, y: 32578, floor: 14 },
+        { name: "Energy Secret Library", x: 32474, y: 32772, floor: 12 },
+        { name: "Earth Secret Library", x: 32608, y: 32540, floor: 12 },
+        { name: "Skeleton Elite Warrior (Inside)", x: 32948, y: 32282, floor: 10 },
+        { name: "Skeleton Elite Warrior (Outside)", x: 32982, y: 32310, floor: 8 },
+        { name: "Nightmare Isles", x: 33478, y: 32613, floor: 9 },
+        { name: "Ferumbra's Lair (Entrance)", x: 33320, y: 32330, floor: 13 },
+        { name: "Ferumbra's Lair (South)", x: 33325, y: 32419, floor: 13 },
+        { name: "Ferumbra's Plague Seal", x: 33292, y: 32322, floor: 14 },
+        { name: "Ferumbra's DT Seal", x: 33288, y: 32353, floor: 14 },
+        { name: "Ferumbra's Jugger Seal", x: 33356, y: 32366, floor: 14 },
+        { name: "Ferumbra's Fury Seal", x: 33355, y: 32336, floor: 14 },
+        { name: "Ferumbra's Undead Seal", x: 33325, y: 32400, floor: 14 },
+        { name: "Ferumbra's Arc", x: 33324, y: 31467, floor: 14 },
+        { name: "Ferumbra's Pumin", x: 33297, y: 32403, floor: 14 },
+        { name: "Haunted Nexus (Darashia)", x: 33087, y: 32346, floor: 8 },
+        { name: "Werehyena -1", x: 33207, y: 32362, floor: 10 },
+        { name: "Werehyena -2", x: 33166, y: 32405, floor: 11 },
+        { name: "Werelion -1", x: 33121, y: 32252, floor: 11 },
+        { name: "Werelion -2", x: 33089, y: 32283, floor: 12 },
+        { name: "Plagueseal -1", x: 33212, y: 31457, floor: 11 },
+        { name: "Plagueseal -2", x: 33214, y: 31456, floor: 13 },
+        { name: "Pumin -1", x: 33460, y: 32788, floor: 8 },
+        { name: "Pumin -2", x: 33448, y: 32788, floor: 9 },
+        { name: "Pumin -3", x: 33468, y: 32786, floor: 12 },
+        { name: "Infernatil", x: 33639, y: 32642, floor: 14 },
+        { name: "Infernatil +1", x: 33667, y: 32684, floor: 13 },
+        { name: "Undead Seal -1", x: 33387, y: 32336, floor: 11 },
+        { name: "Undead Seal -2", x: 33400, y: 32377, floor: 13 },
+        { name: "Bazir Caminho", x: 33641, y: 32696, floor: 11 },
+        { name: "Bazir Paredes", x: 33640, y: 32652, floor: 10 },
+        { name: "DT Seal -1", x: 33432, y: 32703, floor: 13 },
+        { name: "DT Seal -2", x: 33458, y: 32723, floor: 14 },
+        { name: "Jugger Seal -1", x: 33410, y: 32448, floor: 13 },
+        { name: "Jugger Seal -2", x: 33426, y: 32405, floor: 15 },
+        { name: "Gloom Pillars", x: 33854, y: 31861, floor: 14 },
+        { name: "Jaded Roots", x: 33867, y: 31704, floor: 14 },
+        { name: "Putrefactory", x: 34108, y: 31692, floor: 14 },
+        { name: "Darklight", x: 34027, y: 31871, floor: 14 },
+        { name: "Falcon Bastion", x: 33369, y: 31346, floor: 7 },
+        { name: "Falcon (Underground)", x: 33290, y: 31291, floor: 9 },
+        { name: "Ancient Lion Knight", x: 32457, y: 32492, floor: 7 },
+        { name: "Carnisylvan", x: 32561, y: 32466, floor: 13 },
+        { name: "Gunther", x: 33842, y: 32012, floor: 9 },
+        { name: "Quara -1", x: 33869, y: 32024, floor: 10 },
+        { name: "Quara -2", x: 33865, y: 32013, floor: 11 },
+        { name: "Inquisition (DT)", x: 33360, y: 31601, floor: 14 },
+        { name: "Ingol (Surface)", x: 33720, y: 32587, floor: 7 },
+        { name: "Ingol -1", x: 33764, y: 23568, floor: 8 },
+        { name: "Ingol -2", x: 33801, y: 23533, floor: 9 },
+        { name: "Ingol -3", x: 33772, y: 32544, floor: 10 },
+        { name: "Ingol -4", x: 33775, y: 32544, floor: 11 },
+        { name: "Ingol -5", x: 33777, y: 32548, floor: 12 },
+        { name: "Zao Gold Token", x: 32180, y: 31357, floor: 12 },
+        { name: "Lizard City", x: 33078, y: 31186, floor: 7 },
+        { name: "Draken Walls (North)", x: 33032, y: 31109, floor: 6 },
+        { name: "Draken Walls (South)", x: 33116, y: 31247, floor: 6 },
+        { name: "Deathling (Port Hope)", x: 32881, y: 32456, floor: 8 },
+        { name: "Banuta -1", x: 32879, y: 32630, floor: 11 },
+        { name: "Banuta -2", x: 32794, y: 32624, floor: 12 },
+        { name: "Banuta -3", x: 32783, y: 32572, floor: 13 },
+        { name: "Banuta -4", x: 32784, y: 32611, floor: 14 },
+        { name: "Banuta -5", x: 32731, y: 32645, floor: 15 },
+        { name: "Carnivor -1", x: 32752, y: 32629, floor: 8 },
+        { name: "Carnivor -2", x: 32773, y: 32621, floor: 9 },
+        { name: "Carnivor -3", x: 32770, y: 32626, floor: 10 },
+        { name: "Gazer Spectre", x: 32678, y: 32655, floor: 8 },
+        { name: "Asura Palace", x: 32948, y: 32679, floor: 7 },
+        { name: "Asura Mirror", x: 32814, y: 32751, floor: 9 },
+        { name: "True Asura -1", x: 32884, y: 32784, floor: 10 },
+        { name: "True Asura -2", x: 32842, y: 32801, floor: 11 },
+        { name: "Flimsy -1 (Porthope)", x: 33578, y: 31421, floor: 8 },
+        { name: "Flimsy -2 (Porthope)", x: 33497, y: 31436, floor: 9 },
+        { name: "Fire Shrine", x: 33586, y: 32261, floor: 7 },
+        { name: "Mini Roshamuul -1", x: 33582, y: 32284, floor: 8 },
+        { name: "Mini Roshamuul -2", x: 33582, y: 32284, floor: 9 },
+        { name: "Feyrist Faun Cave", x: 33554, y: 32211, floor: 8 },
+        { name: "Summer Court", x: 33674, y: 32227, floor: 7 },
+        { name: "Winter Court", x: 33698, y: 32125, floor: 7 },
+        { name: "Dream Laberynth (Fire)", x: 32014, y: 31947, floor: 13 },
+        { name: "Dream Laberynth (Ice)", x: 32066, y: 31949, floor: 13 }
     ];
+    
 
     const fetchKnownTiles = function() {
         const xhr = new XMLHttpRequest();
@@ -236,7 +324,7 @@
         if (this.map) {
             return;
         }
-
+    
         const _this = this;
         _this.options = options;
         modifyLeaflet();
@@ -246,7 +334,7 @@
             L.latLng(-bounds.yMax - 1, bounds.xMin),
             L.latLng(-bounds.yMin, bounds.xMax + 1)
         );
-
+    
         const mapElement = document.getElementById('map');
         if (!mapElement) {
             return;
@@ -317,11 +405,11 @@
                     floor: _this.floor,
                     zoom: zoom
                 }, true);
-
+    
                 console.log('Clicked at:', event.latlng, 'Coords:', coordX, coordY);
             }
         });
-
+    
         if (L.control && L.control.zoom) {
             L.control.zoom({ position: 'bottomright' }).addTo(map);
         }
@@ -329,19 +417,6 @@
         if (L.crosshairs) {
             this.crosshairs = L.crosshairs().addTo(map);
         } 
-    
-        if (L.control && L.control.coordinates) {
-            L.control.coordinates({
-                position: 'bottomleft',
-                enableUserInput: false,
-                labelFormatterLat: function(lat) {
-                    return '<b>Y</b>: ' + Math.floor(-lat) + ' <b>Z</b>: ' + _this.floor;
-                },
-                labelFormatterLng: function(lng) {
-                    return '<b>X</b>: ' + Math.floor(lng);
-                }
-            }).addTo(map);
-        }
     
         if (L.ExivaButton && L.exivaButton) {
             L.ExivaButton.btns = L.exivaButton({
@@ -353,29 +428,60 @@
             const levelButtons = new L.LevelButtons({ position: 'bottomright' }).addTo(this.map);
             levelButtons.setTibiaMap(this);
         } 
-        // const layersControl = L.control.layers(baseMaps, null, { position: 'bottomright' });
-        // if (L.control && L.control.layers) {
-        //     layersControl.addTo(map);
-        // }
-        _this._showHoverTile();
 
+            if (L.control && L.control.coordinates) {
+                L.control.coordinates({
+                    position: 'bottomleft',
+                    enableUserInput: false,
+                    labelFormatterLat: function(lat) {
+                        return '<b>Y</b>: ' + Math.floor(-lat) + ' <b>Z</b>: ' + _this.floor;
+                    },
+                    labelFormatterLng: function(lng) {
+                        return '<b>X</b>: ' + Math.floor(lng);
+                    }
+                }).addTo(map);
+            }
+
+            const coordinatesStyle = document.createElement('style');
+            coordinatesStyle.textContent = `
+                .leaflet-control-coordinates {
+                    background-color: rgba(0, 0, 0, 0.7);
+                    color: white;
+                    padding: 5px 10px;
+                    border-radius: 5px;
+                    font-family: Arial, sans-serif;
+                    font-size: 12px;
+                }
+                .leaflet-control-coordinates .uiElement {
+                    margin-bottom: 5px;
+                }
+                .leaflet-control-coordinates .uiElement:last-child {
+                    margin-bottom: 0;
+                }
+                .leaflet-control-coordinates b {
+                    margin-right: 5px;
+                }
+            `;
+            document.head.appendChild(coordinatesStyle);
+
+        _this._showHoverTile();
+    
         map.whenReady(function() {
             huntAreas.forEach(area => {
                 const latLng = map.unproject([area.x, area.y], 0);
-                L.marker(latLng)
-                    .addTo(map)
-                    .bindPopup(area.name);
-            });
-        
-            cityAreas.forEach(area => {
-                const latLng = map.unproject([area.x, area.y], 0);
-                L.marker(latLng)
-                    .addTo(map)
-                    .bindPopup(area.name);
+                
+                const icon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div style='background-color:rgba(0,0,0,0.6);color:white;border-radius:50%;width:80px;height:80px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;'>${area.name}</div>`,
+                    iconSize: [80, 80],
+                    iconAnchor: [40, 40]
+                });
+    
+                L.marker(latLng, {icon: icon})
+                    .addTo(map);
             });
         });
     };
-    
     const mapContainer = document.getElementById('map');
     const tibiaMap = new TibiaMap();
     tibiaMap.init(mapContainer.dataset);
