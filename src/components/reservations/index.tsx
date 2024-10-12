@@ -15,7 +15,6 @@ export const ReservationsManager: React.FC = () => {
     onManagementModalOpen,
     onManagementModalClose,
     handleAddReservation,
-    handleDeleteReservation,
     addRespawn,
     removeRespawn,
     fetchReservations
@@ -31,7 +30,6 @@ export const ReservationsManager: React.FC = () => {
         timeSlots={timeSlots} 
         respawns={respawns}
         onAddReservation={handleAddReservation}
-        onDeleteReservation={handleDeleteReservation}
         onFetchReservation={fetchReservations}
       />
       <ManagementModal 

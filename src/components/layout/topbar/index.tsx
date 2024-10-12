@@ -4,25 +4,19 @@ import { FaSignOutAlt, FaBars } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import { clearLocalStorage } from "../../../shared/utils/utils";
 import WorldSelect from "../world-select";
-import { useTokenStore } from "../../../store/token-decoded-store";
+import { useHomeLogic } from "../../../app/home/hooks/useHome";
 
 interface TopbarProps {
   onToggleMenu: () => void;
 }
 
 const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
-  const { mode, setMode } = useTokenStore();
+  const { mode, handleModeChange, handleWorldChange } = useHomeLogic();
 
   const handleLogout = useCallback(() => {
     clearLocalStorage();
     signOut({ redirect: true, callbackUrl: '/' });
   }, []);
-
-  const handleModeChange = useCallback(() => {
-    clearLocalStorage();
-    const newMode = mode === 'ally' ? 'enemy' : 'ally';
-    setMode(newMode);
-  }, [mode, setMode]);
 
   return (
     <Flex
@@ -54,7 +48,7 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
       </Text>
       <Spacer />
       <HStack spacing={4}>
-        <WorldSelect />
+        <WorldSelect onChange={handleWorldChange} />
         <HStack>
           <Text fontSize="sm">Aliado</Text>
           <Switch

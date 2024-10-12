@@ -6,14 +6,17 @@ import {
   MenuItem,
   Button,
   Box,
-  Image,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useTokenStore } from '../../../store/token-decoded-store';
 import { capitalizeFirstLetter } from '../../../shared/utils/utils';
 import { useSession } from 'next-auth/react';
 
-const WorldSelect: React.FC = () => {
+interface WorldSelectProps {
+  onChange?: (world: string) => void;
+}
+
+const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
   const { decodedToken, selectedWorld, setSelectedWorld, decodeAndSetToken } = useTokenStore();
   const { data: session, status } = useSession();
 
@@ -25,6 +28,9 @@ const WorldSelect: React.FC = () => {
 
   const handleWorldChange = (newWorld: string) => {
     setSelectedWorld(newWorld);
+    if (onChange) {
+      onChange(newWorld);
+    }
     if (typeof window !== 'undefined') {
       window.location.reload();
     }

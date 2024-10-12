@@ -33,7 +33,6 @@ interface ReservationTableProps {
   timeSlots: string[];
   respawns: Respawn[];
   onAddReservation: (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => Promise<void>;
-  onDeleteReservation: (reservation: Reservation) => void;
   onFetchReservation: () => Promise<void>;
 }
 

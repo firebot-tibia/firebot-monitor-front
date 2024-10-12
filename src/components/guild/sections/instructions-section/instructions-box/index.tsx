@@ -55,7 +55,7 @@ const InstructionsBox = () => {
               fontWeight="bold"
               color="green.500"
             >
-              • Respawn Planilhado: Lançado
+              • Respawn Planilhado: Recorrencia Adicionado
             </Text>
             <Text
               fontSize="sm"
@@ -63,11 +63,10 @@ const InstructionsBox = () => {
               fontWeight="bold"
               color="green.500"
             >
-              • Multi-World: Lançado, altere entre os mundos
+              • Multi-World: Lançado - Multi Monitor
             </Text>
             <Text fontSize="sm">• Próxima atualização: Guilds Leave - Quem saiu / entrou na guild alida e inimiga</Text>
             <Text fontSize="sm">• Próxima atualização: Aprimoramento do Mapa de Exiva com triangulaçáo automática</Text>
-            <Text fontSize="sm">• Próxima atualização: Recorrencia no Respawn Planilhado</Text>
           </VStack>
         </Box>
         <Box flex={1}>

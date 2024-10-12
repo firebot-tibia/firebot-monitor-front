@@ -7,16 +7,15 @@ interface UseReservationTableProps {
   timeSlots: string[];
   respawns: Respawn[];
   onAddReservation: (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => Promise<void>;
-  onDeleteReservation: (reservation: Reservation) => void;
   onFetchReservation: () => Promise<void>;
 }
 
 export const useReservationTable = ({
   reservations,
   onAddReservation,
-  onDeleteReservation,
   onFetchReservation,
 }: UseReservationTableProps) => {
+
   const reservationMap = useMemo(() => {
     const map: Record<string, Record<string, Reservation>> = {};
     reservations.forEach(reservation => {
@@ -40,14 +39,8 @@ export const useReservationTable = ({
     await onFetchReservation();
   }, [onAddReservation, onFetchReservation]);
 
-  const handleDeleteReservation = useCallback(async (id: string) => {
-    await onDeleteReservation(id);
-    await onFetchReservation();
-  }, [onDeleteReservation, onFetchReservation]);
-
   return {
     findReservationForSlot,
     handleAddReservation,
-    handleDeleteReservation,
   };
 };

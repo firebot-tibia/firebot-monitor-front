@@ -114,6 +114,13 @@ export const formatTimeSlotEnd = (timeSlot: string) => {
   return `${formattedStart} - ${formattedEnd}`;
 };
 
+export const formatTimeOnline = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = Math.floor(minutes % 60);
+  const seconds = Math.floor((minutes % 1) * 60);
+  return `${hours.toString().padStart(2, '0')}:${remainingMinutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+
 export const parseTimeOnline = (timeOnline: string): number => {
   const parts = timeOnline.split(':').map(Number);
   return parts.length === 3 ? parts[0] * 3600 + parts[1] * 60 + parts[2] : 0;

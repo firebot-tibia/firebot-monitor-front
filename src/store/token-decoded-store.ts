@@ -29,7 +29,6 @@ interface TokenState {
   selectedWorld: string;
   mode: MonitorMode;
   setSelectedWorld: (world: string) => void;
-  setMode: (mode: MonitorMode) => void;
   getSelectedGuild: () => Guild | null;
   decodeAndSetToken: (token: string) => void;
   initializeSSE: (handleMessage?: (data: any) => void) => Promise<void>;
@@ -45,15 +44,6 @@ export const useTokenStore = create<TokenState>((set, get) => ({
     const { decodedToken, mode } = get();
     if (decodedToken && decodedToken.guilds[world]) {
       const guildId = mode === 'ally' ? decodedToken.guilds[world].ally_guild.id : decodedToken.guilds[world].enemy_guild.id;
-      useStorageStore.getState().setItem('selectedGuildId', guildId);
-    }
-  },
-  setMode: (mode: MonitorMode) => {
-    set({ mode });
-    useStorageStore.getState().setItem('monitorMode', mode);
-    const { decodedToken, selectedWorld } = get();
-    if (decodedToken && decodedToken.guilds[selectedWorld]) {
-      const guildId = mode === 'ally' ? decodedToken.guilds[selectedWorld].ally_guild.id : decodedToken.guilds[selectedWorld].enemy_guild.id;
       useStorageStore.getState().setItem('selectedGuildId', guildId);
     }
   },

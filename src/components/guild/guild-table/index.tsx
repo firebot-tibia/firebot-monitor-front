@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useState, useEffect } from 'react';
 import { 
   Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box, 
   useToast, Spinner, useColorModeValue, Badge, Flex,
@@ -93,15 +93,16 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
           comparison = a.Level - b.Level;
           break;
         case 'TimeOnline':
-          comparison = a.TimeOnline.localeCompare(b.TimeOnline);
+          comparison = parseInt(a.TimeOnline) - parseInt(b.TimeOnline);
           break;
         case 'Vocation':
           comparison = a.Vocation.localeCompare(b.Vocation);
           break;
       }
-      return sortOrder === 'desc' ? comparison : -comparison;
+      return sortOrder === 'asc' ? -comparison : comparison;
     });
   }, [data, sortField, sortOrder]);
+
 
   const SortIcon: FC<{ field: SortField }> = ({ field }) => (
     <IconButton
