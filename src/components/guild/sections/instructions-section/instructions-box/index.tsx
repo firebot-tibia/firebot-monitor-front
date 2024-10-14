@@ -49,22 +49,6 @@ const InstructionsBox = () => {
               <ClockIcon size={20} className="mr-2" />
               <Text fontWeight="bold" fontSize="lg">Atualizações Recentes:</Text>
             </Flex>
-            <Text
-              fontSize="sm"
-              animation={isBlinking ? `${blinkAnimation} 1s infinite` : 'none'}
-              fontWeight="bold"
-              color="green.500"
-            >
-              • Respawn Planilhado: Recorrencia Adicionado
-            </Text>
-            <Text
-              fontSize="sm"
-              animation={isBlinking ? `${blinkAnimation} 1s infinite` : 'none'}
-              fontWeight="bold"
-              color="green.500"
-            >
-              • Multi-World: Lançado - Multi Monitor
-            </Text>
             <Text fontSize="sm">• Próxima atualização: Guilds Leave - Quem saiu / entrou na guild alida e inimiga</Text>
             <Text fontSize="sm">• Próxima atualização: Aprimoramento do Mapa de Exiva com triangulaçáo automática</Text>
           </VStack>
