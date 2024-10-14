@@ -46,6 +46,8 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onChange }) => {
     return null;
   }
 
+  const availableModes = Object.keys(modeMap).filter(mode => mode !== monitorMode) as Mode[];
+
   return (
     <Menu>
       <MenuButton
@@ -60,24 +62,18 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onChange }) => {
         {modeMap[monitorMode]}
       </MenuButton>
       <MenuList bg="black" borderColor="gray.600">
-        <MenuItem
-          onClick={() => handleModeChange('ally')}
-          bg="black"
-          _hover={{ bg: "gray.700" }}
-        >
-          <Box display="flex" alignItems="center">
-            {modeMap.ally}
-          </Box>
-        </MenuItem>
-        <MenuItem
-          onClick={() => handleModeChange('enemy')}
-          bg="black"
-          _hover={{ bg: "gray.700" }}
-        >
-          <Box display="flex" alignItems="center">
-            {modeMap.enemy}
-          </Box>
-        </MenuItem>
+        {availableModes.map((mode) => (
+          <MenuItem
+            key={mode}
+            onClick={() => handleModeChange(mode)}
+            bg="black"
+            _hover={{ bg: "gray.700" }}
+          >
+            <Box display="flex" alignItems="center">
+              {modeMap[mode]}
+            </Box>
+          </MenuItem>
+        ))}
       </MenuList>
     </Menu>
   );

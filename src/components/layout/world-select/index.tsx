@@ -30,6 +30,8 @@ const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
 
   if (!decodedToken || !decodedToken.guilds) return null;
 
+  const availableWorlds = Object.keys(decodedToken.guilds).filter(world => world !== selectedWorld);
+
   return (
     <Menu>
       <MenuButton
@@ -44,7 +46,7 @@ const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
         {selectedWorld ? capitalizeFirstLetter(selectedWorld) : "Select World"}
       </MenuButton>
       <MenuList bg="black" borderColor="gray.600">
-        {Object.keys(decodedToken.guilds).map((worldId) => (
+        {availableWorlds.map((worldId) => (
           <MenuItem
             key={worldId}
             onClick={() => handleWorldChange(worldId)}
