@@ -1,14 +1,18 @@
 export const defaultRespawns = [
   { name: "Issavi", image: "goanna.gif" },
   { name: "Ingol -3", image: "carnivostrich.gif" },
+  { name: "ingol -3", image: "carnivostrich.gif" },
   { name: "Livraria Ice", image: "icecold_book.gif" },
   { name: "Livraria Fire", image: "burning_book.gif" },
   { name: "Livraria Energy", image: "energy_book.gif" },
   { name: "Wardragon -1", image: "wardragon.gif" },
   { name: "Wardragon -2", image: "wardragon.gif" },
+  { name: "Dragão -1", image: "wardragon.gif" },
+  { name: "dragão -2", image: "wardragon.gif" },
   { name: "Piolho -1", image: "piolho.gif" },
   { name: "Piolho -2", image: "piolho2.gif" },
   { name: "Cobra", image: "cobra_assassin.gif" },
+  { name: "Cobra Bastion", image: "cobra_assassin.gif" },
   { name: "Rotten Esquerda", image: "rotten_golem.gif" },
   { name: "Rotten Direita", image: "rotten_golem.gif" },
   { name: "Furious Crater (Cloak)", image: "cloak.gif" },
@@ -23,6 +27,9 @@ export const defaultRespawns = [
   { name: "Darklight Core", image: "darklight.gif" },
   { name: "Gloom Pillars", image: "pillar.gif" },
   { name: "Putrefactory", image: "rotten_man.gif" },
+  { name: "Asura Mirror", image: "asura.gif" },
+  { name: "Buried Cathedral -3", image: "burster.gif" },
+  { name: "prison -3", image: "prison.gif" },
 ];
 
 

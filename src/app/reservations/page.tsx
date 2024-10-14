@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Heading } from '@chakra-ui/react';
 import DashboardLayout from '../../components/layout';
 import { ReservationsManager } from '../../components/reservations';
-import { addDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const Respawns: React.FC = () => {

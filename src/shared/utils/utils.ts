@@ -104,8 +104,8 @@ export const formatTimeSlot = (timeString: string): string => {
 };
 
 export const defaultTimeSlots = [
-  "05:10 - 09:30", "09:31 - 12:40", "12:41 - 15:50", "15:51 - 19:00",
-  "19:01 - 22:10", "22:11 - 01:20", "01:21 - 04:50"
+  "05:30 - 09:00", "09:01 - 12:30", "12:31 - 16:00", "16:01 - 19:30",
+  "19:31 - 23:00", "23:01 - 02:30", "02:31 - 05:00"
 ].map(formatTimeSlot);
 
 export const formatTimeSlotEnd = (timeSlot: string) => {

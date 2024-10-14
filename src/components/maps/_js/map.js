@@ -495,10 +495,6 @@
     const processExivaButton = document.getElementById('processExiva');
     if (processExivaButton) {
         processExivaButton.addEventListener('click', function() {
-            if (tibiaMap.crosshairs && typeof tibiaMap.crosshairs._toggleExiva === 'function') {
-                tibiaMap.crosshairs._toggleExiva();
-            }
-    
             const exivaText = document.getElementById('exiva').value;
             const direction = exivaText.match(/to the (\w+(-\w+)?)\./);
             
