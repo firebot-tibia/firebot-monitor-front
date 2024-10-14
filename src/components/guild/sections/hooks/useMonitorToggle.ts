@@ -47,39 +47,11 @@ export const useMonitorToggleSection = (
 
   const testDeathAudio = useCallback(() => {
     deathAudio.playAudio();
-    const msg = "Teste de alerta de morte!";
-    toast({
-      title: "Teste de Alerta de Morte",
-      description: msg,
-      status: "warning",
-      duration: 3000,
-      isClosable: true,
-    });
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(msg);
-      utterance.lang = 'pt-BR';
-      utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'pt-BR') || null;
-      speechSynthesis.speak(utterance);
-    }
-  }, [deathAudio, toast]);
+  }, [deathAudio]);
 
   const testLevelUpAudio = useCallback(() => {
     levelUpAudio.playAudio();
-    const msg = "Teste de alerta de level up!";
-    toast({
-      title: "Teste de Alerta de Level Up",
-      description: msg,
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(msg);
-      utterance.lang = 'pt-BR';
-      utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'pt-BR') || null;
-      speechSynthesis.speak(utterance);
-    }
-  }, [levelUpAudio, toast]);
+  }, [levelUpAudio]);
 
   const handleStartMonitoring = useCallback(() => {
     if (!monitoringStarted) {
