@@ -4,7 +4,6 @@
 
 # TO-DO
 
-
 - Resolver refresh token do sistema
 - Melhorar a integracao do SSE
 - Reduzir a quantidade de chamadas para api
