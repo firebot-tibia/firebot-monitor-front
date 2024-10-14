@@ -1,8 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-  Box,
   VStack,
-  Checkbox,
   Heading,
   Input,
   SimpleGrid,
@@ -10,7 +8,8 @@ import {
   Flex,
   FormControl,
   FormLabel,
-  Text
+  Text,
+  Checkbox
 } from '@chakra-ui/react';
 import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
 import { useCharacterTypesView } from '../../../../shared/hooks/useTypeView';
@@ -19,9 +18,16 @@ import { useCharacterMonitoring } from '../hooks/useMonitor';
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[];
   isLoading: boolean;
+  characterChanges: GuildMemberResponse[];
+  onCharacterChangesProcessed: () => void;
 }
 
-export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters }) => {
+export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ 
+  characters,
+  isLoading,
+  characterChanges,
+  onCharacterChangesProcessed
+}) => {
   const types = useCharacterTypesView(characters);
   const {
     threshold,
@@ -29,16 +35,25 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
     timeWindow,
     setTimeWindow,
     monitoredLists,
-    handleCheckboxChange
+    handleCheckboxChange,
+    handleStatusChange
   } = useCharacterMonitoring(characters, types);
 
   const textColor = useColorModeValue('gray.100', 'gray.200');
   const inputBgColor = useColorModeValue('black.700', 'black.800');
 
+  useEffect(() => {
+    if (characterChanges.length > 0) {
+      characterChanges.forEach(change => {
+        handleStatusChange(change, "logged-in");
+      });
+      onCharacterChangesProcessed();
+    }
+  }, [characterChanges, handleStatusChange, onCharacterChangesProcessed]);
+
   return (
     <VStack spacing={6} align="stretch">
       <Heading size="md" color={textColor}>Configurações de Monitoramento</Heading>
-      
       <Flex direction={{ base: "column", md: "row" }} gap={4}>
         <FormControl>
           <FormLabel htmlFor="threshold" color={textColor}>Número Total de Personagens</FormLabel>
@@ -53,7 +68,6 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
             color={textColor}
           />
         </FormControl>
-        
         <FormControl>
           <FormLabel htmlFor="timeWindow" color={textColor}>Tempo (segundos)</FormLabel>
           <Input
@@ -68,22 +82,19 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters
           />
         </FormControl>
       </Flex>
-      
-      <Box>
-        <Text fontSize="sm" color={textColor} mb={2} fontWeight="bold">Tipos monitorados:</Text>
-        <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={2}>
-          {types.map((type) => (
-            <Checkbox
-              key={type}
-              isChecked={monitoredLists.includes(type)}
-              onChange={(e) => handleCheckboxChange(type, e.target.checked)}
-              colorScheme="blue"
-            >
-              <Text fontSize="sm" color={textColor}>{type}</Text>
-            </Checkbox>
-          ))}
-        </SimpleGrid>
-      </Box>
+      <Text fontSize="sm" color={textColor} mb={2} fontWeight="bold">Tipos monitorados:</Text>
+      <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={2}>
+        {types.map((type) => (
+          <Checkbox
+            key={type}
+            isChecked={monitoredLists.includes(type)}
+            onChange={(e) => handleCheckboxChange(type, e.target.checked)}
+            colorScheme="blue"
+          >
+            <Text fontSize="sm" color={textColor}>{type}</Text>
+          </Checkbox>
+        ))}
+      </SimpleGrid>
     </VStack>
   );
 };

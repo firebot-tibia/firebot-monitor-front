@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Menu,
   MenuButton,
@@ -10,21 +10,13 @@ import {
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useTokenStore } from '../../../store/token-decoded-store';
 import { capitalizeFirstLetter } from '../../../shared/utils/utils';
-import { useSession } from 'next-auth/react';
 
 interface WorldSelectProps {
   onChange?: (world: string) => void;
 }
 
 const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
-  const { decodedToken, selectedWorld, setSelectedWorld, decodeAndSetToken } = useTokenStore();
-  const { data: session, status } = useSession();
-
-  useEffect(() => {
-    if (status === 'authenticated' && session?.access_token) {
-      decodeAndSetToken(session.access_token);
-    }
-  }, [status, session, decodeAndSetToken]);
+  const { decodedToken, selectedWorld, setSelectedWorld } = useTokenStore();
 
   const handleWorldChange = (newWorld: string) => {
     setSelectedWorld(newWorld);

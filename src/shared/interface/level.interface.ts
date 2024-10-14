@@ -1,6 +1,5 @@
 export interface Level {
-    character: string;
-    oldLevel: number;
-    newLevel: number;
-    date: Date;
-  }
+  player: string;
+  old_level: number;
+  new_level: number;
+}

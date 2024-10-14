@@ -30,7 +30,6 @@ export const LevelUpSection: React.FC<LevelUpSectionProps> = ({ levelUpList, lev
               levelList={levelUpList} 
               playAudio={playAudio}
               audioEnabled={audioEnabled}
-              isLevelUp={true}
             />
           </TabPanel>
           <TabPanel>
@@ -38,7 +37,6 @@ export const LevelUpSection: React.FC<LevelUpSectionProps> = ({ levelUpList, lev
               levelList={levelDownList} 
               playAudio={playAudio}
               audioEnabled={audioEnabled}
-              isLevelUp={false}
             />
           </TabPanel>
         </TabPanels>

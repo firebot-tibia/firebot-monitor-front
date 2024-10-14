@@ -14,7 +14,7 @@ export const usePermissionCheck = () => {
       const payload = session.access_token.split('.')[1];
       const decoded = JSON.parse(atob(payload));
       const userStatus = decoded?.status;
-      if (userStatus !== 'admin' && userStatus !== 'editor') {
+      if (userStatus !== 'admin') {
         toast({
           title: 'Permissão negada',
           description: 'Você não tem permissão para editar estas informações.',

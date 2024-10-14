@@ -30,7 +30,9 @@ const Home: FC = () => {
     handleLocalChange,
     handleClassificationChange,
     groupedData,
-    handleStartMonitoring
+    handleStartMonitoring,
+    characterChanges,
+    setCharacterChanges,
   } = useHomeLogic();
 
 
@@ -74,7 +76,6 @@ const Home: FC = () => {
               <TabPanel>
                 <GuildDataSection
                   isLoading={isLoading}
-                  guildData={guildData}
                   groupedData={groupedData}
                   handleLocalChange={handleLocalChange}
                   handleClassificationChange={handleClassificationChange}
@@ -98,8 +99,10 @@ const Home: FC = () => {
                 />
               </TabPanel>
               <TabPanel>
-                <MonitorToggleSection
+              <MonitorToggleSection
                   guildData={guildData}
+                  characterChanges={characterChanges}
+                  setCharacterChanges={setCharacterChanges}
                   isLoading={isLoading}
                   onStartMonitoring={handleStartMonitoring}
                 />

@@ -5,7 +5,6 @@ import { GuildMemberTable } from '../../guild-table';
 
 interface GuildDataSectionProps {
   isLoading: boolean;
-  guildData: GuildMemberResponse[];
   groupedData: Array<{
     type: string;
     data: GuildMemberResponse[];
@@ -19,7 +18,6 @@ interface GuildDataSectionProps {
 
 const GuildDataSection: React.FC<GuildDataSectionProps> = React.memo(({
   isLoading,
-  guildData,
   groupedData,
   handleLocalChange,
   handleClassificationChange,
@@ -34,7 +32,7 @@ const GuildDataSection: React.FC<GuildDataSectionProps> = React.memo(({
     );
   }
 
-  if (guildData.length === 0) {
+  if (groupedData.length === 0) {
     return (
       <Box textAlign="center" fontSize="xl" mt={10}>
         <Text>Nenhum dado de guilda disponível.</Text>

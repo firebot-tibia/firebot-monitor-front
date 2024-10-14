@@ -1,5 +1,5 @@
 import React from "react";
-import { 
+import {
   Text,
   Button,
   useDisclosure,
@@ -13,11 +13,16 @@ import {
 import { ChevronDownIcon } from "@chakra-ui/icons";
 
 interface TruncatedTextProps {
-  text: string;
+  text: string | undefined;
 }
 
 export const TruncatedText: React.FC<TruncatedTextProps> = ({ text }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  if (!text) {
+    return <Text>No text available</Text>;
+  }
+
   const truncatedText = text.length > 100 ? `${text.slice(0, 100)}...` : text;
 
   return (

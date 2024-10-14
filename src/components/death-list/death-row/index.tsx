@@ -19,7 +19,7 @@ export const DeathTableRow: React.FC<DeathTableRowProps> = ({ death }) => {
   const toast = useToast();
 
   const handleClick = () => {
-    const textToCopy = `${death.name}: ${death.death}`;
+    const textToCopy = `${death.name}: ${death.text}`;
     navigator.clipboard.writeText(textToCopy).then(() => {
       toast({
         title: "Copiado para a área de transferência",
@@ -52,7 +52,7 @@ export const DeathTableRow: React.FC<DeathTableRowProps> = ({ death }) => {
           {death.city}
         </Badge>
       </Td>
-      <Td><TruncatedText text={death.death} /></Td>
+      <Td><TruncatedText text={death.text} /></Td>
       <Td>{formatDate(death.date)}</Td>
     </Tr>
   );

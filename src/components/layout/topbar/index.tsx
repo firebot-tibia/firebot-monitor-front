@@ -1,18 +1,16 @@
-import { Flex, IconButton, Spacer, HStack, Text, Switch } from "@chakra-ui/react";
+import { Flex, IconButton, Spacer, HStack, Text } from "@chakra-ui/react";
 import { FC, useCallback } from "react";
 import { FaSignOutAlt, FaBars } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import { clearLocalStorage } from "../../../shared/utils/utils";
 import WorldSelect from "../world-select";
-import { useHomeLogic } from "../../../app/home/hooks/useHome";
+import ModeSelect from "../mode-select";
 
 interface TopbarProps {
   onToggleMenu: () => void;
 }
 
 const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
-  const { mode, handleModeChange, handleWorldChange } = useHomeLogic();
-
   const handleLogout = useCallback(() => {
     clearLocalStorage();
     signOut({ redirect: true, callbackUrl: '/' });
@@ -31,7 +29,7 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
       justify="space-between"
       px={4}
       py={2}
-      zIndex="1000" 
+      zIndex="1000"
       width="100%"
       boxShadow="md"
     >
@@ -48,16 +46,8 @@ const Topbar: FC<TopbarProps> = ({ onToggleMenu }) => {
       </Text>
       <Spacer />
       <HStack spacing={4}>
-        <WorldSelect onChange={handleWorldChange} />
-        <HStack>
-          <Text fontSize="sm">Aliado</Text>
-          <Switch
-            colorScheme="red"
-            isChecked={mode === 'enemy'}
-            onChange={handleModeChange}
-          />
-          <Text fontSize="sm">Inimigo</Text>
-        </HStack>
+        <WorldSelect />
+        <ModeSelect />
         <IconButton
           aria-label="Logout"
           onClick={handleLogout}

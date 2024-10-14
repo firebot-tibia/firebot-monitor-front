@@ -58,7 +58,6 @@ const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
       newEventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('Received SSE data:', data);
           onMessage(data);
         } catch (parseError) {
           console.error('Error parsing event data:', parseError);

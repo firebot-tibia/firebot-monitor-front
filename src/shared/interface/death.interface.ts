@@ -1,10 +1,9 @@
 export interface Death {
-    id: string;
     name: string;
+    killer: string;
     level: number;
     vocation: string;
     city: string;
-    death: string;
+    text: string;
     date?: Date;
-    kind: string;
   }

@@ -50,8 +50,8 @@ export const DeathTableContent: React.FC<DeathTableContentProps> = ({
           </Tr>
         </Thead>
         <Tbody>
-          {currentData.map((death) => (
-            <DeathTableRow key={death.id} death={death} />
+          {currentData.map((death, index) => (
+            <DeathTableRow key={`${death.name}-${death.level}-${index}`} death={death} />
           ))}
         </Tbody>
       </Table>

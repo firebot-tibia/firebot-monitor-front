@@ -46,7 +46,7 @@ export const DeathTable: React.FC<DeathTableProps> = ({ deathList, playAudio, au
   }, [deathList, audioEnabled, playAudio]);
 
   const handleCopyAllDeaths = useCallback(() => {
-    const textToCopy = deathList.map(death => `${death.name}: ${death.death}`).join('\n');
+    const textToCopy = deathList.map(death => `${death.name}: ${death.text}`).join('\n');
     navigator.clipboard.writeText(textToCopy).then(() => {
       toast({
         title: "Todas as mortes copiadas",

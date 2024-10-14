@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { create } from 'zustand';
-import { upsertPlayer } from '../../services/guilds';
-import { UpsertPlayerInput } from '../interface/character-upsert.interface';
-import { GuildMemberResponse } from '../interface/guild/guild-member.interface';
-import { useStorageStore } from '../../store/storage-store';
-import { useTokenStore } from '../../store/token-decoded-store';
+import { upsertPlayer } from '../services/guilds';
+import { UpsertPlayerInput } from '../shared/interface/character-upsert.interface';
+import { GuildMemberResponse } from '../shared/interface/guild/guild-member.interface';
+import { useStorageStore } from './storage-store';
+import { useTokenStore } from './token-decoded-store';
 
 const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall'];
 
@@ -24,7 +24,7 @@ const useCharacterTypesStore = create<CharacterTypesState>((set) => ({
 export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
   const toast = useToast();
   const { customTypes, addCustomType } = useCharacterTypesStore();
-  const { decodedToken, selectedWorld, mode } = useTokenStore();
+  const { selectedWorld } = useTokenStore();
   const guildId = useStorageStore.getState().getItem('selectedGuildId', '');
 
   const types = useMemo(() => {

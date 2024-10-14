@@ -28,8 +28,8 @@ interface TokenState {
   decodedToken: DecodedToken | null;
   selectedWorld: string;
   mode: MonitorMode;
+  userStatus: string;
   setSelectedWorld: (world: string) => void;
-  getSelectedGuild: () => Guild | null;
   decodeAndSetToken: (token: string) => void;
   initializeSSE: (handleMessage?: (data: any) => void) => Promise<void>;
 }
@@ -38,6 +38,7 @@ export const useTokenStore = create<TokenState>((set, get) => ({
   decodedToken: null,
   selectedWorld: useStorageStore.getState().getItem('selectedWorld', ''),
   mode: useStorageStore.getState().getItem('monitorMode', 'enemy') as MonitorMode,
+  userStatus: '',
   setSelectedWorld: (world: string) => {
     set({ selectedWorld: world });
     useStorageStore.getState().setItem('selectedWorld', world);
@@ -47,17 +48,12 @@ export const useTokenStore = create<TokenState>((set, get) => ({
       useStorageStore.getState().setItem('selectedGuildId', guildId);
     }
   },
-  getSelectedGuild: () => {
-    const { decodedToken, selectedWorld, mode } = get();
-    if (!decodedToken || !selectedWorld) return null;
-    const guildPair = decodedToken.guilds[selectedWorld];
-    return mode === 'ally' ? guildPair.ally_guild : guildPair.enemy_guild;
-  },
   decodeAndSetToken: (token: string) => {
     const decoded = jwtDecode<DecodedToken>(token);
     set({ decodedToken: decoded });
     const worlds = Object.keys(decoded.guilds);
     const storedWorld = useStorageStore.getState().getItem('selectedWorld', '');
+    set({ decodedToken: decoded, userStatus: decoded.status });
     if (worlds.length > 0 && (!storedWorld || !worlds.includes(storedWorld))) {
       set({ selectedWorld: worlds[0] });
       useStorageStore.getState().setItem('selectedWorld', worlds[0]);

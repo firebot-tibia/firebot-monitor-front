@@ -116,9 +116,8 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
 
   if (isLoading) {
     return (
-      <Box textAlign="center" py={4}>
-        <Spinner />
-        <Text mt={2} color={textColor}>Carregando...</Text>
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <Spinner size="xl" />
       </Box>
     );
   }

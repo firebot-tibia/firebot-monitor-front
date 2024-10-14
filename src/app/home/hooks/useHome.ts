@@ -4,24 +4,20 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { upsertPlayer } from "../../../services/guilds";
 import { useAudio, AudioControl } from "../../../shared/hooks/useAudio";
 import { usePermissionCheck } from "../../../shared/hooks/usePermissionCheck";
-import { useCharacterTypes } from "../../../shared/hooks/useType";
 import { Death } from "../../../shared/interface/death.interface";
 import { GuildMemberResponse } from "../../../shared/interface/guild/guild-member.interface";
 import { Level } from "../../../shared/interface/level.interface";
 import { useGlobalStore } from "../../../store/death-level-store";
-import { useStorageStore } from "../../../store/storage-store";
+import { useStorage, useStorageStore } from "../../../store/storage-store";
 import { useTokenStore } from "../../../store/token-decoded-store";
-import { clearLocalStorage, formatTimeOnline } from "../../../shared/utils/utils";
-import { useCharacterMonitoring } from "../../../components/guild/guild-table/hooks/useMonitor";
+import { formatTimeOnline } from "../../../shared/utils/utils";
+import { useCharacterTypes } from "../../../store/use-type-store";
 
-const isOnline = (member: GuildMemberResponse): boolean => {
-  return member.OnlineStatus;
-};
 
 export const useHomeLogic = () => {
+  const [value, setValue] = useStorage('monitorMode', 'enemy');
   const toast = useToast();
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([]);
-  const [onlineTimes, setOnlineTimes] = useState<{[key: string]: string}>({});
   const [isLoading, setIsLoading] = useState(true);
   const { data: session, status } = useSession();
   const guildId = useStorageStore.getState().getItem('selectedGuildId', '');
@@ -33,15 +29,11 @@ export const useHomeLogic = () => {
   ]) as AudioControl[];
   
   const [firstAudio, secondAudio] = audioControls;
+  const [characterChanges, setCharacterChanges] = useState<GuildMemberResponse[]>([]);
+
   
   const { types, addType } = useCharacterTypes(guildData);
   const sseInitialized = useRef(false);
-
-  const mode = useStorageStore(state => state.getItem('monitorMode', 'enemy'));
-  const setMode = useCallback((newMode: 'ally' | 'enemy') => {
-    useStorageStore.getState().setItem('monitorMode', newMode);
-  }, []);
-
 
   const {
     deathList,
@@ -64,7 +56,7 @@ export const useHomeLogic = () => {
   }, [addDeath, firstAudio]);
 
   const handleNewLevel = useCallback((newLevel: Level) => {
-    if (newLevel.newLevel > newLevel.oldLevel) {
+    if (newLevel.new_level > newLevel.old_level) {
       addLevelUp(newLevel);
       if (secondAudio.audioEnabled) {
         secondAudio.playAudio();
@@ -83,38 +75,45 @@ export const useHomeLogic = () => {
   }, []);
 
   const handleMessage = useCallback((data: any) => {
-    if (data?.[mode]) {
-      setGuildData(data[mode]);
-      const initialOnlineTimes = data[mode].reduce((acc: {[key: string]: string}, member: GuildMemberResponse) => {
-        if (member.OnlineStatus && member.OnlineSince) {
-          const onlineSince = new Date(member.OnlineSince);
-          const now = new Date();
-          const diffInMinutes = (now.getTime() - onlineSince.getTime()) / 60000;
-          acc[member.Name] = formatTimeOnline(diffInMinutes);
-        } else {
-          acc[member.Name] = "00:00:00";
-        }
-        return acc;
-      }, {});
-      setOnlineTimes(initialOnlineTimes);
+    if (data?.[value]) {
+      const newGuildData = data[value].map((member: GuildMemberResponse) => ({
+        ...member,
+        OnlineSince: member.OnlineStatus ? (member.OnlineSince || new Date().toISOString()) : null,
+        TimeOnline: member.OnlineStatus ? "00:00:00" : null
+      }));
+      setGuildData(newGuildData);
     }
-    if (data?.[`${mode}-changes`]) {
-      Object.entries(data[`${mode}-changes`]).forEach(([name, change]: [string, any]) => {
-        if (change.ChangeType === "logged-in") {
-          updateMemberData(change.Member, { 
-            OnlineStatus: true, 
-            OnlineSince: change.Member.OnlineSince,
-          });
-          setOnlineTimes(prev => ({...prev, [change.Member.Name]: "00:00:00"}));
-        } else if (change.ChangeType === "logged-out") {
-          updateMemberData(change.Member, { 
-            OnlineStatus: false, 
-            OnlineSince: "",
-          });
-          setOnlineTimes(prev => ({...prev, [change.Member.Name]: "00:00:00"}));
-        } else {
-          updateMemberData(change.Member, change.Member);
-        }
+    if (data?.[`${value}-changes`]) {
+      setGuildData(prevData => {
+        const updatedData = [...prevData];
+        const newChanges: GuildMemberResponse[] = [];
+        Object.entries(data[`${value}-changes`]).forEach(([name, change]: [string, any]) => {
+          const index = updatedData.findIndex(member => member.Name === name);
+          if (index !== -1) {
+            if (change.ChangeType === "logged-in") {
+              updatedData[index] = {
+                ...updatedData[index],
+                ...change.Member,
+                OnlineStatus: true,
+                OnlineSince: new Date().toISOString(),
+                TimeOnline: "00:00:00"
+              };
+              newChanges.push(updatedData[index]);
+            } else if (change.ChangeType === "logged-out") {
+              updatedData[index] = {
+                ...updatedData[index],
+                ...change.Member,
+                OnlineStatus: false,
+                OnlineSince: null,
+                TimeOnline: null
+              };
+            } else {
+              updatedData[index] = { ...updatedData[index], ...change.Member };
+            }
+          }
+        });
+        setCharacterChanges(prev => [...prev, ...newChanges]);
+        return updatedData;
       });
     }
     if (data?.death) {
@@ -124,26 +123,26 @@ export const useHomeLogic = () => {
       handleNewLevel(data.level);
     }
     setIsLoading(false);
-  }, [mode, handleNewDeath, handleNewLevel, updateMemberData]);
+  }, [value, handleNewDeath, handleNewLevel]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setOnlineTimes(prevTimes => {
-        const newTimes = {...prevTimes};
-        guildData.forEach(member => {
+      setGuildData(prevData => 
+        prevData.map(member => {
           if (member.OnlineStatus && member.OnlineSince) {
             const onlineSince = new Date(member.OnlineSince);
             const now = new Date();
             const diffInMinutes = (now.getTime() - onlineSince.getTime()) / 60000;
-            newTimes[member.Name] = formatTimeOnline(diffInMinutes);
+            return { ...member, TimeOnline: formatTimeOnline(diffInMinutes) };
           }
-        });
-        return newTimes;
-      });
+          return member;
+        })
+      );
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [guildData]);
+  }, []);
+
 
   useEffect(() => {
     if (status === 'authenticated' && session?.access_token) {
@@ -156,22 +155,11 @@ export const useHomeLogic = () => {
       initializeSSE(handleMessage);
       sseInitialized.current = true;
     }
-  }, [decodedToken, selectedWorld, mode, initializeSSE, handleMessage, session]);
+  }, [decodedToken, selectedWorld, value, initializeSSE, handleMessage, session]);
 
   useEffect(() => {
     resetNewCounts();
-  }, [mode, resetNewCounts]);
-
-  const handleModeChange = useCallback(() => {
-    clearLocalStorage();
-    const newMode = mode === 'ally' ? 'enemy' : 'ally';
-    setMode(newMode);
-    sseInitialized.current = false;
-    if (session && decodedToken && selectedWorld) {
-      initializeSSE(handleMessage);
-      sseInitialized.current = true;
-    }
-  }, [mode, setMode, session, decodedToken, selectedWorld, initializeSSE, handleMessage]);
+  }, [value, resetNewCounts]);
 
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
     if (!checkPermission()) return;
@@ -221,40 +209,35 @@ export const useHomeLogic = () => {
   }, [guildId, checkPermission, selectedWorld, updateMemberData, toast]);
 
   const groupedData = useMemo(() => {
-    const typedData = types.map(type => ({
+    const onlineMembers = guildData.filter(member => member.OnlineStatus && member.TimeOnline);
+    
+    const sortedGuildData = onlineMembers.sort((a, b) => {
+      if (a.TimeOnline === "00:00:00" && b.TimeOnline !== "00:00:00") return -1;
+      if (a.TimeOnline !== "00:00:00" && b.TimeOnline === "00:00:00") return 1;
+      return a.TimeOnline.localeCompare(b.TimeOnline);
+    });
+  
+    return types.map(type => ({
       type,
-      data: guildData.filter(member => member.Kind === type).map(member => ({
-        ...member,
-        TimeOnline: onlineTimes[member.Name] || "00:00:00"
-      })),
-      onlineCount: guildData.filter(member => member.Kind === type && isOnline(member)).length
-    }));
-
-    const unclassified = {
+      data: sortedGuildData.filter(member => member.Kind === type),
+      onlineCount: sortedGuildData.filter(member => member.Kind === type).length
+    })).concat({
       type: 'unclassified',
-      data: guildData.filter(member => !member.Kind || !types.includes(member.Kind)).map(member => ({
-        ...member,
-        TimeOnline: onlineTimes[member.Name] || "00:00:00"
-      })),
-      onlineCount: guildData.filter(member => 
-        (!member.Kind || !types.includes(member.Kind)) && isOnline(member)
-      ).length
-    };
+      data: sortedGuildData.filter(member => !member.Kind || !types.includes(member.Kind)),
+      onlineCount: sortedGuildData.filter(member => (!member.Kind || !types.includes(member.Kind))).length
+    }).filter(group => group.data.length > 0);
+  }, [guildData, types]);
 
-    return [...typedData, unclassified].filter(group => group.data.length > 0);
-  }, [types, guildData, onlineTimes]);
 
   const handleStartMonitoring = useCallback(() => {
     firstAudio.markUserInteraction();
     secondAudio.markUserInteraction();
   }, [firstAudio, secondAudio]);
 
-  const monitoring = useCharacterMonitoring(guildData, types);
-
   return {
-    mode,
-    handleModeChange,
-    handleWorldChange: setSelectedWorld,
+    value,
+    setValue,
+    setSelectedWorld,
     newDeathCount,
     newLevelUpCount,
     newLevelDownCount,
@@ -274,6 +257,7 @@ export const useHomeLogic = () => {
     handleClassificationChange,
     groupedData,
     handleStartMonitoring,
-    ...monitoring,
+    characterChanges,
+    setCharacterChanges,
   };
 };

@@ -9,10 +9,9 @@ interface LevelTableRowProps {
 export const LevelTableRow: React.FC<LevelTableRowProps> = ({ level }) => {
   return (
     <Tr>
-      <Td>{level.character}</Td>
-      <Td>{level.oldLevel}</Td>
-      <Td>{level.newLevel}</Td>
-      <Td>{level.date.toLocaleString()}</Td>
+      <Td>{level.player}</Td>
+      <Td>{level.old_level}</Td>
+      <Td>{level.new_level}</Td>
     </Tr>
   );
 };

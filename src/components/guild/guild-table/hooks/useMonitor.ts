@@ -1,31 +1,51 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useToast } from '@chakra-ui/react';
-import { useFlexibleLocalStorage } from '../../../../shared/hooks/useFlexLocalStorage';
 import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
-import { parseTimeOnline } from '../../../../shared/utils/utils';
+import { useMonitoringStore } from '../../../../store/monitoring-store';
 
 export const useCharacterMonitoring = (characters: GuildMemberResponse[], types: string[]) => {
-  const [threshold, setThreshold] = useFlexibleLocalStorage<number>('character-threshold', 5);
-  const [timeWindow, setTimeWindow] = useFlexibleLocalStorage<number>('character-timeWindow', 120);
-  const [monitoredLists, setMonitoredLists] = useFlexibleLocalStorage<string[]>('monitored-lists', ['bomba', 'maker']);
+  const { threshold, timeWindow, monitoredLists, setThreshold, setTimeWindow, setMonitoredLists } = useMonitoringStore();
   const toast = useToast();
   const lastAlertTimeRef = useRef<number>(0);
+  const recentLoginsRef = useRef<Set<string>>(new Set());
+
+  const speakMessage = useCallback((msg: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(msg);
+      utterance.lang = 'pt-BR';
+      const voices = speechSynthesis.getVoices();
+
+      const brVoice = voices.find(voice => voice.lang === 'pt-BR');
+      if (brVoice) {
+        utterance.voice = brVoice;
+      } 
+
+      utterance.pitch = 0.7;
+      utterance.rate = 0.9;
+      utterance.volume = 1.2;
+
+      utterance.onstart = () => console.log("Speech started");
+      utterance.onend = () => console.log("Speech ended");
+      utterance.onerror = (event) => console.error("Speech error:", event);
+
+      speechSynthesis.speak(utterance);
+    } 
+  }, []);
 
   const checkThreshold = useCallback(() => {
     const now = Date.now();
     if (now - lastAlertTimeRef.current < 60000) return;
 
-    const filteredCharacters = characters.filter(char => monitoredLists.includes(char.Kind));
-    const recentCharacters = filteredCharacters.filter(char => 
-      char.OnlineStatus && parseTimeOnline(char.TimeOnline) <= timeWindow
+    const recentLogins = Array.from(recentLoginsRef.current);
+    const filteredCharacters = characters.filter(char =>
+      monitoredLists.includes(char.Kind) && recentLogins.includes(char.Name)
     );
-    
-    const totalRecentCount = recentCharacters.length;
+    const totalRecentCount = filteredCharacters.length;
 
     if (totalRecentCount >= threshold) {
       lastAlertTimeRef.current = now;
       const recentCounts = monitoredLists.reduce((acc, list) => {
-        acc[list] = recentCharacters.filter(char => char.Kind === list).length;
+        acc[list] = filteredCharacters.filter(char => char.Kind === list).length;
         return acc;
       }, {} as Record<string, number>);
 
@@ -43,15 +63,12 @@ export const useCharacterMonitoring = (characters: GuildMemberResponse[], types:
         duration: 5000,
         isClosable: true,
       });
-      
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(msg);
-        utterance.lang = 'pt-BR';
-        utterance.voice = speechSynthesis.getVoices().find(voice => voice.lang === 'pt-BR') || null;
-        speechSynthesis.speak(utterance);
-      }
+
+      speakMessage(msg);
+
+      recentLoginsRef.current.clear();
     }
-  }, [characters, threshold, timeWindow, toast, monitoredLists]);
+  }, [characters, threshold, timeWindow, toast, monitoredLists, speakMessage]);
 
   useEffect(() => {
     const timer = setInterval(checkThreshold, 10000);
@@ -59,16 +76,27 @@ export const useCharacterMonitoring = (characters: GuildMemberResponse[], types:
   }, [checkThreshold]);
 
   useEffect(() => {
-    setMonitoredLists(prev => prev.filter(type => types.includes(type)));
+    setMonitoredLists(monitoredLists.filter(type => types.includes(type)));
   }, [types, setMonitoredLists]);
 
   const handleCheckboxChange = useCallback((type: string, isChecked: boolean) => {
-    setMonitoredLists(prev => 
-      isChecked 
-        ? [...prev, type]
-        : prev.filter(t => t !== type)
+    setMonitoredLists(
+      isChecked
+        ? [...monitoredLists, type]
+        : monitoredLists.filter(t => t !== type)
     );
-  }, [setMonitoredLists]);
+  }, [monitoredLists, setMonitoredLists]);
+
+  const handleStatusChange = useCallback((member: GuildMemberResponse, changeType: string) => {
+    if (changeType === "logged-in") {
+      recentLoginsRef.current.add(member.Name);
+      setTimeout(() => {
+        recentLoginsRef.current.delete(member.Name);
+      }, timeWindow * 1000);
+      checkThreshold();
+    }
+  }, [timeWindow, checkThreshold]);
+
 
   return {
     threshold,
@@ -76,6 +104,7 @@ export const useCharacterMonitoring = (characters: GuildMemberResponse[], types:
     timeWindow,
     setTimeWindow,
     monitoredLists,
-    handleCheckboxChange
+    handleCheckboxChange,
+    handleStatusChange
   };
 };
