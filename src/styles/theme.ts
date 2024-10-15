@@ -22,9 +22,9 @@ const fonts = {
 
 const colors = {
   geist: {
-    background: '#000',
-    foreground: '#fff',
-    primary: '#0070f3',
+    background: 'red.800',
+    foreground: 'white',
+    primary: 'red.800',
     secondary: '#666',
     success: '#0070f3',
     error: '#e00',

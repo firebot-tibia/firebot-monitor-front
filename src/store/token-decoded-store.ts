@@ -38,7 +38,7 @@ export const useTokenStore = create<TokenState>((set, get) => ({
   decodedToken: null,
   selectedWorld: useStorageStore.getState().getItem('selectedWorld', ''),
   mode: useStorageStore.getState().getItem('monitorMode', 'enemy') as MonitorMode,
-  userStatus: '',
+  userStatus: useStorageStore.getState().getItem('userStatus', ''),
   setSelectedWorld: (world: string) => {
     set({ selectedWorld: world });
     useStorageStore.getState().setItem('selectedWorld', world);

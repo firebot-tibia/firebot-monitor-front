@@ -6,6 +6,7 @@ import {
   MenuItem,
   Button,
   Box,
+  Text,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useTokenStore } from '../../../store/token-decoded-store';
@@ -46,18 +47,24 @@ const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
         {selectedWorld ? capitalizeFirstLetter(selectedWorld) : "Select World"}
       </MenuButton>
       <MenuList bg="black" borderColor="gray.600">
-        {availableWorlds.map((worldId) => (
-          <MenuItem
-            key={worldId}
-            onClick={() => handleWorldChange(worldId)}
-            bg="black"
-            _hover={{ bg: "gray.700" }}
-          >
-            <Box display="flex" alignItems="center">
-              {capitalizeFirstLetter(worldId)}
-            </Box>
+        {availableWorlds.length > 0 ? (
+          availableWorlds.map((worldId) => (
+            <MenuItem
+              key={worldId}
+              onClick={() => handleWorldChange(worldId)}
+              bg="black"
+              _hover={{ bg: "gray.700" }}
+            >
+              <Box display="flex" alignItems="center">
+                {capitalizeFirstLetter(worldId)}
+              </Box>
+            </MenuItem>
+          ))
+        ) : (
+          <MenuItem bg="black" _hover={{ bg: "black" }} cursor="default">
+            <Text color="gray.400">Nenhum mundo</Text>
           </MenuItem>
-        ))}
+        )}
       </MenuList>
     </Menu>
   );
