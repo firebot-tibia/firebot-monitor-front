@@ -56,11 +56,10 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
 }) => {
   const [sortField, setSortField] = useState<SortField>('TimeOnline');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [zoom, setZoom] = useState<number>(80);
 
   const toast = useToast();
   const bgColor = useColorModeValue('black.800', 'black.900');
-  const hoverBgColor = useColorModeValue('gray.700', 'gray.800');
+  const hoverBgColor = useColorModeValue('red.700', 'red.800');
   const textColor = useColorModeValue('white', 'gray.100');
 
   const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)");
