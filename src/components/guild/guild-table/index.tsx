@@ -177,7 +177,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                         <LocalInput
                           member={member}
                           onLocalChange={onLocalChange}
-                          fontSize={responsiveFontSize}
+                          fontSize={"md"}
                           onClick={(e) => e.stopPropagation()}
                         />
                       </Box>

@@ -30,8 +30,8 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
   addType,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const bgColor = useColorModeValue('gray.800', 'gray.900');
-  const hoverBgColor = useColorModeValue('gray.700', 'gray.800');
+  const bgColor = useColorModeValue('black.800', 'black.900');
+  const hoverBgColor = useColorModeValue('red.700', 'red.800');
   const textColor = useColorModeValue('white', 'gray.100');
 
   const handleClassificationClick = (newType: string) => {
@@ -63,11 +63,11 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
         {renderTypeContent(member.Kind || 'n/a')}
       </MenuButton>
       <Portal>
-        <MenuList bg={bgColor} borderColor="gray.700" zIndex={1000}>
+        <MenuList bg="red.700" borderColor="black.700" zIndex={1000}>
           {Array.isArray(types) && types.length > 0 ? (
             types.map((type: string) => (
-              <MenuItem 
-                key={type} 
+              <MenuItem
+                key={type}
                 onClick={() => handleClassificationClick(type)}
                 bg={bgColor}
                 _hover={{ bg: hoverBgColor }}
@@ -78,7 +78,7 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
           ) : (
             <MenuItem isDisabled bg={bgColor}>Sem tipos para exibir</MenuItem>
           )}
-          <CharacterTypesManager 
+          <CharacterTypesManager
             addType={(newType) => {
               addType(newType);
               onClassificationChange(member, newType);

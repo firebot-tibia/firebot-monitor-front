@@ -41,7 +41,7 @@ export const LocalInput: FC<LocalInputProps> = ({
         onFocus={() => {
           updateDropdownPosition();
         }}
-        bg="gray.800"
+        bg="black.800"
         size="xs"
         fontSize={fontSize}
         width="100%"
@@ -53,8 +53,8 @@ export const LocalInput: FC<LocalInputProps> = ({
             ref={dropdownRef}
             position="absolute"
             zIndex={1000}
-            bg="gray.900"
-            borderColor="gray.700"
+            bg="red.900"
+            borderColor="red.700"
             borderWidth="1px"
             borderRadius="md"
             maxHeight="200px"
@@ -69,7 +69,7 @@ export const LocalInput: FC<LocalInputProps> = ({
                   key={option}
                   onClick={() => handleOptionClick(option)}
                   p={2}
-                  _hover={{ bg: "gray.700", cursor: "pointer" }}
+                  _hover={{ bg: "black.700", cursor: "pointer" }}
                   color="white"
                 >
                   {option}

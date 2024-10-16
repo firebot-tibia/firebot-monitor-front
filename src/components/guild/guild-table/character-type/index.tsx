@@ -33,10 +33,10 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
 
   return (
     <>
-      <Button 
-        onClick={onOpen} 
-        size="sm" 
-        colorScheme="gray" 
+      <Button
+        onClick={onOpen}
+        size="sm"
+        colorScheme="gray"
         variant="ghost"
         leftIcon={<AddIcon />}
       >
@@ -45,10 +45,10 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-        <ModalContent 
-          bg="gray.800" 
-          color="white" 
-          borderRadius="md" 
+        <ModalContent
+          bg="red.800"
+          color="white"
+          borderRadius="md"
           boxShadow="xl"
         >
           <ModalHeader borderBottomWidth="1px" borderColor="gray.700">
@@ -64,23 +64,23 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
                 value={newType}
                 onChange={(e) => setNewType(e.target.value)}
                 placeholder="Ex: PT 123"
-                bg="gray.700"
+                bg="red.700"
                 border="none"
                 _focus={{ boxShadow: "0 0 0 1px #63B3ED" }}
               />
             </VStack>
           </ModalBody>
           <ModalFooter borderTopWidth="1px" borderColor="gray.700">
-            <Button 
-              onClick={handleAddType} 
-              colorScheme="blue" 
+            <Button
+              onClick={handleAddType}
+              colorScheme="red"
               mr={3}
               leftIcon={<AddIcon />}
             >
               Adicionar
             </Button>
-            <Button 
-              onClick={onClose} 
+            <Button
+              onClick={onClose}
               variant="ghost"
             >
               Cancelar
