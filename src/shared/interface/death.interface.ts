@@ -5,5 +5,5 @@ export interface Death {
     vocation: string;
     city: string;
     text: string;
-    date?: Date;
+    date?: string;
   }

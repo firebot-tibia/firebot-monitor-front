@@ -1,9 +1,9 @@
-import React, { FC, useMemo, useState, useEffect } from 'react';
-import { 
-  Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box, 
+import { FC, useMemo, useState } from 'react';
+import {
+  Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box,
   useToast, Spinner, useColorModeValue, Tag, Flex,
-  TableContainer, useMediaQuery, VStack,
-  IconButton, Select
+  TableContainer, useMediaQuery,
+  IconButton
 } from '@chakra-ui/react';
 import { LocalInput } from './local-input';
 import { CharacterClassification } from './render-classification';
@@ -44,9 +44,9 @@ const ClassificationLegend: FC = () => (
   </HStack>
 );
 
-export const GuildMemberTable: FC<GuildMemberTableProps> = ({ 
-  data, 
-  onLocalChange, 
+export const GuildMemberTable: FC<GuildMemberTableProps> = ({
+  data,
+  onLocalChange,
   onClassificationChange,
   showExivaInput,
   types,
@@ -65,7 +65,6 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
 
   const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)");
   const [isLargerThan992] = useMediaQuery("(min-width: 992px)");
-  const [isLargerThan768] = useMediaQuery("(min-width: 768px)");
 
   const responsiveFontSize = isLargerThan1200 ? "2xs" : isLargerThan992 ? "3xs" : "4xs";
   const responsivePadding = isLargerThan1200 ? 0.5 : 0.25;
@@ -149,7 +148,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                   <Td px={0.5} py={responsivePadding} width="18%">
                     <Flex alignItems="center" maxWidth="100%">
                       <Image src={TableVocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "16px" : "14px"} mr={1} flexShrink={0} />
-                      <Box 
+                      <Box
                         onClick={() => handleNameClick(member)}
                         cursor="pointer"
                         title="Clique para copiar exiva"
@@ -179,7 +178,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                           member={member}
                           onLocalChange={onLocalChange}
                           fontSize={responsiveFontSize}
-                          onClick={(e) => e.stopPropagation()} 
+                          onClick={(e) => e.stopPropagation()}
                         />
                       </Box>
                     </Td>

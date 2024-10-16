@@ -8,7 +8,7 @@ const GuildStats: React.FC = () => {
   return (
     <DashboardLayout>
       <Box p={4}>
-        <Heading as="h1" mb={6} textAlign="center">Estatísticas da Guilda</Heading>
+        <Heading as="h1" mt={10} textAlign="center">Estatísticas da Guilda</Heading>
         <GuildStatsContainer />
       </Box>
     </DashboardLayout>

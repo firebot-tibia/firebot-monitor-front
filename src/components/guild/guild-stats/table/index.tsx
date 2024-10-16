@@ -1,8 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
   Box,
-  Heading,
-  StatGroup,
   Table,
   Thead,
   Tbody,
@@ -10,23 +8,19 @@ import {
   Th,
   Td,
   Image,
-  useDisclosure,
-  Spinner,
-  Center,
   Text,
+  Flex,
+  Spinner,
 } from '@chakra-ui/react';
 import { Vocations } from '../../../../constant/character';
 import { GuildData, GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
 import ExpStats from '../container/exp-stats';
-import PlayerModal from '../player-modal';
 
 interface GuildTableProps {
   guildType: 'allyGain' | 'allyLoss' | 'enemyGain' | 'enemyLoss';
   guildData: GuildData;
-  currentPage: number;
   filter: string;
   onCharacterClick: (characterName: string) => void;
-  renderCharacterName: (character: GuildMember) => React.ReactNode;
   isLoading: boolean;
 }
 
@@ -35,100 +29,69 @@ const GuildTable: React.FC<GuildTableProps> = ({
   guildData,
   filter,
   onCharacterClick,
-  renderCharacterName,
   isLoading,
 }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const bgColor = "black.800";
+  const borderColor = "black.700";
+  const hoverBgColor = "red.700";
+  const textColor = "white.100";
+  const headerColor = "red.400";
 
-  const handleRowClick = (characterName: string) => {
-    setSelectedCharacter(characterName);
-    onCharacterClick(characterName);
-    onOpen();
-  };
+  const tableTitle = `${guildType.includes('ally') ? 'Aliados' : 'Inimigos'} - ${guildType.includes('Gain') ? 'Ganho' : 'Perda'} de XP`;
 
-  const tableRows = useMemo(() => {
-    if (isLoading) {
-      return (
-        <Tr>
-          <Td colSpan={5}>
-            <Center py={4}>
-              <Spinner size="xl" />
-            </Center>
-          </Td>
-        </Tr>
-      );
-    }
-
-    if (guildData.data.length === 0) {
-      return (
-        <Tr>
-          <Td colSpan={5}>
-            <Center py={4}>
-              <Text>Nenhum dado disponível</Text>
-            </Center>
-          </Td>
-        </Tr>
-      );
-    }
-
-    return guildData.data.map((item: GuildMember, index: number) => (
-      <Tr
-        key={item.name}
-        _hover={{ bg: 'gray.600', cursor: 'pointer' }}
-        transition="background-color 0.2s"
-      >
-        <Td p={1}>{item.experience}</Td>
-        <Td p={1} textAlign="center">
-          <Image src={Vocations[item.vocation]} alt={item.vocation} boxSize="24px" display="inline-block" />
-        </Td>
-        <Td p={1} onClick={() => handleRowClick(item.name)}>
-          {renderCharacterName(item)}
-        </Td>
-        <Td p={1} isNumeric>{item.level}</Td>
-        <Td p={1} textAlign="center">
-          <Box
-            as="span"
-            display="inline-block"
-            w={3}
-            h={3}
-            borderRadius="full"
-            bg={item.online ? 'green.500' : 'red.500'}
-          />
-        </Td>
-      </Tr>
-    ));
-  }, [guildData.data, handleRowClick, renderCharacterName, isLoading]);
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" height="200px">
+        <Spinner size="xl" color="red.400" />
+      </Flex>
+    );
+  }
 
   return (
-    <Box width="100%">
-      <Heading as="h2" size="sm" mb={2} textAlign="left">
-        {guildType.includes('ally') ? 'Aliados' : 'Inimigos'} - {guildType.includes('Gain') ? 'Ganho' : 'Perda'} de XP
-      </Heading>
-      <StatGroup mb={4}>
+    <Box bg={bgColor} borderRadius="md" overflow="hidden" boxShadow="lg" style={{ zoom: `${100}%` }}>
+      <Box p={4} borderBottom="1px" borderColor={borderColor}>
+        <Text fontSize="lg" fontWeight="bold" color={headerColor}>
+          {tableTitle}
+        </Text>
         <ExpStats totalExp={guildData.totalExp} avgExp={guildData.avgExp} filter={filter} />
-      </StatGroup>
+      </Box>
       <Box overflowX="auto">
-        <Table variant="simple" size="sm">
+        <Table variant="unstyled" size="sm">
           <Thead>
             <Tr>
-              <Th p={1}>EXP</Th>
-              <Th p={1} textAlign="center">VOC</Th>
-              <Th p={1}>NOME</Th>
-              <Th p={1} isNumeric>LVL</Th>
-              <Th p={1} textAlign="center">STATUS</Th>
+              <Th color={headerColor}>EXP</Th>
+              <Th color={headerColor}>VOC</Th>
+              <Th color={headerColor}>NOME</Th>
+              <Th isNumeric color={headerColor}>LVL</Th>
+              <Th color={headerColor}>STATUS</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {tableRows}
+            {guildData.data.map((item: GuildMember) => (
+              <Tr
+                key={item.name}
+                _hover={{ bg: hoverBgColor, cursor: 'pointer' }}
+                onClick={() => onCharacterClick(item.name)}
+              >
+                <Td color={textColor}>{item.experience}</Td>
+                <Td>
+                  <Image src={Vocations[item.vocation]} alt={item.vocation} boxSize="24px" />
+                </Td>
+                <Td color={textColor}>{item.name}</Td>
+                <Td isNumeric color={textColor}>{item.level}</Td>
+                <Td>
+                  <Box
+                    w={3}
+                    h={3}
+                    borderRadius="full"
+                    bg={item.online ? 'green.500' : 'red.500'}
+                  />
+                </Td>
+              </Tr>
+            ))}
           </Tbody>
         </Table>
       </Box>
-      <PlayerModal
-        isOpen={isOpen}
-        onClose={onClose}
-        characterName={selectedCharacter}
-      />
     </Box>
   );
 };

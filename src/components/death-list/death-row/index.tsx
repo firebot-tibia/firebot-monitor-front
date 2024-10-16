@@ -1,7 +1,7 @@
 import React from "react";
-import { 
-  Tr, 
-  Td, 
+import {
+  Tr,
+  Td,
   Text,
   Badge,
   Tooltip,
@@ -53,7 +53,7 @@ export const DeathTableRow: React.FC<DeathTableRowProps> = ({ death }) => {
         </Badge>
       </Td>
       <Td><TruncatedText text={death.text} /></Td>
-      <Td>{formatDate(death.date)}</Td>
+      <Td>{formatDate(death.date || '')}</Td>
     </Tr>
   );
 };

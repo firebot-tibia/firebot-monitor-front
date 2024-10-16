@@ -13,8 +13,8 @@ const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
     <Flex direction="column" h="100vh">
       <Topbar />
       <Flex flex="1">
-        <Box 
-          p={10} 
+        <Box
+          p={10}
           w={"100%"}>
           {children}
         </Box>

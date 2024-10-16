@@ -1,7 +1,7 @@
 import React, {useCallback } from 'react';
-import { 
-  Flex, IconButton, HStack, Text, useDisclosure, Drawer, 
-  DrawerOverlay, DrawerContent, DrawerBody, VStack, Tooltip, 
+import {
+  Flex, IconButton, HStack, Text, useDisclosure, Drawer,
+  DrawerOverlay, DrawerContent, DrawerBody, VStack, Tooltip,
   useColorModeValue, Box,
   Icon
 } from "@chakra-ui/react";
@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
   { name: 'Suporte no Discord', href: 'https://discord.gg/5eUrDejn', icon: FaDiscord, target: '_blank' },
 ];
 
-const Layout = () => {
+const Topbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const userStatus = useTokenStore(state => state.userStatus);
   const bgColor = useColorModeValue('red.800', 'red.900');
@@ -136,4 +136,4 @@ const Layout = () => {
   );
 };
 
-export default Layout;
+export default Topbar;

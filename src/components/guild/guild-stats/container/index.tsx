@@ -1,11 +1,21 @@
-import React, { useCallback, useEffect } from 'react';
-import { Box, Flex, SimpleGrid, Text, Tooltip, useDisclosure } from '@chakra-ui/react';
-import FilterBar from './filter-bar';
-import GuildTable from '../table';
-import CharacterTooltip from './character-tooltip';
-import { GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Box,
+  SimpleGrid,
+  useDisclosure,
+  VStack,
+  Heading,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+} from '@chakra-ui/react';
 import { useGuildStatsStore } from '../../../../store/guild-stats-store';
 import { Pagination } from '../../../pagination';
+import PlayerModal from '../player-modal';
+import GuildTable from '../table';
+import FilterBar from './filter-bar';
 
 const GuildStatsContainer: React.FC = () => {
   const {
@@ -25,28 +35,39 @@ const GuildStatsContainer: React.FC = () => {
     setVocationFilter,
     setNameFilter,
     setPage,
-    setSelectedCharacter,
     fetchGuildStats,
   } = useGuildStatsStore();
 
-  const { onOpen } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+
+  const bgColor = "black.800";
+  const softRedColor = "red.400";
+  const borderColor = "white.700";
 
   useEffect(() => {
     fetchGuildStats('ally');
     fetchGuildStats('enemy');
   }, [fetchGuildStats]);
 
-  const handleFilterChange = useCallback((selectedFilter: string) => {
-    setFilter(selectedFilter);
+  const handleFilterChange = useCallback((newFilter: string) => {
+    setFilter(newFilter);
   }, [setFilter]);
 
-  const handleVocationFilterChange = useCallback((selectedVocation: string) => {
-    setVocationFilter(selectedVocation);
+  const handleVocationFilterChange = useCallback((newVocation: string) => {
+    setVocationFilter(newVocation);
   }, [setVocationFilter]);
 
-  const handleNameFilterChange = useCallback((name: string) => {
-    setNameFilter(name);
-  }, [setNameFilter]);
+  const handleNameFilterChange = useCallback((newName: string) => {
+    setNameFilter(newName);
+    const characterExists = [allyGainData, allyLossData, enemyGainData, enemyLossData]
+      .some(data => data.data.some(player => player.name.toLowerCase() === newName.toLowerCase()));
+
+    if (!characterExists) {
+      setSelectedCharacter(newName);
+      onOpen();
+    }
+  }, [allyGainData, allyLossData, enemyGainData, enemyLossData, setNameFilter, onOpen]);
 
   const handlePageChange = useCallback((guildType: 'allyGain' | 'allyLoss' | 'enemyGain' | 'enemyLoss', pageNumber: number) => {
     setPage(guildType, pageNumber);
@@ -55,117 +76,109 @@ const GuildStatsContainer: React.FC = () => {
   const handleCharacterClick = useCallback((characterName: string) => {
     setSelectedCharacter(characterName);
     onOpen();
-  }, [setSelectedCharacter, onOpen]);
-
-  const renderCharacterName = useCallback((character: GuildMember) => (
-    <Tooltip 
-      label={
-        <CharacterTooltip 
-          name={character.name}
-          vocation={character.vocation}
-          level={character.level}
-          experience={character.experience}
-          online={character.online}
-        />
-      }
-      placement="top"
-      hasArrow
-    >
-      <Text 
-        cursor="pointer" 
-        onClick={() => handleCharacterClick(character.name)}
-        _hover={{ textDecoration: 'underline' }}
-      >
-        {character.name}
-      </Text>
-    </Tooltip>
-  ), [handleCharacterClick]);
+  }, [onOpen]);
 
   return (
-    <Flex direction="column" align="center" width="100%" maxWidth="1400px" mx="auto">
-      <FilterBar
-        filter={filter}
-        vocationFilter={vocationFilter}
-        nameFilter={nameFilter}
-        onFilterChange={handleFilterChange}
-        onVocationFilterChange={handleVocationFilterChange}
-        onNameFilterChange={handleNameFilterChange}
+    <Box width="100%" bg={bgColor} minH="100vh" py={8} style={{ zoom: `${80}%` }}>
+      <VStack spacing={6} align="stretch" maxWidth="1400px" mx="auto" px={4}>
+        <FilterBar
+          filter={filter}
+          vocationFilter={vocationFilter}
+          nameFilter={nameFilter}
+          onFilterChange={handleFilterChange}
+          onVocationFilterChange={handleVocationFilterChange}
+          onNameFilterChange={handleNameFilterChange}
+        />
+
+        <Tabs variant="soft-rounded" colorScheme="red">
+          <TabList>
+            <Tab color="white" _selected={{ color: 'white', bg: softRedColor }}>Aliados</Tab>
+            <Tab color="white" _selected={{ color: 'white', bg: softRedColor }}>Inimigos</Tab>
+          </TabList>
+
+          <TabPanels>
+            <TabPanel>
+              <SimpleGrid columns={[1, null, 2]} spacing={6}>
+                <Box bg={bgColor} borderRadius="md" borderWidth={1} borderColor={borderColor} p={4}>
+                  <VStack spacing={4}>
+                    <GuildTable
+                      guildType="allyGain"
+                      guildData={allyGainData}
+                      filter={filter}
+                      onCharacterClick={handleCharacterClick}
+                      isLoading={loading}
+                    />
+                    <Pagination
+                      currentPage={allyGainPage}
+                      totalPages={allyGainData.totalPages}
+                      onPageChange={(newPage) => handlePageChange('allyGain', newPage)}
+                    />
+                  </VStack>
+                </Box>
+                <Box bg={bgColor} borderRadius="md" borderWidth={1} borderColor={borderColor} p={4}>
+                  <VStack spacing={4}>
+                    <GuildTable
+                      guildType="allyLoss"
+                      guildData={allyLossData}
+                      filter={filter}
+                      onCharacterClick={handleCharacterClick}
+                      isLoading={loading}
+                    />
+                    <Pagination
+                      currentPage={allyLossPage}
+                      totalPages={allyLossData.totalPages}
+                      onPageChange={(newPage) => handlePageChange('allyLoss', newPage)}
+                    />
+                  </VStack>
+                </Box>
+              </SimpleGrid>
+            </TabPanel>
+            <TabPanel>
+              <SimpleGrid columns={[1, null, 2]} spacing={6}>
+                <Box bg={bgColor} borderRadius="md" borderWidth={1} borderColor={borderColor} p={4}>
+                  <VStack spacing={4}>
+                    <GuildTable
+                      guildType="enemyGain"
+                      guildData={enemyGainData}
+                      filter={filter}
+                      onCharacterClick={handleCharacterClick}
+                      isLoading={loading}
+                    />
+                    <Pagination
+                      currentPage={enemyGainPage}
+                      totalPages={enemyGainData.totalPages}
+                      onPageChange={(newPage) => handlePageChange('enemyGain', newPage)}
+                    />
+                  </VStack>
+                </Box>
+                <Box bg={bgColor} borderRadius="md" borderWidth={1} borderColor={borderColor} p={4}>
+                  <VStack spacing={4}>
+                    <GuildTable
+                      guildType="enemyLoss"
+                      guildData={enemyLossData}
+                      filter={filter}
+                      onCharacterClick={handleCharacterClick}
+                      isLoading={loading}
+                    />
+                    <Pagination
+                      currentPage={enemyLossPage}
+                      totalPages={enemyLossData.totalPages}
+                      onPageChange={(newPage) => handlePageChange('enemyLoss', newPage)}
+                    />
+                  </VStack>
+                </Box>
+              </SimpleGrid>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </VStack>
+
+      <PlayerModal
+        isOpen={isOpen}
+        onClose={onClose}
+        characterName={selectedCharacter}
       />
-      <SimpleGrid columns={[1, null, 2]} spacing={4} width="100%" mt={4}>
-        <Box>
-          <SimpleGrid columns={[1, null, 2]} spacing={4}>
-            <Box>
-              <GuildTable
-                guildType="allyGain"
-                guildData={allyGainData}
-                currentPage={allyGainPage}
-                filter={filter}
-                onCharacterClick={handleCharacterClick}
-                renderCharacterName={renderCharacterName}
-                isLoading={loading}
-              />
-              <Pagination
-                currentPage={allyGainPage}
-                totalPages={allyGainData.totalPages}
-                onPageChange={(page) => handlePageChange('allyGain', page)}
-              />
-            </Box>
-            <Box>
-              <GuildTable
-                guildType="allyLoss"
-                guildData={allyLossData}
-                currentPage={allyLossPage}
-                filter={filter}
-                onCharacterClick={handleCharacterClick}
-                renderCharacterName={renderCharacterName}
-                isLoading={loading}
-              />
-              <Pagination
-                currentPage={allyLossPage}
-                totalPages={allyLossData.totalPages}
-                onPageChange={(page) => handlePageChange('allyLoss', page)}
-              />
-            </Box>
-          </SimpleGrid>
-        </Box>
-        <Box>
-          <SimpleGrid columns={[1, null, 2]} spacing={4}>
-            <Box>
-              <GuildTable
-                guildType="enemyGain"
-                guildData={enemyGainData}
-                currentPage={enemyGainPage}
-                filter={filter}
-                onCharacterClick={handleCharacterClick}
-                renderCharacterName={renderCharacterName}
-                isLoading={loading}
-              />
-              <Pagination
-                currentPage={enemyGainPage}
-                totalPages={enemyGainData.totalPages}
-                onPageChange={(page) => handlePageChange('enemyGain', page)}
-              />
-            </Box>
-            <Box>
-              <GuildTable
-                guildType="enemyLoss"
-                guildData={enemyLossData}
-                currentPage={enemyLossPage}
-                filter={filter}
-                onCharacterClick={handleCharacterClick}
-                renderCharacterName={renderCharacterName}
-                isLoading={loading}
-              />
-              <Pagination
-                currentPage={enemyLossPage}
-                totalPages={enemyLossData.totalPages}
-                onPageChange={(page) => handlePageChange('enemyLoss', page)}
-              />
-            </Box>
-          </SimpleGrid>
-        </Box>
-      </SimpleGrid>
-    </Flex>
+    </Box>
   );
 };
 

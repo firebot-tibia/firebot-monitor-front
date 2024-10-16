@@ -45,7 +45,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
   itemsPerPage: 30,
 
   setFilter: (filter) => {
-    const newSort = filter === 'Diaria' ? 'exp_yesterday' : 
+    const newSort = filter === 'Diaria' ? 'exp_yesterday' :
                     filter === 'Semanal' ? 'exp_week' : 'exp_month';
     set({ filter, sort: newSort, allyGainPage: 1, allyLossPage: 1, enemyGainPage: 1, enemyLossPage: 1 });
     get().fetchGuildStats('ally');
@@ -74,7 +74,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
   fetchGuildStats: async (guildType) => {
     const { filter, sort, vocationFilter, nameFilter, itemsPerPage, allyGainPage, allyLossPage, enemyGainPage, enemyLossPage } = get();
     set({ loading: true });
-  
+
     try {
       const selectedWorld = useStorageStore.getState().getItem('selectedWorld', '');
 
@@ -86,13 +86,13 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         sort: sort,
         offset: 0,
       };
-  
+
       const response = await getExperienceList(query);
-  
+
       const experienceField =
         filter === 'Diaria' ? 'experience_one_day' :
         filter === 'Semanal' ? 'experience_one_week' : 'experience_one_month';
-  
+
       const formattedData = response.exp_list.players.map((player: any) => ({
         experience: player[experienceField],
         vocation: player.vocation,
@@ -100,12 +100,12 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         level: player.level,
         online: player.online,
       }));
-  
+
       const gainData = formattedData.filter((player: any) => {
         const exp = parseInt(player.experience.replace(/,/g, ''));
         return exp > 0;
       });
-  
+
       const lossData = formattedData.filter((player: any) => {
         const exp = parseInt(player.experience.replace(/,/g, ''));
         return exp < 0;
@@ -114,34 +114,34 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         const expB = parseInt(b.experience.replace(/,/g, ''));
         return expA - expB;
       });
-  
+
       const calculateTotalExp = (data: any[]) => {
         return data.reduce((total, player) => {
           const exp = parseInt(player.experience.replace(/,/g, ''));
           return total + exp;
         }, 0);
       };
-  
+
       const gainTotalExp = calculateTotalExp(gainData);
       const lossTotalExp = calculateTotalExp(lossData);
-  
+
       const gainAvgExp = gainData.length > 0 ? gainTotalExp / gainData.length : 0;
       const lossAvgExp = lossData.length > 0 ? lossTotalExp / lossData.length : 0;
-  
+
       const newGainData = {
         data: gainData.slice((guildType === 'ally' ? allyGainPage - 1 : enemyGainPage - 1) * itemsPerPage, (guildType === 'ally' ? allyGainPage : enemyGainPage) * itemsPerPage),
         totalPages: Math.ceil(gainData.length / itemsPerPage),
         totalExp: gainTotalExp,
         avgExp: gainAvgExp,
       };
-  
+
       const newLossData = {
         data: lossData.slice((guildType === 'ally' ? allyLossPage - 1 : enemyLossPage - 1) * itemsPerPage, (guildType === 'ally' ? allyLossPage : enemyLossPage) * itemsPerPage),
         totalPages: Math.ceil(lossData.length / itemsPerPage),
         totalExp: lossTotalExp,
         avgExp: lossAvgExp,
       };
-  
+
       if (guildType === 'ally') {
         set({ allyGainData: newGainData, allyLossData: newLossData, loading: false });
       } else {

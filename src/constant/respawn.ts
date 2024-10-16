@@ -5,6 +5,7 @@ export const defaultRespawns = [
   { name: "Livraria Ice", image: "icecold_book.gif" },
   { name: "Livraria Fire", image: "burning_book.gif" },
   { name: "Livraria Energy", image: "energy_book.gif" },
+  { name: "Livraria (Energy)", image: "energy_book.gif" },
   { name: "Wardragon -1", image: "wardragon.gif" },
   { name: "Wardragon -2", image: "wardragon.gif" },
   { name: "Dragão -1", image: "wardragon.gif" },

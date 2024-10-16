@@ -19,10 +19,10 @@ export const formatExp = (value: number): string => {
   export const getTimeColor = (timeOnline: string | null): string => {
     try {
       if (!timeOnline) return 'red.500';
-  
+
       const [hours, minutes] = timeOnline.split(':').map(Number);
       const totalMinutes = hours * 60 + minutes;
-      
+
       if (totalMinutes <= 5) return 'red.500';
       if (totalMinutes <= 15) return 'orange.500';
       if (totalMinutes <= 30) return 'yellow.500';
@@ -39,45 +39,11 @@ export const clearLocalStorage = () => {
       const currentDomain = window.location.hostname;
       if (currentDomain === 'localhost' || currentDomain === 'monitor.firebot.run') {
         localStorage.removeItem('deathList');
-      } 
+      }
     } catch (error) {
       console.error('Error clearing localStorage:', error);
     }
   }
-};
-
-export const formatDate = (dateInput: string | Date | undefined | null): string => {
-  if (!dateInput) return 'Data desconhecida';
-  
-  let date: Date;
-  if (typeof dateInput === 'string') {
-    date = new Date(dateInput);
-  } else if (dateInput instanceof Date) {
-    date = dateInput;
-  } else {
-    return 'Data inválida';
-  }
-
-  if (isNaN(date.getTime())) {
-    return 'Data inválida';
-  }
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-};
-
-export const normalizeTimeOnline = (timeOnline: string): string => {
-  return timeOnline && timeOnline.trim() !== '' ? timeOnline : '00:00:00';
-};
-
-export const isOnline = (member: GuildMemberResponse): boolean => {
-  const normalizedTime = normalizeTimeOnline(member.TimeOnline);
-  return normalizedTime !== '00:00:00';
 };
 
 export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof useToast>) => {
@@ -99,7 +65,7 @@ export const formatTimeSlot = (timeString: string): string => {
   const currentDate = new Date();
   const startDate = new Date(currentDate.setHours(parseInt(start.split(':')[0]), parseInt(start.split(':')[1])));
   const endDate = new Date(currentDate.setHours(parseInt(end.split(':')[0]), parseInt(end.split(':')[1])));
-  
+
   return `${format(startDate, 'dd/MM/yyyy-HH:mm')} - ${format(endDate, 'dd/MM/yyyy-HH:mm')}`;
 };
 
@@ -110,14 +76,14 @@ export const defaultTimeSlots = [
 
 export const formatTimeSlotEnd = (timeSlot: string) => {
   const [startTime, endTime] = timeSlot.split(' - ');
-  
+
   const parseTimeString = (timeString: string) => {
     return parse(timeString, 'dd/MM/yyyy-HH:mm', new Date());
   };
 
   const formattedStart = format(parseTimeString(startTime), 'HH:mm');
   const formattedEnd = format(parseTimeString(endTime), 'HH:mm');
-  
+
   return `${formattedStart} - ${formattedEnd}`;
 };
 
@@ -146,4 +112,20 @@ export const capitalizeFirstLetter = (string: string) => {
 
 export const formatDateForAPI = (date: Date): string => {
   return format(date, 'dd/MM/yyyy-HH:mm');
+};
+
+export  const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const gmt3Date = new Date(date.getTime() - (3 * 60 * 60 * 1000));
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC'
+  };
+
+  return new Intl.DateTimeFormat('pt-BR', options).format(gmt3Date);
 };
