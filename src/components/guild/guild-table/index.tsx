@@ -1,16 +1,23 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useCallback, useMemo, useState } from 'react';
 import {
   Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box,
   useToast, Spinner, useColorModeValue, Tag, Flex,
-  TableContainer, useMediaQuery,
-  IconButton
+  TableContainer, useMediaQuery, IconButton,
+  Link, VStack,
+  Popover,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+  Button,
+  PopoverCloseButton
 } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import { LocalInput } from './local-input';
 import { CharacterClassification } from './render-classification';
 import { TableVocationIcons } from '../../../constant/character';
 import { GuildMemberResponse } from '../../../shared/interface/guild/guild-member.interface';
 import { copyExivas, getTimeColor } from '../../../shared/utils/utils';
-import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
+import { ChevronUpIcon, ChevronDownIcon, MoreHorizontal, X } from 'lucide-react';
 
 interface GuildMemberTableProps {
   data: GuildMemberResponse[];
@@ -22,6 +29,15 @@ interface GuildMemberTableProps {
   isLoading: boolean;
   onlineCount: number;
 }
+
+interface CharacterNameProps {
+  member: GuildMemberResponse;
+  handleNameClick: (member: GuildMemberResponse) => void;
+  isLargerThan992: boolean;
+  toggleTooltip: (id: string) => void;
+  isTooltipOpen: (id: string) => boolean;
+}
+
 
 type SortField = 'Level' | 'TimeOnline' | 'Vocation';
 type SortOrder = 'asc' | 'desc';
@@ -44,6 +60,88 @@ const ClassificationLegend: FC = () => (
   </HStack>
 );
 
+export const TooltipStateManager = () => {
+  const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set());
+
+  const toggleTooltip = useCallback((id: string) => {
+    setOpenTooltips(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const isTooltipOpen = useCallback((id: string) => openTooltips.has(id), [openTooltips]);
+
+  return { toggleTooltip, isTooltipOpen };
+};
+
+export const CharacterName: FC<CharacterNameProps> = ({
+  member,
+  handleNameClick,
+  isLargerThan992,
+  toggleTooltip,
+  isTooltipOpen
+}) => {
+  const memberId = useMemo(() => `${member.Name}-${member.Level}`, [member.Name, member.Level]);
+
+  return (
+    <Flex alignItems="center" maxWidth="100%">
+      <Image src={TableVocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "16px" : "14px"} mr={1} flexShrink={0} />
+      <Box
+        onClick={() => handleNameClick(member)}
+        cursor="pointer"
+        title="Clique para copiar exiva"
+        isTruncated
+        maxWidth="calc(100% - 40px)"
+      >
+        {member.Name}
+      </Box>
+      <Popover
+        isOpen={isTooltipOpen(memberId)}
+        onClose={() => {}}
+        closeOnBlur={false}
+        closeOnEsc={false}
+      >
+        <PopoverTrigger>
+          <IconButton
+            aria-label="More info"
+            icon={<MoreHorizontal size={16} />}
+            size="xs"
+            variant="ghost"
+            ml={1}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleTooltip(memberId);
+            }}
+          />
+        </PopoverTrigger>
+        <PopoverContent>
+          <PopoverCloseButton onClick={() => toggleTooltip(memberId)} />
+          <PopoverBody>
+            <VStack align="start" spacing={1}>
+              <Text>Level: {member.Level}</Text>
+              <Text>Vocation: {member.Vocation}</Text>
+              <Text>Time Online: {member.TimeOnline}</Text>
+              <Link
+                as={NextLink}
+                href={`/guild-stats/${encodeURIComponent(member.Name)}`}
+                color="red.300"
+              >
+                Ver estatísticas detalhadas
+              </Link>
+            </VStack>
+          </PopoverBody>
+        </PopoverContent>
+      </Popover>
+    </Flex>
+  );
+};
+
 export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   data,
   onLocalChange,
@@ -56,6 +154,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
 }) => {
   const [sortField, setSortField] = useState<SortField>('TimeOnline');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const { toggleTooltip, isTooltipOpen } = TooltipStateManager();
 
   const toast = useToast();
   const bgColor = useColorModeValue('black.800', 'black.900');
@@ -95,7 +194,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
           comparison = a.Vocation.localeCompare(b.Vocation);
           break;
       }
-      return sortOrder === 'asc' ? -comparison : comparison;
+      return sortOrder === 'asc' ? comparison : -comparison;
     });
   }, [data, sortField, sortOrder]);
 
@@ -145,18 +244,14 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                 <Tr key={member.Name} _hover={{ bg: hoverBgColor }}>
                   <Td px={0.5} py={responsivePadding} width="2%">{index + 1}</Td>
                   <Td px={0.5} py={responsivePadding} width="18%">
-                    <Flex alignItems="center" maxWidth="100%">
-                      <Image src={TableVocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "16px" : "14px"} mr={1} flexShrink={0} />
-                      <Box
-                        onClick={() => handleNameClick(member)}
-                        cursor="pointer"
-                        title="Clique para copiar exiva"
-                        isTruncated
-                        maxWidth="calc(100% - 15px)"
-                      >
-                        {member.Name}
-                      </Box>
-                    </Flex>
+                  <CharacterName
+                      key={`${member.Name}-${member.Level}`}
+                      member={member}
+                      handleNameClick={handleNameClick}
+                      isLargerThan992={isLargerThan992}
+                      toggleTooltip={toggleTooltip}
+                      isTooltipOpen={isTooltipOpen}
+                    />
                   </Td>
                   <Td px={0.5} py={responsivePadding} isNumeric width="5%">{member.Level}</Td>
                   {isLargerThan992 && (

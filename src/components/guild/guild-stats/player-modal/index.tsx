@@ -61,19 +61,24 @@ const CharacterStatsPage: React.FC = () => {
     fetchData();
   }, [characterName]);
 
+  const handleBack = () => {
+    router.back();
+  };
+
+
   return (
     <Box width="100%"  minH="100vh" py={8} px={4}>
       <VStack spacing={6} align="stretch" maxWidth="1400px" mx="auto">
         <Flex justifyContent="space-between" alignItems="center">
-          <Button
-            leftIcon={<ChevronLeftIcon />}
-            onClick={() => router.push('/guild-stats')}
-            bg={accentColor}
-            color={textColor}
-            _hover={{ bg: 'red.900' }}
-          >
-            Voltar para Estatísticas da Guilda
-          </Button>
+        <Button
+          leftIcon={<ChevronLeftIcon />}
+          onClick={handleBack}
+          bg={accentColor}
+          color={textColor}
+          _hover={{ bg: 'red.900' }}
+        >
+          Voltar
+        </Button>
         </Flex>
         <Heading color={textColor}>{characterName || 'Jogador Desconhecido'}</Heading>
         {loading ? (
