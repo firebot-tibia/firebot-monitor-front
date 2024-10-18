@@ -25,8 +25,9 @@ export const getExperienceList = async (query: ExperienceListQuery) => {
 
 export const getPlayerOnlineHistory = async (query: { character: string; }) => {
   try {
+    const decodedCharacter = decodeURIComponent(query.character);
     const response = await api.get(`/gamedata/online-time`, {
-      params: query,
+      params: { character: decodedCharacter },
     });
     return response.data;
   } catch (error) {
@@ -36,8 +37,9 @@ export const getPlayerOnlineHistory = async (query: { character: string; }) => {
 
 export const getPlayersLifeTimeDeaths = async (query: { character: string; }) => {
   try {
+    const decodedCharacter = decodeURIComponent(query.character);
     const response = await api.get(`/gamedata/players/deaths`, {
-      params: query,
+      params: { character: decodedCharacter },
     });
     return response.data;
   } catch (error) {
@@ -47,8 +49,9 @@ export const getPlayersLifeTimeDeaths = async (query: { character: string; }) =>
 
 export const getPlayerExperienceHistory = async (query: { character: string; }) => {
   try {
+    const decodedCharacter = decodeURIComponent(query.character);
     const response = await api.get(`/gamedata/players/experience-history`, {
-      params: query,
+      params: { character: decodedCharacter },
     });
     return response.data;
   } catch (error) {

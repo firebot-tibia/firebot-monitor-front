@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   SimpleGrid,
@@ -28,6 +29,10 @@ interface FilterBarProps {
   onFilterChange: (filter: string) => void;
   onVocationFilterChange: (vocation: string) => void;
   onNameFilterChange: (name: string) => void;
+  allyGainData: { data: { name: string }[] };
+  allyLossData: { data: { name: string }[] };
+  enemyGainData: { data: { name: string }[] };
+  enemyLossData: { data: { name: string }[] };
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
@@ -37,11 +42,24 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onFilterChange,
   onVocationFilterChange,
   onNameFilterChange,
+  allyGainData,
+  allyLossData,
+  enemyGainData,
+  enemyLossData,
 }) => {
   const [searchInput, setSearchInput] = useState(nameFilter);
+  const router = useRouter();
 
   const handleSearch = () => {
-    onNameFilterChange(searchInput);
+    const characterExists = [allyGainData, allyLossData, enemyGainData, enemyLossData]
+      .some(data => data.data.some(player => player.name.toLowerCase() === searchInput.toLowerCase()));
+
+    if (!characterExists) {
+      router.push(`/guild-stats/${encodeURIComponent(searchInput)}`);
+    } else {
+      onNameFilterChange(searchInput);
+    }
+    setSearchInput('');
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
@@ -64,7 +82,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
     bg: "red.900",
     borderColor: "red.700",
     boxShadow: "lg",
-    mt: "2px", // Add a small margin to separate the menu from the button
+    mt: "2px",
   };
 
   const menuItemStyle = {

@@ -51,7 +51,6 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
     closeDeleteModal
   } = useReservationsManager();
 
-  const bgColor = useColorModeValue('gray.800', 'gray.900');
   const textColor = useColorModeValue('gray.100', 'gray.200');
   const buttonBgColor = useColorModeValue('green.500', 'green.400');
   const buttonHoverBgColor = useColorModeValue('green.600', 'green.500');
@@ -138,7 +137,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
   }
 
   return (
-    <Box bg={bgColor} p={4} borderRadius="md" overflowX="auto" position="relative">
+    <Box p={4} borderRadius="md" overflowX="auto" position="relative">
       {isDeleting && (
         <Box
           position="absolute"

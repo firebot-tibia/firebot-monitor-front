@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   SimpleGrid,
   useDisclosure,
   VStack,
-  Heading,
   Tabs,
   TabList,
   Tab,
@@ -40,6 +40,7 @@ const GuildStatsContainer: React.FC = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const router = useRouter();
 
   const bgColor = "black.800";
   const softRedColor = "red.400";
@@ -63,31 +64,33 @@ const GuildStatsContainer: React.FC = () => {
     const characterExists = [allyGainData, allyLossData, enemyGainData, enemyLossData]
       .some(data => data.data.some(player => player.name.toLowerCase() === newName.toLowerCase()));
 
-    if (!characterExists) {
-      setSelectedCharacter(newName);
-      onOpen();
-    }
-  }, [allyGainData, allyLossData, enemyGainData, enemyLossData, setNameFilter, onOpen]);
+      if (!characterExists) {
+        router.push(`/guild-stats/${encodeURIComponent(newName)}`);
+      }
+  }, [allyGainData, allyLossData, enemyGainData, enemyLossData, setNameFilter, onOpen, router]);
 
   const handlePageChange = useCallback((guildType: 'allyGain' | 'allyLoss' | 'enemyGain' | 'enemyLoss', pageNumber: number) => {
     setPage(guildType, pageNumber);
   }, [setPage]);
 
   const handleCharacterClick = useCallback((characterName: string) => {
-    setSelectedCharacter(characterName);
-    onOpen();
-  }, [onOpen]);
+    router.push(`/guild-stats/${encodeURIComponent(characterName)}`);
+  }, [router]);
 
   return (
     <Box width="100%" bg={bgColor} minH="100vh" py={8} style={{ zoom: `${80}%` }}>
       <VStack spacing={6} align="stretch" maxWidth="1400px" mx="auto" px={4}>
-        <FilterBar
+      <FilterBar
           filter={filter}
           vocationFilter={vocationFilter}
           nameFilter={nameFilter}
           onFilterChange={handleFilterChange}
           onVocationFilterChange={handleVocationFilterChange}
           onNameFilterChange={handleNameFilterChange}
+          allyGainData={allyGainData}
+          allyLossData={allyLossData}
+          enemyGainData={enemyGainData}
+          enemyLossData={enemyLossData}
         />
 
         <Tabs variant="soft-rounded" colorScheme="red">
@@ -172,12 +175,6 @@ const GuildStatsContainer: React.FC = () => {
           </TabPanels>
         </Tabs>
       </VStack>
-
-      <PlayerModal
-        isOpen={isOpen}
-        onClose={onClose}
-        characterName={selectedCharacter}
-      />
     </Box>
   );
 };
