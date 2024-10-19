@@ -40,7 +40,7 @@ const InstructionsBox = () => {
             <Text fontSize="sm" fontWeight="bold" color="red.500">• Apenas contas de administrador podem editar os campos.</Text>
             <Text fontSize="sm">• Campo Local: Atualize a localização atual do seu personagem no jogo.</Text>
             <Text fontSize="sm">• Clique no nome: Copie o comando exiva para a área de transferência (CTRL+C).</Text>
-            <Text fontSize="sm">• Bugs ou erros: Por favor, relate-nos no Discord.</Text>
+            <Text fontSize="sm">• Clique nos ...: Para abrir as estatísticas do personagem</Text>
           </VStack>
         </Box>
         <Box flex={1}>

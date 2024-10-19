@@ -27,7 +27,7 @@ const LoginPage = () => {
   const inputBorderColor = useColorModeValue('gray.300', 'gray.700');
 
   const handleDiscordRedirect = () => {
-    window.open("https://discord.com/invite/R92awHFr", "_blank");
+    window.open("https://discord.gg/2uYKmHNmHP", "_blank");
   };
 
   return (

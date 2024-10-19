@@ -124,6 +124,7 @@ export const CharacterName: FC<CharacterNameProps> = ({
           <PopoverCloseButton onClick={() => toggleTooltip(memberId)} />
           <PopoverBody>
             <VStack align="start" spacing={1}>
+              <Text>Name: {member.Name}</Text>
               <Text>Level: {member.Level}</Text>
               <Text>Vocation: {member.Vocation}</Text>
               <Text>Time Online: {member.TimeOnline}</Text>
@@ -164,7 +165,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)");
   const [isLargerThan992] = useMediaQuery("(min-width: 992px)");
 
-  const responsiveFontSize = isLargerThan1200 ? "2xs" : isLargerThan992 ? "3xs" : "4xs";
+  const responsiveFontSize = isLargerThan1200 ? "xs" : isLargerThan992 ? "2xs" : "3xs";
   const responsivePadding = isLargerThan1200 ? 0.5 : 0.25;
 
   const handleNameClick = (member: GuildMemberResponse) => {
@@ -194,7 +195,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
           comparison = a.Vocation.localeCompare(b.Vocation);
           break;
       }
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return sortOrder === 'desc' ? comparison : -comparison;
     });
   }, [data, sortField, sortOrder]);
 

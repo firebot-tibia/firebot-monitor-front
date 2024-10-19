@@ -1,16 +1,15 @@
-import React, {useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   Flex, IconButton, HStack, Text, useDisclosure, Drawer,
   DrawerOverlay, DrawerContent, DrawerBody, VStack, Tooltip,
-  useColorModeValue, Box,
-  Icon
+  useColorModeValue, Box, Icon, Link
 } from "@chakra-ui/react";
-import { FaSignOutAlt, FaBars, FaCog } from "react-icons/fa";
-import { FaHome, FaMap, FaDiscord } from "react-icons/fa";
+import { FaSignOutAlt, FaBars, FaCog, FaDiscord } from "react-icons/fa";
+import { FaHome, FaMap } from "react-icons/fa";
 import { IoMdStats } from "react-icons/io";
 import { FaOptinMonster } from "react-icons/fa6";
 import { signOut } from "next-auth/react";
-import Link from 'next/link';
+import NextLink from 'next/link';
 import { clearLocalStorage } from "../../../shared/utils/utils";
 import WorldSelect from "../world-select";
 import ModeSelect from "../mode-select";
@@ -29,7 +28,6 @@ const navItems: NavItem[] = [
   { name: 'Estatísticas da Guild', href: '/guild-stats', icon: IoMdStats },
   { name: 'Respawns', href: '/reservations', icon: FaOptinMonster, requiredStatus: ['admin', 'reservations'] },
   { name: 'Mapa Exiva', href: '/tibia-map', icon: FaMap },
-  { name: 'Suporte no Discord', href: 'https://discord.gg/5eUrDejn', icon: FaDiscord, target: '_blank' },
 ];
 
 const Topbar = () => {
@@ -72,15 +70,22 @@ const Topbar = () => {
           color={textColor}
           fontSize="20px"
         />
-        <Text fontSize="xl" fontWeight="bold">
-          Firebot Monitor
-        </Text>
+        <Flex align="center">
+          <Text fontSize="xl" fontWeight="bold" mr={2}>
+            Firebot Monitor
+          </Text>
+          <Tooltip label="Suporte no Discord">
+            <Link href="https://discord.gg/2uYKmHNmHP" isExternal>
+              <Icon as={FaDiscord} fontSize="24px" color={textColor} />
+            </Link>
+          </Tooltip>
+        </Flex>
         <HStack spacing={2}>
           <WorldSelect />
           <ModeSelect />
           <Tooltip label="Settings">
             <IconButton
-              as={Link}
+              as={NextLink}
               href="/settings"
               aria-label="Settings"
               icon={<FaCog />}
@@ -108,7 +113,7 @@ const Topbar = () => {
           <DrawerBody p={0}>
             <VStack spacing={0} align="stretch">
               {filteredNavItems.map((item, index) => (
-                <Link key={index} href={item.href} passHref>
+                <NextLink key={index} href={item.href} passHref>
                   <Flex
                     as="a"
                     align="center"
@@ -122,11 +127,12 @@ const Topbar = () => {
                       bg: 'whiteAlpha.100',
                     }}
                     onClick={onClose}
+                    target={item.target}
                   >
                     <Icon as={item.icon} mr={3} fontSize="16px" />
                     {item.name}
                   </Flex>
-                </Link>
+                </NextLink>
               ))}
             </VStack>
           </DrawerBody>
