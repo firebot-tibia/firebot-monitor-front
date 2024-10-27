@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 import {
   Flex, IconButton, HStack, Text, useDisclosure, Drawer,
   DrawerOverlay, DrawerContent, DrawerBody, VStack, Tooltip,
-  useColorModeValue, Box, Icon, Link
+  useColorModeValue, Box, Icon, Link,
+  Image
 } from "@chakra-ui/react";
 import { FaSignOutAlt, FaBars, FaCog, FaDiscord } from "react-icons/fa";
 import { FaHome, FaMap } from "react-icons/fa";
@@ -112,6 +113,7 @@ const Topbar = () => {
         <DrawerContent bg={bgColor} color={textColor}>
           <DrawerBody p={0}>
             <VStack spacing={0} align="stretch">
+            <Image src="/assets/logo.png" alt="Firebot Monitor" boxSize="120px" mr={2} />
               {filteredNavItems.map((item, index) => (
                 <NextLink key={index} href={item.href} passHref>
                   <Flex

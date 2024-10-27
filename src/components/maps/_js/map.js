@@ -40,7 +40,6 @@
     const huntAreas = [
         { name: "Gold Token", x: 32128, y: 31369, floor: 7 },
         { name: "Cobra Bastion", x: 33393, y: 32666, floor: 7 },
-        { name: "Ankrahmun Gold Token", x: 32141, y: 31353, floor: 12 },
         { name: "Cobra Bastion", x: 33391, y: 32667, floor: 7 },
         { name: "(0 & +1 flask) Cobra Bastion", x: 33397, y: 32653, floor: 5 },
         { name: "(-1) Cobra Bastion", x: 33362, y: 32749, floor: 8 },
@@ -95,7 +94,6 @@
         { name: "Inquisition (DT)", x: 33360, y: 31601, floor: 14 },
         { name: "Ingol (Surface)", x: 33720, y: 32587, floor: 7 },
         { name: "Ingol -1", x: 33764, y: 23568, floor: 8 },
-        { name: "Zao Gold Token", x: 32180, y: 31357, floor: 12 },
         { name: "Lizard City", x: 33078, y: 31186, floor: 7 },
         { name: "Draken Walls (North)", x: 33032, y: 31109, floor: 6 },
         { name: "Draken Walls (South)", x: 33116, y: 31247, floor: 6 },
@@ -116,7 +114,10 @@
         { name: "Summer Court", x: 33674, y: 32227, floor: 7 },
         { name: "Winter Court", x: 33698, y: 32125, floor: 7 },
         { name: "Dream Laberynth (Fire)", x: 32014, y: 31947, floor: 13 },
-        { name: "Dream Laberynth (Ice)", x: 32066, y: 31949, floor: 13 }
+        { name: "Dream Laberynth (Ice)", x: 32066, y: 31949, floor: 13 },
+        { name: "Rottem Golem", x: 33841, y: 31120, floor: 11 }, 
+        { name: "Wardragon", x: 33222, y: 31051, floor: 14 },
+        { name: "Rotthings ( Piolho )", x: 33222, y: 32028, floor: 8 }
     ];
     
 

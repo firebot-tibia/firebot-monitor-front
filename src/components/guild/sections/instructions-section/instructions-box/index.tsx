@@ -51,6 +51,12 @@ const InstructionsBox = () => {
             </Flex>
             <Text fontSize="sm">• Próxima atualização: Guilds Leave - Quem saiu / entrou na guild alida e inimiga</Text>
             <Text fontSize="sm">• Próxima atualização: Aprimoramento do Mapa de Exiva com triangulaçáo automática</Text>
+            <Text
+              fontSize="sm"
+              animation={isBlinking ? `${blinkAnimation} 1s infinite` : 'none'}
+              fontWeight="bold"
+              color="green.500"
+            >Identificamos um problema na contagem do tempo online, esta sendo resolvido...</Text>
           </VStack>
         </Box>
         <Box flex={1}>
