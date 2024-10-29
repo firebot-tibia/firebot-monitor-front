@@ -1,7 +1,7 @@
 import { useToast, useDisclosure } from "@chakra-ui/react";
 import { endOfDay, format, lastDayOfMonth, startOfDay } from "date-fns";
 import { useState, useEffect, useCallback } from "react";
-import { getReservationsList, getAllRespawnsPremiums, createRespawn, removeRespawnApi, createReservation, deleteReservation } from "../../../services/guilds";
+import { getReservationsList, getAllRespawnsPremiums, createReservation, deleteReservation } from "../../../services/guilds";
 import { usePermissionCheck } from "../../../shared/hooks/usePermissionCheck";
 import { Respawn, CreateReservationData, Reservation } from "../../../shared/interface/reservations.interface";
 import { defaultTimeSlots } from "../../../shared/utils/utils";
@@ -24,7 +24,7 @@ export const useReservationsManager = () => {
     const now = new Date();
     const firstDayOfMonth = format(startOfDay(now), 'dd/MM/yyyy-HH:mm');
     const lastDayOfCurrentMonth = format(endOfDay(lastDayOfMonth(now)), 'dd/MM/yyyy-HH:mm');
-  
+
     try {
       const guildId = useStorageStore.getState().getItem('selectedGuildId', '');
       if (!guildId) {
@@ -56,47 +56,6 @@ export const useReservationsManager = () => {
       console.error('Failed to fetch respawns:', error);
     }
   }, []);
-
-  const addRespawn = useCallback(async (newRespawn: { name: string; image: string }) => {
-    if (!checkPermission()) return;
-    try {
-      const createdRespawn = await createRespawn({
-        name: newRespawn.name,
-        description: newRespawn.name,
-        premium: true,
-      });
-      setRespawns(prev => [...prev, createdRespawn]);
-      fetchRespawns();
-      toast({
-        title: "Respawn criado com sucesso",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error('Failed to create respawn:', error);
-      toast({
-        title: "Esse respawn já existe",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [checkPermission, fetchRespawns, toast]);
-
-  const removeRespawn = useCallback(async (id: string) => {
-    if (!checkPermission()) return;
-    if (id) {
-      await removeRespawnApi(id);
-      fetchRespawns();
-      toast({
-        title: "Respawn removido com sucesso",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [checkPermission, fetchRespawns, toast]);
 
   const handleAddReservation = useCallback(async (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => {
     if (!checkPermission()) return;
@@ -179,8 +138,6 @@ export const useReservationsManager = () => {
     handleAddReservation,
     handleDeleteReservation,
     confirmDeleteReservation,
-    addRespawn,
-    removeRespawn,
     fetchReservations
   };
 };

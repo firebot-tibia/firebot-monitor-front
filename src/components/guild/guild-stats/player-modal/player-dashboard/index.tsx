@@ -1,31 +1,125 @@
-import { Alert, AlertIcon, AlertTitle, AlertDescription, GridItem, Stat, StatLabel, StatNumber, StatHelpText,
-  StatArrow, HStack, MenuButton, Button, MenuList, MenuItem, Thead, Tr, Th, Tbody, Td, VStack, Table, Text, Box, Grid, Menu } from "@chakra-ui/react";
-import { useState, useMemo, useEffect } from "react";
-import { ExperienceDataItem } from "../../../../../shared/interface/guild/guild-stats-experience-history.interface";
-import { OnlineTimeDay, PlayerDeaths } from "../../../../../shared/interface/guild/guild-stats-player.interface";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  HStack, Box, Text, Grid, GridItem, Menu,
+  MenuButton, MenuList, MenuItem, Button, Table, Thead,
+  Tbody, Tr, Th, Td, Tooltip as ChakraTooltip,
+} from '@chakra-ui/react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import {  motion } from 'framer-motion';
+import { ArrowUpIcon, ArrowDownIcon, ClockIcon, StarIcon,
+  TrendingUpIcon, ZapIcon,
+  ChevronDownIcon,
+  } from 'lucide-react';
+import { ExperienceDataItem } from "../../interfaces/guild-stats-experience-history.interface";
+import { OnlineTimeDay } from "../../interfaces/guild-stats-player.interface";
+import { StatCardProps, PlayerDashboardProps, ChartCardProps, CustomTooltipProps } from './interfaces/player-dashboard.interface';
 
-interface PlayerDashboardProps {
-  experienceData: ExperienceDataItem[];
-  onlineHistory: OnlineTimeDay[];
-  deathData: PlayerDeaths | null;
-}
+
+const COLORS = {
+  primary: '#4F46E5',
+  secondary: '#10B981',
+  accent: '#F59E0B',
+  danger: '#EF4444',
+  background: {
+    dark: '#111827',
+    card: '#1F2937',
+    hover: '#374151'
+  },
+  text: {
+    primary: '#F9FAFB',
+    secondary: '#D1D5DB',
+    muted: '#9CA3AF'
+  },
+  chart: {
+    experience: '#EC4899',
+    level: '#3B82F6',
+    online: '#10B981',
+    grid: 'rgba(255, 255, 255, 0.1)'
+  }
+};
+
+const MotionBox = motion(Box);
+
+const LoadingSpinner: React.FC = () => (
+  <Box className="flex justify-center items-center h-64">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500" />
+  </Box>
+);
+
+const EmptyState: React.FC<{ title: string; message: string }> = ({ title, message }) => (
+  <Box className="text-center py-12 bg-gray-900 rounded-xl border border-gray-700">
+    <Text className="text-xl font-semibold text-white mb-2">{title}</Text>
+    <Text className="text-gray-400">{message}</Text>
+  </Box>
+);
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, change, suffix = '', icon: Icon }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <MotionBox
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      initial={false}
+      className="relative overflow-hidden rounded-xl"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+    >
+      <Box
+        className={`
+          p-6 rounded-xl border border-gray-700 transition-all duration-200
+          ${isHovered ? 'bg-gray-800' : 'bg-gray-900'}
+        `}
+      >
+        <HStack spacing={4} className="mb-4">
+          <Box
+            className={`
+              p-2 rounded-lg transition-colors duration-200
+              ${isHovered ? 'bg-indigo-600' : 'bg-indigo-500/20'}
+            `}
+          >
+            <Icon
+              className={`
+                w-5 h-5 transition-colors duration-200
+                ${isHovered ? 'text-white' : 'text-indigo-500'}
+              `}
+            />
+          </Box>
+          <Text className="text-gray-400 font-medium">{title}</Text>
+        </HStack>
+
+        <Box className="space-y-1">
+          <Text className="text-3xl font-bold text-white tracking-tight">
+            {value}{suffix}
+          </Text>
+          {change && (
+            <HStack spacing={2}>
+              {change > 0 ? (
+                <ArrowUpIcon className="w-4 h-4 text-green-500" />
+              ) : (
+                <ArrowDownIcon className="w-4 h-4 text-red-500" />
+              )}
+              <Text
+                className={
+                  change > 0 ? 'text-green-500' : 'text-red-500'
+                }
+              >
+                {Math.abs(change)}
+              </Text>
+            </HStack>
+          )}
+        </Box>
+      </Box>
+    </MotionBox>
+  );
+};
 
 const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ experienceData, onlineHistory, deathData }) => {
   const [selectedDate, setSelectedDate] = useState('');
 
-  const bgColor = 'bg-gray-900';
-  const cardBgColor = 'bg-gray-900';
-  const textColor = 'text-white';
-  const accentColor = 'text-red-500';
-
-  const expChartColor = '#ff6384';
-  const levelChartColor = '#36a2eb';
-  const timeChartColor = '#4bc0c0';
-
   const hasExperienceData = experienceData && experienceData.length > 0;
   const hasOnlineHistory = onlineHistory && onlineHistory.length > 0;
-  const hasDeathData = deathData && deathData.deaths && deathData.deaths.length > 0;
 
   const sortedHistory = useMemo(() => {
     if (!hasOnlineHistory) return [];
@@ -47,251 +141,505 @@ const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ experienceData, onlin
 
   const latestExp = hasExperienceData ? experienceData[experienceData.length - 1] : null;
 
-  const EmptyStateCard = ({ title, message }: { title: string; message: string }) => (
-    <Box className={`${cardBgColor} p-4 rounded-md`}>
-      <Alert variant="left-accent" status="info" className="bg-blue-900 border-blue-500">
-        <AlertIcon />
-        <Box>
-          <AlertTitle className={textColor}>{title}</AlertTitle>
-          <AlertDescription className={textColor}>{message}</AlertDescription>
-        </Box>
-      </Alert>
-    </Box>
-  );
+const ExperienceChart: React.FC<{
+  data: ExperienceDataItem[];
+  formatValue: (value: number) => string;
+}> = ({ data, formatValue }) => {
+  const [focusedDataIndex, setFocusedDataIndex] = useState<number | null>(null);
 
-  const StatsGrid = () => {
-    if (!hasExperienceData) {
-      return (
-        <EmptyStateCard
-          title="Sem dados de experiência"
-          message="Nenhum dado de experiência disponível para este jogador ainda."
-        />
-      );
-    }
+  const chartData = useMemo(() =>
+    data.map(item => ({
+      date: new Date(item.date).toLocaleDateString('pt-BR'),
+      experience: item.experience,
+      level: item.level,
+      exp_change: item.exp_change,
+      originalDate: item.date
+    }))
+  , [data]);
 
-    return (
-      <Grid className="grid grid-cols-4 gap-4">
-        <GridItem>
-          <Box className={`${cardBgColor} p-4 rounded-md`}>
-            <Stat>
-              <StatLabel className={textColor}>Nível Atual</StatLabel>
-              <StatNumber className={accentColor}>{latestExp?.level || 'N/A'}</StatNumber>
-              {latestExp?.level_change && (
-                <StatHelpText className={textColor}>
-                  <StatArrow type={latestExp.level_change > 0 ? 'increase' : 'decrease'} />
-                  {latestExp.level_change}
-                </StatHelpText>
-              )}
-            </Stat>
-          </Box>
-        </GridItem>
+  return (
+    <ChartCard title="Progresso de Experiência e Nível">
+      <Box className="h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={chartData}
+            onMouseMove={(e) => {
+              if (e.activeTooltipIndex !== undefined) {
+                setFocusedDataIndex(e.activeTooltipIndex);
+              }
+            }}
+            onMouseLeave={() => setFocusedDataIndex(null)}
+          >
+            <defs>
+              <linearGradient id="expLine" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={COLORS.chart.experience} stopOpacity={0.8}/>
+                <stop offset="95%" stopColor={COLORS.chart.experience} stopOpacity={0.2}/>
+              </linearGradient>
+              <linearGradient id="levelLine" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={COLORS.chart.level} stopOpacity={0.8}/>
+                <stop offset="95%" stopColor={COLORS.chart.level} stopOpacity={0.2}/>
+              </linearGradient>
+            </defs>
 
-        <GridItem>
-          <Box className={`${cardBgColor} p-4 rounded-md`}>
-            <Stat>
-              <StatLabel className={textColor}>Experiência Total</StatLabel>
-              <StatNumber className={accentColor}>{formatLargeNumber(latestExp?.experience || 0)}</StatNumber>
-              {latestExp?.exp_change && (
-                <StatHelpText className={textColor}>
-                  <StatArrow type={latestExp.exp_change > 0 ? 'increase' : 'decrease'} />
-                  {formatLargeNumber(latestExp.exp_change)}
-                </StatHelpText>
-              )}
-            </Stat>
-          </Box>
-        </GridItem>
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.chart.grid} />
 
-        <GridItem>
-          <Box className={`${cardBgColor} p-4 rounded-md`}>
-            <Stat>
-              <StatLabel className={textColor}>Média Exp/Hora</StatLabel>
-              <StatNumber className={accentColor}>
-                {formatLargeNumber(latestExp?.average_experience_per_hour || 0)}
-              </StatNumber>
-            </Stat>
-          </Box>
-        </GridItem>
-
-        <GridItem>
-          <Box className={`${cardBgColor} p-4 rounded-md`}>
-            <Stat>
-              <StatLabel className={textColor}>Tempo Online (Último)</StatLabel>
-              <StatNumber className={accentColor}>{latestExp?.time_online || 'N/A'}</StatNumber>
-            </Stat>
-          </Box>
-        </GridItem>
-      </Grid>
-    );
-  };
-
-  const ExperienceChart = () => {
-    if (!hasExperienceData) return null;
-
-    const chartData = experienceData.map(data => ({
-      date: new Date(data.date).toLocaleDateString('pt-BR'),
-      experience: data.experience,
-      level: data.level
-    }));
-
-    return (
-      <Box className={`${cardBgColor} p-4 rounded-md h-[450px]`}>
-        <Text className={`${textColor} font-bold text-lg mb-4 text-center`}>
-          Progresso de Experiência e Nível
-        </Text>
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-            <XAxis dataKey="date" stroke="white" angle={-45} textAnchor="end" height={60} />
-            <YAxis yAxisId="left" stroke="white" tickFormatter={formatLargeNumber} />
-            <YAxis yAxisId="right" orientation="right" stroke="white" />
-            <Tooltip
-              contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none' }}
-              labelStyle={{ color: 'white' }}
-              formatter={(value: number) => formatLargeNumber(value)}
+            <XAxis
+              dataKey="date"
+              stroke={COLORS.text.secondary}
+              tick={{ fill: COLORS.text.secondary }}
+              angle={-45}
+              textAnchor="end"
+              height={60}
             />
+
+            <YAxis
+              yAxisId="left"
+              stroke={COLORS.text.secondary}
+              tick={{ fill: COLORS.text.secondary }}
+              tickFormatter={formatValue}
+            />
+
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              stroke={COLORS.text.secondary}
+              tick={{ fill: COLORS.text.secondary }}
+            />
+
+            <Tooltip
+              content={
+                <CustomTooltip
+                  valueFormatter={formatValue}
+                />
+              }
+            />
+
             <Legend />
-            <Line yAxisId="left" type="monotone" dataKey="experience" stroke={expChartColor} name="Experiência Total" />
-            <Line yAxisId="right" type="monotone" dataKey="level" stroke={levelChartColor} name="Nível" />
+
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="experience"
+              stroke={COLORS.chart.experience}
+              strokeWidth={2}
+              dot={(props: any) => {
+                const isFocused = focusedDataIndex === props.index;
+                return (
+                  <circle
+                    cx={props.cx}
+                    cy={props.cy}
+                    r={isFocused ? 6 : 4}
+                    fill={COLORS.chart.experience}
+                    strokeWidth={isFocused ? 2 : 0}
+                    stroke="white"
+                    className="transition-all duration-200"
+                  />
+                );
+              }}
+              name="Experiência"
+              animationDuration={1000}
+            />
+
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="level"
+              stroke={COLORS.chart.level}
+              strokeWidth={2}
+              dot={(props: any) => {
+                const isFocused = focusedDataIndex === props.index;
+                return (
+                  <circle
+                    cx={props.cx}
+                    cy={props.cy}
+                    r={isFocused ? 6 : 4}
+                    fill={COLORS.chart.level}
+                    strokeWidth={isFocused ? 2 : 0}
+                    stroke="white"
+                    className="transition-all duration-200"
+                  />
+                );
+              }}
+              name="Nível"
+              animationDuration={1000}
+            />
           </LineChart>
         </ResponsiveContainer>
       </Box>
-    );
-  };
+    </ChartCard>
+  );
+};
 
-  const OnlineTimeChart = () => {
-    if (!hasOnlineHistory) return null;
 
-    const selectedDay = sortedHistory.find(day => day.date === selectedDate);
-    const hourlyData = new Array(24).fill(0).map((_, index) => ({
+const OnlineTimeChart: React.FC<{
+  data: OnlineTimeDay[];
+  selectedDate: string;
+  onDateChange: (date: string) => void;
+}> = ({ data, selectedDate, onDateChange }) => {
+  const [hoveredBar, setHoveredBar] = useState<string | null>(null);
+  const [animationComplete, setAnimationComplete] = useState(false);
+  const [isAnimated, setIsAnimated] = useState(false);
+
+  const hourlyData = useMemo(() => {
+    const selectedDay = data.find(day => day.date === selectedDate);
+    if (!selectedDay?.online_time_messages) return [];
+
+    const hours = new Array(24).fill(0).map((_, index) => ({
       hour: `${index.toString().padStart(2, '0')}:00`,
-      onlineTime: 0
+      onlineTime: 0,
+      messages: [] as { start: Date; end: Date }[]
     }));
 
-    if (selectedDay?.online_time_messages) {
-      selectedDay.online_time_messages.forEach(message => {
-        const startTime = new Date(message.start_time);
-        const endTime = new Date(message.end_time);
-        const startHour = startTime.getHours();
-        const endHour = endTime.getHours();
-        const duration = (endTime.getTime() - startTime.getTime()) / 3600000;
+    selectedDay.online_time_messages.forEach(message => {
+      const start = new Date(message.start_time);
+      const end = new Date(message.end_time);
+      const startHour = start.getHours();
+      const endHour = end.getHours();
 
-        if (startHour === endHour) {
-          hourlyData[startHour].onlineTime += duration;
-        } else {
-          for (let hour = startHour; hour <= endHour; hour++) {
-            if (hour === startHour) {
-              hourlyData[hour].onlineTime += (60 - startTime.getMinutes()) / 60;
-            } else if (hour === endHour) {
-              hourlyData[hour].onlineTime += endTime.getMinutes() / 60;
-            } else {
-              hourlyData[hour].onlineTime += 1;
-            }
+      if (startHour === endHour) {
+        const duration = (end.getTime() - start.getTime()) / 3600000;
+        hours[startHour].onlineTime += duration;
+        hours[startHour].messages.push({ start, end });
+      } else {
+        for (let hour = startHour; hour <= endHour; hour++) {
+          let duration = 0;
+          if (hour === startHour) {
+            duration = (60 - start.getMinutes()) / 60;
+          } else if (hour === endHour) {
+            duration = end.getMinutes() / 60;
+          } else {
+            duration = 1;
           }
+          hours[hour].onlineTime += duration;
+          hours[hour].messages.push({ start, end });
         }
-      });
-    }
+      }
+    });
 
-    return (
-      <Box className={`${cardBgColor} p-4 rounded-md h-[450px]`}>
-        <HStack className="justify-between mb-4">
-          <Text className={`${textColor} font-bold text-lg`}>Tempo Online por Hora</Text>
-          <Menu>
-            <MenuButton as={Button} className={`${bgColor} ${textColor}`}>
-              {new Date(selectedDate).toLocaleDateString('pt-BR')}
-            </MenuButton>
-            <MenuList className={`${bgColor} max-h-[200px] overflow-y-auto`}>
-              {sortedHistory.map(day => (
-                <MenuItem
-                  key={day.date}
-                  onClick={() => setSelectedDate(day.date)}
-                  className={`${bgColor} ${textColor} hover:${cardBgColor}`}
-                >
-                  {new Date(day.date).toLocaleDateString('pt-BR', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                  - Total: {day.total_online_time_str}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
-        </HStack>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={hourlyData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-            <XAxis dataKey="hour" stroke="white" />
-            <YAxis stroke="white" tickFormatter={(value) => `${value}h`} />
-            <Tooltip
-              contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none' }}
-              labelStyle={{ color: 'white' }}
-              formatter={(value: number) => `${value.toFixed(2)} horas`}
+    return hours;
+  }, [data, selectedDate]);
+
+  return (
+    <ChartCard
+      title="Tempo Online por Hora"
+      action={
+        <DateSelector
+          dates={data.map(day => ({
+            date: day.date,
+            label: `${new Date(day.date).toLocaleDateString('pt-BR')} - ${day.total_online_time_str}`
+          }))}
+          selectedDate={selectedDate}
+          onDateChange={onDateChange}
+        />
+      }
+    >
+      <Box className="h-[400px]">
+        <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+            data={hourlyData}
+            onMouseMove={() => !isAnimated && setIsAnimated(true)}
+          >
+            <defs>
+              <linearGradient id="onlineBar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={COLORS.chart.online} stopOpacity={0.8}/>
+                <stop offset="95%" stopColor={COLORS.chart.online} stopOpacity={0.2}/>
+              </linearGradient>
+            </defs>
+
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.chart.grid} />
+
+            <XAxis
+              dataKey="hour"
+              stroke={COLORS.text.secondary}
+              tick={{ fill: COLORS.text.secondary }}
             />
-            <Legend />
-            <Bar dataKey="onlineTime" fill={timeChartColor} name="Tempo Online" />
+
+            <YAxis
+              stroke={COLORS.text.secondary}
+              tick={{ fill: COLORS.text.secondary }}
+              tickFormatter={(value) => `${value}h`}
+            />
+
+            <Tooltip
+              content={
+                <CustomTooltip
+                  valueFormatter={(value) => `${value.toFixed(2)} horas`}
+                />
+              }
+            />
+
+            <Bar
+              dataKey="onlineTime"
+              name="Tempo Online"
+              radius={[4, 4, 0, 0]}
+              onMouseEnter={(data) => setHoveredBar(data.hour)}
+              onMouseLeave={() => setHoveredBar(null)}
+            >
+              {hourlyData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={hoveredBar === entry.hour ? COLORS.chart.online : 'url(#onlineBar)'}
+                  className="transition-colors duration-200"
+                >
+                  {animationComplete && (
+                    <animate
+                      attributeName="opacity"
+                      from="0"
+                      to="1"
+                      dur="0.5s"
+                      begin={`${index * 50}ms`}
+                    />
+                  )}
+                </Cell>
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </Box>
-    );
-  };
+    </ChartCard>
+  );
+};
 
-  const DeathsTable = () => {
-    if (!hasDeathData) {
-      return (
-        <EmptyStateCard
-          title="Sem histórico de mortes"
-          message="Nenhuma morte registrada para este jogador."
-        />
-      );
-    }
+const ChartCard: React.FC<ChartCardProps> = ({
+  title,
+  children,
+  action,
+  isLoading = false
+}) => (
+  <MotionBox
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="bg-gray-900 rounded-xl border border-gray-700 p-6"
+  >
+    <HStack className="justify-between mb-6">
+      <Text className="text-lg font-semibold text-white">{title}</Text>
+      {action}
+    </HStack>
+    {isLoading ? <LoadingSpinner /> : children}
+  </MotionBox>
+);
 
-    return (
-      <Box className={`${cardBgColor} p-4 rounded-md`}>
-        <Text className={`${textColor} font-bold mb-2`}>Histórico de Mortes</Text>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th className={textColor}>Data</Th>
-              <Th className={textColor}>Nível</Th>
-              <Th className={textColor}>Morto por</Th>
-              <Th className={textColor}>Descrição</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {deathData.deaths.slice(0, 5).map((death, index) => (
-              <Tr key={index}>
-                <Td className={textColor}>{new Date(death.date).toLocaleDateString('pt-BR')}</Td>
-                <Td className={textColor}>{death.text.match(/Level (\d+)/)?.[1] || 'N/A'}</Td>
-                <Td className={textColor}>{death.killers[0]}</Td>
-                <Td className={textColor}>{death.text}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
-    );
-  };
+const CustomTooltip: React.FC<CustomTooltipProps> = ({
+  active,
+  payload,
+  label,
+  valueFormatter = (val) => val?.toString() || '0'
+}) => {
+  if (!active || !payload) return null;
 
   return (
-    <VStack className="space-y-6">
-      <StatsGrid />
-
-      {(!hasExperienceData && !hasOnlineHistory) ? (
-        <EmptyStateCard
-          title="Sem dados de progresso"
-          message="Não há dados de experiência ou tempo online disponíveis para este jogador."
-        />
-      ) : (
-        <Grid className="grid grid-cols-2 gap-6">
-          {hasExperienceData && <GridItem><ExperienceChart /></GridItem>}
-          {hasOnlineHistory && <GridItem><OnlineTimeChart /></GridItem>}
-        </Grid>
-      )}
-
-      <DeathsTable />
-    </VStack>
+    <MotionBox
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-gray-800 border border-gray-700 p-3 rounded-lg shadow-lg"
+    >
+      <Text className="text-sm font-medium text-white mb-2">
+        {label}
+      </Text>
+      {payload.map((item, index) => (
+        <HStack key={index} className="space-x-2">
+          <Box
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: item.color }}
+          />
+          <Text className="text-sm text-gray-300">
+            {`${item.name}: ${valueFormatter(item.value)}`}
+          </Text>
+        </HStack>
+      ))}
+    </MotionBox>
   );
+};
+
+
+const DateSelector = ({
+  dates,
+  selectedDate,
+  onDateChange
+}: {
+  dates: { date: string; label: string }[];
+  selectedDate: string;
+  onDateChange: (date: string) => void;
+}) => (
+  <Menu>
+    <MenuButton
+      as={Button}
+      className="bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+      rightIcon={<ChevronDownIcon className="w-4 h-4" />}
+    >
+      {selectedDate ?
+        new Date(selectedDate).toLocaleDateString('pt-BR') :
+        'Selecionar Data'
+      }
+    </MenuButton>
+    <MenuList
+      className="bg-gray-800 border-gray-700 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700"
+    >
+      {dates.map(({ date, label }) => (
+        <MenuItem
+          key={date}
+          onClick={() => onDateChange(date)}
+          className={`
+            text-white hover:bg-gray-700 transition-colors
+            ${selectedDate === date ? 'bg-gray-700' : ''}
+          `}
+        >
+          {label}
+        </MenuItem>
+      ))}
+    </MenuList>
+  </Menu>
+);
+
+return (
+  <Box className="w-full max-w-7xl mx-auto p-6 space-y-8">
+    <MotionBox
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-8"
+    >
+      <Text className="text-3xl font-bold text-white mb-2">
+        Estatísticas do Jogador
+      </Text>
+      <Box className="h-1 w-32 bg-indigo-600 rounded" />
+    </MotionBox>
+
+    <MotionBox
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.2 }}
+    >
+      <Grid
+        templateColumns={{
+          base: "repeat(1, 1fr)",
+          md: "repeat(2, 1fr)",
+          lg: "repeat(4, 1fr)"
+        }}
+        gap={6}
+      >
+        <StatCard
+          title="Nível Atual"
+          value={latestExp?.level || 'N/A'}
+          change={latestExp?.level_change}
+          icon={StarIcon}
+        />
+        <StatCard
+          title="Experiência Total"
+          value={formatLargeNumber(latestExp?.experience || 0)}
+          change={latestExp?.exp_change}
+          icon={TrendingUpIcon}
+        />
+        <StatCard
+          title="Média Exp/Hora"
+          value={formatLargeNumber(latestExp?.average_experience_per_hour || 0)}
+          suffix="/h"
+          change={latestExp?.average_experience_per_hour}
+          icon={ZapIcon}
+        />
+        <StatCard
+          title="Tempo Online"
+          value={latestExp?.time_online || 'N/A'}
+          icon={ClockIcon}
+        />
+      </Grid>
+    </MotionBox>
+
+    {(!hasExperienceData && !hasOnlineHistory) ? (
+      <EmptyState
+        title="Sem dados de progresso"
+        message="Não há dados de experiência ou tempo online disponíveis para este jogador."
+      />
+    ) : (
+      <MotionBox
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        <Grid
+          templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }}
+          gap={6}
+        >
+          {hasExperienceData && (
+            <GridItem>
+              <ExperienceChart
+                data={experienceData}
+                formatValue={formatLargeNumber}
+              />
+            </GridItem>
+          )}
+
+          {hasOnlineHistory && (
+            <GridItem>
+              <OnlineTimeChart
+                data={sortedHistory}
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+              />
+            </GridItem>
+          )}
+        </Grid>
+      </MotionBox>
+    )}
+
+      <MotionBox
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="bg-gray-900 rounded-xl border border-gray-700 p-6"
+      >
+        <Text className="text-lg font-semibold text-white mb-4">
+          Histórico de Mortes
+        </Text>
+        <Box className="overflow-x-auto">
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th className="text-gray-400">Data</Th>
+                <Th className="text-gray-400">Killer</Th>
+                <Th className="text-gray-400">Detalhes</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {deathData?.deaths.slice(0, 5).map((death, index) => (
+                <MotionBox
+                  key={index}
+                  as="tr"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  whileHover={{
+                    backgroundColor: 'rgba(55, 65, 81, 0.5)',
+                    transition: { duration: 0.2 }
+                  }}
+                  className="border-b border-gray-800"
+                >
+                  <Td className="text-white">
+                    {new Date(death.date).toLocaleDateString('pt-BR')}
+                  </Td>
+                  <Td className="text-white">
+                    {death.killers[0]}
+                  </Td>
+                  <Td className="text-white">
+                    <ChakraTooltip
+                      label={death.text}
+                      hasArrow
+                      placement="top"
+                    >
+                      <Text className="truncate max-w-xs cursor-help">
+                        {death.text}
+                      </Text>
+                    </ChakraTooltip>
+                  </Td>
+                </MotionBox>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      </MotionBox>
+  </Box>
+);
+
 };
 
 export default PlayerDashboard;

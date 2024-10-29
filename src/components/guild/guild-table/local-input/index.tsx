@@ -1,13 +1,14 @@
-import React, { FC } from "react";
-import { Box, Input, List, ListItem, Portal } from "@chakra-ui/react";
-import { GuildMemberResponse } from "../../../../shared/interface/guild/guild-member.interface";
+import { Portal, ListItem, Input, Box, List } from "@chakra-ui/react";
+import { FC } from "react";
 import { useLocalInput } from "../hooks/useLocalInput";
+import { GuildMemberResponse } from "../../../../shared/interface/guild/guild-member.interface";
+
 interface LocalInputProps {
   member: GuildMemberResponse;
   onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
   fontSize: string;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-}
+  }
 
 export const LocalInput: FC<LocalInputProps> = ({
   member,
@@ -38,16 +39,14 @@ export const LocalInput: FC<LocalInputProps> = ({
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         placeholder="Local Hunt"
-        onFocus={() => {
-          updateDropdownPosition();
-        }}
+        onFocus={updateDropdownPosition}
         bg="black.800"
         size="xs"
         fontSize={fontSize}
         width="100%"
         color="white"
       />
-      {isDropdownOpen && (
+      {isDropdownOpen && filteredOptions.length > 0 && (
         <Portal>
           <Box
             ref={dropdownRef}

@@ -1,5 +1,5 @@
 import { UpsertPlayerInput } from '../shared/interface/character-upsert.interface';
-import { ExperienceListQuery } from '../shared/interface/guild/guild-stats.interface';
+import { ExperienceListQuery } from '../components/guild/guild-stats/interfaces/guild-stats.interface';
 import { CreateReservationData, Respawn } from '../shared/interface/reservations.interface';
 import api from '../lib/api';
 
@@ -59,7 +59,7 @@ export const getPlayerExperienceHistory = async (query: { character: string; }) 
   }
 };
 
-export const getReservationsList = async (query: { 
+export const getReservationsList = async (query: {
   guild_id: string;
   status?: 'reserved' | 'canceled' | 'free';
   start_time_greater?: string;
@@ -79,27 +79,18 @@ export const getReservationsList = async (query: {
   }
 };
 
-export const createRespawn = async (respawnData: Respawn) => {
-  try {
-    const response = await api.post('/respawns/create', { ...respawnData, premium: true });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const removeRespawnApi = async ( id: string) => {
-  try {
-    const response = await api.delete(`/respawns/${id}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 export const getAllRespawnsPremiums  = async () => {
   try {
     const response = await api.get(`/respawns/list-premium`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllRespawns  = async () => {
+  try {
+    const response = await api.get(`/respawns/list-all`);
     return response.data;
   } catch (error) {
     throw error;

@@ -27,7 +27,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Monitorar Guild', href: '/home', icon: FaHome },
   { name: 'Estatísticas da Guild', href: '/guild-stats', icon: IoMdStats },
-  { name: 'Respawns', href: '/reservations', icon: FaOptinMonster, requiredStatus: ['admin', 'reservations'] },
+  { name: 'Respawns', href: '/reservations', icon: FaOptinMonster},
   { name: 'Mapa Exiva', href: '/tibia-map', icon: FaMap },
 ];
 
@@ -42,9 +42,6 @@ const Topbar = () => {
     signOut({ redirect: true, callbackUrl: '/' });
   }, []);
 
-  const filteredNavItems = navItems.filter(item =>
-    !item.requiredStatus || item.requiredStatus.includes(userStatus)
-  );
 
   return (
     <Box>
@@ -114,7 +111,7 @@ const Topbar = () => {
           <DrawerBody p={0}>
             <VStack spacing={0} align="stretch">
             <Image src="/assets/logo.png" alt="Firebot Monitor" boxSize="120px" mr={2} />
-              {filteredNavItems.map((item, index) => (
+              {navItems.map((item, index) => (
                 <NextLink key={index} href={item.href} passHref>
                   <Flex
                     as="a"

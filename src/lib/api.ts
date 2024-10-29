@@ -4,14 +4,19 @@ import { useAuthStore } from '../store/auth-store';
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
 });
+
 
 api.interceptors.request.use(async (config) => {
   const getAccessToken = useAuthStore.getState().getAccessToken;
   const accessToken = await getAccessToken();
   
   if (accessToken) {
-    config.headers['Authorization'] = `Bearer ${accessToken}`;
+    config.headers['Authorization'] = `${accessToken}`;
   }
   
   return config;
@@ -30,7 +35,7 @@ api.interceptors.response.use(
         const newAccessToken = useAuthStore.getState().accessToken;
         
         if (newAccessToken) {
-          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          originalRequest.headers['Authorization'] = `${newAccessToken}`;
           return api(originalRequest);
         } else {
           throw new Error('Failed to refresh token');

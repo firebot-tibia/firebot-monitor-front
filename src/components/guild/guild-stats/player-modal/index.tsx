@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getPlayerExperienceHistory, getPlayerOnlineHistory, getPlayersLifeTimeDeaths } from '../../../../services/guilds';
-import { OnlineTimeDay, PlayerDeaths } from '../../../../shared/interface/guild/guild-stats-player.interface';
+import { OnlineTimeDay, PlayerDeaths } from '../interfaces/guild-stats-player.interface';
 import PlayerDashboard from './player-dashboard';
-import { ExperienceDataItem } from '../../../../shared/interface/guild/guild-stats-experience-history.interface';
+import { ExperienceDataItem } from '../interfaces/guild-stats-experience-history.interface';
 import { VStack, Flex, Button, Spinner, Heading, Text, Box } from '@chakra-ui/react';
 
 const CharacterStatsPage: React.FC = () => {

@@ -8,7 +8,6 @@ import {
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
-  Button,
   PopoverCloseButton
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
@@ -17,7 +16,7 @@ import { CharacterClassification } from './render-classification';
 import { TableVocationIcons } from '../../../constant/character';
 import { GuildMemberResponse } from '../../../shared/interface/guild/guild-member.interface';
 import { copyExivas, getTimeColor } from '../../../shared/utils/utils';
-import { ChevronUpIcon, ChevronDownIcon, MoreHorizontal, X } from 'lucide-react';
+import { ChevronUpIcon, ChevronDownIcon, MoreHorizontal} from 'lucide-react';
 
 interface GuildMemberTableProps {
   data: GuildMemberResponse[];
@@ -88,6 +87,12 @@ export const CharacterName: FC<CharacterNameProps> = ({
   isTooltipOpen
 }) => {
   const memberId = useMemo(() => `${member.Name}-${member.Level}`, [member.Name, member.Level]);
+  const sanitizeName = (name: string) => {
+    return name
+      .normalize('NFKD') 
+      .replace(/[\u00A0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]/g, ' ')
+      .trim();
+  };
 
   return (
     <Flex alignItems="center" maxWidth="100%">
@@ -130,7 +135,7 @@ export const CharacterName: FC<CharacterNameProps> = ({
               <Text>Time Online: {member.TimeOnline}</Text>
               <Link
                 as={NextLink}
-                href={`/guild-stats/${encodeURIComponent(member.Name)}`}
+                href={`/guild-stats/${encodeURIComponent(sanitizeName(member.Name))}`}
                 color="red.300"
               >
                 Ver estatísticas detalhadas

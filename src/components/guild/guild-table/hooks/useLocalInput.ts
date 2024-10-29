@@ -1,6 +1,6 @@
-import { useState, useMemo, useRef, useEffect } from "react";
-import { respawns } from "../../../../constant/respawn";
+import { useState, useRef, useEffect } from "react";
 import { GuildMemberResponse } from "../../../../shared/interface/guild/guild-member.interface";
+import { useRespawnsStore } from "../../../../store/respawn-store";
 
 interface UseLocalInputProps {
   member: GuildMemberResponse;
@@ -12,34 +12,79 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [isDropdownSelection, setIsDropdownSelection] = useState(false);
+  const dropdownSelectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const respawnOptions = useMemo(() => {
-    return respawns.flatMap((city) =>
-      city.spawns.map((spawn: any) => ({
-        value: `${spawn.name}`,
-        name: spawn.name,
-        label: `${spawn.name}`,
-      }))
-    );
+  const { respawns, fetchRespawns, isLoading } = useRespawnsStore();
+
+  useEffect(() => {
+    return () => {
+      if (dropdownSelectionTimeoutRef.current) {
+        clearTimeout(dropdownSelectionTimeoutRef.current);
+      }
+    };
   }, []);
 
-  const handleInputChange = (value: string) => {
+  useEffect(() => {
+    fetchRespawns();
+  }, [fetchRespawns]);
+
+  useEffect(() => {
+    if (!isDropdownSelection) {
+      setInputValue(member.Local || "");
+    }
+  }, [member.Local, isDropdownSelection]);
+
+  const handleInputChange = async (value: string) => {
     setInputValue(value);
+    setIsDropdownSelection(false);
 
-    const filtered = respawnOptions
-      .filter((option) =>
-        option.label.toLowerCase().includes(value.toLowerCase())
-      )
-      .map((option) => option.label);
+    if (respawns.length === 0 && !isLoading) {
+      await fetchRespawns();
+    }
 
-    setFilteredOptions(filtered);
-    setIsDropdownOpen(filtered.length > 0);
+    if (value.trim()) {
+      const filtered = respawns
+        .filter((respawn) =>
+          respawn.name.toLowerCase().includes(value.toLowerCase())
+        )
+        .map((respawn) => respawn.name);
+
+      setFilteredOptions(filtered);
+      setIsDropdownOpen(filtered.length > 0);
+    } else {
+      setFilteredOptions([]);
+      setIsDropdownOpen(false);
+    }
+  };
+
+  const handleOptionClick = (optionLabel: string) => {
+    if (dropdownSelectionTimeoutRef.current) {
+      clearTimeout(dropdownSelectionTimeoutRef.current);
+    }
+
+    setIsDropdownSelection(true);
+    setInputValue(optionLabel);
+
+    const updatedMember = { ...member, Local: optionLabel };
+    onLocalChange(updatedMember, optionLabel);
+
+    setFilteredOptions([]);
+    setIsDropdownOpen(false);
+
+    dropdownSelectionTimeoutRef.current = setTimeout(() => {
+      setIsDropdownSelection(false);
+    }, 500);
   };
 
   const applyChange = () => {
-    onLocalChange(member, inputValue);
+    if (!isDropdownSelection && inputValue !== member.Local) {
+      const updatedMember = { ...member, Local: inputValue };
+      onLocalChange(updatedMember, inputValue);
+    }
     setIsDropdownOpen(false);
   };
 
@@ -51,22 +96,10 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
 
   const handleBlur = () => {
     setTimeout(() => {
-      applyChange();
+      if (!isDropdownSelection) {
+        applyChange();
+      }
     }, 200);
-  };
-
-  const handleOptionClick = (optionLabel: string) => {
-    const selectedOption = respawnOptions.find(
-      (option) => option.label === optionLabel
-    );
-
-    if (selectedOption) {
-      setInputValue(selectedOption.name);
-      onLocalChange(member, selectedOption.name);
-    }
-
-    setFilteredOptions([]);
-    setIsDropdownOpen(false);
   };
 
   const updateDropdownPosition = () => {
@@ -89,6 +122,9 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
+        if (!isDropdownSelection) {
+          applyChange();
+        }
       }
     };
 
@@ -108,7 +144,7 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", updateDropdownPosition);
     };
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, inputValue, member, isDropdownSelection]);
 
   return {
     inputValue,
@@ -122,5 +158,6 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
     handleBlur,
     handleOptionClick,
     updateDropdownPosition,
+    isLoading,
   };
 };

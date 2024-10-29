@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { getExperienceList } from '../services/guilds';
-import { ExperienceListQuery, GuildData } from '../shared/interface/guild/guild-stats.interface';
+import { ExperienceListQuery, GuildData } from '../components/guild/guild-stats/interfaces/guild-stats.interface';
 import { useStorageStore } from './storage-store';
 interface GuildStatsState {
   filter: string;

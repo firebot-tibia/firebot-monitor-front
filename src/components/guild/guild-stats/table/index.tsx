@@ -13,7 +13,7 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { Vocations } from '../../../../constant/character';
-import { GuildData, GuildMember } from '../../../../shared/interface/guild/guild-stats.interface';
+import { GuildData, GuildMember } from '../interfaces/guild-stats.interface';
 import ExpStats from '../container/exp-stats';
 
 interface GuildTableProps {
