@@ -39,6 +39,8 @@ export const clearLocalStorage = () => {
       const currentDomain = window.location.hostname;
       if (currentDomain === 'localhost' || currentDomain === 'monitor.firebot.run') {
         localStorage.removeItem('deathList');
+        localStorage.removeItem('levelUpList');
+        localStorage.removeItem('levelDownList');
       }
     } catch (error) {
       console.error('Error clearing localStorage:', error);

@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useStorageStore } from "../../../store/storage-store";
+import { clearLocalStorage } from '../../../shared/utils/utils';
 
 type Mode = 'ally' | 'enemy';
 
@@ -18,7 +19,7 @@ interface ModeSelectProps {
 
 const modeMap: Record<Mode, string> = {
   'ally': 'Aliado',
-  'enemy': 'Inimigo'
+  'enemy': 'Inimigo',
 };
 
 const ModeSelect: React.FC<ModeSelectProps> = ({ onChange }) => {
@@ -33,6 +34,7 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onChange }) => {
 
   const handleModeChange = (newMode: Mode) => {
     useStorageStore.getState().setItem('monitorMode', newMode);
+    clearLocalStorage();
     setMonitorMode(newMode);
     if (onChange) {
       onChange(newMode);

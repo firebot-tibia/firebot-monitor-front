@@ -1,10 +1,32 @@
-export { default } from 'next-auth/middleware'
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
+
+export default withAuth(
+  function middleware(req) {
+    const isProtectedRoute = req.nextUrl.pathname.startsWith('/protected');
+    const isAuth = !!req.nextauth.token;
+
+    if (isProtectedRoute && !isAuth) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
+  }
+);
 
 export const config = {
   matcher: [
-    '/home/:path*', 
-    '/tibia-map/:path*', 
-    '/reservations/:path*', 
-    '/guild-stats/:path*'
+    "/home/:path*",
+    "/guild-stats/:path*",
+    "/reservations/:path*",
+    "/tibia-map/:path*",
+    "/settings/:path*"
   ],
 };
+
+

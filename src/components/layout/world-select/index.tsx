@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useTokenStore } from '../../../store/token-decoded-store';
-import { capitalizeFirstLetter } from '../../../shared/utils/utils';
+import { capitalizeFirstLetter, clearLocalStorage } from '../../../shared/utils/utils';
 
 interface WorldSelectProps {
   onChange?: (world: string) => void;
@@ -23,6 +23,7 @@ const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
     setSelectedWorld(newWorld);
     if (onChange) {
       onChange(newWorld);
+      clearLocalStorage();
     }
     if (typeof window !== 'undefined') {
       window.location.reload();

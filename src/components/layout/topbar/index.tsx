@@ -14,8 +14,6 @@ import NextLink from 'next/link';
 import { clearLocalStorage } from "../../../shared/utils/utils";
 import WorldSelect from "../world-select";
 import ModeSelect from "../mode-select";
-import { useTokenStore } from '../../../store/token-decoded-store';
-
 interface NavItem {
   name: string;
   href: string;
@@ -33,7 +31,6 @@ const navItems: NavItem[] = [
 
 const Topbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const userStatus = useTokenStore(state => state.userStatus);
   const bgColor = useColorModeValue('red.800', 'red.900');
   const textColor = useColorModeValue('white', 'gray.100');
 
