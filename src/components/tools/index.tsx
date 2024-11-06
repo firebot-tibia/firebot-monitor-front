@@ -1,55 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Input,
   Button,
   Text,
   Grid,
   GridItem,
-  FormControl,
-  FormLabel,
   useToast,
   VStack,
   Container,
   Heading,
   Icon,
   Fade,
-  Flex,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { FaCopy, FaUserAlt, FaHammer, FaBomb, FaMagic, FaUserEdit } from 'react-icons/fa';
+import { InputWithIcon } from './input-icon';
 
-interface InputWithIconProps {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string;
+interface FormState {
+  mainChar: string;
+  maker: string;
+  bombChar: string;
+  sdChar: string;
+  registeredBy: string;
 }
 
 const DescriptionEditor: React.FC = () => {
-  const [mainChar, setMainChar] = useState("");
-  const [maker, setMaker] = useState("");
-  const [bombChar, setBombChar] = useState("");
-  const [sdChar, setSDChar] = useState("");
-  const [registeredBy, setRegisteredBy] = useState("");
-  const [generatedDescription, setGeneratedDescription] = useState("");
+  const [formState, setFormState] = useState<FormState>({
+    mainChar: '',
+    maker: '',
+    bombChar: '',
+    sdChar: '',
+    registeredBy: ''
+  });
+
+  const [generatedDescription, setGeneratedDescription] = useState('');
 
   const toast = useToast();
   const cardBg = useColorModeValue('white', 'gray.800');
-  const inputBg = useColorModeValue('gray.50', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
-
-  const generateDescription = () => {
-    return `Main: ${mainChar} | Maker: ${maker} | BombChar: ${bombChar} | SDChar: ${sdChar} - ${registeredBy}`;
-  };
+  const descriptionBg = useColorModeValue('gray.50', 'gray.700');
 
   useEffect(() => {
-    setGeneratedDescription(generateDescription());
-  }, [mainChar, maker, bombChar, sdChar, registeredBy]);
+    const description = `Main: ${formState.mainChar} | Maker: ${formState.maker} | BombChar: ${formState.bombChar} | SDChar: ${formState.sdChar}${formState.registeredBy ? ` - ${formState.registeredBy}` : ''}`;
+    setGeneratedDescription(description);
+  }, [formState]);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(generatedDescription).then(() => {
+  const handleInputChange = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormState(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedDescription);
       toast({
         title: "Copiado!",
         description: "Descrição copiada com sucesso!",
@@ -59,8 +64,7 @@ const DescriptionEditor: React.FC = () => {
         position: "top",
         variant: "subtle",
       });
-    }).catch(err => {
-      console.error('Erro ao copiar: ', err);
+    } catch (err) {
       toast({
         title: "Erro",
         description: "Não foi possível copiar a descrição",
@@ -69,36 +73,8 @@ const DescriptionEditor: React.FC = () => {
         isClosable: true,
         position: "top",
       });
-    });
+    }
   };
-
-
-  const InputWithIcon: React.FC<InputWithIconProps> = ({
-    icon,
-    label,
-    value,
-    onChange,
-    placeholder
-  }) => (
-    <FormControl>
-      <FormLabel color="gray.500" fontSize="sm" fontWeight="medium">
-        <Flex align="center" gap={2}>
-          <Icon as={icon} />
-          {label}
-        </Flex>
-      </FormLabel>
-      <Input
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        bg={inputBg}
-        borderColor={borderColor}
-        _hover={{ borderColor: "red.500" }}
-        _focus={{ borderColor: "red.500", boxShadow: "0 0 0 1px var(--chakra-colors-red-500)" }}
-        transition="all 0.2s"
-      />
-    </FormControl>
-  );
 
   return (
     <Container maxW="container.md" py={10}>
@@ -124,15 +100,15 @@ const DescriptionEditor: React.FC = () => {
                 <InputWithIcon
                   icon={FaUserAlt}
                   label="Character Principal"
-                  value={mainChar}
-                  onChange={(e) => setMainChar(e.target.value)}
+                  value={formState.mainChar}
+                  onChange={handleInputChange('mainChar')}
                   placeholder="Digite o nome do char principal"
                 />
                 <InputWithIcon
                   icon={FaHammer}
                   label="Maker"
-                  value={maker}
-                  onChange={(e) => setMaker(e.target.value)}
+                  value={formState.maker}
+                  onChange={handleInputChange('maker')}
                   placeholder="Digite o nome do maker"
                 />
               </VStack>
@@ -143,15 +119,15 @@ const DescriptionEditor: React.FC = () => {
                 <InputWithIcon
                   icon={FaBomb}
                   label="Bomb Character"
-                  value={bombChar}
-                  onChange={(e) => setBombChar(e.target.value)}
+                  value={formState.bombChar}
+                  onChange={handleInputChange('bombChar')}
                   placeholder="Digite o nome do bomb char"
                 />
                 <InputWithIcon
                   icon={FaMagic}
                   label="SD Character"
-                  value={sdChar}
-                  onChange={(e) => setSDChar(e.target.value)}
+                  value={formState.sdChar}
+                  onChange={handleInputChange('sdChar')}
                   placeholder="Digite o nome do SD char"
                 />
               </VStack>
@@ -162,14 +138,14 @@ const DescriptionEditor: React.FC = () => {
             <InputWithIcon
               icon={FaUserEdit}
               label="Registrado por"
-              value={registeredBy}
-              onChange={(e) => setRegisteredBy(e.target.value)}
+              value={formState.registeredBy}
+              onChange={handleInputChange('registeredBy')}
               placeholder="Digite seu nome"
             />
           </Box>
 
           <Fade in={!!generatedDescription}>
-            <Box mt={6} p={4} bg={inputBg} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
+            <Box mt={6} p={4} bg={descriptionBg} borderRadius="lg" borderWidth="1px" borderColor={borderColor}>
               <Text color="gray.500" mb={2} fontSize="sm" fontWeight="medium">
                 Descrição Gerada
               </Text>
@@ -187,9 +163,10 @@ const DescriptionEditor: React.FC = () => {
             color="white"
             _hover={{ bg: "red.800" }}
             _active={{ bg: "red.700" }}
-            leftIcon={<FaCopy />}
+            leftIcon={<Icon as={FaCopy} />}
             onClick={copyToClipboard}
-            transition="all 0.3s"
+            transition="all 0.2s"
+            disabled={!generatedDescription}
           >
             Copiar Descrição
           </Button>
