@@ -13,23 +13,19 @@ import {
   Fade,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FaCopy, FaUserAlt, FaHammer, FaBomb, FaMagic, FaUserEdit } from 'react-icons/fa';
+import { FaCopy, FaUserAlt, FaHammer, FaUserEdit, FaPlus } from 'react-icons/fa';
 import { InputWithIcon } from './input-icon';
 
 interface FormState {
   mainChar: string;
-  maker: string;
-  bombChar: string;
-  sdChar: string;
+  makers: string[];
   registeredBy: string;
 }
 
 const DescriptionEditor: React.FC = () => {
   const [formState, setFormState] = useState<FormState>({
     mainChar: '',
-    maker: '',
-    bombChar: '',
-    sdChar: '',
+    makers: [''],
     registeredBy: ''
   });
 
@@ -41,14 +37,40 @@ const DescriptionEditor: React.FC = () => {
   const descriptionBg = useColorModeValue('gray.50', 'gray.700');
 
   useEffect(() => {
-    const description = `Main: ${formState.mainChar} | Maker: ${formState.maker} ${formState.registeredBy ? ` - ${formState.registeredBy}` : ''}`;
+    let description = `Main: ${formState.mainChar}`;
+
+    if (formState.makers.length > 0) {
+      const makers = formState.makers.filter(maker => maker.trim() !== '');
+      description += ` | Maker: ${makers.join(', ')}`;
+    }
+
+    if (formState.registeredBy) {
+      description += ` | Reg: ${formState.registeredBy}`;
+    }
+
     setGeneratedDescription(description);
   }, [formState]);
 
-  const handleInputChange = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (field: keyof FormState, index?: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (field === 'makers') {
+      const makers = [...formState.makers];
+      makers[index!] = e.target.value;
+      setFormState(prev => ({
+        ...prev,
+        makers
+      }));
+    } else {
+      setFormState(prev => ({
+        ...prev,
+        [field]: e.target.value
+      }));
+    }
+  };
+
+  const addMaker = () => {
     setFormState(prev => ({
       ...prev,
-      [field]: e.target.value
+      makers: [...prev.makers, '']
     }));
   };
 
@@ -61,7 +83,7 @@ const DescriptionEditor: React.FC = () => {
         status: "success",
         duration: 2000,
         isClosable: true,
-        position: "top",
+        position: "top-right",
         variant: "subtle",
       });
     } catch (err) {
@@ -71,7 +93,7 @@ const DescriptionEditor: React.FC = () => {
         status: "error",
         duration: 2000,
         isClosable: true,
-        position: "top",
+        position: "top-right",
       });
     }
   };
@@ -104,16 +126,29 @@ const DescriptionEditor: React.FC = () => {
                   onChange={handleInputChange('mainChar')}
                   placeholder="Digite o nome do char principal"
                 />
-                <InputWithIcon
-                  icon={FaHammer}
-                  label="Maker"
-                  value={formState.maker}
-                  onChange={handleInputChange('maker')}
-                  placeholder="Digite o nome do maker"
-                />
+                {formState.makers.map((maker, index) => (
+                  <Box key={index} display="flex" alignItems="center" justifyContent="space-between" w="100%">
+                    <InputWithIcon
+                      icon={FaHammer}
+                      label="Maker"
+                      value={maker}
+                      onChange={handleInputChange('makers', index)}
+                      placeholder="Digite o nome do maker"
+                    />
+                    <Button
+                      onClick={addMaker}
+                      size="sm"
+                      colorScheme="blue"
+                      variant="outline"
+                      leftIcon={<FaPlus />}
+                      ml={4}
+                      mt={7}
+                    >
+                    </Button>
+                  </Box>
+                ))}
               </VStack>
             </GridItem>
-
           </Grid>
 
           <Box mt={6}>
