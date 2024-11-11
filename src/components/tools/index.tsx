@@ -41,7 +41,7 @@ const DescriptionEditor: React.FC = () => {
   const descriptionBg = useColorModeValue('gray.50', 'gray.700');
 
   useEffect(() => {
-    const description = `Main: ${formState.mainChar} | Maker: ${formState.maker} | BombChar: ${formState.bombChar} | SDChar: ${formState.sdChar}${formState.registeredBy ? ` - ${formState.registeredBy}` : ''}`;
+    const description = `Main: ${formState.mainChar} | Maker: ${formState.maker} ${formState.registeredBy ? ` - ${formState.registeredBy}` : ''}`;
     setGeneratedDescription(description);
   }, [formState]);
 
@@ -114,24 +114,6 @@ const DescriptionEditor: React.FC = () => {
               </VStack>
             </GridItem>
 
-            <GridItem>
-              <VStack spacing={4}>
-                <InputWithIcon
-                  icon={FaBomb}
-                  label="Bomb Character"
-                  value={formState.bombChar}
-                  onChange={handleInputChange('bombChar')}
-                  placeholder="Digite o nome do bomb char"
-                />
-                <InputWithIcon
-                  icon={FaMagic}
-                  label="SD Character"
-                  value={formState.sdChar}
-                  onChange={handleInputChange('sdChar')}
-                  placeholder="Digite o nome do SD char"
-                />
-              </VStack>
-            </GridItem>
           </Grid>
 
           <Box mt={6}>

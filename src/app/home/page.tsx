@@ -5,7 +5,6 @@ import { Badge, Box, Flex, Spinner, Tab, TabList, TabPanel, TabPanels, Tabs, VSt
 import DashboardLayout from '../../components/layout';
 import { DeathSection } from '../../components/guild/sections/death-section';
 import GuildDataSection from '../../components/guild/sections/guild-data-section';
-import InstructionsSection from '../../components/guild/sections/instructions-section';
 import MonitorToggleSection from '../../components/guild/sections/monitor-toggle-section';
 import { LevelUpSection } from '../../components/guild/sections/levelup-section';
 import { useHomeLogic } from './hooks/useHome';
@@ -48,7 +47,6 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout>
-      <InstructionsSection />
       <Box maxWidth="100%" overflow="hidden" fontSize={["xs", "sm", "md"]}>
         <VStack spacing={4} align="stretch">
           <Tabs isFitted variant="enclosed">

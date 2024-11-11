@@ -9,18 +9,15 @@ export const ReservationsManager: React.FC = () => {
     reservations,
     timeSlots,
     respawns,
-    isManagementModalOpen,
-    onManagementModalOpen,
-    onManagementModalClose,
     handleAddReservation,
     fetchReservations
   } = useReservationsManager();
 
   return (
     <VStack spacing={8} align="stretch">
-      <ReservationTable 
-        reservations={reservations} 
-        timeSlots={timeSlots} 
+      <ReservationTable
+        reservations={reservations}
+        timeSlots={timeSlots}
         respawns={respawns}
         onAddReservation={handleAddReservation}
         onFetchReservation={fetchReservations}
