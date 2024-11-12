@@ -47,7 +47,7 @@ const Home: FC = () => {
 
   return (
     <DashboardLayout>
-      <Box maxWidth="100%" overflow="hidden" fontSize={["xs", "sm", "md"]}>
+      <Box maxWidth="100%" overflow="hidden" fontSize={["xs", "sm", "md"]} mt={6}>
         <VStack spacing={4} align="stretch">
           <Tabs isFitted variant="enclosed">
             <TabList mb="1em">

@@ -7,7 +7,7 @@ export default withAuth(
     const isAuth = !!req.nextauth.token;
 
     if (isProtectedRoute && !isAuth) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
 
     return NextResponse.next();
