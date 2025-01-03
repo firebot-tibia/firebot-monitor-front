@@ -46,6 +46,7 @@
     "lucide-react": "^0.441.0",
     "next": "^14.2.4",
     "next-auth": "^4.24.7",
+    "next-sitemap": "^4.2.3",
     "react": "^18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",

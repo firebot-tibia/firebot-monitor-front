@@ -75,7 +75,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             transition={{ duration: 0.3 }}
           >
             <Image
-              src="/assets/logo.png"
+              src="/assets/images/og.png"
               alt="Firebot Monitor"
               boxSize={{ base: '120px', md: '160px' }}
               animation={`${pulse} 2s infinite ease-in-out`}

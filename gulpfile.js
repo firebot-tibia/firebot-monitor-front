@@ -16,7 +16,7 @@ gulp.task('clean', function () {
 
 gulp.task('html', function () {
   return gulp
-    .src(['src/components/tibia-map/maps/index.html'])
+    .src(['src/components/features/tibia-map/index.html'])
     .pipe(replace(/\.\.\/dist\//g, ''))
     .pipe(gulp.dest('public/dist/'))
 })
@@ -25,9 +25,9 @@ gulp.task('css', function () {
   return gulp
     .src([
       require.resolve('leaflet/dist/leaflet.css'),
-      'src/components/tibia-map/maps/_css/leaflet.coordinates.css',
-      'src/components/tibia-map/maps/_css/leaflet.buttons.css',
-      'src/components/tibia-map/maps/_css/map.css',
+      'src/components/features/tibia-map/_css/leaflet.coordinates.css',
+      'src/components/features/tibia-map/_css/leaflet.buttons.css',
+      'src/components/features/tibia-map/_css/map.css',
     ])
     .pipe(concat('map.css'))
     .pipe(autoprefixer())
@@ -39,11 +39,11 @@ gulp.task('js', function () {
   return gulp
     .src([
       require.resolve('leaflet'),
-      'src/components/tibia-map/maps/_js/leaflet.coordinates.js',
-      'src/components/tibia-map/maps/_js/leaflet.crosshairs.js',
-      'src/components/tibia-map/maps/_js/leaflet.levelbuttons.js',
-      'src/components/tibia-map/maps/_js/leaflet.exivabutton.js',
-      'src/components/tibia-map/maps/_js/map.js',
+      'src/components/features/tibia-map/_js/leaflet.coordinates.js',
+      'src/components/features/tibia-map/_js/leaflet.crosshairs.js',
+      'src/components/features/tibia-map/_js/leaflet.levelbuttons.js',
+      'src/components/features/tibia-map/_js/leaflet.exivabutton.js',
+      'src/components/features/tibia-map/_js/map.js',
     ])
     .pipe(concat('map.js'))
     .pipe(terser())
@@ -52,7 +52,7 @@ gulp.task('js', function () {
 
 gulp.task('images', function () {
   return gulp
-    .src(['src/components/tibia-map/maps/_css/*.png', 'src/components/tibia-map/maps/_img/*.png'])
+    .src(['src/components/features/tibia-map/_css/*.png', 'src/components/features/tibia-map/_img/*.png'])
     .pipe(
       imagemin({
         optimizationLevel: 7,

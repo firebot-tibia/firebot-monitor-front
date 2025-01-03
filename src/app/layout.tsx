@@ -1,7 +1,8 @@
 import { FC, ReactNode } from 'react'
 import '../styles/globals.css'
 import Script from 'next/script'
-import { AppProviders } from '../config/providers/app-providers'
+import { google } from '../constants/google'
+import { AppProviders } from '../contexts/useTheme'
 
 interface RootLayoutProps {
   children: ReactNode
@@ -29,14 +30,14 @@ const RootLayout: FC<RootLayoutProps> = ({ children }) => {
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-T5KJDV88');
+            })(window,document,'script','dataLayer',${google.GTM_ID});
           `}
         </Script>
       </head>
       <body>
         <noscript>
           <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-T5KJDV88"
+            src={`https://www.googletagmanager.com/ns.html?id=${google.GTM_ID}`}
             height="0"
             width="0"
             style={{ display: 'none', visibility: 'hidden' }}

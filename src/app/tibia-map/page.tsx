@@ -1,6 +1,6 @@
 import { Box } from '@chakra-ui/react'
 import DashboardLayout from '../../components/layout'
-import Maps from '../../components/tibia-map'
+import Maps from '../../components/features/tibia-map'
 
 const TibiaMaps = () => {
   return (

@@ -1,6 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react'
 import DashboardLayout from '../../components/layout'
-import { tools } from '../../components/unauthenticated/tools/config/toolbar.config'
+import { tools } from '../../components/unauthenticated/constants/toolbar'
 
 const Dashboard = () => {
   const ActiveToolComponent = tools.find((tool) => tool.id === 'description')?.component

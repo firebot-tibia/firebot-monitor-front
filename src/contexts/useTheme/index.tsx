@@ -1,13 +1,11 @@
 'use client'
 
 import { ChakraProvider } from '@chakra-ui/react'
-import { FC, ReactNode } from 'react'
+import { FC } from 'react'
 import { SessionProvider } from 'next-auth/react'
 import theme from '../../styles/theme'
+import { AppProvidersProps } from './types'
 
-interface AppProvidersProps {
-  children: ReactNode
-}
 
 export const AppProviders: FC<AppProvidersProps> = ({ children }) => {
   return (
