@@ -1,21 +1,16 @@
-import { Portal, ListItem, Input, Box, List } from "@chakra-ui/react";
-import { FC } from "react";
-import { useLocalInput } from "../hooks/useLocalInput";
-import { GuildMemberResponse } from "../../../../shared/interface/guild/guild-member.interface";
+import { Portal, ListItem, Input, Box, List } from '@chakra-ui/react'
+import { FC } from 'react'
+import { useLocalInput } from '../hooks/useLocalInput'
+import { GuildMemberResponse } from '../../../../types/interfaces/guild/guild-member.interface'
 
 interface LocalInputProps {
-  member: GuildMemberResponse;
-  onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
-  fontSize: string;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
-  }
+  member: GuildMemberResponse
+  onLocalChange: (member: GuildMemberResponse, newLocal: string) => void
+  fontSize: string
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void
+}
 
-export const LocalInput: FC<LocalInputProps> = ({
-  member,
-  onLocalChange,
-  fontSize,
-  onClick,
-}) => {
+export const LocalInput: FC<LocalInputProps> = ({ member, onLocalChange, fontSize, onClick }) => {
   const {
     inputValue,
     isDropdownOpen,
@@ -28,7 +23,7 @@ export const LocalInput: FC<LocalInputProps> = ({
     handleBlur,
     handleOptionClick,
     updateDropdownPosition,
-  } = useLocalInput({ member, onLocalChange });
+  } = useLocalInput({ member, onLocalChange })
 
   return (
     <Box position="relative" onClick={onClick} width="100%">
@@ -68,7 +63,7 @@ export const LocalInput: FC<LocalInputProps> = ({
                   key={option}
                   onClick={() => handleOptionClick(option)}
                   p={2}
-                  _hover={{ bg: "black.700", cursor: "pointer" }}
+                  _hover={{ bg: 'black.700', cursor: 'pointer' }}
                   color="white"
                 >
                   {option}
@@ -79,5 +74,5 @@ export const LocalInput: FC<LocalInputProps> = ({
         </Portal>
       )}
     </Box>
-  );
-};
+  )
+}

@@ -1,45 +1,62 @@
-import { FC, useCallback, useMemo, useState } from 'react';
+'use client'
+import { FC, useCallback, useMemo, useState } from 'react'
 import {
-  Table, Thead, Tbody, Tr, Th, Td, HStack, Text, Image, Box,
-  useToast, Spinner, useColorModeValue, Tag, Flex,
-  TableContainer, useMediaQuery, IconButton,
-  Link, VStack,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  HStack,
+  Text,
+  Image,
+  Box,
+  useToast,
+  Spinner,
+  useColorModeValue,
+  Tag,
+  Flex,
+  TableContainer,
+  useMediaQuery,
+  IconButton,
+  Link,
+  VStack,
   Popover,
   PopoverBody,
   PopoverContent,
   PopoverTrigger,
-  PopoverCloseButton
-} from '@chakra-ui/react';
-import NextLink from 'next/link';
-import { LocalInput } from './local-input';
-import { CharacterClassification } from './render-classification';
-import { TableVocationIcons } from '../../../constant/character';
-import { GuildMemberResponse } from '../../../shared/interface/guild/guild-member.interface';
-import { copyExivas, getTimeColor } from '../../../shared/utils/utils';
-import { ChevronUpIcon, ChevronDownIcon, MoreHorizontal} from 'lucide-react';
+  PopoverCloseButton,
+} from '@chakra-ui/react'
+import NextLink from 'next/link'
+import { LocalInput } from './local-input'
+import { CharacterClassification } from './render-classification'
+import { GuildMemberResponse } from '../../../types/interfaces/guild/guild-member.interface'
+import { ChevronUpIcon, ChevronDownIcon, MoreHorizontal } from 'lucide-react'
+import { tableVocationIcons } from '../../../utils/table-vocation-icons'
+import { getTimeColor } from '../../../utils/get-time-color'
+import { copyExivas } from '../../../utils/copy-exiva'
 
 interface GuildMemberTableProps {
-  data: GuildMemberResponse[];
-  onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
-  onClassificationChange: (member: GuildMemberResponse, newClassification: string) => void;
-  showExivaInput: boolean;
-  types: string[];
-  addType: (newType: string) => void;
-  isLoading: boolean;
-  onlineCount: number;
+  data: GuildMemberResponse[]
+  onLocalChange: (member: GuildMemberResponse, newLocal: string) => void
+  onClassificationChange: (member: GuildMemberResponse, newClassification: string) => void
+  showExivaInput: boolean
+  types: string[]
+  addType: (newType: string) => void
+  isLoading: boolean
+  onlineCount: number
 }
 
 interface CharacterNameProps {
-  member: GuildMemberResponse;
-  handleNameClick: (member: GuildMemberResponse) => void;
-  isLargerThan992: boolean;
-  toggleTooltip: (id: string) => void;
-  isTooltipOpen: (id: string) => boolean;
+  member: GuildMemberResponse
+  handleNameClick: (member: GuildMemberResponse) => void
+  isLargerThan992: boolean
+  toggleTooltip: (id: string) => void
+  isTooltipOpen: (id: string) => boolean
 }
 
-
-type SortField = 'Level' | 'TimeOnline' | 'Vocation';
-type SortOrder = 'asc' | 'desc';
+type SortField = 'Level' | 'TimeOnline' | 'Vocation'
+type SortOrder = 'asc' | 'desc'
 
 const ClassificationLegend: FC = () => (
   <HStack spacing={2} fontSize="2xs" mb={1}>
@@ -57,46 +74,52 @@ const ClassificationLegend: FC = () => (
       <Text>15-30min</Text>
     </HStack>
   </HStack>
-);
+)
 
 export const TooltipStateManager = () => {
-  const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set());
+  const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set())
 
   const toggleTooltip = useCallback((id: string) => {
-    setOpenTooltips(prev => {
-      const newSet = new Set(prev);
+    setOpenTooltips((prev) => {
+      const newSet = new Set(prev)
       if (newSet.has(id)) {
-        newSet.delete(id);
+        newSet.delete(id)
       } else {
-        newSet.add(id);
+        newSet.add(id)
       }
-      return newSet;
-    });
-  }, []);
+      return newSet
+    })
+  }, [])
 
-  const isTooltipOpen = useCallback((id: string) => openTooltips.has(id), [openTooltips]);
+  const isTooltipOpen = useCallback((id: string) => openTooltips.has(id), [openTooltips])
 
-  return { toggleTooltip, isTooltipOpen };
-};
+  return { toggleTooltip, isTooltipOpen }
+}
 
 export const CharacterName: FC<CharacterNameProps> = ({
   member,
   handleNameClick,
   isLargerThan992,
   toggleTooltip,
-  isTooltipOpen
+  isTooltipOpen,
 }) => {
-  const memberId = useMemo(() => `${member.Name}-${member.Level}`, [member.Name, member.Level]);
+  const memberId = useMemo(() => `${member.Name}-${member.Level}`, [member.Name, member.Level])
   const sanitizeName = (name: string) => {
     return name
-      .normalize('NFKD') 
+      .normalize('NFKD')
       .replace(/[\u00A0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]/g, ' ')
-      .trim();
-  };
+      .trim()
+  }
 
   return (
     <Flex alignItems="center" maxWidth="100%">
-      <Image src={TableVocationIcons[member.Vocation]} alt={member.Vocation} boxSize={isLargerThan992 ? "16px" : "14px"} mr={1} flexShrink={0} />
+      <Image
+        src={tableVocationIcons[member.Vocation]}
+        alt={member.Vocation}
+        boxSize={isLargerThan992 ? '16px' : '14px'}
+        mr={1}
+        flexShrink={0}
+      />
       <Box
         onClick={() => handleNameClick(member)}
         cursor="pointer"
@@ -120,8 +143,8 @@ export const CharacterName: FC<CharacterNameProps> = ({
             variant="ghost"
             ml={1}
             onClick={(e) => {
-              e.stopPropagation();
-              toggleTooltip(memberId);
+              e.stopPropagation()
+              toggleTooltip(memberId)
             }}
           />
         </PopoverTrigger>
@@ -145,8 +168,8 @@ export const CharacterName: FC<CharacterNameProps> = ({
         </PopoverContent>
       </Popover>
     </Flex>
-  );
-};
+  )
+}
 
 export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   data,
@@ -156,74 +179,91 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   types,
   addType,
   isLoading,
-  onlineCount
+  onlineCount,
 }) => {
-  const [sortField, setSortField] = useState<SortField>('TimeOnline');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const { toggleTooltip, isTooltipOpen } = TooltipStateManager();
+  const [sortField, setSortField] = useState<SortField>('TimeOnline')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
+  const { toggleTooltip, isTooltipOpen } = TooltipStateManager()
 
-  const toast = useToast();
-  const bgColor = useColorModeValue('black.800', 'black.900');
-  const hoverBgColor = useColorModeValue('red.700', 'red.800');
-  const textColor = useColorModeValue('white', 'gray.100');
+  const toast = useToast()
+  const bgColor = useColorModeValue('black.800', 'black.900')
+  const hoverBgColor = useColorModeValue('red.700', 'red.800')
+  const textColor = useColorModeValue('white', 'gray.100')
 
-  const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)");
-  const [isLargerThan992] = useMediaQuery("(min-width: 992px)");
+  const [isLargerThan1200] = useMediaQuery('(min-width: 1200px)')
+  const [isLargerThan992] = useMediaQuery('(min-width: 992px)')
 
-  const responsiveFontSize = isLargerThan1200 ? "xs" : isLargerThan992 ? "2xs" : "3xs";
-  const responsivePadding = isLargerThan1200 ? 0.5 : 0.25;
+  const responsiveFontSize = isLargerThan1200 ? 'xs' : isLargerThan992 ? '2xs' : '3xs'
+  const responsivePadding = isLargerThan1200 ? 0.5 : 0.25
 
   const handleNameClick = (member: GuildMemberResponse) => {
-    copyExivas(member, toast);
-  };
+    copyExivas(member, toast)
+  }
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
     } else {
-      setSortField(field);
-      setSortOrder('asc');
+      setSortField(field)
+      setSortOrder('asc')
     }
-  };
+  }
 
   const sortedData = useMemo(() => {
-    return [...data].sort((a, b) => {
-      let comparison = 0;
+    return [...data].sort((a: any, b : any) => {
+      let comparison = 0
       switch (sortField) {
         case 'Level':
-          comparison = a.Level - b.Level;
-          break;
+          comparison = a.Level - b.Level
+          break
         case 'TimeOnline':
-          comparison = parseInt(a.TimeOnline) - parseInt(b.TimeOnline);
-          break;
+          comparison = parseInt(a.TimeOnline) - parseInt(b.TimeOnline)
+          break
         case 'Vocation':
-          comparison = a.Vocation.localeCompare(b.Vocation);
-          break;
+          comparison = a.Vocation.localeCompare(b.Vocation)
+          break
       }
-      return sortOrder === 'desc' ? comparison : -comparison;
-    });
-  }, [data, sortField, sortOrder]);
+      return sortOrder === 'desc' ? comparison : -comparison
+    })
+  }, [data, sortField, sortOrder])
 
   const SortIcon: FC<{ field: SortField }> = ({ field }) => (
     <IconButton
       aria-label={`Sort by ${field}`}
-      icon={sortField === field ? (sortOrder === 'asc' ? <ChevronUpIcon /> : <ChevronDownIcon />) : <ChevronUpIcon />}
+      icon={
+        sortField === field ? (
+          sortOrder === 'asc' ? (
+            <ChevronUpIcon />
+          ) : (
+            <ChevronDownIcon />
+          )
+        ) : (
+          <ChevronUpIcon />
+        )
+      }
       size="xs"
       variant="ghost"
       onClick={() => handleSort(field)}
     />
-  );
+  )
 
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
         <Spinner size="xl" />
       </Box>
-    );
+    )
   }
 
   return (
-    <Box bg={bgColor} p={2} borderRadius="xs" maxWidth="100%" overflow="hidden" style={{ zoom: `${100}%` }}>
+    <Box
+      bg={bgColor}
+      p={2}
+      borderRadius="xs"
+      maxWidth="100%"
+      overflow="hidden"
+      style={{ zoom: `${100}%` }}
+    >
       <Flex justify="space-between" align="center" mb={2}>
         <ClassificationLegend />
         <HStack>
@@ -236,21 +276,39 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         <Table variant="simple" size="xs" fontSize={responsiveFontSize} color={textColor}>
           <Thead position="sticky" top={0} bg={bgColor} zIndex={1}>
             <Tr>
-              <Th px={1} py={responsivePadding} color={textColor} width="2%">#</Th>
-              <Th px={1} py={responsivePadding} color={textColor} width="18%">Personagem <SortIcon field="Vocation" /></Th>
-              <Th px={1} py={responsivePadding} color={textColor} isNumeric width="5%">Lvl <SortIcon field="Level" /></Th>
-              {isLargerThan992 && <Th px={1} py={responsivePadding} color={textColor} width="8%">Tipo</Th>}
-              <Th px={1} py={responsivePadding} color={textColor} width="10%">Tempo <SortIcon field="TimeOnline" /></Th>
-              {showExivaInput && <Th px={1} py={responsivePadding} color={textColor} width="45%">Local</Th>}
+              <Th px={1} py={responsivePadding} color={textColor} width="2%">
+                #
+              </Th>
+              <Th px={1} py={responsivePadding} color={textColor} width="18%">
+                Personagem <SortIcon field="Vocation" />
+              </Th>
+              <Th px={1} py={responsivePadding} color={textColor} isNumeric width="5%">
+                Lvl <SortIcon field="Level" />
+              </Th>
+              {isLargerThan992 && (
+                <Th px={1} py={responsivePadding} color={textColor} width="8%">
+                  Tipo
+                </Th>
+              )}
+              <Th px={1} py={responsivePadding} color={textColor} width="10%">
+                Tempo <SortIcon field="TimeOnline" />
+              </Th>
+              {showExivaInput && (
+                <Th px={1} py={responsivePadding} color={textColor} width="45%">
+                  Local
+                </Th>
+              )}
             </Tr>
           </Thead>
           <Tbody>
             {Array.isArray(sortedData) && sortedData.length > 0 ? (
               sortedData.map((member, index) => (
                 <Tr key={member.Name} _hover={{ bg: hoverBgColor }}>
-                  <Td px={0.5} py={responsivePadding} width="2%">{index + 1}</Td>
+                  <Td px={0.5} py={responsivePadding} width="2%">
+                    {index + 1}
+                  </Td>
                   <Td px={0.5} py={responsivePadding} width="18%">
-                  <CharacterName
+                    <CharacterName
                       key={`${member.Name}-${member.Level}`}
                       member={member}
                       handleNameClick={handleNameClick}
@@ -259,7 +317,9 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                       isTooltipOpen={isTooltipOpen}
                     />
                   </Td>
-                  <Td px={0.5} py={responsivePadding} isNumeric width="5%">{member.Level}</Td>
+                  <Td px={0.5} py={responsivePadding} isNumeric width="5%">
+                    {member.Level}
+                  </Td>
                   {isLargerThan992 && (
                     <Td px={0.5} py={responsivePadding} width="8%">
                       <CharacterClassification
@@ -270,14 +330,24 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
                       />
                     </Td>
                   )}
-                  <Td px={0.5} py={responsivePadding} color={getTimeColor(member.TimeOnline)} width="10%">{member.TimeOnline}</Td>
+                  <Td
+                    px={0.5}
+                    py={responsivePadding}
+                    color={getTimeColor(member.TimeOnline)}
+                    width="10%"
+                  >
+                    {member.TimeOnline}
+                  </Td>
                   {showExivaInput && (
                     <Td px={0.5} py={responsivePadding} width="45%">
-                      <Box title="Escreva para autocompletar com os respawns ou customize" width="100%">
+                      <Box
+                        title="Escreva para autocompletar com os respawns ou customize"
+                        width="100%"
+                      >
                         <LocalInput
                           member={member}
                           onLocalChange={onLocalChange}
-                          fontSize={"md"}
+                          fontSize={'md'}
                           onClick={(e) => e.stopPropagation()}
                         />
                       </Box>
@@ -296,5 +366,5 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
         </Table>
       </TableContainer>
     </Box>
-  );
-};
+  )
+}

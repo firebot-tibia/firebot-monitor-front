@@ -1,11 +1,11 @@
-import React from 'react';
-import { Stat, StatLabel, StatNumber, StatHelpText } from '@chakra-ui/react';
-import { formatExp } from '../../../../../shared/utils/utils';
+import React from 'react'
+import { Stat, StatLabel, StatNumber, StatHelpText } from '@chakra-ui/react'
+import { formatExp } from '../../../../../utils/format-exp'
 
 interface ExpStatsProps {
-  totalExp: number;
-  avgExp: number;
-  filter: string;
+  totalExp: number
+  avgExp: number
+  filter: string
 }
 
 const ExpStats: React.FC<ExpStatsProps> = ({ totalExp, avgExp, filter }) => {
@@ -22,7 +22,7 @@ const ExpStats: React.FC<ExpStatsProps> = ({ totalExp, avgExp, filter }) => {
         <StatHelpText>{filter}</StatHelpText>
       </Stat>
     </>
-  );
-};
+  )
+}
 
-export default ExpStats;
+export default ExpStats

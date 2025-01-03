@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Modal,
   ModalOverlay,
@@ -8,20 +8,20 @@ import {
   ModalFooter,
   Button,
   Text,
-} from '@chakra-ui/react';
+} from '@chakra-ui/react'
 
 interface DeleteReservationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: (deleteAll: boolean) => void;
-  isLoading: boolean; 
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: (deleteAll: boolean) => void
+  isLoading: boolean
 }
 
 export const DeleteReservationModal: React.FC<DeleteReservationModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  isLoading, 
+  isLoading,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -38,9 +38,11 @@ export const DeleteReservationModal: React.FC<DeleteReservationModalProps> = ({
           <Button colorScheme="red" onClick={() => onConfirm(true)} isDisabled={isLoading}>
             Todas as recorrentes
           </Button>
-          <Button variant="ghost" onClick={onClose} isDisabled={isLoading}>Cancelar</Button>
+          <Button variant="ghost" onClick={onClose} isDisabled={isLoading}>
+            Cancelar
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
-  );
-};
+  )
+}

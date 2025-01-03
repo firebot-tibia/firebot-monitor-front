@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react'
 import {
   Table,
   Thead,
@@ -20,120 +20,153 @@ import {
   Box,
   useColorModeValue,
   Spinner,
-} from '@chakra-ui/react';
-import { Reservation, CreateReservationData, Respawn } from '../../../shared/interface/reservations.interface';
-import { AddReservationForm } from '../add-reservations';
-import { formatTimeSlotEnd } from '../../../shared/utils/utils';
-import { useReservationTable } from '../hooks/useTableHook';
-import { DeleteReservationModal } from '../delete-reservations-modal';
-import { useReservationsManager } from '../hooks/useReservations';
+} from '@chakra-ui/react'
+import {
+  Reservation,
+  CreateReservationData,
+  Respawn,
+} from '../../../types/interfaces/reservations.interface'
+import { AddReservationForm } from '../add-reservations'
+import { useReservationTable } from '../hooks/useTableHook'
+import { DeleteReservationModal } from '../delete-reservations-modal'
+import { useReservationsManager } from '../hooks/useReservations'
+import { formatTimeSlotEnd } from '../../../utils/format-time-slot-end'
 
 interface ReservationTableProps {
-  reservations: Reservation[];
-  timeSlots: string[];
-  respawns: Respawn[];
-  onAddReservation: (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => Promise<void>;
-  onFetchReservation: () => Promise<void>;
+  reservations: Reservation[]
+  timeSlots: string[]
+  respawns: Respawn[]
+  onAddReservation: (
+    data: Omit<CreateReservationData, 'world'> & { respawn_id: string },
+  ) => Promise<void>
+  onFetchReservation: () => Promise<void>
 }
 
-const RESPAWNS_PER_TABLE = 6;
+const RESPAWNS_PER_TABLE = 6
 
 export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
-  const { isOpen: isAddModalOpen, onOpen: openAddModal, onClose: closeAddModal } = useDisclosure();
-  const [selectedSlot, setSelectedSlot] = useState<{ time: string; respawn: Respawn } | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const { findReservationForSlot } = useReservationTable(props);
-  const { 
+  const { isOpen: isAddModalOpen, onOpen: openAddModal, onClose: closeAddModal } = useDisclosure()
+  const [selectedSlot, setSelectedSlot] = useState<{ time: string; respawn: Respawn } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const { findReservationForSlot } = useReservationTable(props)
+  const {
     handleAddReservation,
     handleDeleteReservation,
     confirmDeleteReservation,
     isDeleteModalOpen,
-    closeDeleteModal
-  } = useReservationsManager();
+    closeDeleteModal,
+  } = useReservationsManager()
 
-  const textColor = useColorModeValue('gray.100', 'gray.200');
-  const buttonBgColor = useColorModeValue('green.500', 'green.400');
-  const buttonHoverBgColor = useColorModeValue('green.600', 'green.500');
+  const textColor = useColorModeValue('gray.100', 'gray.200')
+  const buttonBgColor = useColorModeValue('green.500', 'green.400')
+  const buttonHoverBgColor = useColorModeValue('green.600', 'green.500')
 
-  const handleAddClick = useCallback((time: string, respawn: Respawn) => {
-    setSelectedSlot({ time, respawn });
-    openAddModal();
-  }, [openAddModal]);
+  const handleAddClick = useCallback(
+    (time: string, respawn: Respawn) => {
+      setSelectedSlot({ time, respawn })
+      openAddModal()
+    },
+    [openAddModal],
+  )
 
-  const handleDelete = useCallback((reservation: Reservation) => {
-    handleDeleteReservation(reservation);
-  }, [handleDeleteReservation]);
+  const handleDelete = useCallback(
+    (reservation: Reservation) => {
+      handleDeleteReservation(reservation)
+    },
+    [handleDeleteReservation],
+  )
 
-  const handleConfirmDelete = useCallback(async (deleteAll: boolean) => {
-    setIsDeleting(true);
-    await confirmDeleteReservation(deleteAll);
-    setIsDeleting(false);
-    closeDeleteModal();
-    props.onFetchReservation();
-  }, [confirmDeleteReservation, closeDeleteModal, props.onFetchReservation]);
+  const handleConfirmDelete = useCallback(
+    async (deleteAll: boolean) => {
+      setIsDeleting(true)
+      await confirmDeleteReservation(deleteAll)
+      setIsDeleting(false)
+      closeDeleteModal()
+      props.onFetchReservation()
+    },
+    [confirmDeleteReservation, closeDeleteModal, props.onFetchReservation],
+  )
 
-  const renderTable = useCallback((startIndex: number, endIndex: number) => (
-    <Table variant="simple" key={startIndex} size="sm">
-      <Thead>
-        <Tr>
-          <Th color={textColor}>Horário</Th>
-          {props.respawns.slice(startIndex, endIndex).map(respawn => (
-            <Th key={respawn.id} textAlign="center">
-              <VStack spacing={2}>
-                {respawn.image && (
-                  <Image
-                    src={`/assets/images/creatures/${respawn.image}`}
-                    alt={respawn.name}
-                    boxSize="40px"
-                    objectFit="contain"
-                  />
-                )}
-                <Text fontSize="xs" color={textColor}>{respawn.name}</Text>
-              </VStack>
-            </Th>
-          ))}
-        </Tr>
-      </Thead>
-      <Tbody>
-        {props.timeSlots.map(timeSlot => (
-          <Tr key={timeSlot}>
-            <Td color={textColor}>{formatTimeSlotEnd(timeSlot)}</Td>
-            {props.respawns.slice(startIndex, endIndex).map(respawn => {
-              const reservation = findReservationForSlot(timeSlot, respawn.id || '');
-              return (
-                <Td key={`${respawn.id}-${timeSlot}`} textAlign="center">
-                  {reservation ? (
-                    <VStack spacing={1}>
-                      <Text fontSize="xs" color="red.400">
-                        {reservation.reserved_for}
-                      </Text>
-                      <Button size="xs" colorScheme="red" onClick={() => handleDelete(reservation)}>
-                        Remover
-                      </Button>
-                    </VStack>
-                  ) : (
-                    <Button
-                      size="xs"
-                      bg={buttonBgColor}
-                      color="white"
-                      _hover={{ bg: buttonHoverBgColor }}
-                      onClick={() => handleAddClick(timeSlot, respawn)}
-                    >
-                      Adicionar
-                    </Button>
+  const renderTable = useCallback(
+    (startIndex: number, endIndex: number) => (
+      <Table variant="simple" key={startIndex} size="sm">
+        <Thead>
+          <Tr>
+            <Th color={textColor}>Horário</Th>
+            {props.respawns.slice(startIndex, endIndex).map((respawn) => (
+              <Th key={respawn.id} textAlign="center">
+                <VStack spacing={2}>
+                  {respawn.image && (
+                    <Image
+                      src={`/assets/images/creatures/${respawn.image}`}
+                      alt={respawn.name}
+                      boxSize="40px"
+                      objectFit="contain"
+                    />
                   )}
-                </Td>
-              );
-            })}
+                  <Text fontSize="xs" color={textColor}>
+                    {respawn.name}
+                  </Text>
+                </VStack>
+              </Th>
+            ))}
           </Tr>
-        ))}
-      </Tbody>
-    </Table>
-  ), [props.respawns, props.timeSlots, textColor, buttonBgColor, buttonHoverBgColor, findReservationForSlot, handleDelete, handleAddClick]);
+        </Thead>
+        <Tbody>
+          {props.timeSlots.map((timeSlot) => (
+            <Tr key={timeSlot}>
+              <Td color={textColor}>{formatTimeSlotEnd(timeSlot)}</Td>
+              {props.respawns.slice(startIndex, endIndex).map((respawn) => {
+                const reservation = findReservationForSlot(timeSlot, respawn.id || '')
+                return (
+                  <Td key={`${respawn.id}-${timeSlot}`} textAlign="center">
+                    {reservation ? (
+                      <VStack spacing={1}>
+                        <Text fontSize="xs" color="red.400">
+                          {reservation.reserved_for}
+                        </Text>
+                        <Button
+                          size="xs"
+                          colorScheme="red"
+                          onClick={() => handleDelete(reservation)}
+                        >
+                          Remover
+                        </Button>
+                      </VStack>
+                    ) : (
+                      <Button
+                        size="xs"
+                        bg={buttonBgColor}
+                        color="white"
+                        _hover={{ bg: buttonHoverBgColor }}
+                        onClick={() => handleAddClick(timeSlot, respawn)}
+                      >
+                        Adicionar
+                      </Button>
+                    )}
+                  </Td>
+                )
+              })}
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+    ),
+    [
+      props.respawns,
+      props.timeSlots,
+      textColor,
+      buttonBgColor,
+      buttonHoverBgColor,
+      findReservationForSlot,
+      handleDelete,
+      handleAddClick,
+    ],
+  )
 
-  const tables = [];
+  const tables = []
   for (let i = 0; i < props.respawns.length; i += RESPAWNS_PER_TABLE) {
-    tables.push(renderTable(i, i + RESPAWNS_PER_TABLE));
+    tables.push(renderTable(i, i + RESPAWNS_PER_TABLE))
   }
 
   return (
@@ -169,9 +202,9 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
                   await handleAddReservation({
                     ...data,
                     respawn_id: selectedSlot.respawn.id || '',
-                  });
-                  closeAddModal();
-                  props.onFetchReservation();
+                  })
+                  closeAddModal()
+                  props.onFetchReservation()
                 }}
                 respawnId={selectedSlot.respawn.id || ''}
                 timeSlot={selectedSlot.time}
@@ -187,5 +220,5 @@ export const ReservationTable: React.FC<ReservationTableProps> = (props) => {
         isLoading={isDeleting}
       />
     </Box>
-  );
-};
+  )
+}

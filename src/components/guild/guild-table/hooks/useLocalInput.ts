@@ -1,150 +1,134 @@
-import { useState, useRef, useEffect } from "react";
-import { GuildMemberResponse } from "../../../../shared/interface/guild/guild-member.interface";
-import { useRespawnsStore } from "../../../../store/respawn-store";
+'use client'
+import { useState, useRef, useEffect } from 'react'
+import { GuildMemberResponse } from '../../../../types/interfaces/guild/guild-member.interface'
+import { useRespawnsStore } from '../../../../stores/respawn-store'
 
 interface UseLocalInputProps {
-  member: GuildMemberResponse;
-  onLocalChange: (member: GuildMemberResponse, newLocal: string) => void;
+  member: GuildMemberResponse
+  onLocalChange: (member: GuildMemberResponse, newLocal: string) => void
+}
+
+interface DropdownPosition {
+  top: number
+  left: number
+  width: number
 }
 
 export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => {
-  const [inputValue, setInputValue] = useState(member.Local || "");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const [isDropdownSelection, setIsDropdownSelection] = useState(false);
-  const dropdownSelectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [inputValue, setInputValue] = useState(member.Local || '')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [filteredOptions, setFilteredOptions] = useState<string[]>([])
+  const [dropdownPosition, setDropdownPosition] = useState<DropdownPosition>({
+    top: 0,
+    left: 0,
+    width: 0,
+  })
+  const [isDropdownSelection, setIsDropdownSelection] = useState(false)
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const selectionTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
-  const { respawns, fetchRespawns, isLoading } = useRespawnsStore();
-
-  useEffect(() => {
-    return () => {
-      if (dropdownSelectionTimeoutRef.current) {
-        clearTimeout(dropdownSelectionTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    fetchRespawns();
-  }, [fetchRespawns]);
+  const { respawns, fetchRespawns, isLoading } = useRespawnsStore()
 
   useEffect(() => {
     if (!isDropdownSelection) {
-      setInputValue(member.Local || "");
+      setInputValue(member.Local || '')
     }
-  }, [member.Local, isDropdownSelection]);
+    return () => clearTimeout(selectionTimeoutRef.current)
+  }, [member.Local, isDropdownSelection])
+
+  useEffect(() => {
+    fetchRespawns()
+  }, [fetchRespawns])
+
+  const updateDropdownPosition = () => {
+    const rect = inputRef.current?.getBoundingClientRect()
+    if (rect) {
+      setDropdownPosition({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+  }
 
   const handleInputChange = async (value: string) => {
-    setInputValue(value);
-    setIsDropdownSelection(false);
+    setInputValue(value)
+    setIsDropdownSelection(false)
 
     if (respawns.length === 0 && !isLoading) {
-      await fetchRespawns();
+      await fetchRespawns()
     }
 
-    if (value.trim()) {
+    const trimmedValue = value.trim().toLowerCase()
+    if (trimmedValue) {
       const filtered = respawns
-        .filter((respawn) =>
-          respawn.name.toLowerCase().includes(value.toLowerCase())
-        )
-        .map((respawn) => respawn.name);
+        .filter((r) => r.name.toLowerCase().includes(trimmedValue))
+        .map((r) => r.name)
 
-      setFilteredOptions(filtered);
-      setIsDropdownOpen(filtered.length > 0);
+      setFilteredOptions(filtered)
+      setIsDropdownOpen(filtered.length > 0)
+      updateDropdownPosition()
     } else {
-      setFilteredOptions([]);
-      setIsDropdownOpen(false);
+      setFilteredOptions([])
+      setIsDropdownOpen(false)
     }
-  };
-
-  const handleOptionClick = (optionLabel: string) => {
-    if (dropdownSelectionTimeoutRef.current) {
-      clearTimeout(dropdownSelectionTimeoutRef.current);
-    }
-
-    setIsDropdownSelection(true);
-    setInputValue(optionLabel);
-
-    const updatedMember = { ...member, Local: optionLabel };
-    onLocalChange(updatedMember, optionLabel);
-
-    setFilteredOptions([]);
-    setIsDropdownOpen(false);
-
-    dropdownSelectionTimeoutRef.current = setTimeout(() => {
-      setIsDropdownSelection(false);
-    }, 500);
-  };
+  }
 
   const applyChange = () => {
     if (!isDropdownSelection && inputValue !== member.Local) {
-      const updatedMember = { ...member, Local: inputValue };
-      onLocalChange(updatedMember, inputValue);
+      onLocalChange({ ...member, Local: inputValue }, inputValue)
     }
-    setIsDropdownOpen(false);
-  };
+    setIsDropdownOpen(false)
+  }
+
+  const handleOptionClick = (option: string) => {
+    clearTimeout(selectionTimeoutRef.current)
+    setIsDropdownSelection(true)
+    setInputValue(option)
+    onLocalChange({ ...member, Local: option }, option)
+    setIsDropdownOpen(false)
+    setFilteredOptions([])
+
+    selectionTimeoutRef.current = setTimeout(() => {
+      setIsDropdownSelection(false)
+    }, 500)
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      applyChange();
-    }
-  };
+    if (e.key === 'Enter') applyChange()
+  }
 
   const handleBlur = () => {
-    setTimeout(() => {
-      if (!isDropdownSelection) {
-        applyChange();
-      }
-    }, 200);
-  };
-
-  const updateDropdownPosition = () => {
-    if (inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: rect.width,
-      });
-    }
-  };
+    setTimeout(applyChange, 200)
+  }
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node) &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-        if (!isDropdownSelection) {
-          applyChange();
-        }
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      const isOutside =
+        !inputRef.current?.contains(target) && !dropdownRef.current?.contains(target)
+
+      if (isOutside) {
+        setIsDropdownOpen(false)
+        if (!isDropdownSelection) applyChange()
       }
-    };
+    }
 
-    const handleScroll = () => {
-      if (isDropdownOpen) {
-        updateDropdownPosition();
-      }
-    };
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isDropdownOpen, isDropdownSelection])
 
-    updateDropdownPosition();
-    document.addEventListener("mousedown", handleClickOutside);
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", updateDropdownPosition);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateDropdownPosition);
-    };
-  }, [isDropdownOpen, inputValue, member, isDropdownSelection]);
+  useEffect(() => {
+    if (isDropdownOpen) {
+      const observer = new ResizeObserver(updateDropdownPosition)
+      if (inputRef.current) observer.observe(inputRef.current)
+      return () => observer.disconnect()
+    }
+  }, [isDropdownOpen])
 
   return {
     inputValue,
@@ -159,5 +143,5 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
     handleOptionClick,
     updateDropdownPosition,
     isLoading,
-  };
-};
+  }
+}

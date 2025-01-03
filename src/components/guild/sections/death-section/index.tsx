@@ -1,15 +1,19 @@
-import React from 'react';
-import { Box, Flex, Heading } from '@chakra-ui/react';
-import { Death } from '../../../../shared/interface/death.interface';
-import DeathTable from '../../../death-list';
+import React from 'react'
+import { Box, Flex, Heading } from '@chakra-ui/react'
+import { Death } from '../../../../types/interfaces/death.interface'
+import DeathTable from '../../../lists/death-list'
 
 interface DeathSectionProps {
-  deathList: Death[];
-  playAudio: () => void;
-  audioEnabled: boolean;
+  deathList: Death[]
+  playAudio: () => void
+  audioEnabled: boolean
 }
 
-export const DeathSection: React.FC<DeathSectionProps> = ({ deathList, playAudio, audioEnabled }) => {
+export const DeathSection: React.FC<DeathSectionProps> = ({
+  deathList,
+  playAudio,
+  audioEnabled,
+}) => {
   return (
     <Box>
       <Flex align="center" justify="center" mb={4}>
@@ -17,11 +21,7 @@ export const DeathSection: React.FC<DeathSectionProps> = ({ deathList, playAudio
           Mortes Recentes
         </Heading>
       </Flex>
-      <DeathTable 
-        deathList={deathList} 
-        playAudio={playAudio}
-        audioEnabled={audioEnabled}
-      />
+      <DeathTable deathList={deathList} audioEnabled={audioEnabled} />
     </Box>
-  );
-};
+  )
+}
