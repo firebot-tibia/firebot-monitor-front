@@ -91,9 +91,7 @@ const MonitorToggleSection: React.FC<MonitorToggleSectionProps> = (props) => {
         >
           {monitoringStarted ? 'Monitoramento Ativo' : 'Iniciar Monitoramento'}
         </Button>
-        <BombaMakerMonitor
-          characters={guildData}
-        />
+        <BombaMakerMonitor characters={guildData} />
       </VStack>
     </Box>
   )

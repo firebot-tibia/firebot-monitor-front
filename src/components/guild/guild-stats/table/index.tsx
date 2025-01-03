@@ -71,7 +71,11 @@ const GuildTable: React.FC<GuildTableProps> = ({
               >
                 <Td color={textColor}>{item.experience}</Td>
                 <Td>
-                  <Image src={tableVocationIcons[item.vocation]} alt={item.vocation} boxSize="24px" />
+                  <Image
+                    src={tableVocationIcons[item.vocation]}
+                    alt={item.vocation}
+                    boxSize="24px"
+                  />
                 </Td>
                 <Td color={textColor}>{item.name}</Td>
                 <Td isNumeric color={textColor}>

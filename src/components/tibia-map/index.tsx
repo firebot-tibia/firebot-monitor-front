@@ -46,7 +46,7 @@ const Maps: React.FC = () => {
             oldScript.parentNode?.replaceChild(newScript, oldScript)
           })
 
-        window.dispatchEvent(new Event('scriptsLoaded'))
+          window.dispatchEvent(new Event('scriptsLoaded'))
         } catch (error) {
           console.error('Error loading scripts:', error)
         }
@@ -57,21 +57,18 @@ const Maps: React.FC = () => {
   }, [htmlContent])
 
   return (
-      <div
-        style={{
-          height: '40vh',
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          ref={mapContainerRef}
-          style={{ height: '40vh', width: '100%', position: 'relative' }}
-        />
-      </div>
+    <div
+      style={{
+        height: '40vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <div ref={mapContainerRef} style={{ height: '40vh', width: '100%', position: 'relative' }} />
+    </div>
   )
 }
 
-export default Maps;
+export default Maps

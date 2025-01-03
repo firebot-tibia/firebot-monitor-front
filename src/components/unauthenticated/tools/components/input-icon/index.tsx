@@ -1,6 +1,14 @@
 import React from 'react'
-import { FormControl, FormLabel, Input, Icon, Flex, useColorModeValue, useBreakpointValue } from '@chakra-ui/react'
-import { InputWithIconProps } from './types';
+import {
+  FormControl,
+  FormLabel,
+  Input,
+  Icon,
+  Flex,
+  useColorModeValue,
+  useBreakpointValue,
+} from '@chakra-ui/react'
+import { InputWithIconProps } from './types'
 
 const InputWithIcon: React.FC<InputWithIconProps> = ({
   icon,
@@ -9,16 +17,11 @@ const InputWithIcon: React.FC<InputWithIconProps> = ({
   onChange,
   placeholder,
 }) => {
-  const inputSize = useBreakpointValue({ base: "lg", md: "md" });
+  const inputSize = useBreakpointValue({ base: 'lg', md: 'md' })
 
   return (
     <FormControl>
-      <FormLabel
-        fontSize={{ base: "sm", md: "md" }}
-        fontWeight="medium"
-        color="gray.600"
-        mb={2}
-      >
+      <FormLabel fontSize={{ base: 'sm', md: 'md' }} fontWeight="medium" color="gray.600" mb={2}>
         <Flex align="center" gap={2}>
           <Icon as={icon} />
           {label}
@@ -39,11 +42,11 @@ const InputWithIcon: React.FC<InputWithIconProps> = ({
           transform: 'scale(1.01)',
         }}
         transition="all 0.2s"
-        h={{ base: "50px", md: "40px" }}
-        fontSize={{ base: "md", md: "sm" }}
+        h={{ base: '50px', md: '40px' }}
+        fontSize={{ base: 'md', md: 'sm' }}
       />
     </FormControl>
-  );
-};
+  )
+}
 
-export default InputWithIcon;
+export default InputWithIcon

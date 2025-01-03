@@ -7,55 +7,55 @@ import { useHomeLogic } from '../../hooks/use-dashboard'
 import { GuildMemberTable } from '../../components/guild/guild-table'
 
 export default function Home() {
- const [isClient, setIsClient] = useState(false)
- const {
-  isLoading,
-  status,
-  types,
-  addType,
-  handleLocalChange,
-  handleClassificationChange,
-  groupedData,
- } = useHomeLogic()
+  const [isClient, setIsClient] = useState(false)
+  const {
+    isLoading,
+    status,
+    types,
+    addType,
+    handleLocalChange,
+    handleClassificationChange,
+    groupedData,
+  } = useHomeLogic()
 
- useEffect(() => {
-   setIsClient(true)
- }, [])
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
- if (!isClient) {
-   return (
-     <DashboardLayout>
-       <Center h="100vh">
-         <Spinner size="xl" />
-       </Center>
-     </DashboardLayout>
-   )
- }
+  if (!isClient) {
+    return (
+      <DashboardLayout>
+        <Center h="100vh">
+          <Spinner size="xl" />
+        </Center>
+      </DashboardLayout>
+    )
+  }
 
- if (status === 'loading' || isLoading) {
-   return (
-     <DashboardLayout>
-       <Center h="100vh">
-         <Spinner size="xl" />
-       </Center>
-     </DashboardLayout>
-   )
- }
+  if (status === 'loading' || isLoading) {
+    return (
+      <DashboardLayout>
+        <Center h="100vh">
+          <Spinner size="xl" />
+        </Center>
+      </DashboardLayout>
+    )
+  }
 
- if (!types?.length || !groupedData?.length) {
-   return (
-     <DashboardLayout>
-       <Center h="100vh">
-        <Text>Nenhum dado de guilda disponível.</Text>
-       </Center>
-     </DashboardLayout>
-   )
- }
+  if (!types?.length || !groupedData?.length) {
+    return (
+      <DashboardLayout>
+        <Center h="100vh">
+          <Text>Nenhum dado de guilda disponível.</Text>
+        </Center>
+      </DashboardLayout>
+    )
+  }
 
- return (
-   <DashboardLayout>
-     <Box maxWidth="100%" overflow="hidden" fontSize={['xs', 'sm', 'md']} mt={6}>
-       <VStack spacing={4} align="stretch">
+  return (
+    <DashboardLayout>
+      <Box maxWidth="100%" overflow="hidden" fontSize={['xs', 'sm', 'md']} mt={6}>
+        <VStack spacing={4} align="stretch">
           <SimpleGrid columns={[1, 2, 3]} spacing={1}>
             {groupedData.map(({ type, data, onlineCount }) => (
               <GuildMemberTable
@@ -71,8 +71,8 @@ export default function Home() {
               />
             ))}
           </SimpleGrid>
-       </VStack>
-     </Box>
-   </DashboardLayout>
- )
+        </VStack>
+      </Box>
+    </DashboardLayout>
+  )
 }

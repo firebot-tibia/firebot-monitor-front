@@ -16,51 +16,48 @@ import {
   InputRightElement,
   VStack,
   IconButton,
-} from '@chakra-ui/react';
-import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { keyframes } from '@emotion/react';
-import { useLogin } from '../hooks/useLogin';
+} from '@chakra-ui/react'
+import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa'
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { keyframes } from '@emotion/react'
+import { useLogin } from '../hooks/useLogin'
 
 const pulse = keyframes`
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
-`;
+`
 
 const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { email, setEmail, password, setPassword, errors, handleLogin } = useLogin();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { email, setEmail, password, setPassword, errors, handleLogin } = useLogin()
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const bgColor = useColorModeValue('white', 'gray.900');
-  const textColor = useColorModeValue('gray.800', 'white');
-  const inputBgColor = useColorModeValue('gray.50', 'gray.800');
-  const inputBorderColor = useColorModeValue('gray.200', 'gray.600');
-  const errorColor = useColorModeValue('red.500', 'red.300');
+  const bgColor = useColorModeValue('white', 'gray.900')
+  const textColor = useColorModeValue('gray.800', 'white')
+  const inputBgColor = useColorModeValue('gray.50', 'gray.800')
+  const inputBorderColor = useColorModeValue('gray.200', 'gray.600')
+  const errorColor = useColorModeValue('red.500', 'red.300')
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await handleLogin();
-    setIsLoading(false);
-  };
+    e.preventDefault()
+    setIsLoading(true)
+    await handleLogin()
+    setIsLoading(false)
+  }
 
-  const MotionCenter = motion(Center);
+  const MotionCenter = motion(Center)
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: "sm", md: "md" }}
+      size={{ base: 'sm', md: 'md' }}
       motionPreset="slideInBottom"
       isCentered
     >
-      <ModalOverlay
-        bg="blackAlpha.300"
-        backdropFilter="blur(10px)"
-      />
+      <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
       <ModalContent
         bg={bgColor}
         p={8}
@@ -69,11 +66,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
         border="1px solid"
         borderColor={useColorModeValue('gray.100', 'gray.700')}
       >
-        <ModalCloseButton
-          color={textColor}
-          size="lg"
-          borderRadius="full"
-        />
+        <ModalCloseButton color={textColor} size="lg" borderRadius="full" />
 
         <VStack spacing={6}>
           <MotionCenter
@@ -84,7 +77,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             <Image
               src="/assets/logo.png"
               alt="Firebot Monitor"
-              boxSize={{ base: "120px", md: "160px" }}
+              boxSize={{ base: '120px', md: '160px' }}
               animation={`${pulse} 2s infinite ease-in-out`}
             />
           </MotionCenter>
@@ -104,7 +97,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                   _hover={{ borderColor: 'red.500' }}
                   _focus={{
                     borderColor: 'red.500',
-                    boxShadow: '0 0 0 1px var(--chakra-colors-red-500)'
+                    boxShadow: '0 0 0 1px var(--chakra-colors-red-500)',
                   }}
                   color={textColor}
                   size="lg"
@@ -131,7 +124,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                     _hover={{ borderColor: 'red.500' }}
                     _focus={{
                       borderColor: 'red.500',
-                      boxShadow: '0 0 0 1px var(--chakra-colors-red-500)'
+                      boxShadow: '0 0 0 1px var(--chakra-colors-red-500)',
                     }}
                     color={textColor}
                     size="lg"
@@ -193,15 +186,15 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               bg: 'red.50',
               borderColor: 'red.600',
               color: 'red.600',
-              transform: 'scale(1.05)'
+              transform: 'scale(1.05)',
             }}
-            >
+          >
             Solicitar Demonstração
           </Button>
         </VStack>
       </ModalContent>
     </Modal>
-  );
-};
+  )
+}
 
-export default LoginModal;
+export default LoginModal

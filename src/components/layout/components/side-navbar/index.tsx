@@ -1,6 +1,6 @@
-"use client"
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+'use client'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   Flex,
   IconButton,
@@ -13,31 +13,30 @@ import {
   PopoverTrigger,
   PopoverContent,
   Portal,
-} from '@chakra-ui/react';
-import { FaSignOutAlt, FaBars, FaDiscord, FaHome, FaMap, FaCog } from 'react-icons/fa';
-import { IoMdStats } from 'react-icons/io';
-import { FaOptinMonster } from 'react-icons/fa6';
-import { signOut } from 'next-auth/react';
-import NextLink from 'next/link';
-import WorldSelect from '../world-select';
-import ModeSelect from '../mode-select';
-
+} from '@chakra-ui/react'
+import { FaSignOutAlt, FaBars, FaDiscord, FaHome, FaMap, FaCog } from 'react-icons/fa'
+import { IoMdStats } from 'react-icons/io'
+import { FaOptinMonster } from 'react-icons/fa6'
+import { signOut } from 'next-auth/react'
+import NextLink from 'next/link'
+import WorldSelect from '../world-select'
+import ModeSelect from '../mode-select'
 
 const navItems = [
   { name: 'Monitorar Guild', href: '/home', icon: FaHome },
   { name: 'Estatísticas', href: '/guild-stats', icon: IoMdStats },
   { name: 'Respawns', href: '/reservations', icon: FaOptinMonster },
   { name: 'Mapa Exiva', href: '/tibia-map', icon: FaMap },
-];
+]
 
 const SideNavbar = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const bgColor = useColorModeValue('gray.900', 'black');
-  const textColor = useColorModeValue('white', 'gray.100');
+  const [isExpanded, setIsExpanded] = useState(false)
+  const bgColor = useColorModeValue('gray.900', 'black')
+  const textColor = useColorModeValue('white', 'gray.100')
 
   const handleLogout = () => {
-    signOut({ redirect: true, callbackUrl: '/' });
-  };
+    signOut({ redirect: true, callbackUrl: '/' })
+  }
 
   return (
     <motion.div
@@ -138,7 +137,7 @@ const SideNavbar = () => {
         </VStack>
       </Flex>
     </motion.div>
-  );
-};
+  )
+}
 
-export default SideNavbar;
+export default SideNavbar

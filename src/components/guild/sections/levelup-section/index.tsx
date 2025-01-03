@@ -33,10 +33,7 @@ export const LevelUpSection: React.FC<LevelUpSectionProps> = ({
             <LevelTable levelList={levelUpList} audioEnabled={audioEnabled} />
           </TabPanel>
           <TabPanel>
-            <LevelTable
-              levelList={levelDownList}
-              audioEnabled={audioEnabled}
-            />
+            <LevelTable levelList={levelDownList} audioEnabled={audioEnabled} />
           </TabPanel>
         </TabPanels>
       </Tabs>

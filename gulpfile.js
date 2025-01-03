@@ -1,25 +1,25 @@
-import gulp from 'gulp';
-import del from 'del';
-import autoprefixer from 'gulp-autoprefixer';
-import cleanCSS from 'gulp-clean-css';
-import concat from 'gulp-concat';
-import imagemin from 'gulp-imagemin';
-import replace from 'gulp-replace';
-import terser from 'gulp-terser';
-import { createRequire } from 'module';
+import gulp from 'gulp'
+import del from 'del'
+import autoprefixer from 'gulp-autoprefixer'
+import cleanCSS from 'gulp-clean-css'
+import concat from 'gulp-concat'
+import imagemin from 'gulp-imagemin'
+import replace from 'gulp-replace'
+import terser from 'gulp-terser'
+import { createRequire } from 'module'
 
-const require = createRequire(import.meta.url);
+const require = createRequire(import.meta.url)
 
 gulp.task('clean', function () {
-  return del('public/dist/*');
-});
+  return del('public/dist/*')
+})
 
 gulp.task('html', function () {
   return gulp
     .src(['src/components/tibia-map/maps/index.html'])
     .pipe(replace(/\.\.\/dist\//g, ''))
-    .pipe(gulp.dest('public/dist/'));
-});
+    .pipe(gulp.dest('public/dist/'))
+})
 
 gulp.task('css', function () {
   return gulp
@@ -32,8 +32,8 @@ gulp.task('css', function () {
     .pipe(concat('map.css'))
     .pipe(autoprefixer())
     .pipe(cleanCSS())
-    .pipe(gulp.dest('public/dist/'));
-});
+    .pipe(gulp.dest('public/dist/'))
+})
 
 gulp.task('js', function () {
   return gulp
@@ -47,8 +47,8 @@ gulp.task('js', function () {
     ])
     .pipe(concat('map.js'))
     .pipe(terser())
-    .pipe(gulp.dest('public/dist/'));
-});
+    .pipe(gulp.dest('public/dist/'))
+})
 
 gulp.task('images', function () {
   return gulp
@@ -58,8 +58,8 @@ gulp.task('images', function () {
         optimizationLevel: 7,
       }),
     )
-    .pipe(gulp.dest('public/dist/_img'));
-});
+    .pipe(gulp.dest('public/dist/_img'))
+})
 
-gulp.task('build', gulp.series('clean', gulp.parallel('html', 'css', 'js', 'images')));
-gulp.task('default', gulp.series('build'));
+gulp.task('build', gulp.series('clean', gulp.parallel('html', 'css', 'js', 'images')))
+gulp.task('default', gulp.series('build'))

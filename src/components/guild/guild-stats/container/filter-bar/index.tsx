@@ -22,7 +22,6 @@ import { SearchIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { capitalizeFirstLetter } from '../../../../../utils/capitalize-first-letter'
 import { tableVocationIcons } from '../../../../../utils/table-vocation-icons'
 
-
 interface FilterBarProps {
   filter: string
   vocationFilter: string

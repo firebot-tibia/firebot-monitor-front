@@ -1,9 +1,9 @@
-import { Box, Flex } from '@chakra-ui/react';
-import DashboardLayout from '../../components/layout';
-import { tools } from '../../components/unauthenticated/tools/config/toolbar.config';
+import { Box, Flex } from '@chakra-ui/react'
+import DashboardLayout from '../../components/layout'
+import { tools } from '../../components/unauthenticated/tools/config/toolbar.config'
 
 const Dashboard = () => {
-  const ActiveToolComponent = tools.find((tool) => tool.id === 'description')?.component;
+  const ActiveToolComponent = tools.find((tool) => tool.id === 'description')?.component
 
   return (
     <DashboardLayout>
@@ -13,7 +13,7 @@ const Dashboard = () => {
         </Box>
       </Flex>
     </DashboardLayout>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

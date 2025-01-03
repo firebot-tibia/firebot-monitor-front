@@ -5,8 +5,11 @@ import { OnlineTimeDay, PlayerDeaths } from '../interfaces/guild-stats-player.in
 import PlayerDashboard from './player-dashboard'
 import { ExperienceDataItem } from '../interfaces/guild-stats-experience-history.interface'
 import { VStack, Flex, Button, Spinner, Heading, Text, Box } from '@chakra-ui/react'
-import { getPlayerOnlineHistory, getPlayersLifeTimeDeaths, getPlayerExperienceHistory } from '../../../../services/guild-stats.service'
-
+import {
+  getPlayerOnlineHistory,
+  getPlayersLifeTimeDeaths,
+  getPlayerExperienceHistory,
+} from '../../../../services/guild-stats.service'
 
 const CharacterStatsPage: React.FC = () => {
   const params = useParams()

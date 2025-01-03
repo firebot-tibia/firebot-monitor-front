@@ -210,7 +210,7 @@ export const GuildMemberTable: FC<GuildMemberTableProps> = ({
   }
 
   const sortedData = useMemo(() => {
-    return [...data].sort((a: any, b : any) => {
+    return [...data].sort((a: any, b: any) => {
       let comparison = 0
       switch (sortField) {
         case 'Level':

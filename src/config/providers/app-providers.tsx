@@ -9,14 +9,10 @@ interface AppProvidersProps {
   children: ReactNode
 }
 
-
-
 export const AppProviders: FC<AppProvidersProps> = ({ children }) => {
   return (
     <SessionProvider>
-        <ChakraProvider theme={theme}>
-          {children}
-        </ChakraProvider>
+      <ChakraProvider theme={theme}>{children}</ChakraProvider>
     </SessionProvider>
   )
 }
