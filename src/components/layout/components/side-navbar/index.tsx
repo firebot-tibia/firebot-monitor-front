@@ -14,20 +14,12 @@ import {
   PopoverContent,
   Portal,
 } from '@chakra-ui/react'
-import { FaSignOutAlt, FaBars, FaDiscord, FaHome, FaMap, FaCog } from 'react-icons/fa'
-import { IoMdStats } from 'react-icons/io'
-import { FaOptinMonster } from 'react-icons/fa6'
+import { FaSignOutAlt, FaBars, FaDiscord, FaCog } from 'react-icons/fa'
 import { signOut } from 'next-auth/react'
 import NextLink from 'next/link'
 import WorldSelect from '../world-select'
 import ModeSelect from '../mode-select'
-
-const navItems = [
-  { name: 'Monitorar Guild', href: '/home', icon: FaHome },
-  { name: 'Estatísticas', href: '/guild-stats', icon: IoMdStats },
-  { name: 'Respawns', href: '/reservations', icon: FaOptinMonster },
-  { name: 'Mapa Exiva', href: '/tibia-map', icon: FaMap },
-]
+import { routesArray } from '../../../../constants/routes'
 
 const SideNavbar = () => {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -65,7 +57,7 @@ const SideNavbar = () => {
         />
 
         <VStack spacing={1} align="stretch" flex={1} pt={4}>
-          {navItems.map((item) => (
+          {routesArray.map((item) => (
             <Tooltip key={item.href} label={!isExpanded ? item.name : ''} placement="right">
               <Flex
                 as={NextLink}

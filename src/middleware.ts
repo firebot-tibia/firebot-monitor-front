@@ -7,7 +7,7 @@ export default withAuth(
     const isPublicRoute = req.nextUrl.pathname === '/'
 
     if (isPublicRoute && isAuth) {
-      return NextResponse.redirect(new URL('/home', req.url))
+      return NextResponse.redirect(new URL('/guild', req.url))
     }
 
     if (!isAuth) {
@@ -25,8 +25,8 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    '/home/:path*',
-    '/guild-stats/:path*',
+    '/statistics/:path*',
+    '/guild/:path*',
     '/reservations/:path*',
     '/tibia-map/:path*',
     '/settings/:path*',

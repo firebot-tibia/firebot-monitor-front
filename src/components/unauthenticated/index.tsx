@@ -15,50 +15,46 @@ import LoginModal from '../features/auth/components/auth-modal'
 
 const UnauthenticatedSidebarSkeleton = ({ isMobile }: any) =>
   isMobile ? (
-    <Box>
-      <Flex
-        bg="rgba(0,0,0,0.9)"
-        px={4}
-        py={3}
-        position="fixed"
-        top={0}
-        left={0}
-        right={0}
-        zIndex={1000}
-      >
-        <Skeleton w="32px" h="32px" />
-        <Skeleton w="100px" h="24px" mx="auto" />
-        <Skeleton w="80px" h="32px" />
-      </Flex>
-
-      <Box position="fixed" bottom={0} left={0} right={0} p={3} bg="rgba(0,0,0,0.9)">
-        <Skeleton h="48px" />
-      </Box>
-    </Box>
-  ) : (
     <Flex
+      bg="rgba(0,0,0,0.9)"
+      px={4}
+      py={3}
+      position="fixed"
+      top={0}
+      left={0}
+      right={0}
+      zIndex={1000}
+      justify="space-between"
+      align="center"
+    >
+      <Skeleton w="32px" h="32px" />
+      <Skeleton w="100px" h="24px" />
+      <Skeleton w="80px" h="32px" />
+    </Flex>
+  ) : (
+    <Box
       position="fixed"
       left={0}
       top={0}
       bottom={0}
-      w="60px"
+      w="240px"
       bg="rgba(0,0,0,0.9)"
-      direction="column"
       p={4}
+      borderRight="1px solid rgba(255,255,255,0.1)"
     >
-      <Skeleton w="32px" h="32px" mb={4} />
-      <VStack spacing={4}>
+      <VStack spacing={4} align="center">
         <Skeleton w="32px" h="32px" />
-        <Skeleton w="32px" h="32px" />
+        <Skeleton h="40px" w="full" />
+        <Skeleton h="40px" w="full" />
       </VStack>
-    </Flex>
+    </Box>
   )
 
 export default function UnauthenticatedSidebar() {
-  const [isExpanded, setIsExpanded] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false, fallback: 'md' })
+  const [isExpanded, setIsExpanded] = useState(!isMobile)
 
   useLayoutEffect(() => {
     setIsLoading(false)

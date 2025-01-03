@@ -6,7 +6,6 @@ import { SessionProvider } from 'next-auth/react'
 import theme from '../../styles/theme'
 import { AppProvidersProps } from './types'
 
-
 export const AppProviders: FC<AppProvidersProps> = ({ children }) => {
   return (
     <SessionProvider>

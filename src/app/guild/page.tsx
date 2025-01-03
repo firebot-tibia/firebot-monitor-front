@@ -1,14 +1,15 @@
 import { Metadata } from 'next'
+import GuildContainer from '../../components/features/guild-table/components/guild-container'
 
 export const metadata: Metadata = {
-  title: 'Firebot Monitor - Monitoramento em tempo real de inimigos',
-  description: 'Tenha informações em tempo real da movimentação de seus inimigos no Tibia',
+  title: 'Firebot Monitor - Guilds',
+  description: 'Informações da guilda inimiga',
   openGraph: {
     url: 'https://monitor.firebot.run/',
     title: 'Firebot Monitor - Monitoramento em tempo real de inimigos',
     locale: 'pt-br',
     type: 'website',
-    description: 'Tenha informações em tempo real da movimentação de seus inimigos no Tibia',
+    description: 'Informações da guilda inimiga',
     images: [
       {
         url: 'https://monitor.firebot.run/assets/images/og.png',
@@ -21,10 +22,12 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     images: 'https://monitor.firebot.run/assets/images/og.png',
     title: 'Firebot Monitor - Monitoramento em tempo real de inimigos',
-    description: 'Tenha informações em tempo real da movimentação de seus inimigos no Tibia',
+    description: 'Informações da guilda inimiga',
     creator: '@firebot.tibia',
     site: 'https://monitor.firebot.run',
   },
 }
 
-export { default } from './dashboard/index'
+export default function Guild() {
+  return <GuildContainer />
+}

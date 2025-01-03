@@ -52,7 +52,10 @@ gulp.task('js', function () {
 
 gulp.task('images', function () {
   return gulp
-    .src(['src/components/features/tibia-map/_css/*.png', 'src/components/features/tibia-map/_img/*.png'])
+    .src([
+      'src/components/features/tibia-map/_css/*.png',
+      'src/components/features/tibia-map/_img/*.png',
+    ])
     .pipe(
       imagemin({
         optimizationLevel: 7,

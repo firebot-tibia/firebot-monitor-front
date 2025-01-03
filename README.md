@@ -1,6 +1,7 @@
 # firebot-front
 
 ## Arquitetura Front-End
+
 ```
 src/
 ├── app/

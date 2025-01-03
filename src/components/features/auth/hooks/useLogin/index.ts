@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useToast } from '@chakra-ui/react'
 import { AuthSchema } from '../../schema/auth.schema'
 import { useAuth } from '../useAuth'
+import { routes } from '../../../../../constants/routes'
 
 type LoginError = {
   email?: string
@@ -45,7 +46,7 @@ export const useLogin = () => {
       if (!session?.access_token) throw new Error('No session token')
 
       setTokens(session.access_token, session.refresh_token!)
-      router.push('/home')
+      router.push(routes.guild)
 
       toast({
         title: 'Logado com sucesso',

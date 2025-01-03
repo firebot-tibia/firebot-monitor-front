@@ -1,12 +1,11 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { Box, VStack, Spinner, Center, Text, SimpleGrid } from '@chakra-ui/react'
-import DashboardLayout from '../../components/layout'
-import { useHomeLogic } from '../../hooks/use-dashboard'
-import { GuildMemberTable } from '../../components/guild/guild-table'
+import { useHomeLogic } from '../../../../../hooks/use-dashboard'
+import { GuildMemberTable } from '../../../../guild/guild-table'
+import DashboardLayout from '../../../../layout'
 
-export default function Home() {
+export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
   const {
     isLoading,

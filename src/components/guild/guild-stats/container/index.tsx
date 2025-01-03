@@ -16,6 +16,7 @@ import { Pagination } from '../../../ui/pagination'
 import GuildTable from '../table'
 import FilterBar from './filter-bar'
 import { useGuildStatsStore } from '../../../../stores/guild-stats-store'
+import { routes } from '../../../../constants/routes'
 
 const GuildStatsContainer: React.FC = () => {
   const {
@@ -73,7 +74,7 @@ const GuildStatsContainer: React.FC = () => {
       )
 
       if (!characterExists) {
-        router.push(`/guild-stats/${encodeURIComponent(newName)}`)
+        router.push(`${routes.statistics}/${encodeURIComponent(newName)}`)
       }
     },
     [allyGainData, allyLossData, enemyGainData, enemyLossData, setNameFilter, router],
@@ -88,7 +89,7 @@ const GuildStatsContainer: React.FC = () => {
 
   const handleCharacterClick = useCallback(
     (characterName: string) => {
-      router.push(`/guild-stats/${encodeURIComponent(characterName)}`)
+      router.push(`${routes.statistics}/${encodeURIComponent(characterName)}`)
     },
     [router],
   )

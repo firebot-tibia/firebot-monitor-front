@@ -10,6 +10,7 @@
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write .",
     "build": "gulp && next build",
+    "postbuild": "next-sitemap",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
     "test": "jest --verbose",
     "test:watch": "jest --watch",

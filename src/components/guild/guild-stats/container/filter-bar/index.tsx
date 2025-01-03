@@ -21,6 +21,7 @@ import {
 import { SearchIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { capitalizeFirstLetter } from '../../../../../utils/capitalize-first-letter'
 import { tableVocationIcons } from '../../../../../utils/table-vocation-icons'
+import { routes } from '../../../../../constants/routes'
 
 interface FilterBarProps {
   filter: string
@@ -56,7 +57,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
     )
 
     if (!characterExists) {
-      router.push(`/guild-stats/${encodeURIComponent(searchInput)}`)
+      router.push(`${routes.statistics}/${encodeURIComponent(searchInput)}`)
     } else {
       onNameFilterChange(searchInput)
     }

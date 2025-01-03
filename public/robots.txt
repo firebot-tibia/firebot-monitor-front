@@ -1,0 +1,12 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /api/*
+Disallow: /*.tsx$
+Disallow: /*.ts$
+
+# Host
+Host: https://monitor.firebot.run
+
+# Sitemaps
+Sitemap: https://monitor.firebot.run/sitemap.xml
