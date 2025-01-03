@@ -1,10 +1,10 @@
-'use client';
+'use client'
 
-import { Button, Text, Flex, Center, Image } from '@chakra-ui/react';
-import { useRouter } from 'next/navigation';
+import { Button, Text, Flex, Center, Image } from '@chakra-ui/react'
+import { useRouter } from 'next/navigation'
 
 const Custom404 = () => {
-  const router = useRouter();
+  const router = useRouter()
 
   return (
     <Flex
@@ -15,23 +15,18 @@ const Custom404 = () => {
       color="white"
       direction="column"
     >
-    <Center>
-    </Center>
+      <Center></Center>
       <Text fontSize="6xl" fontWeight="bold" mb={4}>
         404
       </Text>
       <Text fontSize="2xl" mb={6}>
         Página não encontrada
       </Text>
-      <Button
-        colorScheme="red"
-        size="lg"
-        onClick={() => router.push('/')}
-      >
+      <Button colorScheme="red" size="lg" onClick={() => router.push('/')}>
         Voltar para o Início
       </Button>
     </Flex>
-  );
-};
+  )
+}
 
-export default Custom404;
+export default Custom404

@@ -1,34 +1,26 @@
-import React, { useEffect } from 'react';
 import {
-  VStack,
-  Heading,
-  Input,
-  SimpleGrid,
   useColorModeValue,
+  VStack,
   Flex,
   FormControl,
   FormLabel,
+  SimpleGrid,
+  Checkbox,
+  Input,
   Text,
-  Checkbox
-} from '@chakra-ui/react';
-import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
-import { useCharacterTypesView } from '../../../../shared/hooks/useTypeView';
-import { useCharacterMonitoring } from '../hooks/useMonitor';
+  Heading,
+} from '@chakra-ui/react'
+
+import { useCharacterTypesView } from '../../../../hooks/use-type-view'
+import { GuildMemberResponse } from '../../../../types/interfaces/guild/guild-member.interface'
+import { useCharacterMonitoring } from '../hooks/useMonitor'
 
 interface BombaMakerMonitorProps {
-  characters: GuildMemberResponse[];
-  isLoading: boolean;
-  characterChanges: GuildMemberResponse[];
-  onCharacterChangesProcessed: () => void;
+  characters: GuildMemberResponse[]
 }
 
-export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ 
-  characters,
-  isLoading,
-  characterChanges,
-  onCharacterChangesProcessed
-}) => {
-  const types = useCharacterTypesView(characters);
+export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({ characters }) => {
+  const types = useCharacterTypesView(characters)
   const {
     threshold,
     setThreshold,
@@ -36,27 +28,22 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({
     setTimeWindow,
     monitoredLists,
     handleCheckboxChange,
-    handleStatusChange
-  } = useCharacterMonitoring(characters, types);
+    handleStatusChange,
+  } = useCharacterMonitoring(characters, types)
 
-  const textColor = useColorModeValue('gray.100', 'gray.200');
-  const inputBgColor = useColorModeValue('black.700', 'black.800');
-
-  useEffect(() => {
-    if (characterChanges.length > 0) {
-      characterChanges.forEach(change => {
-        handleStatusChange(change, "logged-in");
-      });
-      onCharacterChangesProcessed();
-    }
-  }, [characterChanges, handleStatusChange, onCharacterChangesProcessed]);
+  const textColor = useColorModeValue('gray.100', 'gray.200')
+  const inputBgColor = useColorModeValue('black.700', 'black.800')
 
   return (
     <VStack spacing={6} align="stretch">
-      <Heading size="md" color={textColor}>Configurações de Monitoramento</Heading>
-      <Flex direction={{ base: "column", md: "row" }} gap={4}>
+      <Heading size="md" color={textColor}>
+        Configurações de Monitoramento
+      </Heading>
+      <Flex direction={{ base: 'column', md: 'row' }} gap={4}>
         <FormControl>
-          <FormLabel htmlFor="threshold" color={textColor}>Número Total de Personagens</FormLabel>
+          <FormLabel htmlFor="threshold" color={textColor}>
+            Número Total de Personagens
+          </FormLabel>
           <Input
             id="threshold"
             value={threshold}
@@ -69,7 +56,9 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({
           />
         </FormControl>
         <FormControl>
-          <FormLabel htmlFor="timeWindow" color={textColor}>Tempo (segundos)</FormLabel>
+          <FormLabel htmlFor="timeWindow" color={textColor}>
+            Tempo (segundos)
+          </FormLabel>
           <Input
             id="timeWindow"
             value={timeWindow}
@@ -82,7 +71,9 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({
           />
         </FormControl>
       </Flex>
-      <Text fontSize="sm" color={textColor} mb={2} fontWeight="bold">Tipos monitorados:</Text>
+      <Text fontSize="sm" color={textColor} mb={2} fontWeight="bold">
+        Tipos monitorados:
+      </Text>
       <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={2}>
         {types.map((type) => (
           <Checkbox
@@ -91,10 +82,12 @@ export const BombaMakerMonitor: React.FC<BombaMakerMonitorProps> = ({
             onChange={(e) => handleCheckboxChange(type, e.target.checked)}
             colorScheme="blue"
           >
-            <Text fontSize="sm" color={textColor}>{type}</Text>
+            <Text fontSize="sm" color={textColor}>
+              {type}
+            </Text>
           </Checkbox>
         ))}
       </SimpleGrid>
     </VStack>
-  );
-};
+  )
+}

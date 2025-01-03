@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   Menu,
   MenuButton,
@@ -10,17 +10,17 @@ import {
   Text,
   useColorModeValue,
   Portal,
-} from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
-import { CharacterTypesManager } from '../character-type';
-import { characterTypeIcons } from '../../../../constant/character';
-import { GuildMemberResponse } from '../../../../shared/interface/guild/guild-member.interface';
+} from '@chakra-ui/react'
+import { ChevronDownIcon } from '@chakra-ui/icons'
+import { CharacterTypesManager } from '../character-type'
+import { GuildMemberResponse } from '../../../../types/interfaces/guild/guild-member.interface'
+import { characterTypeIcons } from '../../../../utils/character-type-icons'
 
 interface CharacterClassificationProps {
-  member: GuildMemberResponse;
-  types: string[];
-  onClassificationChange: (member: GuildMemberResponse, newType: string) => void;
-  addType: (newType: string) => void;
+  member: GuildMemberResponse
+  types: string[]
+  onClassificationChange: (member: GuildMemberResponse, newType: string) => void
+  addType: (newType: string) => void
 }
 
 export const CharacterClassification: React.FC<CharacterClassificationProps> = ({
@@ -29,15 +29,15 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
   onClassificationChange,
   addType,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const bgColor = useColorModeValue('black.800', 'black.900');
-  const hoverBgColor = useColorModeValue('red.700', 'red.800');
-  const textColor = useColorModeValue('white', 'gray.100');
+  const [isOpen, setIsOpen] = useState(false)
+  const bgColor = useColorModeValue('black.800', 'black.900')
+  const hoverBgColor = useColorModeValue('red.700', 'red.800')
+  const textColor = useColorModeValue('white', 'gray.100')
 
   const handleClassificationClick = (newType: string) => {
-    onClassificationChange(member, newType);
-    setIsOpen(false);
-  };
+    onClassificationChange(member, newType)
+    setIsOpen(false)
+  }
 
   const renderTypeContent = (type: string) => (
     <HStack spacing={2}>
@@ -46,7 +46,7 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
       ) : null}
       <Text>{type}</Text>
     </HStack>
-  );
+  )
 
   return (
     <Menu isOpen={isOpen} onClose={() => setIsOpen(false)} placement="top-start">
@@ -76,17 +76,19 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
               </MenuItem>
             ))
           ) : (
-            <MenuItem isDisabled bg={bgColor}>Sem tipos para exibir</MenuItem>
+            <MenuItem isDisabled bg={bgColor}>
+              Sem tipos para exibir
+            </MenuItem>
           )}
           <CharacterTypesManager
             addType={(newType) => {
-              addType(newType);
-              onClassificationChange(member, newType);
-              setIsOpen(false);
+              addType(newType)
+              onClassificationChange(member, newType)
+              setIsOpen(false)
             }}
           />
         </MenuList>
       </Portal>
     </Menu>
-  );
-};
+  )
+}

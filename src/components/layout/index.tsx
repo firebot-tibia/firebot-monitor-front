@@ -1,55 +1,34 @@
-'use client';
-import { Box, Flex, Skeleton } from "@chakra-ui/react";
-import { FC } from "react";
-import Topbar from "./topbar";
-import { useSession } from "next-auth/react";
-import UnauthenticatedTopbar from "../unauthenticated/topbar";
+'use client'
+import dynamic from 'next/dynamic'
+import { Box, Flex } from '@chakra-ui/react'
+import { useSession } from 'next-auth/react'
+import SideNavbar from './components/side-navbar'
+import { FC } from 'react'
+
+const UnauthenticatedTopbar = dynamic(() => import('../unauthenticated'), { ssr: false })
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
-const TopbarLoader = () => (
-  <Skeleton
-    height="64px"
-    width="100%"
-    startColor="red.900"
-    endColor="red.700"
-    position="fixed"
-    top={0}
-    left={0}
-    right={0}
-    zIndex={1000}
-  />
-);
-
 const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
-  const { status } = useSession();
-  const isLoading = status === "loading";
-  const isAuthenticated = status === "authenticated";
+  const { status } = useSession()
+  const isAuthenticated = status === 'authenticated'
 
   return (
-    <Flex direction="column" h="100vh">
-      {isLoading ? (
-        <TopbarLoader />
-      ) : (
-        isAuthenticated ? <Topbar /> : <UnauthenticatedTopbar />
-      )}
-      <Flex
-        flex="1"
-        mt={isLoading ? "64px" : 0}
+    <Flex>
+      {isAuthenticated ? <SideNavbar /> : <UnauthenticatedTopbar />}
+      <Box
+        ml={isAuthenticated ? { base: '70px', md: '240px' } : 0}
+        w="full"
+        minH="100vh"
+        p={6}
+        transition="all 0.3s"
       >
-        <Box
-          p={10}
-          w="100%"
-          opacity={isLoading ? 0.7 : 1}
-          transition="opacity 0.3s"
-        >
-          {children}
-        </Box>
-      </Flex>
+        {children}
+      </Box>
     </Flex>
-  );
-};
+  )
+}
 
-export default DashboardLayout;
+export default DashboardLayout
