@@ -35,6 +35,7 @@ import { ChevronUpIcon, ChevronDownIcon, MoreHorizontal } from 'lucide-react'
 import { tableVocationIcons } from '../../../utils/table-vocation-icons'
 import { getTimeColor } from '../../../utils/get-time-color'
 import { copyExivas } from '../../../utils/copy-exiva'
+import { routes } from '../../../constants/routes'
 
 interface GuildMemberTableProps {
   data: GuildMemberResponse[]
@@ -158,7 +159,7 @@ export const CharacterName: FC<CharacterNameProps> = ({
               <Text>Time Online: {member.TimeOnline}</Text>
               <Link
                 as={NextLink}
-                href={`/guild-stats/${encodeURIComponent(sanitizeName(member.Name))}`}
+                href={`${routes.statistics}/${encodeURIComponent(sanitizeName(member.Name))}`}
                 color="red.300"
               >
                 Ver estatísticas detalhadas
