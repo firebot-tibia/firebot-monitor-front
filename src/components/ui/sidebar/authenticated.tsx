@@ -17,11 +17,10 @@ import {
 import { FaSignOutAlt, FaBars, FaDiscord, FaCog } from 'react-icons/fa'
 import { signOut } from 'next-auth/react'
 import NextLink from 'next/link'
-import WorldSelect from '../world-select'
-import ModeSelect from '../mode-select'
-import { routesArray } from '../../../../constants/routes'
+import { routes, routesArray } from '../../../constants/routes'
+import { WorldSelect, ModeSelect } from '../../layout/components'
 
-const SideNavbar = () => {
+const AuthenticatedSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false)
   const bgColor = useColorModeValue('gray.900', 'black')
   const textColor = useColorModeValue('white', 'gray.100')
@@ -107,7 +106,7 @@ const SideNavbar = () => {
 
           <IconButton
             as={Link}
-            href="https://discord.gg/2uYKmHNmHP"
+            href={routes.discordUrl}
             isExternal
             aria-label="Discord"
             icon={<FaDiscord />}
@@ -132,4 +131,4 @@ const SideNavbar = () => {
   )
 }
 
-export default SideNavbar
+export default AuthenticatedSidebar

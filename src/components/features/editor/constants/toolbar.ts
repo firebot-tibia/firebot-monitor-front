@@ -1,6 +1,6 @@
 import { FiEdit } from 'react-icons/fi'
-import { Tool } from '../types/unauthenticated.types'
 import DescriptionEditor from '../components/description'
+import { Tool } from '../types/unauthenticated.types'
 
 export const tools: Tool[] = [
   {

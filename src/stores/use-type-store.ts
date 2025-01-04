@@ -7,8 +7,7 @@ import { useTokenStore } from './token-decoded-store'
 import { UpsertPlayerInput } from '../types/interfaces/character-upsert.interface'
 import { GuildMemberResponse } from '../types/interfaces/guild/guild-member.interface'
 import { upsertPlayer } from '../services/guild-stats.service'
-
-const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall']
+import { fixedTypes } from '../constants/types'
 
 interface CharacterTypesState {
   customTypes: string[]

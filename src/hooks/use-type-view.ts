@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GuildMemberResponse } from '../types/interfaces/guild/guild-member.interface'
-
-const fixedTypes = ['main', 'maker', 'bomba', 'fracoks', 'exitados', 'mwall']
+import { fixedTypes } from '../constants/types'
 
 export const useCharacterTypesView = (guildData: GuildMemberResponse[]) => {
   const [types, setTypes] = useState<string[]>(fixedTypes)

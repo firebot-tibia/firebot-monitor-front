@@ -1,12 +1,12 @@
 import { Metadata } from 'next'
-import GuildContainer from '../../components/features/guild-table/components/guild-container'
+import Editor from '../../components/features/editor'
 
 export const metadata: Metadata = {
-  title: 'Firebot Monitor - Guilds',
+  title: 'Firebot Monitor - Editor de descrição',
   description: 'Informações da guilda inimiga',
   openGraph: {
     url: 'https://monitor.firebot.run/',
-    title: 'Firebot Monitor - Guilds',
+    title: 'Firebot Monitor - Editor de descrição',
     locale: 'pt-br',
     type: 'website',
     description: 'Informações da guilda inimiga',
@@ -21,13 +21,13 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     images: 'https://monitor.firebot.run/assets/images/og.png',
-    title: 'Firebot Monitor - Guilds',
+    title: 'Firebot Monitor - Editor de descrição',
     description: 'Informações da guilda inimiga',
     creator: '@firebot.tibia',
     site: 'https://monitor.firebot.run',
   },
 }
 
-export default function Guild() {
-  return <GuildContainer />
+export default function EditorPage() {
+  return <Editor />
 }
