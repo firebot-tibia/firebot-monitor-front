@@ -1,32 +1,23 @@
-'use client'
-import dynamic from 'next/dynamic'
-import { Box, Flex } from '@chakra-ui/react'
-import { useSession } from 'next-auth/react'
-import SideNavbar from './components/side-navbar'
-import { FC } from 'react'
-
-const UnauthenticatedTopbar = dynamic(() => import('../unauthenticated'), { ssr: false })
+"use client"
+import { Box, Flex } from "@chakra-ui/react"
+import { Sidebar } from "../ui"
+import { Footer } from "./components"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
-const DashboardLayout: FC<DashboardLayoutProps> = ({ children }) => {
-  const { status } = useSession()
-  const isAuthenticated = status === 'authenticated'
-
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
-    <Flex>
-      {isAuthenticated ? <SideNavbar /> : <UnauthenticatedTopbar />}
-      <Box
-        ml={isAuthenticated ? { base: '70px', md: '240px' } : 0}
-        w="full"
-        minH="100vh"
-        p={6}
-        transition="all 0.3s"
-      >
-        {children}
-      </Box>
+    <Flex direction="column" minH="100vh">
+      <Flex flex={1}>
+      <Sidebar />
+        <Box ml="60px" flex={1} p={6}>
+          {children}
+        </Box>
+      </Flex>
+
+      <Footer />
     </Flex>
   )
 }

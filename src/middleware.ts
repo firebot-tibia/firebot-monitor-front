@@ -1,17 +1,18 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { routes } from './constants/routes'
 
 export default withAuth(
   function middleware(req) {
     const isAuth = !!req.nextauth.token
-    const isPublicRoute = req.nextUrl.pathname === '/'
+    const isPublicRoute = req.nextUrl.pathname === `${routes.home}`
 
     if (isPublicRoute && isAuth) {
-      return NextResponse.redirect(new URL('/guild', req.url))
+      return NextResponse.redirect(new URL(`${routes.guild}`, req.url))
     }
 
     if (!isAuth) {
-      return NextResponse.redirect(new URL('/', req.url))
+      return NextResponse.redirect(new URL(`${routes.home}`, req.url))
     }
 
     return NextResponse.next()

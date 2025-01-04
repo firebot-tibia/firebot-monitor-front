@@ -9,8 +9,11 @@ export const routesArray = [
 ]
 
 export const routes = {
+  home: '/',
   guild: '/guild',
   statistics: '/statistics',
   reservations: '/reservations',
   tibiaMap: '/tibia-map',
+  editor: '/editor',
+  discordUrl: 'https://discord.gg/2uYKmHNmHP',
 }

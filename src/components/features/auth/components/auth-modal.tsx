@@ -22,6 +22,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { keyframes } from '@emotion/react'
 import { useLogin } from '../hooks/useLogin'
+import { routes } from '../../../../constants/routes'
 
 const pulse = keyframes`
   0% { transform: scale(1); }
@@ -174,7 +175,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 
           <Button
             as="a"
-            href="https://discord.gg/2uYKmHNmHP"
+            href={routes.discordUrl}
             target="_blank"
             rel="noopener noreferrer"
             leftIcon={<FaDiscord />}

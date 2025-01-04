@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuth } from '../../../components/features/auth/hooks/useAuth'
+import { signOut } from 'next-auth/react'
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -19,7 +20,7 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       useAuth.getState().clearTokens()
-      window.location.href = '/auth/signin'
+      await signOut({ callbackUrl: '/' })
     }
     return Promise.reject(error)
   },
