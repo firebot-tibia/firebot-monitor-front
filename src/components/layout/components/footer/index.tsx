@@ -13,11 +13,11 @@ export const Footer: React.FC = () => {
             © Firebot | {currentYear} criado por ssbreno e matheusrps
           </Text>
           <Text fontSize={{ base: 'xs', sm: 'sm' }}>
-            Tibia is a registered trademark of ©CipSoft and all products related to Tibia are copyright
-            by ©CipSoft GmbH
+            Tibia is a registered trademark of ©CipSoft and all products related to Tibia are
+            copyright by ©CipSoft GmbH
           </Text>
         </VStack>
-        
+
         <HStack justify="center" spacing={4}>
           <Link
             href="https://www.instagram.com/firebot_tibia/"

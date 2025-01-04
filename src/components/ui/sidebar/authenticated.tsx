@@ -20,7 +20,6 @@ import NextLink from 'next/link'
 import { routes, routesArray } from '../../../constants/routes'
 import { WorldSelect, ModeSelect } from '../../layout/components'
 
-
 const AuthenticatedSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false)
   const bgColor = useColorModeValue('gray.900', 'black')

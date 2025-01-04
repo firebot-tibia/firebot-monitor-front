@@ -1,9 +1,8 @@
-import { Box, Flex } from "@chakra-ui/react"
-import DashboardLayout from "../../layout"
-import { BotDescriptions } from "./components"
+import { Box, Flex } from '@chakra-ui/react'
+import DashboardLayout from '../../layout'
+import { BotDescriptions } from './components'
 
 const Dashboard = () => {
-
   return (
     <DashboardLayout>
       <Flex>
@@ -13,6 +12,6 @@ const Dashboard = () => {
       </Flex>
     </DashboardLayout>
   )
- }
+}
 
- export default Dashboard;
+export default Dashboard

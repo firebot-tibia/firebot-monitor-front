@@ -1,18 +1,18 @@
-import { VStack, IconButton, Button, Collapse } from "@chakra-ui/react"
-import { useState } from "react"
-import { FaBars, FaTools, FaDiscord, FaHome } from "react-icons/fa"
-import LoginButton from "../login-button"
-import { NavbarProps } from "./types"
-import { routes } from "../../../constants/routes"
-import Link from "next/link"
-import { tools } from "../../features/editor/constants/toolbar"
+import { VStack, IconButton, Button, Collapse } from '@chakra-ui/react'
+import { useState } from 'react'
+import { FaBars, FaTools, FaDiscord, FaHome } from 'react-icons/fa'
+import LoginButton from '../login-button'
+import { NavbarProps } from './types'
+import { routes } from '../../../constants/routes'
+import Link from 'next/link'
+import { tools } from '../../features/editor/constants/toolbar'
 
 const NavContent = ({
   isMobile,
   isExpanded,
   onOpenModal,
   activeTool,
-  onToggleExpand
+  onToggleExpand,
 }: NavbarProps & {
   isMobile: boolean
   isExpanded: boolean
@@ -34,14 +34,9 @@ const NavContent = ({
         _hover={{ bg: 'whiteAlpha.200' }}
       />
 
-<LoginButton
-        isMobile={isMobile}
-        isExpanded={isExpanded}
-        onOpenModal={onOpenModal}
-      />
+      <LoginButton isMobile={isMobile} isExpanded={isExpanded} onOpenModal={onOpenModal} />
 
-
-    <Button
+      <Button
         as={Link}
         href={routes.home}
         leftIcon={<FaHome />}
@@ -66,20 +61,20 @@ const NavContent = ({
 
       <Collapse in={isToolsExpanded}>
         <VStack align="stretch" pl={4} spacing={2}>
-          {tools.map(tool => (
+          {tools.map((tool) => (
             <Button
-            key={tool.id}
-            as={Link}
-            href={routes.editor}
-            leftIcon={<tool.icon />}
-            variant="ghost"
-            color="gray.300"
-            justifyContent="flex-start"
-            bg={activeTool === tool.id ? 'whiteAlpha.100' : undefined}
-            _hover={{ bg: 'whiteAlpha.200' }}
-          >
-            {(isMobile || isExpanded) && tool.name}
-          </Button>
+              key={tool.id}
+              as={Link}
+              href={routes.editor}
+              leftIcon={<tool.icon />}
+              variant="ghost"
+              color="gray.300"
+              justifyContent="flex-start"
+              bg={activeTool === tool.id ? 'whiteAlpha.100' : undefined}
+              _hover={{ bg: 'whiteAlpha.200' }}
+            >
+              {(isMobile || isExpanded) && tool.name}
+            </Button>
           ))}
         </VStack>
       </Collapse>
@@ -99,4 +94,4 @@ const NavContent = ({
   )
 }
 
-export default NavContent;
+export default NavContent

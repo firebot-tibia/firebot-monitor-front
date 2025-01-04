@@ -73,4 +73,4 @@ export const Pagination: React.FC<PaginationProps> = ({
   )
 }
 
-export default Pagination;
+export default Pagination

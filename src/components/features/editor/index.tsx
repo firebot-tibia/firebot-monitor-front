@@ -1,9 +1,8 @@
-import { Box, Flex } from "@chakra-ui/react"
-import DashboardLayout from "../../layout"
-import DescriptionEditor from "./components/description";
+import { Box, Flex } from '@chakra-ui/react'
+import DashboardLayout from '../../layout'
+import DescriptionEditor from './components/description'
 
 const Editor = () => {
-
   return (
     <DashboardLayout>
       <Flex>
@@ -13,6 +12,6 @@ const Editor = () => {
       </Flex>
     </DashboardLayout>
   )
- }
+}
 
- export default Editor;
+export default Editor

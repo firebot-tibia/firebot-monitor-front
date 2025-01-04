@@ -5,14 +5,10 @@ import AuthenticatedSidebar from './authenticated'
 import UnauthenticatedSidebar from './unauthenticated'
 
 export const Sidebar = () => {
- const { status } = useSession()
- const isAuthenticated = status === 'authenticated'
+  const { status } = useSession()
+  const isAuthenticated = status === 'authenticated'
 
- return (
-   <Box>
-     {isAuthenticated ? <AuthenticatedSidebar /> : <UnauthenticatedSidebar />}
-   </Box>
- )
+  return <Box>{isAuthenticated ? <AuthenticatedSidebar /> : <UnauthenticatedSidebar />}</Box>
 }
 
-export default Sidebar;
+export default Sidebar
