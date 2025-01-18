@@ -23,12 +23,15 @@ import {
   VStack,
 } from '@chakra-ui/react'
 
-
 import { formatTimeSlotEnd } from '@/utils/format-time-slot-end'
 
 import { useReservationsManager } from '../../hooks/useReservations'
 import { useReservationTable } from '../../hooks/useTableHook'
-import type { Reservation, Respawn, CreateReservationData } from '../../types/reservations.interface'
+import type {
+  Reservation,
+  Respawn,
+  CreateReservationData,
+} from '../../types/reservations.interface'
 import { AddReservationForm } from '../add-reservations'
 import { DeleteReservationModal } from '../delete-reservations-modal'
 
