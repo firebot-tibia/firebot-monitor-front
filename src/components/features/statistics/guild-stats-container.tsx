@@ -21,8 +21,6 @@ import { useGuildStatsStore } from '@/stores/guild-stats-store'
 import FilterBar from './components/filter-bar'
 import GuildTable from './components/table'
 
-
-
 const GuildStatsContainer: React.FC = () => {
   const {
     filter,

@@ -1,6 +1,5 @@
 import { Box, Heading } from '@chakra-ui/react'
 
-
 import GuildStatsContainer from '@/components/features/statistics/guild-stats-container'
 
 import DashboardLayout from '../../components/layout'

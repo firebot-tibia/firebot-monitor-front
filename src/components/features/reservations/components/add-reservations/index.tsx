@@ -33,8 +33,6 @@ import { formatDateForAPI } from '@/utils/format-date-api'
 
 import type { CreateReservationData } from '../../types/reservations.interface'
 
-
-
 interface AddReservationFormProps {
   onSubmit: (data: Omit<CreateReservationData, 'world'> & { respawn_id: string }) => Promise<void>
   respawnId: string

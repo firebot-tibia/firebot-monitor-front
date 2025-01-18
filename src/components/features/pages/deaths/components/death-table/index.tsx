@@ -6,9 +6,6 @@ import type { Death } from '@/components/features/guilds-monitoring/types/death.
 
 import { DeathTableRow } from '../death-row'
 
-
-
-
 interface DeathTableContentProps {
   deathList: Death[]
   currentPage: number

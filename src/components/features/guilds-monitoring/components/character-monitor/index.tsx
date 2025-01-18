@@ -16,8 +16,6 @@ import type { GuildMemberResponse } from '@/types/guild-member.interface'
 
 import { useCharacterMonitoring } from '../../hooks/useMonitor'
 
-
-
 interface BombaMakerMonitorProps {
   characters: GuildMemberResponse[]
 }

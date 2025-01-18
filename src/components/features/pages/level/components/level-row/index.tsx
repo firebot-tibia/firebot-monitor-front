@@ -4,7 +4,6 @@ import { Td, Tr } from '@chakra-ui/react'
 
 import type { Level } from '@/components/features/guilds-monitoring/types/level.interface'
 
-
 interface LevelTableRowProps {
   level: Level
 }

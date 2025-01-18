@@ -7,7 +7,6 @@ import type { Death } from '@/components/features/guilds-monitoring/types/death.
 
 import { TruncatedText } from '../truncated-text'
 
-
 interface DeathTableRowProps {
   death: Death
 }
