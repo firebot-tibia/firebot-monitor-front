@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { signIn, getSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+
 import { useToast } from '@chakra-ui/react'
+import { useRouter } from 'next/navigation'
+import { signIn, getSession } from 'next-auth/react'
+
+import { routes } from '../../../../../constants/routes'
 import { AuthSchema } from '../../schema/auth.schema'
 import { useAuth } from '../useAuth'
-import { routes } from '../../../../../constants/routes'
 
 type LoginError = {
   email?: string
@@ -24,7 +26,7 @@ export const useLogin = () => {
 
     if (!validationResult.success) {
       const fieldErrors: LoginError = {}
-      validationResult.error.errors.forEach((err) => {
+      validationResult.error.errors.forEach(err => {
         if (err.path[0]) fieldErrors[err.path[0] as keyof LoginError] = err.message
       })
       setErrors(fieldErrors)

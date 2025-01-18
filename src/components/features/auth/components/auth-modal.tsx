@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import {
   Modal,
   ModalOverlay,
@@ -17,12 +19,12 @@ import {
   VStack,
   IconButton,
 } from '@chakra-ui/react'
-import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa'
-import { motion } from 'framer-motion'
-import { useState } from 'react'
 import { keyframes } from '@emotion/react'
-import { useLogin } from '../hooks/useLogin'
+import { motion } from 'framer-motion'
+import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa'
+
 import { routes } from '../../../../constants/routes'
+import { useLogin } from '../hooks/useLogin'
 
 const pulse = keyframes`
   0% { transform: scale(1); }
@@ -92,7 +94,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                 <Input
                   type="text"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   bg={inputBgColor}
                   borderColor={inputBorderColor}
                   _hover={{ borderColor: 'red.500' }}
@@ -119,7 +121,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     bg={inputBgColor}
                     borderColor={inputBorderColor}
                     _hover={{ borderColor: 'red.500' }}

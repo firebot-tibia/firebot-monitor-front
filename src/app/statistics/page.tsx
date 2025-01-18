@@ -1,6 +1,9 @@
 import { Box, Heading } from '@chakra-ui/react'
+
+
+import GuildStatsContainer from '@/components/features/statistics/guild-stats-container'
+
 import DashboardLayout from '../../components/layout'
-import GuildStatsContainer from '../../components/guild/guild-stats/container'
 
 const GuildStats = () => {
   return (

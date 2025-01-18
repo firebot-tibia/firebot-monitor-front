@@ -1,7 +1,9 @@
 import React from 'react'
-import { Button, Flex, Text } from '@chakra-ui/react'
+
 import { ChevronLeftIcon, ChevronRightIcon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
-import { PaginationProps } from './types'
+import { Button, Flex, Text } from '@chakra-ui/react'
+
+import type { PaginationProps } from './types'
 
 export const Pagination: React.FC<PaginationProps> = ({
   currentPage,

@@ -1,5 +1,5 @@
+import type { Session } from 'next-auth'
 import { create } from 'zustand'
-import { Session } from 'next-auth'
 
 interface GlobalState {
   error: Error | null
@@ -37,10 +37,10 @@ const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
   reconnectTimeout: null,
   reconnectAttempts: 0,
 
-  setError: (error) => set({ error }),
-  setEventSource: (eventSource) => set({ eventSource }),
-  setIsSettingUp: (isSettingUp) => set({ isSettingUp }),
-  setReconnectTimeout: (timeout) => set({ reconnectTimeout: timeout }),
+  setError: error => set({ error }),
+  setEventSource: eventSource => set({ eventSource }),
+  setIsSettingUp: isSettingUp => set({ isSettingUp }),
+  setReconnectTimeout: timeout => set({ reconnectTimeout: timeout }),
 
   setupEventSource: async (baseUrl, getSession, onMessage, selectedWorld) => {
     const { isSettingUp, isConnected, reconnectTimeout, reconnectAttempts } = get()
@@ -65,7 +65,7 @@ const useEventSourceGlobal = create<GlobalState>()((set, get) => ({
       const fullUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(session.access_token)}&world=${selectedWorld}`
       const newEventSource = new EventSource(fullUrl)
 
-      newEventSource.onmessage = (event) => {
+      newEventSource.onmessage = event => {
         try {
           const data = JSON.parse(event.data)
           onMessage(data)

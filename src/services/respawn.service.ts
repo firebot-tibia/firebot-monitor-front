@@ -1,5 +1,5 @@
-import { CreateReservationData } from '../types/interfaces/reservations.interface'
 import api from './api/firebot-api'
+import type { CreateReservationData } from '../components/features/reservations/types/reservations.interface'
 
 export const getReservationsList = async (query: {
   guild_id: string

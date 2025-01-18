@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { Box, Container, Text, HStack, Link, VStack } from '@chakra-ui/react'
 import { FaInstagram, FaYoutube, FaGithub } from 'react-icons/fa'
 

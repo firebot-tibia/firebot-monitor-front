@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+
 import { getAllRespawns } from '../services/respawn.service'
 
 interface Respawn {

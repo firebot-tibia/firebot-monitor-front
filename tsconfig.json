@@ -13,6 +13,7 @@
     "jsx": "preserve",
     "jsxImportSource": "react",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"

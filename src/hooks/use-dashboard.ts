@@ -1,16 +1,18 @@
 'use client'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import { useToast } from '@chakra-ui/react'
 import { useSession } from 'next-auth/react'
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+
 import { usePermission } from './use-permission'
-import { Death } from '../types/interfaces/death.interface'
-import { GuildMemberResponse } from '../types/interfaces/guild/guild-member.interface'
-import { Level } from '../types/interfaces/level.interface'
+import type { Death } from '../components/features/guilds-monitoring/types/death.interface'
+import type { Level } from '../components/features/guilds-monitoring/types/level.interface'
+import { upsertPlayer } from '../services/guild-stats.service'
 import { useGlobalStore } from '../stores/death-level-store'
 import { useStorage, useStorageStore } from '../stores/storage-store'
 import { useTokenStore } from '../stores/token-decoded-store'
 import { useCharacterTypes } from '../stores/use-type-store'
-import { upsertPlayer } from '../services/guild-stats.service'
+import type { GuildMemberResponse } from '../types/guild-member.interface'
 import { formatTimeOnline } from '../utils/format-time-online'
 
 export const useHomeLogic = () => {
@@ -62,8 +64,8 @@ export const useHomeLogic = () => {
 
   const updateMemberData = useCallback(
     (member: GuildMemberResponse, changes: Partial<GuildMemberResponse>) => {
-      setGuildData((prevData) =>
-        prevData.map((m) => (m.Name === member.Name ? { ...m, ...changes } : m)),
+      setGuildData(prevData =>
+        prevData.map(m => (m.Name === member.Name ? { ...m, ...changes } : m)),
       )
     },
     [],
@@ -80,11 +82,11 @@ export const useHomeLogic = () => {
         setGuildData(newGuildData)
       }
       if (data?.[`${value}-changes`]) {
-        setGuildData((prevData) => {
+        setGuildData(prevData => {
           const updatedData = [...prevData]
           const newChanges: GuildMemberResponse[] = []
           Object.entries(data[`${value}-changes`]).forEach(([name, change]: [string, any]) => {
-            const index = updatedData.findIndex((member) => member.Name === name)
+            const index = updatedData.findIndex(member => member.Name === name)
             if (index !== -1) {
               if (change.ChangeType === 'logged-in') {
                 updatedData[index] = {
@@ -108,7 +110,7 @@ export const useHomeLogic = () => {
               }
             }
           })
-          setCharacterChanges((prev) => [...prev, ...newChanges])
+          setCharacterChanges(prev => [...prev, ...newChanges])
           return updatedData
         })
       }
@@ -125,8 +127,8 @@ export const useHomeLogic = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setGuildData((prevData) =>
-        prevData.map((member) => {
+      setGuildData(prevData =>
+        prevData.map(member => {
           if (member.OnlineStatus && member.OnlineSince) {
             const onlineSince = new Date(member.OnlineSince)
             const now = new Date()
@@ -212,7 +214,7 @@ export const useHomeLogic = () => {
   )
 
   const groupedData = useMemo(() => {
-    const onlineMembers = guildData.filter((member) => member.OnlineStatus && member.TimeOnline)
+    const onlineMembers = guildData.filter(member => member.OnlineStatus && member.TimeOnline)
 
     const sortedGuildData = onlineMembers.sort((a, b) => {
       const timeA = a.TimeOnline || '00:00:00'
@@ -225,19 +227,18 @@ export const useHomeLogic = () => {
     })
 
     return types
-      .map((type) => ({
+      .map(type => ({
         type,
-        data: sortedGuildData.filter((member) => member.Kind === type),
-        onlineCount: sortedGuildData.filter((member) => member.Kind === type).length,
+        data: sortedGuildData.filter(member => member.Kind === type),
+        onlineCount: sortedGuildData.filter(member => member.Kind === type).length,
       }))
       .concat({
         type: 'unclassified',
-        data: sortedGuildData.filter((member) => !member.Kind || !types.includes(member.Kind)),
-        onlineCount: sortedGuildData.filter(
-          (member) => !member.Kind || !types.includes(member.Kind),
-        ).length,
+        data: sortedGuildData.filter(member => !member.Kind || !types.includes(member.Kind)),
+        onlineCount: sortedGuildData.filter(member => !member.Kind || !types.includes(member.Kind))
+          .length,
       })
-      .filter((group) => group.data.length > 0)
+      .filter(group => group.data.length > 0)
   }, [guildData, types])
 
   return {

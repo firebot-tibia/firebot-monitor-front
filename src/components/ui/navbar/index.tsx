@@ -1,10 +1,12 @@
-import { VStack, IconButton, Button, Collapse } from '@chakra-ui/react'
 import { useState } from 'react'
-import { FaBars, FaTools, FaDiscord, FaHome } from 'react-icons/fa'
-import LoginButton from '../login-button'
-import { NavbarProps } from './types'
-import { routes } from '../../../constants/routes'
+
+import { VStack, IconButton, Button, Collapse } from '@chakra-ui/react'
 import Link from 'next/link'
+import { FaBars, FaTools, FaDiscord, FaHome } from 'react-icons/fa'
+
+import LoginButton from '../login-button'
+import type { NavbarProps } from './types'
+import { routes } from '../../../constants/routes'
 import { tools } from '../../features/editor/constants/toolbar'
 
 const NavContent = ({
@@ -61,7 +63,7 @@ const NavContent = ({
 
       <Collapse in={isToolsExpanded}>
         <VStack align="stretch" pl={4} spacing={2}>
-          {tools.map((tool) => (
+          {tools.map(tool => (
             <Button
               key={tool.id}
               as={Link}

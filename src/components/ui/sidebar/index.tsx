@@ -1,6 +1,7 @@
 'use client'
 import { Box } from '@chakra-ui/react'
 import { useSession } from 'next-auth/react'
+
 import AuthenticatedSidebar from './authenticated'
 import UnauthenticatedSidebar from './unauthenticated'
 

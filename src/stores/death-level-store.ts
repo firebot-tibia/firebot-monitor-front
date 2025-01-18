@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { Death } from '../types/interfaces/death.interface'
-import { Level } from '../types/interfaces/level.interface'
+
+import type { Death } from '../components/features/guilds-monitoring/types/death.interface'
+import type { Level } from '../components/features/guilds-monitoring/types/level.interface'
 
 interface GlobalState {
   deathList: Death[]
@@ -17,25 +18,25 @@ interface GlobalState {
   setError: (error: string | null) => void
 }
 
-export const useGlobalStore = create<GlobalState>()((set) => ({
+export const useGlobalStore = create<GlobalState>()(set => ({
   deathList: [],
   levelUpList: [],
   levelDownList: [],
   newDeathCount: 0,
   newLevelUpCount: 0,
   newLevelDownCount: 0,
-  addDeath: (death) =>
-    set((state) => ({
+  addDeath: death =>
+    set(state => ({
       deathList: [death, ...state.deathList],
       newDeathCount: state.newDeathCount + 1,
     })),
-  addLevelUp: (levelUp) =>
-    set((state) => ({
+  addLevelUp: levelUp =>
+    set(state => ({
       levelUpList: [levelUp, ...state.levelUpList],
       newLevelUpCount: state.newLevelUpCount + 1,
     })),
-  addLevelDown: (levelDown) =>
-    set((state) => ({
+  addLevelDown: levelDown =>
+    set(state => ({
       levelDownList: [levelDown, ...state.levelDownList],
       newLevelDownCount: state.newLevelDownCount + 1,
     })),
@@ -46,5 +47,5 @@ export const useGlobalStore = create<GlobalState>()((set) => ({
       newLevelDownCount: 0,
     }),
   error: null,
-  setError: (error) => set({ error }),
+  setError: error => set({ error }),
 }))

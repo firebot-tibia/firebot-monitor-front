@@ -1,5 +1,6 @@
-import { useToast } from '@chakra-ui/react'
-import { GuildMemberResponse } from '../types/interfaces/guild/guild-member.interface'
+import type { useToast } from '@chakra-ui/react'
+
+import type { GuildMemberResponse } from '../types/guild-member.interface'
 
 export const copyExivas = (data: GuildMemberResponse, toast: ReturnType<typeof useToast>) => {
   const cleanName = data.Name.trim()

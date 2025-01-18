@@ -1,5 +1,6 @@
 'use client'
 import { Box, Flex } from '@chakra-ui/react'
+
 import { Sidebar } from '../ui'
 import { Footer } from './components'
 

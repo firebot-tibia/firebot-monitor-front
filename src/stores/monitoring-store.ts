@@ -12,13 +12,13 @@ interface MonitoringState {
 
 export const useMonitoringStore = create<MonitoringState>()(
   persist(
-    (set) => ({
+    set => ({
       threshold: 5,
       timeWindow: 120,
       monitoredLists: ['bomba', 'maker'],
-      setThreshold: (value) => set({ threshold: value }),
-      setTimeWindow: (value) => set({ timeWindow: value }),
-      setMonitoredLists: (value) => set({ monitoredLists: value }),
+      setThreshold: value => set({ threshold: value }),
+      setTimeWindow: value => set({ timeWindow: value }),
+      setMonitoredLists: value => set({ monitoredLists: value }),
     }),
     {
       name: 'monitoring-store',

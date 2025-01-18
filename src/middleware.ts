@@ -1,5 +1,6 @@
-import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { withAuth } from 'next-auth/middleware'
+
 import { routes } from './constants/routes'
 
 export default withAuth(

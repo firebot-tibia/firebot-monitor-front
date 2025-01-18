@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 ;(function () {
   const URL_PREFIX = 'https://tibiamaps.github.io/tibia-map-data/'
   let KNOWN_TILES = null
@@ -494,7 +495,7 @@
     _this._showHoverTile()
 
     map.whenReady(function () {
-      huntAreas.forEach((area) => {
+      huntAreas.forEach(area => {
         const latLng = map.unproject([area.x, area.y], 0)
 
         const icon = L.divIcon({
@@ -559,7 +560,7 @@
 
     console.log('Finding hunt areas in direction:', direction)
 
-    const relevantAreas = huntAreas.filter((area) => {
+    const relevantAreas = huntAreas.filter(area => {
       const areaLatLng = map.unproject([area.x, area.y], 0)
       if (!areaLatLng) {
         console.error('Não foi possível desprojetar coordenadas para:', area)
@@ -569,22 +570,22 @@
       return areaDirection === direction
     })
 
-    const visibleAreas = relevantAreas.filter((area) => {
+    const visibleAreas = relevantAreas.filter(area => {
       const areaLatLng = map.unproject([area.x, area.y], 0)
       return areaLatLng && bounds.contains(areaLatLng)
     })
 
-    const invisibleAreas = relevantAreas.filter((area) => {
+    const invisibleAreas = relevantAreas.filter(area => {
       const areaLatLng = map.unproject([area.x, area.y], 0)
       return areaLatLng && !bounds.contains(areaLatLng)
     })
 
     let resultText = ''
     if (visibleAreas.length > 0) {
-      resultText += 'Áreas visíveis: ' + visibleAreas.map((area) => area.name).join(', ') + '\n\n'
+      resultText += 'Áreas visíveis: ' + visibleAreas.map(area => area.name).join(', ') + '\n\n'
     }
     if (invisibleAreas.length > 0) {
-      resultText += 'Áreas fora da visão: ' + invisibleAreas.map((area) => area.name).join(', ')
+      resultText += 'Áreas fora da visão: ' + invisibleAreas.map(area => area.name).join(', ')
     }
 
     if (resultText === '') {
@@ -645,7 +646,7 @@
     cityButtonsContainer.innerHTML = ''
 
     if (Array.isArray(cityAreas) && cityAreas.length > 0) {
-      cityAreas.forEach((city) => {
+      cityAreas.forEach(city => {
         const button = document.createElement('button')
         button.textContent = city.name
         button.className = 'btn btn-sm btn-outline-light city-btn'

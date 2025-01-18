@@ -1,15 +1,16 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+
 import Editor from '../../components/features/editor'
 
 export const metadata: Metadata = {
   title: 'Firebot Monitor - Editor de descrição',
-  description: 'Informações da guilda inimiga',
+  description: 'Editar descrição para inserir no teamspeak',
   openGraph: {
-    url: 'https://monitor.firebot.run/',
+    url: 'https://monitor.firebot.run/editor',
     title: 'Firebot Monitor - Editor de descrição',
     locale: 'pt-br',
     type: 'website',
-    description: 'Informações da guilda inimiga',
+    description: 'Editar descrição para inserir no teamspeak',
     images: [
       {
         url: 'https://monitor.firebot.run/assets/images/og.png',
@@ -22,9 +23,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     images: 'https://monitor.firebot.run/assets/images/og.png',
     title: 'Firebot Monitor - Editor de descrição',
-    description: 'Informações da guilda inimiga',
+    description: 'Editar descrição para inserir no teamspeak',
     creator: '@firebot.tibia',
-    site: 'https://monitor.firebot.run',
+    site: 'https://monitor.firebot.run/editor',
   },
 }
 

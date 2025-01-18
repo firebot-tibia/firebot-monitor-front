@@ -1,6 +1,8 @@
-import { FC, ReactNode } from 'react'
+import type { FC, ReactNode } from 'react'
+
 import '../styles/globals.css'
 import Script from 'next/script'
+
 import { google } from '../constants/google'
 import { AppProviders } from '../contexts/useTheme'
 
