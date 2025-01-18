@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 import {
   useBreakpointValue,
   Box,
@@ -9,11 +11,11 @@ import {
   Skeleton,
   VStack,
 } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
 import { FaBars } from 'react-icons/fa'
+
 import LoginModal from '../../features/auth/components/auth-modal'
+import type { ToolType } from '../../features/editor/types/unauthenticated.types'
 import NavContent from '../navbar'
-import { ToolType } from '../../features/editor/types/unauthenticated.types'
 
 const SidebarSkeleton = () => (
   <VStack spacing={4} p={4} width="240px">

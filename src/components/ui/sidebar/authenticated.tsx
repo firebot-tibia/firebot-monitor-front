@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+
 import {
   Flex,
   IconButton,
@@ -14,9 +14,11 @@ import {
   PopoverContent,
   Portal,
 } from '@chakra-ui/react'
-import { FaSignOutAlt, FaBars, FaDiscord, FaCog } from 'react-icons/fa'
-import { signOut } from 'next-auth/react'
+import { motion } from 'framer-motion'
 import NextLink from 'next/link'
+import { signOut } from 'next-auth/react'
+import { FaSignOutAlt, FaBars, FaDiscord, FaCog } from 'react-icons/fa'
+
 import { routes, routesArray } from '../../../constants/routes'
 import { WorldSelect, ModeSelect } from '../../layout/components'
 
@@ -56,7 +58,7 @@ const AuthenticatedSidebar = () => {
         />
 
         <VStack spacing={1} align="stretch" flex={1} pt={4}>
-          {routesArray.map((item) => (
+          {routesArray.map(item => (
             <Tooltip key={item.href} label={!isExpanded ? item.name : ''} placement="right">
               <Flex
                 as={NextLink}

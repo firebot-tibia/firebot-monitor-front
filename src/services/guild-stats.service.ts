@@ -1,6 +1,6 @@
-import { ExperienceListQuery } from '../components/guild/guild-stats/interfaces/guild-stats.interface'
-import { UpsertPlayerInput } from '../types/interfaces/character-upsert.interface'
 import api from './api/firebot-api'
+import type { UpsertPlayerInput } from '../components/features/guilds-monitoring/types/character-upsert.interface'
+import type { ExperienceListQuery } from '../components/features/statistics/types/guild-stats.interface'
 
 export const upsertPlayer = async (playerData: UpsertPlayerInput, world: string) => {
   try {

@@ -1,4 +1,5 @@
 import React from 'react'
+
 import {
   FormControl,
   FormLabel,
@@ -8,7 +9,8 @@ import {
   useColorModeValue,
   useBreakpointValue,
 } from '@chakra-ui/react'
-import { InputWithIconProps } from './types'
+
+import type { InputWithIconProps } from './types'
 
 const InputWithIcon: React.FC<InputWithIconProps> = ({
   icon,

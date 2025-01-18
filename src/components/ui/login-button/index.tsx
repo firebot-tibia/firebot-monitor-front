@@ -1,6 +1,7 @@
 import { Button } from '@chakra-ui/react'
 import { FaUserAlt } from 'react-icons/fa'
-import { LoginButtonProps } from './types'
+
+import type { LoginButtonProps } from './types'
 
 const LoginButton: React.FC<LoginButtonProps> = ({
   variant = 'default',

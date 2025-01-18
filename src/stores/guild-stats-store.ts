@@ -1,9 +1,10 @@
 import { create } from 'zustand'
+
 import { useStorageStore } from './storage-store'
-import {
-  GuildData,
+import type {
   ExperienceListQuery,
-} from '../components/guild/guild-stats/interfaces/guild-stats.interface'
+  GuildData,
+} from '../components/features/statistics/types/guild-stats.interface'
 import { getExperienceList } from '../services/guild-stats.service'
 
 interface GuildStatsState {
@@ -48,7 +49,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
   selectedCharacter: null,
   itemsPerPage: 30,
 
-  setFilter: (filter) => {
+  setFilter: filter => {
     const newSort =
       filter === 'Diaria' ? 'exp_yesterday' : filter === 'Semanal' ? 'exp_week' : 'exp_month'
     set({
@@ -63,7 +64,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
     get().fetchGuildStats('enemy')
   },
 
-  setVocationFilter: (vocation) => {
+  setVocationFilter: vocation => {
     set({
       vocationFilter: vocation,
       allyGainPage: 1,
@@ -75,7 +76,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
     get().fetchGuildStats('enemy')
   },
 
-  setNameFilter: (name) => {
+  setNameFilter: name => {
     set({
       nameFilter: name.trim(),
       allyGainPage: 1,
@@ -92,9 +93,9 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
     get().fetchGuildStats(guildType.startsWith('ally') ? 'ally' : 'enemy')
   },
 
-  setSelectedCharacter: (character) => set({ selectedCharacter: character }),
+  setSelectedCharacter: character => set({ selectedCharacter: character }),
 
-  fetchGuildStats: async (guildType) => {
+  fetchGuildStats: async guildType => {
     const {
       filter,
       sort,

@@ -32,7 +32,7 @@ L.Crosshairs = L.LayerGroup.extend({
       exiva_line_northwest_1: L.polyline([], this.options.style),
       exiva_line_northwest_2: L.polyline([], this.options.style),
     }
-    for (var layer in this.crosshair) {
+    for (const layer in this.crosshair) {
       this.addLayer(this.crosshair[layer])
     }
     this._hideExiva()
@@ -124,13 +124,13 @@ L.Crosshairs = L.LayerGroup.extend({
     }
   },
   _moveCrosshairs: function (e) {
-    var bounds
-    var bounds_exiva_100
-    var bounds_exiva_250
+    let bounds
+    let bounds_exiva_100
+    let bounds_exiva_250
     if (e.latlng) {
-      var pos = this._map.project(e.latlng, 0)
-      var x = Math.floor(pos.x)
-      var y = Math.floor(pos.y)
+      const pos = this._map.project(e.latlng, 0)
+      const x = Math.floor(pos.x)
+      const y = Math.floor(pos.y)
       bounds = this.calculateExivaBounds(0, x, y)
       bounds_exiva_100 = this.calculateExivaBounds(100, x, y)
       bounds_exiva_250 = this.calculateExivaBounds(250, x, y)
@@ -139,11 +139,11 @@ L.Crosshairs = L.LayerGroup.extend({
       bounds_exiva_100 = this.crosshair.exiva_rectangle_100.getBounds()
       bounds_exiva_250 = this.crosshair.exiva_rectangle_250.getBounds()
     }
-    var latlng = bounds.getCenter()
+    const latlng = bounds.getCenter()
     this.crosshair.rectangle.setBounds(bounds)
     this.crosshair.exiva_rectangle_100.setBounds(bounds_exiva_100)
     this.crosshair.exiva_rectangle_250.setBounds(bounds_exiva_250)
-    var point = this._map.project(latlng)
+    const point = this._map.project(latlng)
     this.crosshair.longitude_line_north.setLatLngs([
       this._map.unproject([point.x, point.y]),
       this._map.unproject([point.x, this._map.getPixelBounds().min.y]),
@@ -160,8 +160,8 @@ L.Crosshairs = L.LayerGroup.extend({
       this._map.unproject([point.x, point.y]),
       this._map.unproject([this._map.getPixelBounds().max.x, point.y]),
     ])
-    var DIAGONAL_SIZE = 102360
-    var OTHER_DIAGONAL_SIZE = DIAGONAL_SIZE * 2.42
+    const DIAGONAL_SIZE = 102360
+    const OTHER_DIAGONAL_SIZE = DIAGONAL_SIZE * 2.42
     this.crosshair.exiva_line_northeast_1.setLatLngs([
       this._map.unproject([point.x, point.y]),
       this._map.unproject([point.x + DIAGONAL_SIZE, point.y - OTHER_DIAGONAL_SIZE]),

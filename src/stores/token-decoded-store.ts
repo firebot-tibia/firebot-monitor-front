@@ -1,8 +1,9 @@
-import { create } from 'zustand'
 import { jwtDecode } from 'jwt-decode'
+import { getSession } from 'next-auth/react'
+import { create } from 'zustand'
+
 import useEventSourceGlobal from './event-source-store'
 import { useStorageStore } from './storage-store'
-import { getSession } from 'next-auth/react'
 
 interface Guild {
   id: string
@@ -78,6 +79,6 @@ export const useTokenStore = create<TokenState>((set, get) => ({
     const baseUrl = `${process.env.NEXT_PUBLIC_SSE_URL}${mode}/`
     useEventSourceGlobal
       .getState()
-      .initializeEventSource(baseUrl, getSession, handleMessage || ((data) => data), selectedWorld)
+      .initializeEventSource(baseUrl, getSession, handleMessage || (data => data), selectedWorld)
   },
 }))

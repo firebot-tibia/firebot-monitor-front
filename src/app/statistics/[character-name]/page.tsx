@@ -1,6 +1,8 @@
 import React from 'react'
+
 import { Box, Heading } from '@chakra-ui/react'
-import CharacterStatsPage from '../../../components/guild/guild-stats/player-modal'
+
+import CharacterStatsPage from '../../../components/features/statistics/components/player-modal'
 import DashboardLayout from '../../../components/layout'
 
 const CharacterPage: React.FC = () => {

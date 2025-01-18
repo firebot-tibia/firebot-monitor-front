@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Menu, MenuButton, MenuList, MenuItem, Button, Box } from '@chakra-ui/react'
+
 import { ChevronDownIcon } from '@chakra-ui/icons'
+import { Menu, MenuButton, MenuList, MenuItem, Button, Box } from '@chakra-ui/react'
+
 import { useStorageStore } from '../../../../stores/storage-store'
 
 type Mode = 'ally' | 'enemy'
@@ -39,7 +41,7 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onChange }) => {
     return null
   }
 
-  const availableModes = Object.keys(modeMap).filter((mode) => mode !== monitorMode) as Mode[]
+  const availableModes = Object.keys(modeMap).filter(mode => mode !== monitorMode) as Mode[]
 
   return (
     <Menu>
@@ -55,7 +57,7 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onChange }) => {
         {modeMap[monitorMode]}
       </MenuButton>
       <MenuList bg="black" borderColor="gray.600">
-        {availableModes.map((mode) => (
+        {availableModes.map(mode => (
           <MenuItem
             key={mode}
             onClick={() => handleModeChange(mode)}

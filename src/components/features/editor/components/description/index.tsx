@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+
 import {
   Box,
   Button,
@@ -13,8 +14,9 @@ import {
   Fade,
 } from '@chakra-ui/react'
 import { FaCopy, FaUserAlt, FaHammer, FaUserEdit, FaPlus } from 'react-icons/fa'
-import InputWithIcon from '../input-icon'
+
 import { useDescriptionEditor } from '../../hooks/useDescriptions'
+import InputWithIcon from '../input-icon'
 import { DescriptionEditorSkeleton } from './description-editor-skeleton'
 
 const DescriptionEditor: React.FC = () => {

@@ -1,9 +1,11 @@
-import NextAuth, { NextAuthOptions, Session, User } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import type { JWT } from 'next-auth/jwt'
 import axios from 'axios'
 import { jwtDecode } from 'jwt-decode'
-import { DecodedToken } from '../../../../components/features/auth/types/auth.types'
+import type { NextAuthOptions, User } from 'next-auth'
+import NextAuth, { Session } from 'next-auth'
+import type { JWT } from 'next-auth/jwt'
+import CredentialsProvider from 'next-auth/providers/credentials'
+
+import type { DecodedToken } from '../../../../components/features/auth/types/auth.types'
 
 const authOptions: NextAuthOptions = {
   providers: [

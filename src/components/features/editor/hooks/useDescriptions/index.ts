@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+
 import { useToast, useBreakpointValue, useColorModeValue } from '@chakra-ui/react'
 
 interface FormState {
@@ -30,8 +31,8 @@ export const useDescriptionEditor = () => {
   useEffect(() => {
     const activeFields = [
       formState.mainChar && `Main: ${formState.mainChar}`,
-      formState.makers.some((m) => m.trim()) &&
-        `Maker: ${formState.makers.filter((m) => m.trim()).join(', ')}`,
+      formState.makers.some(m => m.trim()) &&
+        `Maker: ${formState.makers.filter(m => m.trim()).join(', ')}`,
       formState.registeredBy && `Reg: ${formState.registeredBy}`,
     ].filter(Boolean)
 
@@ -48,14 +49,14 @@ export const useDescriptionEditor = () => {
       if (field === 'makers' && typeof index === 'number') {
         const makers = [...formState.makers]
         makers[index] = e.target.value
-        setFormState((prev) => ({ ...prev, makers }))
+        setFormState(prev => ({ ...prev, makers }))
       } else {
-        setFormState((prev) => ({ ...prev, [field]: e.target.value }))
+        setFormState(prev => ({ ...prev, [field]: e.target.value }))
       }
     }
 
   const addMaker = () => {
-    setFormState((prev) => ({
+    setFormState(prev => ({
       ...prev,
       makers: [...prev.makers, ''],
     }))

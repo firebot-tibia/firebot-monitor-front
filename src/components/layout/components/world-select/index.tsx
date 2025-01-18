@@ -1,6 +1,8 @@
 import React from 'react'
-import { Menu, MenuButton, MenuList, MenuItem, Button, Box, Text } from '@chakra-ui/react'
+
 import { ChevronDownIcon } from '@chakra-ui/icons'
+import { Menu, MenuButton, MenuList, MenuItem, Button, Box, Text } from '@chakra-ui/react'
+
 import { useTokenStore } from '../../../../stores/token-decoded-store'
 import { capitalizeFirstLetter } from '../../../../utils/capitalize-first-letter'
 
@@ -23,9 +25,7 @@ const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
 
   if (!decodedToken || !decodedToken.guilds) return null
 
-  const availableWorlds = Object.keys(decodedToken.guilds).filter(
-    (world) => world !== selectedWorld,
-  )
+  const availableWorlds = Object.keys(decodedToken.guilds).filter(world => world !== selectedWorld)
 
   return (
     <Menu>
@@ -42,7 +42,7 @@ const WorldSelect: React.FC<WorldSelectProps> = ({ onChange }) => {
       </MenuButton>
       <MenuList bg="black" borderColor="gray.600">
         {availableWorlds.length > 0 ? (
-          availableWorlds.map((worldId) => (
+          availableWorlds.map(worldId => (
             <MenuItem
               key={worldId}
               onClick={() => handleWorldChange(worldId)}

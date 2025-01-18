@@ -7,9 +7,9 @@ const Maps: React.FC = () => {
 
   useEffect(() => {
     fetch('/api/maps')
-      .then((response) => response.text())
-      .then((data) => setHtmlContent(data))
-      .catch((error) => console.error('Error fetching HTML:', error))
+      .then(response => response.text())
+      .then(data => setHtmlContent(data))
+      .catch(error => console.error('Error fetching HTML:', error))
   }, [])
 
   useEffect(() => {
@@ -37,9 +37,9 @@ const Maps: React.FC = () => {
           await loadScript('/dist/map.js')
 
           const scripts = mapContainerRef.current?.querySelectorAll('script')
-          scripts?.forEach((oldScript) => {
+          scripts?.forEach(oldScript => {
             const newScript = document.createElement('script')
-            Array.from(oldScript.attributes).forEach((attr) =>
+            Array.from(oldScript.attributes).forEach(attr =>
               newScript.setAttribute(attr.name, attr.value),
             )
             newScript.appendChild(document.createTextNode(oldScript.innerHTML))

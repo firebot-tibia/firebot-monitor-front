@@ -42,7 +42,7 @@ export const useAudio = (audioSources: string | string[]): AudioControl | AudioC
     (index: number) => {
       if (audioRefs.current[index] && !audioInitialized[index]) {
         audioRefs.current[index]!.load()
-        setAudioInitialized((prev) => {
+        setAudioInitialized(prev => {
           const newState = [...prev]
           newState[index] = true
           return newState
@@ -54,7 +54,7 @@ export const useAudio = (audioSources: string | string[]): AudioControl | AudioC
 
   const toggleAudio = useCallback(
     (index: number) => {
-      setAudioStates((prev) => {
+      setAudioStates(prev => {
         const newState = [...prev]
         newState[index] = !newState[index]
         return newState
@@ -66,7 +66,7 @@ export const useAudio = (audioSources: string | string[]): AudioControl | AudioC
 
   const enableAudio = useCallback(
     (index: number) => {
-      setAudioStates((prev) => {
+      setAudioStates(prev => {
         const newState = [...prev]
         newState[index] = true
         return newState
@@ -83,7 +83,7 @@ export const useAudio = (audioSources: string | string[]): AudioControl | AudioC
   const playAudio = useCallback(
     (index: number) => {
       if (audioStates[index] && audioRefs.current[index] && userInteracted) {
-        audioRefs.current[index]!.play().catch((error) => {
+        audioRefs.current[index]!.play().catch(error => {
           console.error('Error playing audio:', error)
         })
       } else if (!userInteracted) {

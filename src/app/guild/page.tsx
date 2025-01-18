@@ -1,5 +1,6 @@
-import { Metadata } from 'next'
-import GuildContainer from '../../components/features/guild-table/components/guild-container'
+import type { Metadata } from 'next'
+
+import GuildContainer from '../../components/features/guilds-monitoring/components/guild-container'
 
 export const metadata: Metadata = {
   title: 'Firebot Monitor - Guilds',

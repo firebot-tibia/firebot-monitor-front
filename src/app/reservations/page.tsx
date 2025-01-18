@@ -1,8 +1,9 @@
 import { Box, Heading } from '@chakra-ui/react'
-import DashboardLayout from '../../components/layout'
-import { ReservationsManager } from '../../components/reservations'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+
+import { ReservationsManager } from '../../components/features/reservations'
+import DashboardLayout from '../../components/layout'
 
 const Respawns = () => {
   const now = new Date()
