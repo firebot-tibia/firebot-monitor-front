@@ -15,8 +15,9 @@ export class TokenManager {
   async refreshToken(
     refreshToken: string,
   ): Promise<{ access_token: string; refresh_token: string }> {
-    if (this.isRefreshing) {
-      return this.refreshPromise!
+    // If already refreshing, wait for the existing promise
+    if (this.isRefreshing && this.refreshPromise) {
+      return this.refreshPromise
     }
 
     try {
@@ -24,22 +25,21 @@ export class TokenManager {
       this.refreshPromise = this.performRefresh(refreshToken)
       const result = await this.refreshPromise
 
-      let attempts = 3
-      while (attempts > 0) {
+      // Try to update session with exponential backoff
+      for (let attempt = 0; attempt < 3; attempt++) {
         try {
           await this.updateSession(result)
-          break
+          return result
         } catch (error) {
-          attempts--
-          if (attempts === 0) throw error
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          if (attempt === 2) throw error // Last attempt failed
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000))
         }
       }
 
       return result
     } catch (error) {
       console.error('Token refresh error:', error)
-      await this.handleRefreshError()
+      await this.handleRefreshError(error)
       throw error
     } finally {
       this.isRefreshing = false
@@ -50,64 +50,70 @@ export class TokenManager {
   private async performRefresh(
     refreshToken: string,
   ): Promise<{ access_token: string; refresh_token: string }> {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-refresh-token': refreshToken,
-        },
-        credentials: 'include',
-      })
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'x-refresh-token': refreshToken,
+      },
+      credentials: 'include',
+      cache: 'no-cache',
+    })
 
-      if (!response.ok) {
-        const errorData = await response.text()
-        throw new Error(`Token refresh failed: ${response.status} - ${errorData}`)
-      }
-
-      try {
-        const data = await response.json()
-        if (!data.access_token || !data.refresh_token) {
-          throw new Error('Invalid token response format')
-        }
-        return {
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-        }
-      } catch (parseError) {
-        throw new Error(`Failed to parse refresh response: ${parseError}`)
-      }
-    } catch (error) {
-      console.error('Perform refresh error:', error)
-      throw error
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Refresh failed (${response.status}): ${errorText}`)
     }
+
+    // Verify we got JSON response
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Expected JSON response from refresh endpoint')
+    }
+
+    const data = await response.json()
+    if (!data.access_token || !data.refresh_token) {
+      throw new Error('Invalid token response format')
+    }
+
+    return data
   }
 
   private async updateSession(tokens: {
     access_token: string
     refresh_token: string
   }): Promise<void> {
-    try {
-      document.dispatchEvent(new Event('visibilitychange'))
-      await new Promise(resolve => setTimeout(resolve, 500))
+    // Force next-auth to check for session updates
+    document.dispatchEvent(new Event('visibilitychange'))
 
-      const session = await getSession()
-      if (!session) {
-        throw new Error('No session found after refresh')
-      }
-      if (session.access_token !== tokens.access_token) {
-        throw new Error('Session tokens mismatch')
-      }
-    } catch (error) {
-      console.error('Update session error:', error)
-      throw error
+    // Wait for session to potentially update
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    const session = await getSession()
+    if (!session) {
+      throw new Error('Session not found after refresh')
+    }
+
+    // Verify session was updated with new token
+    if (session.access_token !== tokens.access_token) {
+      throw new Error('Session update failed: token mismatch')
     }
   }
 
-  private async handleRefreshError(): Promise<void> {
-    await signOut({
-      callbackUrl: '/',
-      redirect: true,
-    })
+  private async handleRefreshError(error: any): Promise<void> {
+    // Log the error before signing out
+    console.error('Fatal refresh error:', error)
+
+    try {
+      await signOut({
+        callbackUrl: '/',
+        redirect: true,
+      })
+    } catch (signOutError) {
+      console.error('SignOut failed:', signOutError)
+      // Force redirect if signOut fails
+      window.location.href = '/'
+    }
   }
 }

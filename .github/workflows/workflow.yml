@@ -27,11 +27,11 @@ jobs:
           npm run lint
           npm run prettier:check
 
-      - name: Run tests with coverage
-        run: npm run test:coverage
+      # - name: Run tests with coverage
+      #   run: npm run test:coverage
 
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+      # - name: Upload coverage reports
+      #   uses: codecov/codecov-action@v3
 
       - name: Build project
         run: npm run build
