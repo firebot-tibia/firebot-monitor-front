@@ -2,8 +2,9 @@ import React from 'react'
 
 import { Badge, Box, Divider, Flex, HStack, Image, Text, VStack } from '@chakra-ui/react'
 
+import type { GuildMember } from '@/types/guild-member'
+
 import { tableVocationIcons } from '../../../../../utils/table-vocation-icons'
-import type { GuildMember } from '../../types/guild-stats.interface'
 
 const CharacterTooltip: React.FC<GuildMember> = ({ name, vocation, level, experience, online }) => {
   return (

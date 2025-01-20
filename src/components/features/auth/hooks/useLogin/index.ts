@@ -6,7 +6,6 @@ import { signIn, getSession } from 'next-auth/react'
 
 import { routes } from '../../../../../constants/routes'
 import { AuthSchema } from '../../schema/auth.schema'
-import { useAuth } from '../useAuth'
 
 type LoginError = {
   email?: string
@@ -19,7 +18,6 @@ export const useLogin = () => {
   const [errors, setErrors] = useState<LoginError>({})
   const toast = useToast()
   const router = useRouter()
-  const { setTokens } = useAuth()
 
   const handleLogin = async () => {
     const validationResult = AuthSchema.safeParse({ email, password })
@@ -47,7 +45,6 @@ export const useLogin = () => {
       const session = await getSession()
       if (!session?.access_token) throw new Error('No session token')
 
-      setTokens(session.access_token, session.refresh_token!)
       router.push(routes.guild)
 
       toast({

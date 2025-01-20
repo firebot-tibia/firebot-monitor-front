@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useState } from 'react'
 
 import {
@@ -14,7 +15,7 @@ import {
 import { FaBars } from 'react-icons/fa'
 
 import LoginModal from '../../features/auth/components/auth-modal'
-import type { ToolType } from '../../features/editor/types/unauthenticated.types'
+import type { ToolType } from '../../features/editor/types/tools.types'
 import NavContent from '../navbar'
 
 const SidebarSkeleton = () => (

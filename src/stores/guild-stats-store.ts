@@ -5,7 +5,7 @@ import type {
   ExperienceListQuery,
   GuildData,
 } from '../components/features/statistics/types/guild-stats.interface'
-import { getExperienceList } from '../services/guild-stats.service'
+import { getExperienceList } from '../services/guild-stats'
 
 interface GuildStatsState {
   filter: string

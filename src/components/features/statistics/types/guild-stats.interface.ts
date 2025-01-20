@@ -1,10 +1,4 @@
-export interface GuildMember {
-  experience: string
-  vocation: string
-  name: string
-  level: number
-  online: boolean
-}
+import type { GuildMember } from '@/types/guild-member'
 
 export interface GuildData {
   data: GuildMember[]

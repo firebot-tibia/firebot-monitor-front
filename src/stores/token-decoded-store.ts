@@ -1,8 +1,6 @@
 import { jwtDecode } from 'jwt-decode'
-import { getSession } from 'next-auth/react'
 import { create } from 'zustand'
 
-import useEventSourceGlobal from './event-source-store'
 import { useStorageStore } from './storage-store'
 
 interface Guild {
@@ -32,7 +30,6 @@ interface TokenState {
   userStatus: string
   setSelectedWorld: (world: string) => void
   decodeAndSetToken: (token: string) => void
-  initializeSSE: (handleMessage?: (data: any) => void) => Promise<void>
 }
 
 export const useTokenStore = create<TokenState>((set, get) => ({
@@ -72,13 +69,5 @@ export const useTokenStore = create<TokenState>((set, get) => ({
           : decoded.guilds[get().selectedWorld].enemy_guild.id
       useStorageStore.getState().setItem('selectedGuildId', guildId)
     }
-  },
-  initializeSSE: async (handleMessage?) => {
-    const { selectedWorld, mode, decodedToken } = get()
-    if (!decodedToken || !selectedWorld) return
-    const baseUrl = `${process.env.NEXT_PUBLIC_SSE_URL}${mode}/`
-    useEventSourceGlobal
-      .getState()
-      .initializeEventSource(baseUrl, getSession, handleMessage || (data => data), selectedWorld)
   },
 }))

@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 
 import { VStack, IconButton, Button, Collapse } from '@chakra-ui/react'

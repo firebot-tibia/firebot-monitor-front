@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { format, parse } from 'date-fns'
 
 export const formatTimeSlot = (timeString: string): string => {
   const [start, end] = timeString.split(' - ')
@@ -11,6 +11,18 @@ export const formatTimeSlot = (timeString: string): string => {
   )
 
   return `${format(startDate, 'dd/MM/yyyy-HH:mm')} - ${format(endDate, 'dd/MM/yyyy-HH:mm')}`
+}
+
+export const formatTimeSlotEnd = (timeSlot: string) => {
+  const [startTime, endTime] = timeSlot.split(' - ')
+  const parseTimeString = (timeString: string) => {
+    return parse(timeString, 'dd/MM/yyyy-HH:mm', new Date())
+  }
+
+  const formattedStart = format(parseTimeString(startTime), 'HH:mm')
+  const formattedEnd = format(parseTimeString(endTime), 'HH:mm')
+
+  return `${formattedStart} - ${formattedEnd}`
 }
 
 export const defaultTimeSlots = [

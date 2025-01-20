@@ -28,8 +28,10 @@ import {
   startOfDay,
 } from 'date-fns'
 
+
+
 import { useTokenStore } from '@/stores/token-decoded-store'
-import { formatDateForAPI } from '@/utils/format-date-api'
+import { formatDateForAPI } from '@/utils/format-date'
 
 import type { CreateReservationData } from '../../types/reservations.interface'
 

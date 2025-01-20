@@ -111,6 +111,7 @@ const BotDescriptions = () => {
             src="/assets/images/og.png"
             alt="Firebot Monitor Logo"
             fill
+            sizes='100'
             className="object-contain"
             priority
           />
@@ -131,7 +132,7 @@ const BotDescriptions = () => {
               className="animate-bounce"
             />
             <div className="text-center">
-              <div className="text-3xl font-bold">1500 Tibia Coins</div>
+              <div className="text-3xl font-bold">750 Tibia Coins</div>
               <div className="text-gray-400">por mês</div>
             </div>
           </div>
