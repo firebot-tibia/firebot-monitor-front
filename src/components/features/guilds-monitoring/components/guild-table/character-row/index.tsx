@@ -1,14 +1,14 @@
-import { memo } from "react"
+import { memo } from 'react'
 
-import { useToast, Tr, Td, HStack, Text, Image } from "@chakra-ui/react"
+import { useToast, Tr, Td, HStack, Text, Image } from '@chakra-ui/react'
 
-import { getTimeColor } from "@/utils/get-time-color"
-import { tableVocationIcons } from "@/utils/table-vocation-icons"
+import { getTimeColor } from '@/utils/get-time-color'
+import { tableVocationIcons } from '@/utils/table-vocation-icons'
 
-import { CharacterClassification } from "../render-classification"
-import { ExivaInput } from "./exiva-input"
-import type { CharacterRowProps } from "./types"
-import { capitalizeFirstLetter } from '../../../../../../utils/capitalize-first-letter';
+import { CharacterClassification } from '../render-classification'
+import { ExivaInput } from './exiva-input'
+import type { CharacterRowProps } from './types'
+import { capitalizeFirstLetter } from '../../../../../../utils/capitalize-first-letter'
 
 export const CharacterRow = memo(function CharacterRow({
   member,
@@ -17,7 +17,7 @@ export const CharacterRow = memo(function CharacterRow({
   types,
   onClassificationChange,
   addType,
-  index
+  index,
 }: CharacterRowProps) {
   const toast = useToast()
 
@@ -72,7 +72,7 @@ export const CharacterRow = memo(function CharacterRow({
         pl={1}
         w="10%"
         lineHeight="1"
-        onClick={(e) => {
+        onClick={e => {
           e.stopPropagation()
         }}
       >
@@ -94,7 +94,7 @@ export const CharacterRow = memo(function CharacterRow({
             member={member}
             onLocalChange={onLocalChange}
             fontSize="11px"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           />
         </Td>
       )}

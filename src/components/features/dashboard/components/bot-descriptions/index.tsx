@@ -111,7 +111,7 @@ const BotDescriptions = () => {
             src="/assets/images/og.png"
             alt="Firebot Monitor Logo"
             fill
-            sizes='100'
+            sizes="100"
             className="object-contain"
             priority
           />

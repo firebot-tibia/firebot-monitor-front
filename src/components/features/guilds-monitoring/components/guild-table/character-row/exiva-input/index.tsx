@@ -11,7 +11,7 @@ import {
   InputGroup,
   InputRightElement,
   Spinner,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { Search, MapPin } from 'lucide-react'
 
@@ -19,12 +19,11 @@ import { useLocalInput } from '@/components/features/guilds-monitoring/hooks/use
 
 import type { ExivaInputProps } from './types'
 
-
 export const ExivaInput: FC<ExivaInputProps> = ({
   member,
   onLocalChange,
-  fontSize = "14px",
-  onClick
+  fontSize = '14px',
+  onClick,
 }) => {
   const {
     inputValue,
@@ -65,7 +64,7 @@ export const ExivaInput: FC<ExivaInputProps> = ({
           _hover={{ borderColor: 'whiteAlpha.200' }}
           _focus={{
             borderColor: 'whiteAlpha.300',
-            bg: 'whiteAlpha.50'
+            bg: 'whiteAlpha.50',
           }}
           pl={1}
           pr={1}
@@ -128,7 +127,7 @@ export const ExivaInput: FC<ExivaInputProps> = ({
                         _hover={{
                           bg: hoverBg,
                           cursor: 'pointer',
-                          color: 'white'
+                          color: 'white',
                         }}
                         display="flex"
                         alignItems="center"
@@ -162,7 +161,7 @@ export const ExivaInput: FC<ExivaInputProps> = ({
                         _hover={{
                           bg: hoverBg,
                           cursor: 'pointer',
-                          color: 'white'
+                          color: 'white',
                         }}
                         display="flex"
                         alignItems="center"

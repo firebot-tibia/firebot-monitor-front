@@ -44,17 +44,8 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
   const sortedTypes = [...types].sort()
 
   return (
-    <Menu
-      isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
-      placement="top-start"
-      autoSelect={false}
-    >
-      <Tooltip
-        label={`Current Type: ${currentType}`}
-        placement="top"
-        openDelay={500}
-      >
+    <Menu isOpen={isOpen} onClose={() => setIsOpen(false)} placement="top-start" autoSelect={false}>
+      <Tooltip label={`Current Type: ${currentType}`} placement="top" openDelay={500}>
         <MenuButton
           as={Button}
           rightIcon={<ChevronDownIcon />}
@@ -75,10 +66,7 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
           height="22px"
           fontSize="11px"
         >
-          <Text
-            isTruncated
-            maxW="80px"
-          >
+          <Text isTruncated maxW="80px">
             {currentType}
           </Text>
         </MenuButton>
@@ -95,7 +83,7 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
         >
           {sortedTypes.length > 0 ? (
             <Box>
-              {sortedTypes.map((type) => (
+              {sortedTypes.map(type => (
                 <MenuItem
                   key={type}
                   onClick={() => handleClassificationClick(type)}
@@ -117,12 +105,7 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
               <Divider my={1} borderColor={borderColor} />
             </Box>
           ) : (
-            <MenuItem
-              isDisabled
-              bg="transparent"
-              fontSize="11px"
-              height="24px"
-            >
+            <MenuItem isDisabled bg="transparent" fontSize="11px" height="24px">
               Sem tipos para exibir
             </MenuItem>
           )}

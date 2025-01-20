@@ -1,10 +1,10 @@
-import { Box, HStack, Table, Tbody, Text } from "@chakra-ui/react"
+import { Box, HStack, Table, Tbody, Text } from '@chakra-ui/react'
 
-import { CharacterRow } from "./character-row"
-import { TableHeader } from "./table-header"
-import type { GuildTableProps } from "./types"
-import { useGuildTable } from "../../hooks/useGuildTable"
-import { useCharacterTypesView } from "../../hooks/useType/use-type-view"
+import { CharacterRow } from './character-row'
+import { TableHeader } from './table-header'
+import type { GuildTableProps } from './types'
+import { useGuildTable } from '../../hooks/useGuildTable'
+import { useCharacterTypesView } from '../../hooks/useType/use-type-view'
 
 export const GuildTable = ({
   type,
@@ -14,13 +14,9 @@ export const GuildTable = ({
   onClassificationChange,
   showExivaInput,
   addType,
-  isLoading
+  isLoading,
 }: GuildTableProps) => {
-  const {
-    sortConfig,
-    handleSort,
-    filteredData
-  } = useGuildTable(data)
+  const { sortConfig, handleSort, filteredData } = useGuildTable(data)
 
   const types = useCharacterTypesView(data)
 
@@ -52,17 +48,8 @@ export const GuildTable = ({
         </HStack>
       </HStack>
       {/* Table */}
-      <Table
-        variant="unstyled"
-        size="xs"
-        layout="fixed"
-        w="full"
-      >
-        <TableHeader
-          sortConfig={sortConfig}
-          onSort={handleSort}
-          showExivaInput={showExivaInput}
-        />
+      <Table variant="unstyled" size="xs" layout="fixed" w="full">
+        <TableHeader sortConfig={sortConfig} onSort={handleSort} showExivaInput={showExivaInput} />
         <Tbody>
           {filteredData.map((member, index) => (
             <CharacterRow

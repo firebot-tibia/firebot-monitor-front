@@ -1,15 +1,13 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from 'react'
 
-import { Center, Spinner, SimpleGrid, Box, Text } from "@chakra-ui/react"
+import { Center, Spinner, SimpleGrid, Box, Text } from '@chakra-ui/react'
 
-import DashboardLayout from "@/components/layout"
+import DashboardLayout from '@/components/layout'
 
-
-import { useGuilds } from "../../hooks/useGuilds"
-import { GuildTable } from "../guild-table"
-
+import { useGuilds } from '../../hooks/useGuilds'
+import { GuildTable } from '../guild-table'
 
 export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
@@ -71,15 +69,10 @@ export default function GuildContainer() {
         <SimpleGrid
           columns={{ base: 1, lg: 3 }}
           spacing={{ base: 4, lg: 6 }}
-          minChildWidth={{ base: "100%", lg: "400px" }}
+          minChildWidth={{ base: '100%', lg: '400px' }}
         >
           {groupedData.map(({ type, data, onlineCount }) => (
-            <Box
-              key={type}
-              w="full"
-              minW={{ base: "calc(100vw - 32px)", lg: "400px" }}
-              maxW="100%"
-            >
+            <Box key={type} w="full" minW={{ base: 'calc(100vw - 32px)', lg: '400px' }} maxW="100%">
               <GuildTable
                 type={type}
                 data={data}

@@ -39,7 +39,7 @@ export class TokenManager {
       return result
     } catch (error) {
       console.error('Token refresh error:', error)
-      await this.handleRefreshError(error)
+      await this.handleRefreshError()
       throw error
     } finally {
       this.isRefreshing = false

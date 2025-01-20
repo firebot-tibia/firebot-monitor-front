@@ -23,7 +23,6 @@ import {
   VStack,
 } from '@chakra-ui/react'
 
-
 import { formatTimeSlotEnd } from '@/utils/format-time-slot'
 
 import { useReservationsManager } from '../../hooks/useReservations'

@@ -10,8 +10,8 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-    const { status } = useSession()
-    const isAuthenticated = status === 'authenticated'
+  const { status } = useSession()
+  const isAuthenticated = status === 'authenticated'
 
   return (
     <Flex direction="column" minH="100vh">
@@ -22,7 +22,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Box>
       </Flex>
 
-      {isAuthenticated ? null  : <Footer />}
+      {isAuthenticated ? null : <Footer />}
     </Flex>
   )
 }

@@ -113,10 +113,7 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
         initialFocusRef={initialRef}
         motionPreset="slideInBottom"
       >
-        <ModalOverlay
-          bg="blackAlpha.300"
-          backdropFilter="blur(10px)"
-        />
+        <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
         <ModalContent
           bg="gray.900"
           color="white"
@@ -124,18 +121,10 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
           boxShadow="dark-lg"
           maxW="400px"
         >
-          <ModalHeader
-            borderBottomWidth="1px"
-            borderColor="gray.700"
-            fontSize="md"
-            py={3}
-          >
+          <ModalHeader borderBottomWidth="1px" borderColor="gray.700" fontSize="md" py={3}>
             Adicionar Novo Tipo
           </ModalHeader>
-          <ModalCloseButton
-            size="sm"
-            _hover={{ bg: 'whiteAlpha.200' }}
-          />
+          <ModalCloseButton size="sm" _hover={{ bg: 'whiteAlpha.200' }} />
 
           <ModalBody py={4}>
             <VStack spacing={3} align="stretch">
@@ -154,10 +143,10 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
                     border="none"
                     _focus={{
                       boxShadow: '0 0 0 1px #63B3ED',
-                      bg: 'gray.700'
+                      bg: 'gray.700',
                     }}
                     _hover={{
-                      bg: 'gray.700'
+                      bg: 'gray.700',
                     }}
                   />
                   {newType && (
@@ -176,19 +165,13 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
                 {error ? (
                   <FormErrorMessage>{error}</FormErrorMessage>
                 ) : (
-                  <FormHelperText color="gray.400">
-                    Use um nome curto e descritivo
-                  </FormHelperText>
+                  <FormHelperText color="gray.400">Use um nome curto e descritivo</FormHelperText>
                 )}
               </FormControl>
             </VStack>
           </ModalBody>
 
-          <ModalFooter
-            borderTopWidth="1px"
-            borderColor="gray.700"
-            py={3}
-          >
+          <ModalFooter borderTopWidth="1px" borderColor="gray.700" py={3}>
             <Button
               onClick={handleAddType}
               colorScheme="blue"
