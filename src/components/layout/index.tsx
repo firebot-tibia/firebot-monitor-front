@@ -1,5 +1,6 @@
 'use client'
 import { Box, Flex } from '@chakra-ui/react'
+import { useSession } from 'next-auth/react'
 
 import { Sidebar } from '../ui'
 import { Footer } from './components'
@@ -9,6 +10,9 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const { status } = useSession()
+  const isAuthenticated = status === 'authenticated'
+
   return (
     <Flex direction="column" minH="100vh">
       <Flex flex={1}>
@@ -18,7 +22,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Box>
       </Flex>
 
-      <Footer />
+      {isAuthenticated ? null : <Footer />}
     </Flex>
   )
 }

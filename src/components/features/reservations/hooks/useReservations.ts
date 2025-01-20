@@ -3,16 +3,16 @@ import { useState, useEffect, useCallback } from 'react'
 import { useToast, useDisclosure } from '@chakra-ui/react'
 import { endOfDay, format, lastDayOfMonth, startOfDay } from 'date-fns'
 
-import { usePermission } from '@/hooks/use-permission'
+import { defaultRespawns } from '@/constants/default-respawns'
+import { usePermission } from '@/hooks/usePermission'
 import {
   getReservationsList,
   getAllRespawnsPremiums,
   createReservation,
   deleteReservation,
-} from '@/services/respawn.service'
+} from '@/services/respawn'
 import { useStorageStore } from '@/stores/storage-store'
 import { useTokenStore } from '@/stores/token-decoded-store'
-import { defaultRespawns } from '@/utils/default-respawns'
 import { defaultTimeSlots } from '@/utils/format-time-slot'
 
 import type { Reservation, Respawn, CreateReservationData } from '../types/reservations.interface'

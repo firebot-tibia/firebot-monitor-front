@@ -8,7 +8,7 @@ import {
   getPlayerExperienceHistory,
   getPlayerOnlineHistory,
   getPlayersLifeTimeDeaths,
-} from '../../../../../services/guild-stats.service'
+} from '../../../../../services/guild-stats'
 import type { ExperienceDataItem } from '../../types/guild-stats-experience-history.interface'
 import type { OnlineTimeDay, PlayerDeaths } from '../../types/guild-stats-player.interface'
 import PlayerDashboard from '../player-dashboard'

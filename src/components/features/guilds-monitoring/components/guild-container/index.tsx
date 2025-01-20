@@ -1,11 +1,13 @@
 'use client'
-import { useEffect, useState } from 'react'
 
-import { Box, Center, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
+import { useState, useEffect } from 'react'
 
-import { useHomeLogic } from '../../../../../hooks/use-dashboard'
-import DashboardLayout from '../../../../layout'
-import { GuildMemberTable } from '../guild-table'
+import { Center, Spinner, SimpleGrid, Box, Text } from '@chakra-ui/react'
+
+import DashboardLayout from '@/components/layout'
+
+import { useGuilds } from '../../hooks/useGuilds'
+import { GuildTable } from '../guild-table'
 
 export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
@@ -17,23 +19,13 @@ export default function GuildContainer() {
     handleLocalChange,
     handleClassificationChange,
     groupedData,
-  } = useHomeLogic()
+  } = useGuilds()
 
   useEffect(() => {
     setIsClient(true)
   }, [])
 
-  if (!isClient) {
-    return (
-      <DashboardLayout>
-        <Center h="100vh">
-          <Spinner size="xl" />
-        </Center>
-      </DashboardLayout>
-    )
-  }
-
-  if (status === 'loading' || isLoading) {
+  if (!isClient || status === 'loading' || isLoading) {
     return (
       <DashboardLayout>
         <Center h="100vh">
@@ -55,12 +47,34 @@ export default function GuildContainer() {
 
   return (
     <DashboardLayout>
-      <Box maxWidth="100%" overflow="hidden" fontSize={['xs', 'sm', 'md']} mt={6}>
-        <VStack spacing={4} align="stretch">
-          <SimpleGrid columns={[1, 2, 3]} spacing={1}>
-            {groupedData.map(({ type, data, onlineCount }) => (
-              <GuildMemberTable
-                key={type}
+      <Box
+        w="full"
+        px={2}
+        py={2}
+        overflow="auto"
+        css={{
+          '&::-webkit-scrollbar': {
+            width: '6px',
+            height: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(255,255,255,0.1)',
+            borderRadius: '24px',
+          },
+        }}
+      >
+        <SimpleGrid
+          columns={{ base: 1, lg: 3 }}
+          spacing={{ base: 4, lg: 6 }}
+          minChildWidth={{ base: '100%', lg: '400px' }}
+        >
+          {groupedData.map(({ type, data, onlineCount }) => (
+            <Box key={type} w="full" minW={{ base: 'calc(100vw - 32px)', lg: '400px' }} maxW="100%">
+              <GuildTable
+                type={type}
                 data={data}
                 onlineCount={onlineCount}
                 onLocalChange={handleLocalChange}
@@ -70,9 +84,9 @@ export default function GuildContainer() {
                 addType={addType}
                 isLoading={false}
               />
-            ))}
-          </SimpleGrid>
-        </VStack>
+            </Box>
+          ))}
+        </SimpleGrid>
       </Box>
     </DashboardLayout>
   )

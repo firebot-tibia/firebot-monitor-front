@@ -2,8 +2,10 @@ import React from 'react'
 
 import { Box, Flex, Image, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react'
 
+import type { GuildMember } from '@/types/guild-member'
+
 import { tableVocationIcons } from '../../../../../utils/table-vocation-icons'
-import type { GuildData, GuildMember } from '../../types/guild-stats.interface'
+import type { GuildData } from '../../types/guild-stats.interface'
 import ExpStats from '../exp-stats'
 
 interface GuildTableProps {

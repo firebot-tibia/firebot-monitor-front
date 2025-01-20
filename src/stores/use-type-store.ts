@@ -5,10 +5,10 @@ import { create } from 'zustand'
 
 import { useStorageStore } from './storage-store'
 import { useTokenStore } from './token-decoded-store'
-import type { UpsertPlayerInput } from '../components/features/guilds-monitoring/types/character-upsert.interface'
+import type { UpsertPlayerInput } from '../components/features/guilds-monitoring/types/character-upsert'
 import { fixedTypes } from '../constants/types'
-import { upsertPlayer } from '../services/guild-stats.service'
-import type { GuildMemberResponse } from '../types/guild-member.interface'
+import { upsertPlayer } from '../services/guild-stats'
+import type { GuildMemberResponse } from '../types/guild-member.response'
 
 interface CharacterTypesState {
   customTypes: string[]
