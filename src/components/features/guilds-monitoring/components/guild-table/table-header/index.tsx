@@ -71,7 +71,7 @@ export const TableHeader = memo(function TableHeader({
             EXIVA
           </Th>
         )}
-       <Th
+        <Th
           p={0}
           pl={1}
           fontSize="11px"

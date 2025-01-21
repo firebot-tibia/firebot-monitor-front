@@ -9,6 +9,7 @@ export const useTooltipState = () => {
       if (newSet.has(id)) {
         newSet.delete(id)
       } else {
+        newSet.clear()
         newSet.add(id)
       }
       return newSet

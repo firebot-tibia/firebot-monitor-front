@@ -103,11 +103,11 @@ export const CharacterRow = memo(function CharacterRow({
         </Td>
       )}
       <Td p={0} pl={1} w="10%" lineHeight="1">
-      <CharacterTooltip
-        member={member}
-        isOpen={isTooltipOpen(tooltipId)}
-        onToggle={() => toggleTooltip(tooltipId)}
-      />
+        <CharacterTooltip
+          member={member}
+          isOpen={isTooltipOpen(tooltipId)}
+          onToggle={() => toggleTooltip(tooltipId)}
+        />
       </Td>
     </Tr>
   )
