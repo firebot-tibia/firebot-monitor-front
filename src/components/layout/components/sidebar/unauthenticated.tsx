@@ -14,8 +14,8 @@ import {
 } from '@chakra-ui/react'
 import { FaBars } from 'react-icons/fa'
 
-import LoginModal from '../../features/auth/components/auth-modal'
-import type { ToolType } from '../../features/editor/types/tools.types'
+import LoginModal from '../../../features/auth/components/auth-modal'
+import type { ToolType } from '../../../features/editor/types/tools.types'
 import NavContent from '../navbar'
 
 const SidebarSkeleton = () => (

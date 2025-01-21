@@ -19,18 +19,12 @@ import {
   VStack,
   IconButton,
 } from '@chakra-ui/react'
-import { keyframes } from '@emotion/react'
 import { motion } from 'framer-motion'
 import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa'
 
 import { routes } from '../../../../constants/routes'
 import { useLogin } from '../hooks/useLogin'
 
-const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-`
 
 const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { email, setEmail, password, setPassword, errors, handleLogin } = useLogin()
@@ -81,7 +75,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
               src="/assets/images/og.png"
               alt="Firebot Monitor"
               boxSize={{ base: '120px', md: '160px' }}
-              animation={`${pulse} 2s infinite ease-in-out`}
+              animation={`2s infinite ease-in-out`}
             />
           </MotionCenter>
 

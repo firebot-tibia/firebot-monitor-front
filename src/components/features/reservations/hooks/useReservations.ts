@@ -44,7 +44,6 @@ export const useReservationsManager = () => {
     try {
       const guildId = useStorageStore.getState().getItem('selectedGuildId', '')
       if (!guildId) {
-        console.error('No guild selected')
         return
       }
       const response = await getReservationsList({
@@ -56,7 +55,7 @@ export const useReservationsManager = () => {
       })
       setReservations(response)
     } catch (error) {
-      console.error('Failed to fetch reservations:', error)
+      throw error
     }
   }, [selectedWorld])
 
@@ -70,7 +69,7 @@ export const useReservationsManager = () => {
       }))
       setRespawns(respawnsWithImages)
     } catch (error) {
-      console.error('Failed to fetch respawns:', error)
+      throw error
     }
   }, [])
 
@@ -96,7 +95,7 @@ export const useReservationsManager = () => {
           duration: 3000,
           isClosable: true,
         })
-        console.error('Failed to create reservation:', error)
+        throw error
       }
     },
     [checkPermission, toast, selectedWorld, fetchReservations],
@@ -136,7 +135,6 @@ export const useReservationsManager = () => {
           isClosable: true,
         })
       } catch (error) {
-        console.error('Failed to delete reservation(s):', error)
         toast({
           title: 'Erro ao remover reserva(s)',
           status: 'error',

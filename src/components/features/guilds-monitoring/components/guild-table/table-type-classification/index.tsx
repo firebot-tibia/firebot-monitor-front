@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import { ChevronDownIcon } from '@chakra-ui/icons'
 import {
   Button,
   Menu,
@@ -14,6 +13,7 @@ import {
   Divider,
   Tooltip,
 } from '@chakra-ui/react'
+import { ChevronDownIcon } from 'lucide-react'
 
 import { capitalizeFirstLetter } from '@/utils/capitalize-first-letter'
 import { typeColors } from '@/utils/character-type-icons'

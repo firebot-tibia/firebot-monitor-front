@@ -14,7 +14,8 @@ import {
 } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 
-import { Pagination } from '@/components/ui'
+
+import TablePagination from '@/components/common/pagination'
 import { routes } from '@/constants/routes'
 import { useGuildStatsStore } from '@/stores/guild-stats-store'
 
@@ -135,7 +136,7 @@ const GuildStatsContainer: React.FC = () => {
                       onCharacterClick={handleCharacterClick}
                       isLoading={loading}
                     />
-                    <Pagination
+                    <TablePagination
                       currentPage={allyGainPage}
                       totalPages={allyGainData.totalPages}
                       onPageChange={newPage => handlePageChange('allyGain', newPage)}
@@ -151,7 +152,7 @@ const GuildStatsContainer: React.FC = () => {
                       onCharacterClick={handleCharacterClick}
                       isLoading={loading}
                     />
-                    <Pagination
+                    <TablePagination
                       currentPage={allyLossPage}
                       totalPages={allyLossData.totalPages}
                       onPageChange={newPage => handlePageChange('allyLoss', newPage)}
@@ -171,7 +172,7 @@ const GuildStatsContainer: React.FC = () => {
                       onCharacterClick={handleCharacterClick}
                       isLoading={loading}
                     />
-                    <Pagination
+                    <TablePagination
                       currentPage={enemyGainPage}
                       totalPages={enemyGainData.totalPages}
                       onPageChange={newPage => handlePageChange('enemyGain', newPage)}
@@ -187,7 +188,7 @@ const GuildStatsContainer: React.FC = () => {
                       onCharacterClick={handleCharacterClick}
                       isLoading={loading}
                     />
-                    <Pagination
+                    <TablePagination
                       currentPage={enemyLossPage}
                       totalPages={enemyLossData.totalPages}
                       onPageChange={newPage => handlePageChange('enemyLoss', newPage)}

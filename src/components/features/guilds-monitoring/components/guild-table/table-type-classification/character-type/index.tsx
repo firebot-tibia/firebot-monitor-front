@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 
-import { AddIcon, CloseIcon } from '@chakra-ui/icons'
+
 import {
   Button,
   Modal,
@@ -22,6 +22,8 @@ import {
   InputRightElement,
   IconButton,
 } from '@chakra-ui/react'
+import { ShieldCloseIcon } from 'lucide-react'
+import { IoIosAddCircleOutline, IoMdAddCircleOutline } from 'react-icons/io'
 
 interface CharacterTypesManagerProps {
   addType: (newType: string) => void
@@ -97,7 +99,7 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
         onClick={onOpen}
         size="sm"
         variant="ghost"
-        leftIcon={<AddIcon />}
+        leftIcon={<IoIosAddCircleOutline />}
         _hover={{ bg: 'whiteAlpha.200' }}
         _active={{ bg: 'whiteAlpha.300' }}
         fontSize="11px"
@@ -153,7 +155,7 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
                     <InputRightElement>
                       <IconButton
                         aria-label="Clear input"
-                        icon={<CloseIcon />}
+                        icon={<ShieldCloseIcon />}
                         size="xs"
                         variant="ghost"
                         onClick={clearInput}
@@ -176,7 +178,7 @@ export const CharacterTypesManager: React.FC<CharacterTypesManagerProps> = ({ ad
               onClick={handleAddType}
               colorScheme="blue"
               mr={3}
-              leftIcon={<AddIcon />}
+              leftIcon={<IoMdAddCircleOutline />}
               size="sm"
               isDisabled={!newType.trim() || !!error}
             >
