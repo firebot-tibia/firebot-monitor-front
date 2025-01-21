@@ -5,10 +5,12 @@ import { useToast, Tr, Td, HStack, Text, Image } from '@chakra-ui/react'
 import { getTimeColor } from '@/utils/get-time-color'
 import { tableVocationIcons } from '@/utils/table-vocation-icons'
 
-import { CharacterClassification } from '../render-classification'
+import { CharacterClassification } from '../table-type-classification'
 import { ExivaInput } from './exiva-input'
 import type { CharacterRowProps } from './types'
 import { capitalizeFirstLetter } from '../../../../../../utils/capitalize-first-letter'
+import { useTooltipState } from '../../../hooks/useTooltip'
+import { CharacterTooltip } from '../table-tooltip'
 
 export const CharacterRow = memo(function CharacterRow({
   member,
@@ -20,6 +22,8 @@ export const CharacterRow = memo(function CharacterRow({
   index,
 }: CharacterRowProps) {
   const toast = useToast()
+  const { toggleTooltip, isTooltipOpen } = useTooltipState()
+  const tooltipId = `${member.Name}-${member.Level}`
 
   const handleRowClick = () => {
     const cleanName = member.Name.trim()
@@ -62,7 +66,7 @@ export const CharacterRow = memo(function CharacterRow({
           />
         </HStack>
       </Td>
-      <Td p={0} pl={1} w="15%" lineHeight="1">
+      <Td p={0} pl={1} w="20%" lineHeight="1">
         <Text fontSize="11px" color="white.300" isTruncated>
           {capitalizeFirstLetter(member.Name)}
         </Text>
@@ -98,6 +102,13 @@ export const CharacterRow = memo(function CharacterRow({
           />
         </Td>
       )}
+      <Td p={0} pl={1} w="10%" lineHeight="1">
+      <CharacterTooltip
+        member={member}
+        isOpen={isTooltipOpen(tooltipId)}
+        onToggle={() => toggleTooltip(tooltipId)}
+      />
+      </Td>
     </Tr>
   )
 })

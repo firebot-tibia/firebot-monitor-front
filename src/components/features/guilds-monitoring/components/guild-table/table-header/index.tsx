@@ -21,7 +21,7 @@ export const TableHeader = memo(function TableHeader({
           pl={1}
           fontSize="11px"
           color="white.600"
-          w="6%"
+          w="9%"
           cursor="pointer"
           onClick={() => onSort('Level')}
         >
@@ -33,7 +33,7 @@ export const TableHeader = memo(function TableHeader({
           pl={1}
           fontSize="11px"
           color="white.600"
-          w="8%"
+          w="10%"
           onClick={() => onSort('Vocation')}
         >
           VOC
@@ -71,6 +71,16 @@ export const TableHeader = memo(function TableHeader({
             EXIVA
           </Th>
         )}
+       <Th
+          p={0}
+          pl={1}
+          fontSize="11px"
+          color="white.600"
+          w="12%"
+          onClick={() => onSort('TimeOnline')}
+        >
+          MENU
+        </Th>
       </Tr>
     </Thead>
   )

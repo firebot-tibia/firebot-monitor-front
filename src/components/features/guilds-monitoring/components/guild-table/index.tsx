@@ -1,10 +1,10 @@
 import { Box, HStack, Table, Tbody, Text } from '@chakra-ui/react'
 
-import { CharacterRow } from './character-row'
 import { TableHeader } from './table-header'
+import { CharacterRow } from './table-row'
 import type { GuildTableProps } from './types'
 import { useGuildTable } from '../../hooks/useGuildTable'
-import { useCharacterTypesView } from '../../hooks/useType/use-type-view'
+import { useCharacterTypesView } from '../../hooks/useType'
 
 export const GuildTable = ({
   type,
@@ -17,7 +17,6 @@ export const GuildTable = ({
   isLoading,
 }: GuildTableProps) => {
   const { sortConfig, handleSort, filteredData } = useGuildTable(data)
-
   const types = useCharacterTypesView(data)
 
   return (
