@@ -64,7 +64,7 @@ export const CharacterTooltip: FC<CharacterTooltipProps> = ({ member, isOpen, on
               transform: 'scale(0.95)',
             }}
             transition="all 0.2s"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               onToggle()
             }}
@@ -105,7 +105,9 @@ export const CharacterTooltip: FC<CharacterTooltipProps> = ({ member, isOpen, on
                 <HStack justify="space-between">
                   <HStack spacing={2}>
                     <Award size={14} />
-                    <Text fontSize="xs" color={textColor}>Level</Text>
+                    <Text fontSize="xs" color={textColor}>
+                      Level
+                    </Text>
                   </HStack>
                   <Badge colorScheme="purple" fontSize="xs">
                     {member.Level}
@@ -115,7 +117,9 @@ export const CharacterTooltip: FC<CharacterTooltipProps> = ({ member, isOpen, on
                 <HStack justify="space-between">
                   <HStack spacing={2}>
                     <Sword size={14} />
-                    <Text fontSize="xs" color={textColor}>Vocation</Text>
+                    <Text fontSize="xs" color={textColor}>
+                      Vocation
+                    </Text>
                   </HStack>
                   <Badge colorScheme="blue" fontSize="xs">
                     {member.Vocation}
@@ -125,7 +129,9 @@ export const CharacterTooltip: FC<CharacterTooltipProps> = ({ member, isOpen, on
                 <HStack justify="space-between">
                   <HStack spacing={2}>
                     <Clock size={14} />
-                    <Text fontSize="xs" color={textColor}>Online</Text>
+                    <Text fontSize="xs" color={textColor}>
+                      Online
+                    </Text>
                   </HStack>
                   <Badge colorScheme="green" fontSize="xs">
                     {member.TimeOnline}
