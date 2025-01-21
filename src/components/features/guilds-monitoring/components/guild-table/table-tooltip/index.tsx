@@ -32,16 +32,20 @@ const sanitizeName = (name: string): string => {
 
 export const CharacterTooltip: FC<CharacterTooltipProps> = ({ member, isOpen, onToggle }) => {
   const bgColor = useColorModeValue('gray.800', 'gray.900')
-  const borderColor = useColorModeValue('black.700', 'black.600')
-  const textColor = useColorModeValue('black.100', 'black.200')
+  const borderColor = useColorModeValue('gray.700', 'gray.600')
+  const textColor = useColorModeValue('gray.100', 'gray.200')
+
+  const handleClose = () => {
+    onToggle()
+  }
 
   return (
     <Box display="inline-block">
       <Popover
         isOpen={isOpen}
-        onClose={() => {}}
-        closeOnBlur={false}
-        closeOnEsc={false}
+        onClose={handleClose}
+        closeOnBlur={true}
+        closeOnEsc={true}
         placement="right"
         gutter={12}
       >
@@ -77,6 +81,7 @@ export const CharacterTooltip: FC<CharacterTooltipProps> = ({ member, isOpen, on
           <PopoverCloseButton
             top={3}
             right={3}
+            onClick={handleClose}
             _hover={{
               bg: 'whiteAlpha.200',
             }}
@@ -144,6 +149,7 @@ export const CharacterTooltip: FC<CharacterTooltipProps> = ({ member, isOpen, on
                   textDecoration: 'none',
                 }}
                 transition="all 0.2s"
+                onClick={handleClose}
               >
                 Ver estatísticas detalhadas →
               </Link>
