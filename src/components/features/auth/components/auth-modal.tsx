@@ -25,7 +25,6 @@ import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa'
 import { routes } from '../../../../constants/routes'
 import { useLogin } from '../hooks/useLogin'
 
-
 const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { email, setEmail, password, setPassword, errors, handleLogin } = useLogin()
   const [showPassword, setShowPassword] = useState(false)

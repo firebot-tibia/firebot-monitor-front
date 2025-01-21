@@ -14,7 +14,7 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   experimental: {
-    optimizePackageImports: ["@chakra-ui/react"],
+    optimizePackageImports: ['@chakra-ui/react'],
   },
 }
 

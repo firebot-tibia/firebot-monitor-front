@@ -23,7 +23,6 @@ import { routes, routesArray } from '../../../../constants/routes'
 import ModeSelect from '../mode-select'
 import WorldSelect from '../world-select'
 
-
 const AuthenticatedSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false)
   const bgColor = useColorModeValue('gray.900', 'black')

@@ -14,7 +14,6 @@ import {
 } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 
-
 import TablePagination from '@/components/common/pagination'
 import { routes } from '@/constants/routes'
 import { useGuildStatsStore } from '@/stores/guild-stats-store'
