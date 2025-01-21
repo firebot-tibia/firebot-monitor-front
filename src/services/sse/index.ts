@@ -70,7 +70,7 @@ export class SSEManager {
 
       this.config.token = newToken.access_token
     } catch (error) {
-      console.error('Token refresh failed:', error)
+      throw error
     }
 
     if (this.reconnectAttempts < this.maxReconnectAttempts) {

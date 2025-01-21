@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Text, Flex, Center, Image } from '@chakra-ui/react'
+import { Button, Text, Flex, Center } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 
 const Custom404 = () => {

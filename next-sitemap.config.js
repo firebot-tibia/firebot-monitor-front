@@ -30,7 +30,6 @@ export default {
       '/statistics': 0.8, // Home section
       '/reservations': 0.8, // Reservations
       '/tibia-map': 0.7, // Tibia map
-      '/editor': 0.7, // editor
     }
 
     return {

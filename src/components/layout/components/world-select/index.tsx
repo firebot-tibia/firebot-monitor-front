@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { ChevronDownIcon } from '@chakra-ui/icons'
 import { Menu, MenuButton, MenuList, MenuItem, Button, Box, Text } from '@chakra-ui/react'
+import { ChevronDownIcon } from 'lucide-react'
 
 import { useTokenStore } from '../../../../stores/token-decoded-store'
 import { capitalizeFirstLetter } from '../../../../utils/capitalize-first-letter'

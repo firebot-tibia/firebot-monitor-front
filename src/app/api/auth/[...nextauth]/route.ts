@@ -4,21 +4,45 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 
 import api from '@/libs/api/firebot-api'
 
+import type { LoginResponse } from './types'
+
 const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: 'credentials',
+      name: 'Credentials',
       credentials: {
-        email: { type: 'email' },
-        password: { type: 'password' },
+        email: {
+          label: 'Email',
+          type: 'email',
+        },
+        password: {
+          label: 'Password',
+          type: 'password',
+        },
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
-
+      async authorize(credentials): Promise<any> {
         try {
-          const { data } = await api.post('/login', credentials)
-          return data
-        } catch {
-          return null
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error('Missing credentials')
+          }
+
+          const response = await api.post<LoginResponse>('/login', {
+            email: credentials.email,
+            password: credentials.password,
+            json: true,
+          })
+
+          if (!response.data?.access_token || !response.data?.refresh_token) {
+            throw new Error('Invalid response from server')
+          }
+
+          return {
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token,
+          }
+        } catch (error) {
+          throw error
         }
       },
     }),
@@ -30,6 +54,11 @@ const authOptions: NextAuthOptions = {
           ...token,
           access_token: user.access_token,
           refresh_token: user.refresh_token,
+          ally_guild: user.ally_guild,
+          enemy_guild: user.enemy_guild,
+          exp: user.exp,
+          status: user.status,
+          sub: user.sub,
         }
       }
       return token
@@ -39,12 +68,26 @@ const authOptions: NextAuthOptions = {
         ...session,
         access_token: token.access_token,
         refresh_token: token.refresh_token,
+        user: {
+          ...session.user,
+          id: token.sub,
+          email: session.user.email,
+          access_token: token.access_token,
+          refresh_token: token.refresh_token,
+          ally_guild: token.ally_guild,
+          enemy_guild: token.enemy_guild,
+          exp: token.exp,
+          status: token.status,
+          sub: token.sub,
+        },
       }
     },
   },
   pages: {
     signIn: '/auth/signin',
+    error: '/auth/error',
   },
+  debug: true,
 }
 
 const handler = NextAuth(authOptions)

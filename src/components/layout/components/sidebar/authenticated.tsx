@@ -19,8 +19,9 @@ import NextLink from 'next/link'
 import { signOut } from 'next-auth/react'
 import { FaSignOutAlt, FaBars, FaDiscord, FaCog } from 'react-icons/fa'
 
-import { routes, routesArray } from '../../../constants/routes'
-import { WorldSelect, ModeSelect } from '../../layout/components'
+import { routes, routesArray } from '../../../../constants/routes'
+import ModeSelect from '../mode-select'
+import WorldSelect from '../world-select'
 
 const AuthenticatedSidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false)

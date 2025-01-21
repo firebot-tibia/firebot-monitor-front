@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import { SearchIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import {
   Box,
   SimpleGrid,
@@ -19,6 +18,7 @@ import {
   Image,
   Portal,
 } from '@chakra-ui/react'
+import { ChevronDownIcon, SearchIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { routes } from '../../../../../constants/routes'

@@ -27,8 +27,7 @@ export const usePermission = () => {
       }
       return true
     } catch (error) {
-      console.error('Erro ao decodificar o token:', error)
-      return false
+      throw error
     }
   }, [session, toast])
 

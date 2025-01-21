@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 
-import { ChevronDownIcon } from '@chakra-ui/icons'
 import {
   Box,
   Button,
@@ -27,6 +26,7 @@ import {
   isSameDay,
   startOfDay,
 } from 'date-fns'
+import { ChevronDownIcon } from 'lucide-react'
 
 import { useTokenStore } from '@/stores/token-decoded-store'
 import { formatDateForAPI } from '@/utils/format-date'
@@ -134,7 +134,6 @@ export const AddReservationForm: React.FC<AddReservationFormProps> = ({
         })
       }
     } catch (error) {
-      console.error('Error creating reservations:', error)
       toast({
         title: 'Erro ao criar reservas',
         description: 'Ocorreu um erro ao criar as reservas. Por favor, tente novamente.',

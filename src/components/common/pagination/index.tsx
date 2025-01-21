@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { ChevronLeftIcon, ChevronRightIcon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
 import { Button, Flex, Text } from '@chakra-ui/react'
+import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, ArrowRightIcon } from 'lucide-react'
 
 import type { PaginationProps } from './types'
 

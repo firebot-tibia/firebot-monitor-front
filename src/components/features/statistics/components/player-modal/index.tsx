@@ -45,7 +45,6 @@ const CharacterStatsPage: React.FC = () => {
         setExperienceData(experience?.experience_history?.character_experience_messages ?? [])
         setDeathData(deathsData?.deaths ?? null)
       } catch (err) {
-        console.error('Error fetching player data:', err)
         setError('Falha ao buscar dados do jogador. Por favor, tente novamente mais tarde.')
       } finally {
         setLoading(false)

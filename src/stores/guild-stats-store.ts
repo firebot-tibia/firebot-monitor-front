@@ -193,7 +193,6 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         set({ enemyGainData: newGainData, enemyLossData: newLossData, loading: false })
       }
     } catch (error) {
-      console.error(`Failed to fetch ${guildType} guild stats:`, error)
       set({ loading: false })
     }
   },

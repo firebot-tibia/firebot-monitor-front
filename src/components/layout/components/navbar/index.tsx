@@ -8,8 +8,8 @@ import { FaBars, FaTools, FaDiscord, FaHome } from 'react-icons/fa'
 
 import LoginButton from '../login-button'
 import type { NavbarProps } from './types'
-import { routes } from '../../../constants/routes'
-import { tools } from '../../features/editor/constants/toolbar'
+import { routes } from '../../../../constants/routes'
+import { tools } from '../../../features/editor/constants/toolbar'
 
 const NavContent = ({
   isMobile,

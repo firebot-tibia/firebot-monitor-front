@@ -73,7 +73,6 @@ export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
           isClosable: true,
         })
       } catch (error) {
-        console.error('Erro ao adicionar novo tipo:', error)
         toast({
           title: 'Erro ao adicionar tipo',
           description:

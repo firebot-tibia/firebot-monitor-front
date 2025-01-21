@@ -1,21 +1,32 @@
-import NextAuth from 'next-auth'
+import type { DefaultSession, DefaultUser } from 'next-auth'
 
 declare module 'next-auth' {
-  interface Session {
+  interface Session extends DefaultSession {
     access_token?: string
     refresh_token?: string
-    user: User
+    user: {
+      id: string
+      email: string
+      ally_guild: string
+      enemy_guild: string
+      exp: number
+      status: string
+      sub: string
+      access_token?: string
+      refresh_token?: string
+    } & DefaultSession['user']
   }
 
-  interface User {
-    access_token: string
-    refresh_token: string
-    ally_guild: string
+  interface User extends DefaultUser {
+    id: string
     email: string
+    ally_guild: string
     enemy_guild: string
     exp: number
     status: string
     sub: string
+    access_token?: string
+    refresh_token?: string
   }
 }
 
@@ -23,11 +34,10 @@ declare module 'next-auth/jwt' {
   interface JWT {
     access_token?: string
     refresh_token?: string
-    ally_guild: string
-    email: string
-    enemy_guild: string
-    exp: number
-    status: string
-    sub: string
+    ally_guild?: string
+    enemy_guild?: string
+    exp?: number
+    status?: string
+    sub?: string
   }
 }

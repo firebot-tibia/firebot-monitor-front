@@ -141,7 +141,7 @@ export const useGuilds = () => {
         await upsertPlayer(playerData, selectedWorld)
         updateMemberData(member, { Local: newLocal })
       } catch (error) {
-        console.error('Failed to update player:', error)
+        throw error
       }
     },
     [guildId, checkPermission, selectedWorld, updateMemberData],
@@ -171,7 +171,7 @@ export const useGuilds = () => {
           isClosable: true,
         })
       } catch (error) {
-        console.error('Failed to classify player:', error)
+        throw error
       }
     },
     [guildId, checkPermission, selectedWorld, updateMemberData, toast],
