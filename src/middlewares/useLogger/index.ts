@@ -9,6 +9,8 @@ export class Logger {
   private requestId: string
   private logHistory: LogEntry[] = []
   private readonly maxHistorySize = 1000
+  private readonly isProduction = process.env.NODE_ENV === 'production'
+  private readonly isEnabled = !this.isProduction
 
   private constructor() {
     this.requestId = this.generateRequestId()
@@ -22,6 +24,7 @@ export class Logger {
   }
 
   private generateRequestId(): string {
+    if (!this.isEnabled) return ''
     return `${Date.now()}-${Math.random().toString(36).substring(7)}`
   }
 
@@ -34,10 +37,12 @@ export class Logger {
   }
 
   private formatError(error: unknown): LogError {
+    if (!this.isEnabled) return { message: '', code: 'DISABLED' }
+
     if (error instanceof Error) {
       return {
         message: error.message,
-        stack: error.stack,
+        stack: this.isEnabled ? error.stack : undefined,
         code: 'ERROR',
       }
     }
@@ -57,6 +62,8 @@ export class Logger {
   }
 
   private log(level: LogLevel, message: string, data?: any, startTime?: number): void {
+    if (!this.isEnabled) return
+
     const duration = startTime ? this.getDuration(startTime) : undefined
 
     const entry: LogEntry = {
@@ -68,10 +75,11 @@ export class Logger {
       duration,
     }
 
-    // Add to history
-    this.logHistory.unshift(entry)
-    if (this.logHistory.length > this.maxHistorySize) {
-      this.logHistory.pop()
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+      this.logHistory.unshift(entry)
+      if (this.logHistory.length > this.maxHistorySize) {
+        this.logHistory.pop()
+      }
     }
 
     const timestamp = chalk.gray(entry.timestamp)
@@ -109,58 +117,72 @@ export class Logger {
 
     const output = `${timestamp} ${requestId} ${levelColor(prefix)}: ${message}${durationStr}`
 
-    if (level === 'error') {
-      console.error(output)
-      if (data?.stack) {
-        console.error(chalk.red(data.stack))
+    if (this.isEnabled) {
+      if (level === 'error') {
+        console.error(output)
+        if (data?.stack) {
+          console.error(chalk.red(data.stack))
+        }
+      } else {
+        console.log(output)
       }
-    } else {
-      console.log(output)
-    }
 
-    if (data && !data.stack) {
-      console.log(chalk.gray(JSON.stringify(data, null, 2)))
+      if (data && !data.stack) {
+        console.log(chalk.gray(JSON.stringify(data, null, 2)))
+      }
     }
   }
 
   logApi(method: string, path: string, data?: any, startTime?: number): void {
+    if (!this.isEnabled) return
     this.log('api', `${chalk.yellow(method)} ${path}`, data, startTime)
   }
 
   logRoute(method: string, path: string, data?: any, startTime?: number): void {
+    if (!this.isEnabled) return
     this.log('route', `${chalk.yellow(method)} ${path}`, data, startTime)
   }
 
   info(message: string, data?: any, startTime?: number): void {
+    if (!this.isEnabled) return
     this.log('info', message, data, startTime)
   }
 
   error(message: string, error?: unknown, startTime?: number): void {
+    if (!this.isEnabled) return
     const formattedError = this.formatError(error)
     this.log('error', message, formattedError, startTime)
   }
 
   warn(message: string, data?: any, startTime?: number): void {
+    if (!this.isEnabled) return
     this.log('warn', message, data, startTime)
   }
 
   debug(message: string, data?: any, startTime?: number): void {
-    if (process.env.NODE_ENV === 'development') {
-      this.log('debug', message, data, startTime)
-    }
+    if (!this.isEnabled || process.env.NODE_ENV !== 'development') return
+    this.log('debug', message, data, startTime)
   }
 
   getLogHistory(): LogEntry[] {
+    if (!this.isEnabled) return []
     return [...this.logHistory]
   }
 
   clearHistory(): void {
+    if (!this.isEnabled) return
     this.logHistory = []
   }
 }
 
 export async function loggerMiddleware(request: NextRequest, next: () => Promise<NextResponse>) {
   const logger = Logger.getInstance()
+
+  // Skip logging in production
+  if (process.env.NODE_ENV === 'production') {
+    return next()
+  }
+
   const startTime = Date.now()
   const { pathname, searchParams } = request.nextUrl
   const method = request.method
