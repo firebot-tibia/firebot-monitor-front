@@ -20,12 +20,12 @@ const nextConfig = {
         headers: [
           {
             key: 'X-UA-Compatible',
-            value: 'IE=edge,chrome=1'
-          }
-        ]
-      }
+            value: 'IE=edge,chrome=1',
+          },
+        ],
+      },
     ]
-  }
+  },
 }
 
 export default nextConfig
