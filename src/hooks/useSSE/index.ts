@@ -23,7 +23,10 @@ export const useSSE = ({ endpoint, onMessage, onError }: UseSSEOptions) => {
 
   const handleMaxRetriesReached = useCallback(async () => {
     logger.warn('Max SSE reconnection attempts reached, signing out')
-    await signOut({ callbackUrl: '/' })
+    await signOut({
+      callbackUrl: '/',
+      redirect: true,
+    })
   }, [logger])
 
   const cleanupSSE = useCallback(() => {

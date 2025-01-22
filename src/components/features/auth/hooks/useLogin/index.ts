@@ -69,23 +69,14 @@ export const useLogin = () => {
       })
 
       router.push(routes.guild)
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
-
+    } catch (error) {
+      setErrors({ password: 'Verifique as credênciais fornecidas' })
       toast({
-        title: 'Erro no login',
-        description: errorMessage,
+        title: 'Login Incorreto',
+        description: 'Verifique seu e-mail e senha e tente novamente.',
         status: 'error',
-        duration: 5000,
-        isClosable: true,
+        duration: 3000,
       })
-
-      setErrors(prev => ({
-        ...prev,
-        general: errorMessage,
-      }))
-    } finally {
-      setIsLoading(false)
     }
   }
 

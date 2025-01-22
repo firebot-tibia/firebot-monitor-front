@@ -4,8 +4,6 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 
 import api from '@/libs/api/firebot-api'
 
-import type { LoginResponse } from './types'
-
 const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -27,7 +25,7 @@ const authOptions: NextAuthOptions = {
             throw new Error('Missing credentials')
           }
 
-          const response = await api.post<LoginResponse>('/login', {
+          const response = await api.post('/login', {
             email: credentials.email,
             password: credentials.password,
             json: true,

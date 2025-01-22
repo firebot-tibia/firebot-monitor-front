@@ -30,7 +30,7 @@ const SidebarSkeleton = () => (
 const UnauthenticatedSidebar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTool, setActiveTool] = useState<ToolType | null>(null)
+  const [activeTool] = useState<ToolType | null>(null)
   const isMobile = useBreakpointValue({ base: true, md: false })
   const { isOpen, onOpen, onClose } = useDisclosure()
 

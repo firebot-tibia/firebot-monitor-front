@@ -1,4 +1,4 @@
-import { jwtDecode } from 'jwt-decode'
+import * as jwtDecode from 'jsonwebtoken'
 import { create } from 'zustand'
 
 import { useStorageStore } from './storage-store'
@@ -50,7 +50,7 @@ export const useTokenStore = create<TokenState>((set, get) => ({
     }
   },
   decodeAndSetToken: (token: string) => {
-    const decoded = jwtDecode<DecodedToken>(token)
+    const decoded = jwtDecode.decode(token) as DecodedToken
     set({ decodedToken: decoded })
     const worlds = Object.keys(decoded.guilds)
     const storedWorld = useStorageStore.getState().getItem('selectedWorld', '')

@@ -1,4 +1,4 @@
-import { jwtDecode } from 'jwt-decode'
+import * as jwtDecode from 'jsonwebtoken'
 
 import type { DecodedToken } from '@/components/features/auth/types/auth.types'
 import { Logger } from '@/middlewares/useLogger'
@@ -187,7 +187,7 @@ export class SSEClient {
 
   private getUserIdFromToken(token: string): string | null {
     try {
-      const decoded = jwtDecode<DecodedToken>(token)
+      const decoded = jwtDecode.decode(token) as DecodedToken
       return decoded.sub
     } catch (error) {
       this.logger.error('Error decoding token', error)

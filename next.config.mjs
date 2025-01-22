@@ -3,18 +3,29 @@
 const nextConfig = {
   reactStrictMode: true,
   distDir: '.next',
+  basePath: '',
   cleanDistDir: true,
+  crossOrigin: 'anonymous',
+  poweredByHeader: false,
   typescript: {
     ignoreBuildErrors: false,
-  },
-  images: {
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    minimumCacheTTL: 60,
   },
   experimental: {
     optimizePackageImports: ['@chakra-ui/react'],
   },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-UA-Compatible',
+            value: 'IE=edge,chrome=1'
+          }
+        ]
+      }
+    ]
+  }
 }
 
 export default nextConfig

@@ -1,0 +1,7 @@
+{
+  "name": "Firebot",
+  "short_name": "Firebot",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

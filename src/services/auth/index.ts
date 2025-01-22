@@ -5,14 +5,14 @@ import { Logger } from '@/middlewares/useLogger'
 import type { TokenResponse, RefreshError } from './types'
 
 export class TokenManager {
-  private static instance: TokenManager
+  public static instance: TokenManager
   private refreshPromise: Map<string, Promise<TokenResponse>> = new Map()
   private isRefreshing: Map<string, boolean> = new Map()
   private retryCount: Map<string, number> = new Map()
   private readonly maxRetries = 3
   private readonly logger: Logger
 
-  private constructor() {
+  public constructor() {
     this.logger = Logger.getInstance()
   }
 

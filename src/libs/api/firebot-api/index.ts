@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { jwtDecode } from 'jwt-decode'
+import * as jwtDecode from 'jsonwebtoken'
 import { getSession, signOut } from 'next-auth/react'
 
 import type { DecodedToken } from '@/components/features/auth/types/auth.types'
@@ -74,7 +74,7 @@ api.interceptors.response.use(
         }
 
         const tokenManager = TokenManager.getInstance()
-        const decoded = jwtDecode<DecodedToken>(session.refresh_token)
+        const decoded = jwtDecode.decode(session.refresh_token) as DecodedToken
         const tokens = await tokenManager.refreshToken(decoded.sub, session.refresh_token)
 
         logger.info('Token refreshed successfully', {
@@ -85,7 +85,10 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         logger.error('Token refresh failed', refreshError)
-        await signOut({ callbackUrl: '/' })
+        await signOut({
+          callbackUrl: '/',
+          redirect: true,
+        })
         return Promise.reject(refreshError)
       }
     }
