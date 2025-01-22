@@ -1,51 +1,92 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { signOut, useSession } from 'next-auth/react'
 
-import { SSEManager } from '@/services/sse'
+import { Logger } from '@/middlewares/useLogger'
+import { SSEClient } from '@/services/sse'
+import type { UseSSEOptions, ConnectionStatus } from '@/services/sse/types'
 import { useTokenStore } from '@/stores/token-decoded-store'
 
-import type { ConnectionStatus, UseSSEOptions } from './types'
-
-export const useSSE = ({ endpoint, onMessage }: UseSSEOptions) => {
+export const useSSE = ({ endpoint, onMessage, onError }: UseSSEOptions) => {
   const { data: session } = useSession()
   const { selectedWorld, decodeAndSetToken } = useTokenStore()
   const [status, setStatus] = useState<ConnectionStatus>('disconnected')
-  const sseManager = useRef<SSEManager | null>(null)
+  const sseClientRef = useRef<SSEClient | null>(null)
+  const logger = Logger.getInstance()
+
+  const handleTokenRefresh = useCallback(
+    (newToken: string) => {
+      decodeAndSetToken(newToken)
+    },
+    [decodeAndSetToken],
+  )
+
+  const handleMaxRetriesReached = useCallback(async () => {
+    logger.warn('Max SSE reconnection attempts reached, signing out')
+    await signOut({ callbackUrl: '/' })
+  }, [logger])
+
+  const cleanupSSE = useCallback(() => {
+    if (sseClientRef.current) {
+      sseClientRef.current.closeConnection()
+      sseClientRef.current = null
+    }
+  }, [])
 
   useEffect(() => {
-    if (session?.access_token && session?.refresh_token && selectedWorld) {
-      const fullUrl = `${endpoint}${endpoint.includes('?') ? '&' : '?'}token=${encodeURIComponent(session.access_token)}&world=${selectedWorld}`
+    const initializeSSE = async () => {
+      if (!session?.access_token || !session?.refresh_token || !selectedWorld) {
+        cleanupSSE()
+        return
+      }
 
-      sseManager.current = new SSEManager({
-        url: fullUrl,
-        token: session.access_token,
-        refreshToken: session.refresh_token,
-        onMessage,
-        onTokenRefresh: decodeAndSetToken,
-        onStatusChange: setStatus,
-        onMaxRetriesReached: async () => {
-          await signOut({ callbackUrl: '/' })
-        },
-      })
+      try {
+        const fullUrl = `${endpoint}${endpoint.includes('?') ? '&' : '?'}token=${encodeURIComponent(
+          session.access_token,
+        )}&world=${selectedWorld}`
 
-      sseManager.current.connect()
+        sseClientRef.current = new SSEClient({
+          url: fullUrl,
+          token: session.access_token,
+          refreshToken: session.refresh_token,
+          onMessage,
+          onError,
+          onTokenRefresh: handleTokenRefresh,
+          onStatusChange: setStatus,
+          onMaxRetriesReached: handleMaxRetriesReached,
+        })
 
-      return () => {
-        sseManager.current?.closeConnection()
+        sseClientRef.current.connect()
+      } catch (error) {
+        logger.error('Error initializing SSE connection', error)
+        onError?.(error instanceof Error ? error : new Error('Failed to initialize SSE'))
       }
     }
+
+    initializeSSE()
+
+    return cleanupSSE
   }, [
     endpoint,
     session?.access_token,
     session?.refresh_token,
     selectedWorld,
     onMessage,
-    decodeAndSetToken,
+    onError,
+    handleTokenRefresh,
+    handleMaxRetriesReached,
+    cleanupSSE,
+    logger,
   ])
+
+  const reconnect = useCallback(() => {
+    cleanupSSE()
+    sseClientRef.current?.connect()
+  }, [cleanupSSE])
 
   return {
     status,
     isConnected: status === 'connected',
+    reconnect,
   }
 }
