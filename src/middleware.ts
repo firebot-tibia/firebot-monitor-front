@@ -68,6 +68,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
+    '/((?!_next|api|favicon.ico).*)',
     '/statistics/:path*',
     '/guild/:path*',
     '/reservations/:path*',
