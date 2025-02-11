@@ -46,30 +46,31 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
   return (
     <Menu isOpen={isOpen} onClose={() => setIsOpen(false)} placement="top-start" autoSelect={false}>
       <Tooltip label={`Current Type: ${currentType}`} placement="top" openDelay={500}>
-        <MenuButton
-          as={Button}
-          rightIcon={<ChevronDownIcon />}
-          onClick={() => setIsOpen(!isOpen)}
-          size="xs"
-          variant="ghost"
-          bg={bgColor}
-          color={currentColor}
-          _hover={{
-            bg: hoverBgColor,
-            transform: 'translateY(-1px)',
-          }}
-          _active={{
-            transform: 'translateY(0)',
-          }}
-          transition="all 0.2s"
-          px={2}
-          height="22px"
-          fontSize="11px"
-        >
-          <Text isTruncated maxW="80px">
-            {currentType}
-          </Text>
-        </MenuButton>
+      <MenuButton
+        as={Button}
+        rightIcon={<ChevronDownIcon />}
+        onClick={() => setIsOpen(!isOpen)}
+        size="xs"
+        variant="ghost"
+        bg={bgColor}
+        color={currentColor}
+        _hover={{
+          bg: hoverBgColor,
+          transform: 'translateY(-1px)',
+        }}
+        _active={{
+          transform: 'translateY(0)',
+        }}
+        transition="all 0.2s"
+        px={2}
+        height="18px"
+        fontSize="11px"
+        width="70px"
+      >
+        <Text isTruncated>
+          {currentType}
+        </Text>
+      </MenuButton>
       </Tooltip>
 
       <Portal>
