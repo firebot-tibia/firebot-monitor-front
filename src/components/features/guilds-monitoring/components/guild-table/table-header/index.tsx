@@ -51,7 +51,7 @@ export const TableHeader = memo(function TableHeader({
           NAME
         </Th>
 
-        <Th p={0} pl={1} fontSize="11px" color="white.600" w="20%" cursor="pointer">
+        <Th p={0} pl={1} fontSize="11px" color="white.600" w="19%" cursor="pointer">
           TYPE
         </Th>
 
