@@ -65,7 +65,7 @@ export const CharacterClassification: React.FC<CharacterClassificationProps> = (
           px={2}
           height="18px"
           fontSize="11px"
-          width="70px"
+          width="60px"
         >
           <Text isTruncated>{currentType}</Text>
         </MenuButton>
