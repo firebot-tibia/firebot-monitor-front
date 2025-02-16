@@ -6,14 +6,16 @@ import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { FaDiscord } from 'react-icons/fa'
 
+
+import AlertSettings from '@/components/features/monitoring/components/alerts-widget'
+import RespawnListWidget from '@/components/features/reservations/components/respawn-list-widget'
+import StatisticsWidget from '@/components/features/statistics/components/statistics-widget'
+import MapWidget from '@/components/features/tibia-map/map-widget'
 import { routes } from '@/constants/routes'
 
 import ModeSelect from './components/mode-select'
 import WorldSelect from './components/world-select'
-import AlertSettings from '../../components/widgets/alerts-widget'
-import MapWidget from '../../components/widgets/map-widget'
-import RespawnListWidget from '../../components/widgets/respawn-list-widget'
-import StatisticsWidget from '../../components/widgets/statistics-widget'
+
 
 const Header = () => {
   const router = useRouter()

@@ -34,15 +34,12 @@ import {
 } from '@chakra-ui/react'
 import { Settings, Clock, Bell, Plus, X, Volume2, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 
-import type { AlertCondition } from '@/types/alert-types'
+import type { AlertCondition } from '@/components/features/monitoring/types/alert.types'
+import { typeColors } from '@/constants/types'
 
-import { typeColors } from '../../../../../constants/types'
-import {
-  checkAlertCondition,
-  useAlertSettingsStore,
-} from '../../../../../stores/alert-settings-store'
-import { useGuilds } from '../../../../features/guilds-monitoring/hooks/useGuilds'
-import { useCharacterTypesView } from '../../../../features/guilds-monitoring/hooks/useType'
+import { useGuilds } from '../../../guilds-monitoring/hooks/useGuilds'
+import { useCharacterTypesView } from '../../../guilds-monitoring/hooks/useType'
+import { useAlertSettingsStore, checkAlertCondition } from '../../stores/alert-settings-store'
 
 const AlertSettings = () => {
   // Refs and hooks

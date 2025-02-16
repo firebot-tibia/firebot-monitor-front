@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react'
 import { BarChart } from 'lucide-react'
 
-import GuildStatsContainer from '../../../../features/statistics/guild-stats-container'
+import GuildStatsContainer from '../../guild-stats-container'
 
 const StatisticsWidget = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()

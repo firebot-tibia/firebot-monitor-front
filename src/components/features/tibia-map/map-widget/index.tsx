@@ -12,7 +12,7 @@ import {
 import { ListChecks, X } from 'lucide-react'
 import { FaMap } from 'react-icons/fa'
 
-import Maps from '../../../../features/tibia-map'
+import Maps from '..'
 
 const MapWidget = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()

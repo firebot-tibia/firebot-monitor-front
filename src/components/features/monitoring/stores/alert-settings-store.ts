@@ -1,7 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import type { AlertCondition, MonitoredList } from '@/types/alert-types'
+import type {
+  AlertCondition,
+  MonitoredList,
+} from '@/components/features/monitoring/types/alert.types'
 import type { GuildMemberResponse } from '@/types/guild-member.response'
 
 const isRecentlyLogged = (char: GuildMemberResponse, timeWindow: Date): boolean => {
