@@ -4,187 +4,214 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Mapa Tibia</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
-      body,
-      html {
-        height: 100%;
+      :root {
+        --primary-bg: #121212;
+        --secondary-bg: #1c1c1c;
+        --card-bg: #1e2124;
+        --accent-color: #b9230c;
+        --text-color: #e0e0e0;
+        --input-bg: #2c2f33;
+        --input-focus: #3c3c3c;
+        --hover-color: #ffa726;
+      }
+
+      body, html {
+        height: 100vh;
         margin: 0;
         padding: 0;
-        background-color: #121212;
-        color: #e0e0e0;
+        background-color: var(--primary-bg);
+        color: var(--text-color);
+        overflow: hidden;
       }
-      .container-fluid {
-        height: 100%;
-        padding: 20px;
-      }
-      .main-content {
+
+      .main-wrapper {
+        height: 100vh;
         display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
+        gap: 0;
       }
-      #map-container {
+
+      .map-section {
         flex: 1;
-        min-width: 400px;
-        margin-top: 20px;
-        height: 650px;
+        height: 100vh;
+        position: relative;
       }
+
       #map {
         width: 100%;
         height: 100%;
+        background: var(--primary-bg);
       }
-      #inputs-container {
-        background-color: #1c1c1c;
-        padding: 20px;
-        color: #e0e0e0;
+
+      .controls-section {
+        width: 380px;
+        height: 100vh;
+        background: var(--secondary-bg);
+        border-left: 2px solid var(--accent-color);
+        overflow-y: auto;
       }
-      #info-container {
-        flex: 1;
-        min-width: 300px;
-        margin-top: 20px;
-        background-color: #2c2f33;
-        padding: 15px;
-        border-top: 2px solid #b9230c;
+
+      .card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--accent-color);
+        margin-bottom: 1rem;
       }
-      .form-control,
-      .btn-primary {
-        background-color: #40444b;
-        color: #ffffff;
-        border-color: #b9230c;
+
+      .card-header {
+        background: rgba(185, 35, 12, 0.2) !important;
+        border-bottom: 1px solid var(--accent-color);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
       }
+
+      .card-body {
+        padding: 1rem;
+      }
+
+      .form-control {
+        background-color: var(--input-bg);
+        border-color: var(--accent-color);
+        color: var(--text-color);
+        font-size: 0.9rem;
+      }
+
       .form-control:focus {
-        background-color: #4f545c;
-        border-color: #ffa726;
-        color: #ffffff;
+        background-color: var(--input-focus);
+        border-color: var(--hover-color);
+        color: var(--text-color);
+        box-shadow: 0 0 0 0.2rem rgba(185, 35, 12, 0.25);
       }
-      .form-control:read-only {
-        background-color: #2c2c2c;
-        color: #e0e0e0;
+
+      .btn-primary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        transition: all 0.2s ease;
       }
-      .form-control:read-only:focus {
-        background-color: #3c3c3c;
-        color: #e0e0e0;
-      }
+
       .btn-primary:hover {
-        background-color: #ffa726;
-        border-color: #b9230c;
+        background-color: var(--hover-color);
+        border-color: var(--accent-color);
+        transform: translateY(-1px);
       }
+
       .city-btn {
-        margin: 5px;
-        background-color: #b9230c;
-        color: #1e2124;
+        background-color: var(--accent-color);
+        color: var(--text-color);
         border: none;
+        margin: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
       }
-      .alert-info {
-        background-color: #b3310d;
-        border-color: #cb7819;
-        color: #e0e0e0;
+
+      .city-btn:hover {
+        background-color: var(--hover-color);
+        transform: translateY(-1px);
       }
+
+      .coordinates-display {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: var(--text-color);
+        z-index: 1000;
+      }
+
+      /* Custom scrollbar for controls section */
+      .controls-section::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .controls-section::-webkit-scrollbar-track {
+        background: var(--secondary-bg);
+      }
+
+      .controls-section::-webkit-scrollbar-thumb {
+        background: var(--accent-color);
+        border-radius: 3px;
+      }
+
+      /* Leaflet controls styling */
       .leaflet-control-zoom {
-        border: 2px solid #b9230c !important;
+        border: 1px solid var(--accent-color) !important;
+        margin: 1rem !important;
       }
+
       .leaflet-control-zoom-in,
       .leaflet-control-zoom-out {
-        background-color: #2c2f33 !important;
-        color: #b9230c !important;
+        background-color: rgba(44, 47, 51, 0.9) !important;
+        color: var(--accent-color) !important;
+        transition: all 0.2s ease !important;
       }
+
       .leaflet-control-zoom-in:hover,
       .leaflet-control-zoom-out:hover {
-        background-color: #4f545c !important;
+        background-color: var(--input-focus) !important;
       }
     </style>
   </head>
   <body>
-    <div class="container-fluid">
-      <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-        <h4 class="alert-heading">Instruções de Uso:</h4>
-        <ul>
-          <li>
-            A ferramenta oferece orientação aproximada, não 100% precisa. Use seu conhecimento sobre
-            nível e vocação do personagem para interpretar os resultados.
-          </li>
-          <li>Atualmente, suporta a busca de apenas um personagem por vez.</li>
-          <li>
-            <strong>Atenção:</strong> No momento, apenas respawns <strong>META</strong> estão
-            marcados. Caso identifique que algum respawn META esteja faltando, por favor, entre em
-            contato com a equipe via
-            <a
-              href="https://discord.com/invite/5eUrDejn"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="color: yellow"
-              >Discord</a
-            >.
-          </li>
-          <li>
-            Baseado na estrutura fornecida pelo
-            <a
-              href="https://github.com/tibiamaps/tibia-map"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="color: yellow"
-              >Tibia Maps</a
-            >.
-          </li>
-        </ul>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Fechar"
-        ></button>
+    <div class="main-wrapper">
+      <!-- Map Section -->
+      <div class="map-section">
+        <div id="map"></div>
       </div>
 
-      <div class="main-content">
-        <div id="map-container">
-          <div id="map"></div>
+      <!-- Controls Section -->
+      <div class="controls-section p-3">
+        <!-- Exiva Input -->
+        <div class="card">
+          <div class="card-header">
+            Exiva
+          </div>
+          <div class="card-body">
+            <textarea
+              class="form-control"
+              id="exiva"
+              rows="3"
+              placeholder="22:16:33 Brenszk is very far to the east."
+            ></textarea>
+            <button type="button" class="btn btn-primary w-100 mt-2" id="processExiva">
+              Processar Exiva
+            </button>
+          </div>
         </div>
 
-        <div id="info-container">
-          <div id="inputs-container">
-            <div class="row">
-              <div class="col-md-12 mb-3">
-                <div class="card bg-dark text-light">
-                  <div class="card-header">Exiva</div>
-                  <div class="card-body">
-                    <textarea
-                      class="form-control"
-                      id="exiva"
-                      rows="4"
-                      placeholder="22:16:33 Brenszk is very far to the east."
-                    ></textarea>
-                    <button type="button" class="btn btn-primary w-100 mt-2" id="processExiva">
-                      Processar Exiva
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-12 mb-3">
-                <div class="card bg-dark text-light">
-                  <div class="card-header">Resultados</div>
-                  <div class="card-body">
-                    <textarea class="form-control" id="results" rows="4" readonly></textarea>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-12">
-                <div class="card bg-dark text-light">
-                  <div class="card-header">Cidades</div>
-                  <div class="card-body">
-                    <div id="city-buttons" class="d-flex justify-content-start flex-wrap">
-                      <!-- City buttons will be added here dynamically -->
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <!-- Results -->
+        <div class="card">
+          <div class="card-header">
+            Resultados
+          </div>
+          <div class="card-body">
+            <textarea
+              class="form-control"
+              id="results"
+              rows="6"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Cities -->
+        <div class="card">
+          <div class="card-header">
+            Cidades
+          </div>
+          <div class="card-body">
+            <div id="city-buttons" class="d-flex flex-wrap gap-1">
+              <!-- Cities will be added dynamically -->
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

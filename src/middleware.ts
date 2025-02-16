@@ -26,11 +26,5 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: [
-    '/statistics/:path*',
-    '/guild/:path*',
-    '/reservations/:path*',
-    '/tibia-map/:path*',
-    '/settings/:path*',
-  ],
+  matcher: ['/statistics/:path*', '/guild/:path*', '/reservations/:path*', '/settings/:path*'],
 }

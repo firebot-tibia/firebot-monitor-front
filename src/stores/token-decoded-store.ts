@@ -50,24 +50,46 @@ export const useTokenStore = create<TokenState>((set, get) => ({
     }
   },
   decodeAndSetToken: (token: string) => {
-    const decoded = jwtDecode.decode(token) as DecodedToken
-    set({ decodedToken: decoded })
-    const worlds = Object.keys(decoded.guilds)
-    const storedWorld = useStorageStore.getState().getItem('selectedWorld', '')
-    set({ decodedToken: decoded, userStatus: decoded.status })
-    if (worlds.length > 0 && (!storedWorld || !worlds.includes(storedWorld))) {
-      set({ selectedWorld: worlds[0] })
-      useStorageStore.getState().setItem('selectedWorld', worlds[0])
-    } else if (storedWorld) {
-      set({ selectedWorld: storedWorld })
-    }
-    const { mode } = get()
-    if (decoded.guilds[get().selectedWorld]) {
-      const guildId =
-        mode === 'ally'
-          ? decoded.guilds[get().selectedWorld].ally_guild.id
-          : decoded.guilds[get().selectedWorld].enemy_guild.id
-      useStorageStore.getState().setItem('selectedGuildId', guildId)
+    try {
+      // Decode token and validate
+      const decoded = jwtDecode.decode(token) as DecodedToken
+      if (!decoded || !decoded.guilds) {
+        throw new Error('Invalid token format')
+      }
+
+      // Get available worlds
+      const worlds = Object.keys(decoded.guilds)
+      if (worlds.length === 0) {
+        throw new Error('No worlds available in token')
+      }
+
+      // Get stored world or use first available
+      const storedWorld = useStorageStore.getState().getItem('selectedWorld', '')
+      const selectedWorld = worlds.includes(storedWorld) ? storedWorld : worlds[0]
+
+      // Update state in a single set call
+      set({
+        decodedToken: decoded,
+        userStatus: decoded.status,
+        selectedWorld,
+      })
+
+      // Update storage
+      useStorageStore.getState().setItem('selectedWorld', selectedWorld)
+
+      // Update guild ID
+      const { mode } = get()
+      if (decoded.guilds[selectedWorld]) {
+        const guildId =
+          mode === 'ally'
+            ? decoded.guilds[selectedWorld].ally_guild.id
+            : decoded.guilds[selectedWorld].enemy_guild.id
+        useStorageStore.getState().setItem('selectedGuildId', guildId)
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error)
+      set({ decodedToken: null, userStatus: '', selectedWorld: '' })
+      throw error
     }
   },
 }))

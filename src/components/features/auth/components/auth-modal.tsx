@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import {
   Modal,
@@ -22,13 +22,24 @@ import {
 import { motion } from 'framer-motion'
 import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa'
 
+import { useLastLogin } from '@/hooks/useLastLogin'
+
 import { routes } from '../../../../constants/routes'
 import { useLogin } from '../hooks/useLogin'
 
 const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { email, setEmail, password, setPassword, errors, handleLogin } = useLogin()
+  const { getLastLogin, saveLastLogin } = useLastLogin()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const lastLogin = getLastLogin()
+    if (lastLogin) {
+      setEmail(lastLogin.email)
+      setPassword(lastLogin.password)
+    }
+  }, [])
 
   const bgColor = useColorModeValue('white', 'gray.900')
   const textColor = useColorModeValue('gray.800', 'white')
@@ -38,9 +49,21 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!email || !password) {
+      return
+    }
+
     setIsLoading(true)
-    await handleLogin()
-    setIsLoading(false)
+    try {
+      await handleLogin()
+      saveLastLogin(email, password)
+      onClose()
+    } catch (error) {
+      console.error('Login failed:', error)
+      // Error will be handled by useLogin hook and shown in the form
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const MotionCenter = motion(Center)
@@ -89,16 +112,23 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   bg={inputBgColor}
-                  borderColor={inputBorderColor}
-                  _hover={{ borderColor: 'red.500' }}
+                  borderColor={errors.email ? errorColor : inputBorderColor}
+                  _hover={{ borderColor: errors.email ? errorColor : 'purple.500' }}
                   _focus={{
-                    borderColor: 'red.500',
-                    boxShadow: '0 0 0 1px var(--chakra-colors-red-500)',
+                    borderColor: errors.email ? errorColor : 'purple.500',
+                    boxShadow: `0 0 0 1px ${errors.email ? 'var(--chakra-colors-red-500)' : 'var(--chakra-colors-purple-500)'}`,
                   }}
                   color={textColor}
                   size="lg"
                   placeholder="Digite seu e-mail"
+                  isDisabled={isLoading}
+                  required
                 />
+                {errors.email && (
+                  <Text color={errorColor} fontSize="sm" mt={1}>
+                    {errors.email}
+                  </Text>
+                )}
                 {errors.email && (
                   <Text color={errorColor} fontSize="sm" mt={1}>
                     {errors.email}

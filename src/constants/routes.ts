@@ -1,19 +1,10 @@
-import { FaHome, FaOptinMonster, FaMap } from 'react-icons/fa'
-import { IoMdStats } from 'react-icons/io'
+import { FaHome } from 'react-icons/fa'
 
-export const routesArray = [
-  { name: 'Monitorar Guild', href: '/guild', icon: FaHome },
-  { name: 'Estatísticas', href: '/statistics', icon: IoMdStats },
-  { name: 'Respawns', href: '/reservations', icon: FaOptinMonster },
-  { name: 'Mapa Exiva', href: '/tibia-map', icon: FaMap },
-]
+export const routesArray = [{ name: 'Monitorar Guild', href: '/guild', icon: FaHome }]
 
 export const routes = {
   home: '/',
   guild: '/guild',
-  statistics: '/statistics',
-  reservations: '/reservations',
-  tibiaMap: '/tibia-map',
   editor: '/editor',
   discordUrl: 'https://discord.gg/2uYKmHNmHP',
 }

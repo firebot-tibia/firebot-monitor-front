@@ -11,9 +11,9 @@ import { useSSE } from '../../../../../hooks/useSSE'
 import { upsertPlayer } from '../../../../../services/guild-stats'
 import { useStorage, useStorageStore } from '../../../../../stores/storage-store'
 import { useTokenStore } from '../../../../../stores/token-decoded-store'
-import { useCharacterTypes } from '../../../../../stores/use-type-store'
 import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
 import { formatTimeOnline } from '../../../../../utils/format-time-online'
+import { useCharacterTypes } from '../useCharacterTypes'
 
 export const useGuilds = () => {
   const [value, setValue] = useStorage('monitorMode', 'enemy')

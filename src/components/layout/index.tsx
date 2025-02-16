@@ -3,7 +3,8 @@ import { Box, Flex } from '@chakra-ui/react'
 import { useSession } from 'next-auth/react'
 
 import { Footer } from './components'
-import AuthSidebar from './components/sidebar'
+import Header from './components/header'
+import UnauthenticatedSidebar from './components/sidebar'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -16,13 +17,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <Flex direction="column" minH="100vh">
       <Flex flex={1}>
-        <AuthSidebar />
-        <Box ml="60px" flex={1} p={6}>
-          {children}
+        {!isAuthenticated && <UnauthenticatedSidebar />}
+        <Box flex={1} display="flex" flexDirection="column" ml={isAuthenticated ? 0 : '60px'}>
+          {/* Header */}
+          {isAuthenticated && <Header />}
+
+          {/* Main Content */}
+          <Box flex={1} p={6}>
+            {children}
+          </Box>
         </Box>
       </Flex>
 
-      {isAuthenticated ? null : <Footer />}
+      {!isAuthenticated && <Footer />}
     </Flex>
   )
 }

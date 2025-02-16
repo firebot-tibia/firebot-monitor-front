@@ -59,14 +59,14 @@ const Maps: React.FC = () => {
   return (
     <div
       style={{
-        height: '40vh',
+        height: '100%',
         width: '100%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
       }}
     >
-      <div ref={mapContainerRef} style={{ height: '40vh', width: '100%', position: 'relative' }} />
+      <div ref={mapContainerRef} style={{ height: '100%', width: '100%', position: 'relative' }} />
     </div>
   )
 }

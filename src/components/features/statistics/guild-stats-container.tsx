@@ -15,8 +15,8 @@ import {
 import { useRouter } from 'next/navigation'
 
 import TablePagination from '@/components/common/pagination'
+import { useGuildStatsStore } from '@/components/features/statistics/stores/useGuildStats'
 import { routes } from '@/constants/routes'
-import { useGuildStatsStore } from '@/stores/guild-stats-store'
 
 import FilterBar from './components/filter-bar'
 import GuildTable from './components/table'

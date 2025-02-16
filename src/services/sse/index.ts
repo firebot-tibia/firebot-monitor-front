@@ -68,7 +68,6 @@ export class SSEClient {
       }
     }
 
-    // Network status handlers
     window.addEventListener('offline', () => {
       this.logger.warn('Network offline, closing SSE connection')
       this.closeConnection()
@@ -81,7 +80,6 @@ export class SSEClient {
   }
 
   private startHeartbeat(): void {
-    // Clear any existing intervals first
     this.stopHeartbeat()
 
     this.heartbeatInterval = window.setInterval(() => {
