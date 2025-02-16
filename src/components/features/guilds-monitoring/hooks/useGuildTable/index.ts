@@ -9,8 +9,8 @@ import type { SortConfig } from './types'
 export const useGuildTable = (data: GuildMemberResponse[]) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: 'Level',
-    direction: 'desc',
+    key: 'TimeOnline',
+    direction: 'asc',
   })
 
   const handleSort = (key: keyof GuildMemberResponse) => {

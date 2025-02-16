@@ -1,6 +1,3 @@
-export { default as WorldSelect } from './world-select'
-export { default as AuthSidebar } from './sidebar/index'
-export { default as ModeSelect } from './mode-select'
 export { default as Footer } from './footer'
 export { default as Navbar } from './navbar'
-export { default as LoginButton } from './login-button'
+export { default as LoginButton } from './navbar/login-button'

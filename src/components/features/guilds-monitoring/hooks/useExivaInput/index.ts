@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
 
-import { useRespawnsStore } from '../../../../../stores/respawn-store'
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
+import type { GuildMemberResponse } from '@/types/guild-member.response'
+
+import { useRespawnsStore } from '../../../reservations/stores/respawn-store'
 
 interface UseLocalInputProps {
   member: GuildMemberResponse
@@ -16,7 +17,6 @@ interface DropdownPosition {
 }
 
 export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => {
-  // States
   const [inputValue, setInputValue] = useState(member.Local || '')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [filteredOptions, setFilteredOptions] = useState<string[]>([])
@@ -32,15 +32,12 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
     return saved ? JSON.parse(saved) : []
   })
 
-  // Refs
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const selectionTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
-  // Store
   const { respawns, fetchRespawns, isLoading: isRespawnsLoading } = useRespawnsStore()
 
-  // Effects
   useEffect(() => {
     if (!isDropdownSelection) {
       setInputValue(member.Local || '')
@@ -56,7 +53,6 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
     localStorage.setItem('recentLocations', JSON.stringify(recentLocations))
   }, [recentLocations])
 
-  // Dropdown position management
   const updateDropdownPosition = useCallback(() => {
     if (!inputRef.current) return
 
@@ -76,7 +72,6 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
     setDropdownPosition(position)
   }, [filteredOptions.length])
 
-  // Handlers
   const handleInputChange = useCallback(
     async (value: string) => {
       setInputValue(value)
@@ -157,7 +152,6 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
     setTimeout(applyChange, 200)
   }, [applyChange])
 
-  // Click outside handler
   useEffect(() => {
     if (!isDropdownOpen) return
 
@@ -173,7 +167,6 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isDropdownOpen, isDropdownSelection, applyChange])
 
-  // Position update on resize
   useEffect(() => {
     if (!isDropdownOpen) return
 

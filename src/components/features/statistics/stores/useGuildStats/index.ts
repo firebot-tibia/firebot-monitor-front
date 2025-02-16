@@ -1,11 +1,8 @@
 import { create } from 'zustand'
 
-import { useStorageStore } from './storage-store'
-import type {
-  ExperienceListQuery,
-  GuildData,
-} from '../components/features/statistics/types/guild-stats.interface'
-import { getExperienceList } from '../services/guild-stats'
+import { getExperienceList } from '../../../../../services/guild-stats'
+import { useStorageStore } from '../../../../../stores/storage-store'
+import type { ExperienceListQuery, GuildData } from '../../types/guild-stats.interface'
 
 interface GuildStatsState {
   filter: string

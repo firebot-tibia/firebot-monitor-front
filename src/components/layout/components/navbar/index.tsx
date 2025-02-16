@@ -6,7 +6,7 @@ import { VStack, IconButton, Button, Collapse } from '@chakra-ui/react'
 import Link from 'next/link'
 import { FaBars, FaTools, FaDiscord, FaHome } from 'react-icons/fa'
 
-import LoginButton from '../login-button'
+import LoginButton from './login-button'
 import type { NavbarProps } from './types'
 import { routes } from '../../../../constants/routes'
 import { tools } from '../../../features/editor/constants/toolbar'

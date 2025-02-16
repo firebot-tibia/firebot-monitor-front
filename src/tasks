@@ -1,8 +1,7 @@
-Diminuir o tamanho do componente TYPE
-Adicionar widget lateral para alertas
+
 Adicionar avisos de mortes no site e level up
 Refatorar a parte de estatistica para popup
-Refatora o mapa exiva para popup(widget) e com exiva automatico
+exiva automatico
 
 
 Criar boilerplate nestjs e aglutinar tudo que tem de backend + payments la

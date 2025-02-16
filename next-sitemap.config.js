@@ -29,7 +29,6 @@ export default {
       '/guild': 0.8, // Guild statistics
       '/statistics': 0.8, // Home section
       '/reservations': 0.8, // Reservations
-      '/tibia-map': 0.7, // Tibia map
     }
 
     return {
