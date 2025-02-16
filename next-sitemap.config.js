@@ -27,8 +27,6 @@ export default {
       '/': 1.0, // Home page
       '/dashboard': 0.9, // Main dashboard
       '/guild': 0.8, // Guild statistics
-      '/statistics': 0.8, // Home section
-      '/reservations': 0.8, // Reservations
     }
 
     return {
