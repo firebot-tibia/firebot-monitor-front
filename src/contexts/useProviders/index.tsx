@@ -7,6 +7,7 @@ import { SessionProvider } from 'next-auth/react'
 
 import theme from '@/styles/theme'
 
+
 interface AppProvidersProps {
   children: ReactNode
 }

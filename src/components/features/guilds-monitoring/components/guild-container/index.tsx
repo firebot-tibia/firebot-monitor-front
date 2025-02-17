@@ -1,35 +1,37 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 
-import { Center, Spinner, SimpleGrid, Box, Text } from '@chakra-ui/react'
+import { Center, Spinner, SimpleGrid, Text, Box } from '@chakra-ui/react'
 
+import { useAlertSound } from '@/components/features/monitoring/hooks/useAlertSound'
 import DashboardLayout from '@/components/layout'
 
 import { useGuilds } from '../../hooks/useGuilds'
-import { GuildTable } from '../guild-table'
+import GuildTable from '../guild-table'
+
 
 export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
-  const {
-    isLoading,
-    status,
-    types,
-    addType,
-    handleLocalChange,
-    handleClassificationChange,
-    groupedData,
-  } = useGuilds()
+  const { playSound } = useAlertSound()
 
+  // Initialize client-side
   useEffect(() => {
-    setIsClient(true)
+    if (typeof window !== 'undefined') {
+      setIsClient(true)
+      console.debug('GuildContainer initialized on client-side')
+    }
   }, [])
 
-  if (!isClient || status === 'loading' || isLoading) {
+  const { types, addType, handleLocalChange, handleClassificationChange, groupedData } = useGuilds({
+    playSound,
+  })
+
+  if (!isClient) {
     return (
       <DashboardLayout>
         <Center h="100vh">
           <Spinner size="xl" />
+          <Text ml={4}>Initializing client...</Text>
         </Center>
       </DashboardLayout>
     )
@@ -38,8 +40,11 @@ export default function GuildContainer() {
   if (!types?.length || !groupedData?.length) {
     return (
       <DashboardLayout>
-        <Center h="100vh">
-          <Text>Nenhum dado de guilda disponível.</Text>
+        <Center h="100vh" flexDirection="column">
+          <Text mb={4}>Nenhum dado de guilda disponível.</Text>
+          <Text fontSize="sm" color="gray.500">
+            Aguardando dados do servidor...
+          </Text>
         </Center>
       </DashboardLayout>
     )

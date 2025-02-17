@@ -1,11 +1,23 @@
+export type CharacterStatus = {
+  Name: string
+  Kind: string
+  OnlineSince: string
+}
+
 export type AlertCondition = {
   id: string
   timeRange: number
   threshold: number
   enabled: boolean
   createdAt: string
-  sound: 'notification_sound.mp3' | 'notification_sound2.wav' | 'google_voice'
+  sound:
+    | 'notification_sound.mp3'
+    | 'notification_sound2.wav'
+    | 'google_voice_alert'
+    | 'google_voice_warning'
+    | 'google_voice_enemy'
   useVoice?: boolean
+  lastTriggered?: string
 }
 
 export type ListChange = {
@@ -19,11 +31,4 @@ export type AlertCheck = {
   totalChange: number
   threshold: number
   timeRange: number
-}
-
-export type MonitoredList = {
-  id: string
-  type: string
-  enabled: boolean
-  createdAt: string
 }

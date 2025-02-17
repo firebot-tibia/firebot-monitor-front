@@ -8,6 +8,7 @@ import { tableVocationIcons } from '../../../../../utils/table-vocation-icons'
 import type { GuildData } from '../../types/guild-stats.interface'
 import ExpStats from '../exp-stats'
 
+
 interface GuildTableProps {
   guildType: 'allyGain' | 'allyLoss' | 'enemyGain' | 'enemyLoss'
   guildData: GuildData

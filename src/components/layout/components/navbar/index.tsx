@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { VStack, IconButton, Button, Collapse } from '@chakra-ui/react'
+import { VStack, IconButton, Button, Collapse, Divider } from '@chakra-ui/react'
 import Link from 'next/link'
 import { FaBars, FaTools, FaDiscord, FaHome } from 'react-icons/fa'
 
@@ -10,6 +10,8 @@ import LoginButton from './login-button'
 import type { NavbarProps } from './types'
 import { routes } from '../../../../constants/routes'
 import { tools } from '../../../features/editor/constants/toolbar'
+
+
 
 const NavContent = ({
   isMobile,
@@ -39,6 +41,8 @@ const NavContent = ({
       />
 
       <LoginButton isMobile={isMobile} isExpanded={isExpanded} onOpenModal={onOpenModal} />
+
+      <Divider borderColor="whiteAlpha.300" />
 
       <Button
         as={Link}

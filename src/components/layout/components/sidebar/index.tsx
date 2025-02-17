@@ -12,11 +12,13 @@ import {
   Skeleton,
   VStack,
 } from '@chakra-ui/react'
+import { useSession } from 'next-auth/react'
 import { FaBars } from 'react-icons/fa'
 
 import LoginModal from '../../../features/auth/components/auth-modal'
 import type { ToolType } from '../../../features/editor/types/tools.types'
 import NavContent from '../navbar'
+
 
 const SidebarSkeleton = () => (
   <VStack spacing={4} p={4} width="240px">
@@ -33,11 +35,17 @@ const UnauthenticatedSidebar = () => {
   const [activeTool] = useState<ToolType | null>(null)
   const isMobile = useBreakpointValue({ base: true, md: false })
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const { status } = useSession()
+  const isAuthenticated = status === 'authenticated'
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000)
-    return () => clearTimeout(timer)
-  }, [])
+    if (!isAuthenticated) {
+      const timer = setTimeout(() => setIsLoading(false), 1000)
+      return () => clearTimeout(timer)
+    } else {
+      setIsLoading(false)
+    }
+  }, [isAuthenticated])
 
   const desktopSidebar = (
     <Box

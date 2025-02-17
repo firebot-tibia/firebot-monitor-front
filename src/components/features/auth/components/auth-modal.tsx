@@ -18,6 +18,7 @@ import {
   InputRightElement,
   VStack,
   IconButton,
+  Checkbox,
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { FaSignInAlt, FaEye, FaEyeSlash, FaDiscord } from 'react-icons/fa'
@@ -32,14 +33,18 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
   const { getLastLogin, saveLastLogin } = useLastLogin()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
 
   useEffect(() => {
-    const lastLogin = getLastLogin()
-    if (lastLogin) {
-      setEmail(lastLogin.email)
-      setPassword(lastLogin.password)
+    if (isOpen) {
+      const lastLogin = getLastLogin()
+      if (lastLogin) {
+        setEmail(lastLogin.email)
+        setPassword(lastLogin.password)
+        setRememberMe(true)
+      }
     }
-  }, [])
+  }, [isOpen]) // Remove dependencies that change on every render
 
   const bgColor = useColorModeValue('white', 'gray.900')
   const textColor = useColorModeValue('gray.800', 'white')
@@ -56,7 +61,11 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
     setIsLoading(true)
     try {
       await handleLogin()
-      saveLastLogin(email, password)
+      if (rememberMe) {
+        saveLastLogin(email, password)
+      } else {
+        clearLastLogin()
+      }
       onClose()
     } catch (error) {
       console.error('Login failed:', error)
@@ -65,8 +74,6 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
       setIsLoading(false)
     }
   }
-
-  const MotionCenter = motion(Center)
 
   return (
     <Modal
@@ -88,18 +95,20 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
         <ModalCloseButton color={textColor} size="lg" borderRadius="full" />
 
         <VStack spacing={6}>
-          <MotionCenter
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Image
-              src="/assets/images/og.png"
-              alt="Firebot Monitor"
-              boxSize={{ base: '120px', md: '160px' }}
-              animation={`2s infinite ease-in-out`}
-            />
-          </MotionCenter>
+          <Center>
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Image
+                src="/assets/images/og.png"
+                alt="Firebot Monitor"
+                boxSize={{ base: '120px', md: '160px' }}
+                animation={`2s infinite ease-in-out`}
+              />
+            </motion.div>
+          </Center>
 
           <form onSubmit={handleSubmit} style={{ width: '100%' }}>
             <Stack spacing={4} w="100%">
@@ -174,6 +183,16 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                 )}
               </FormControl>
 
+              <Checkbox
+                isChecked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+                colorScheme="red"
+                size="md"
+                color={textColor}
+              >
+                Lembrar credenciais
+              </Checkbox>
+
               <Button
                 type="submit"
                 leftIcon={<FaSignInAlt />}
@@ -181,7 +200,6 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                 color="white"
                 size="lg"
                 w="full"
-                mt={2}
                 _hover={{
                   bgGradient: 'linear(to-r, red.700, red.800)',
                   transform: 'translateY(-2px)',

@@ -17,8 +17,15 @@ export class SSEClient {
   private tokenManager: TokenManager
   private connectionStatus: ConnectionStatus = 'disconnected'
   private lastMessageTime: number = Date.now()
+  private messageQueue: any[] = []
+  private processingQueue: boolean = false
+  private reconnectTimeout: number | null = null
   private readonly HEARTBEAT_INTERVAL = 30000 // 30 seconds
   private readonly HEARTBEAT_TIMEOUT = 45000 // 45 seconds
+  private readonly MESSAGE_BATCH_SIZE = 10
+  private readonly MESSAGE_PROCESS_INTERVAL = 1000 // 1 second
+  private readonly RECONNECT_DELAY = 5000 // 5 seconds
+  private readonly MAX_QUEUE_SIZE = 1000
 
   constructor(config: SSEConfig) {
     this.config = config
@@ -119,18 +126,53 @@ export class SSEClient {
       const data = JSON.parse(event.data)
 
       if (data.type === 'heartbeat') {
-        this.handleHeartbeat(data)
-      } else if (data.type === 'error') {
+        this.handleHeartbeat()
+        return
+      }
+
+      if (data.type === 'error') {
         this.handleErrorMessage(data)
+        return
+      }
+
+      // Add message to queue instead of processing immediately
+      if (this.messageQueue.length < this.MAX_QUEUE_SIZE) {
+        this.messageQueue.push(data)
+        this.processMessageQueue()
       } else {
-        this.config.onMessage(data)
+        this.logger.warn('Message queue full, dropping message')
       }
     } catch (error) {
       this.logger.error('Error parsing SSE message', error)
     }
   }
 
-  private handleHeartbeat(data: any): void {
+  private async processMessageQueue(): Promise<void> {
+    if (this.processingQueue || this.messageQueue.length === 0) return
+
+    this.processingQueue = true
+    try {
+      // Process messages in batches
+      while (this.messageQueue.length > 0) {
+        const batch = this.messageQueue.splice(0, this.MESSAGE_BATCH_SIZE)
+        const latestMessage = batch[batch.length - 1]
+
+        // Only process the latest message from the batch to prevent UI overload
+        if (latestMessage) {
+          this.config.onMessage(latestMessage)
+        }
+
+        // Add delay between batches to prevent overwhelming
+        await new Promise(resolve => setTimeout(resolve, this.MESSAGE_PROCESS_INTERVAL))
+      }
+    } catch (error) {
+      this.logger.error('Error processing message queue', error)
+    } finally {
+      this.processingQueue = false
+    }
+  }
+
+  private handleHeartbeat(): void {
     this.lastMessageTime = Date.now()
     this.logger.debug('Heartbeat received', { timestamp: this.lastMessageTime })
   }
@@ -146,11 +188,23 @@ export class SSEClient {
     this.logger.warn('SSE connection closed')
     this.stopHeartbeat()
 
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnect()
-    } else {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      this.logger.error('Max reconnection attempts reached')
       this.config.onMaxRetriesReached?.()
+      return
     }
+
+    // Exponential backoff for reconnection attempts
+    const delay = Math.min(this.RECONNECT_DELAY * Math.pow(2, this.reconnectAttempts), 30000)
+    this.logger.info(`Scheduling reconnection attempt in ${delay}ms`)
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout)
+    }
+
+    this.reconnectTimeout = window.setTimeout(() => {
+      this.reconnect()
+    }, delay)
   }
 
   private async reconnect(): Promise<void> {

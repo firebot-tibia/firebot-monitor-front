@@ -1,10 +1,11 @@
-import type { FC, ReactNode } from 'react'
-
 import '../styles/globals.css'
+import type { ReactNode, FC } from 'react'
+
 import Script from 'next/script'
 
 import { google } from '../constants/google'
 import { AppProviders } from '../contexts/useProviders'
+
 
 interface RootLayoutProps {
   children: ReactNode

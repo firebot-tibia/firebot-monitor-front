@@ -313,7 +313,7 @@ const PlayerDashboard: React.FC<PlayerDashboardProps> = ({
     onDateChange: (date: string) => void
   }> = ({ data, selectedDate, onDateChange }) => {
     const [hoveredBar, setHoveredBar] = useState<string | null>(null)
-    const [animationComplete, setAnimationComplete] = useState(false)
+    const [animationComplete] = useState(false)
     const [isAnimated, setIsAnimated] = useState(false)
 
     const hourlyData = useMemo(() => {

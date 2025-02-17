@@ -9,7 +9,7 @@ import {
   IconButton,
   Tooltip,
 } from '@chakra-ui/react'
-import { ListChecks, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { FaMap } from 'react-icons/fa'
 
 import Maps from '..'

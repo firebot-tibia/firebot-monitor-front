@@ -1,4 +1,4 @@
-import type { UpsertPlayerInput } from '../../components/features/guilds-monitoring/types/character-upsert'
+import type { UpsertPlayerInput } from '../../components/features/guilds-monitoring/hooks/useCharacterTypes/types'
 import type { ExperienceListQuery } from '../../components/features/statistics/types/guild-stats.interface'
 import api from '../../libs/api/firebot-api'
 

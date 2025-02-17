@@ -45,7 +45,7 @@ const modeConfigs: Record<Mode, ModeConfig> = {
 }
 
 const ModeSelect = () => {
-  const [mounted, setMounted] = useState(false)
+  const [, setMounted] = useState(false)
   const [monitorMode, setMonitorMode] = useState<Mode>('enemy')
   const toast = useToast()
 

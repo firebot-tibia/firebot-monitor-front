@@ -6,6 +6,7 @@ import type { GuildMember } from '@/types/guild-member'
 
 import { tableVocationIcons } from '../../../../../utils/table-vocation-icons'
 
+
 const CharacterTooltip: React.FC<GuildMember> = ({ name, vocation, level, experience, online }) => {
   return (
     <Box

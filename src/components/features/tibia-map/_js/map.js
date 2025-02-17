@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-this-alias */
 ;(function () {
   const URL_PREFIX = 'https://tibiamaps.github.io/tibia-map-data/'
@@ -164,7 +165,7 @@
     parts = hash.split(':')
     if (parts[0]) {
       const tempPos = parts[0].split(',')
-      if (tempPos.length == 3) {
+      if (tempPos.length === 3) {
         position.x = parseInt(tempPos[0], 10)
         position.y = parseInt(tempPos[1], 10)
         position.floor = parseInt(tempPos[2], 10)

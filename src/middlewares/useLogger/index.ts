@@ -1,5 +1,6 @@
-import type { ChalkInstance } from 'chalk'
+/* eslint-disable no-console */
 import chalk from 'chalk'
+import type { ChalkInstance } from 'chalk'
 import type { NextRequest, NextResponse } from 'next/server'
 
 import type { LogEntry, LogError, LogLevel } from './types'

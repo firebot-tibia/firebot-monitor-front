@@ -1,17 +1,8 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
 
-import {
-  Box,
-  SimpleGrid,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  useDisclosure,
-  VStack,
-} from '@chakra-ui/react'
+import React, { useCallback, useEffect } from 'react'
+
+import { Box, SimpleGrid, Tab, TabList, TabPanel, TabPanels, Tabs, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 
 import TablePagination from '@/components/common/pagination'
@@ -42,8 +33,6 @@ const GuildStatsContainer: React.FC = () => {
     fetchGuildStats,
   } = useGuildStatsStore()
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null)
   const router = useRouter()
 
   const bgColor = 'black.800'

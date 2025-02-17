@@ -1,5 +1,6 @@
 import { Box, HStack, Table, Tbody, Text } from '@chakra-ui/react'
 
+
 import { TableHeader } from './table-header'
 import { CharacterRow } from './table-row'
 import type { GuildTableProps } from './types'
@@ -14,7 +15,6 @@ export const GuildTable = ({
   onClassificationChange,
   showExivaInput,
   addType,
-  isLoading,
 }: GuildTableProps) => {
   const { sortConfig, handleSort, filteredData } = useGuildTable(data)
   const types = useCharacterTypesView(data)

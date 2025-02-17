@@ -13,12 +13,18 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { status } = useSession()
   const isAuthenticated = status === 'authenticated'
+  const isLoading = status === 'loading'
 
   return (
     <Flex direction="column" minH="100vh">
       <Flex flex={1}>
-        {!isAuthenticated && <UnauthenticatedSidebar />}
-        <Box flex={1} display="flex" flexDirection="column" ml={isAuthenticated ? 0 : '60px'}>
+        {!isAuthenticated && !isLoading && <UnauthenticatedSidebar />}
+        <Box
+          flex={1}
+          display="flex"
+          flexDirection="column"
+          ml={!isLoading && !isAuthenticated ? '60px' : 0}
+        >
           {/* Header */}
           {isAuthenticated && <Header />}
 
@@ -29,7 +35,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </Box>
       </Flex>
 
-      {!isAuthenticated && <Footer />}
+      {!isAuthenticated && !isLoading && <Footer />}
     </Flex>
   )
 }
