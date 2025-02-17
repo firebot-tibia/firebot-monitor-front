@@ -9,7 +9,6 @@ import { soundOptions } from '../constants/sounds'
 import { useAlertSound } from '../hooks/useAlertSound'
 import { useAlertSettingsStore } from '../stores/alert-settings-store'
 
-
 const AlertSettings = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
 

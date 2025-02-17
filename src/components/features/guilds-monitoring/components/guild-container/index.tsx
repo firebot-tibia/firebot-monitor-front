@@ -9,7 +9,6 @@ import DashboardLayout from '@/components/layout'
 import { useGuilds } from '../../hooks/useGuilds'
 import GuildTable from '../guild-table'
 
-
 export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
   const { playSound } = useAlertSound()

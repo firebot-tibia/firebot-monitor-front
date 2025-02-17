@@ -19,7 +19,6 @@ import LoginModal from '../../../features/auth/components/auth-modal'
 import type { ToolType } from '../../../features/editor/types/tools.types'
 import NavContent from '../navbar'
 
-
 const SidebarSkeleton = () => (
   <VStack spacing={4} p={4} width="240px">
     <Skeleton height="40px" width="100%" />

@@ -11,8 +11,6 @@ import type { NavbarProps } from './types'
 import { routes } from '../../../../constants/routes'
 import { tools } from '../../../features/editor/constants/toolbar'
 
-
-
 const NavContent = ({
   isMobile,
   isExpanded,

@@ -3,7 +3,6 @@ import { Box, Flex } from '@chakra-ui/react'
 import { BotDescriptions } from './components'
 import DashboardLayout from '../../layout'
 
-
 const Dashboard = () => {
   return (
     <DashboardLayout>

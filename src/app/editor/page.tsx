@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 
 import Editor from '../../components/features/editor'
 
-
 export const metadata: Metadata = {
   title: 'Firebot Monitor - Editor de descrição',
   description: 'Editar descrição para inserir no teamspeak',

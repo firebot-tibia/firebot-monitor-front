@@ -13,7 +13,6 @@ import type { ExperienceDataItem } from '../../types/guild-stats-experience-hist
 import type { OnlineTimeDay, PlayerDeaths } from '../../types/guild-stats-player.interface'
 import PlayerDashboard from '../player-dashboard'
 
-
 const CharacterStatsPage: React.FC = () => {
   const params = useParams()
   const router = useRouter()

@@ -6,7 +6,6 @@ import Script from 'next/script'
 import { google } from '../constants/google'
 import { AppProviders } from '../contexts/useProviders'
 
-
 interface RootLayoutProps {
   children: ReactNode
 }

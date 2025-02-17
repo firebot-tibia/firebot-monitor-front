@@ -20,10 +20,10 @@ import {
 import { Bell, Clock, Plus, Trash2, Volume2 } from 'lucide-react'
 
 import { useAlertSettingsStore } from '../../stores/alert-settings-store'
+import { useSoundStore } from '../../stores/sounds-permission-store'
 import type { AlertCondition } from '../../types/alert.types'
 import InputField from '../input-settings'
 import { SoundPermission } from '../sound-permission'
-
 
 interface SoundOption {
   value: AlertCondition['sound']
@@ -52,7 +52,7 @@ export const AlertSettingsPanel = ({
   onTestSound,
 }: AlertSettingsPanelProps) => {
   const { updateAlert } = useAlertSettingsStore()
-  const [hasPermission, setHasPermission] = useState(false)
+  const { hasPermission } = useSoundStore()
 
   const handleUpdateAlert = useCallback(
     (alertId: string, field: keyof AlertCondition, value: any) => {
@@ -83,7 +83,7 @@ export const AlertSettingsPanel = ({
             {!hasPermission && (
               <Card bg="rgba(255, 255, 255, 0.03)" borderColor="whiteAlpha.100" borderWidth={1}>
                 <CardBody>
-                  <SoundPermission onPermissionGranted={() => setHasPermission(true)} />
+                  <SoundPermission onPermissionGranted={() => {}} />
                 </CardBody>
               </Card>
             )}

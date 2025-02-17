@@ -10,7 +10,6 @@ import { useAlertSettingsStore } from '../../stores/__mocks__/alert-settings-sto
 import type { AlertCondition } from '../../types/alert.types'
 import { useAlertMonitoring } from '../useAlertMonitoring'
 
-
 jest.mock('@/middlewares/useLogger', () => ({
   Logger: {
     getInstance: () => ({

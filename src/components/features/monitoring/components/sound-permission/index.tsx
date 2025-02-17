@@ -19,12 +19,64 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
   const logger = Logger.getInstance()
 
   useEffect(() => {
-    const persistedPermission = localStorage.getItem('sound-permission') === 'true'
-    if (persistedPermission) {
-      setHasPermission(true)
-      onPermissionGranted()
-      setShouldShow(false)
+    const checkPermission = async () => {
+      try {
+        // Always try to initialize audio context first
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+        await audioContext.resume()
+
+        const persistedPermission = localStorage.getItem('sound-permission') === 'true'
+        if (persistedPermission) {
+          // Verify if we can actually play sounds
+          const testAudio = new Audio('/sounds/notification_sound.mp3')
+          testAudio.volume = 0.01 // Very quiet test
+
+          await new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => reject(new Error('Audio load timeout')), 5000)
+            testAudio.addEventListener(
+              'canplaythrough',
+              () => {
+                clearTimeout(timeoutId)
+                resolve(true)
+              },
+              { once: true },
+            )
+            testAudio.addEventListener(
+              'error',
+              e => {
+                clearTimeout(timeoutId)
+                reject(e)
+              },
+              { once: true },
+            )
+          })
+
+          // Try a quick play test
+          await testAudio.play()
+          await new Promise(resolve => setTimeout(resolve, 50))
+          testAudio.pause()
+          testAudio.remove()
+
+          setHasPermission(true)
+          onPermissionGranted()
+          setShouldShow(false)
+          console.log('Sound permission verified successfully')
+        }
+      } catch (error) {
+        console.error('Failed to verify sound permission:', error)
+        localStorage.removeItem('sound-permission')
+        setHasPermission(false)
+      }
     }
+
+    // Run the check immediately
+    checkPermission()
+
+    // Also run when the window gains focus
+    const handleFocus = () => checkPermission()
+    window.addEventListener('focus', handleFocus)
+
+    return () => window.removeEventListener('focus', handleFocus)
   }, [onPermissionGranted, setHasPermission])
 
   const handlePermission = useCallback(async () => {
@@ -32,13 +84,40 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
     setIsLoading(true)
 
     try {
-      // First try with a silent audio context
+      // Initialize audio context first
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const oscillator = audioContext.createOscillator()
-      oscillator.connect(audioContext.destination)
-      oscillator.frequency.setValueAtTime(0, audioContext.currentTime) // Silent
-      oscillator.start()
-      oscillator.stop(audioContext.currentTime + 0.001) // Extremely short duration
+      await audioContext.resume()
+
+      // Test audio playback with a real sound file
+      const testAudio = new Audio('/sounds/notification_sound.mp3')
+      testAudio.volume = 0.1 // Very low volume for testing
+
+      // Wait for the audio to load with timeout
+      await new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => reject(new Error('Audio load timeout')), 5000)
+        testAudio.addEventListener(
+          'canplaythrough',
+          () => {
+            clearTimeout(timeoutId)
+            resolve(true)
+          },
+          { once: true },
+        )
+        testAudio.addEventListener(
+          'error',
+          e => {
+            clearTimeout(timeoutId)
+            reject(e)
+          },
+          { once: true },
+        )
+      })
+
+      // Try to play the test sound
+      await testAudio.play()
+      await new Promise(resolve => setTimeout(resolve, 50))
+      testAudio.pause()
+      testAudio.remove()
 
       setHasPermission(true)
       localStorage.setItem('sound-permission', 'true')

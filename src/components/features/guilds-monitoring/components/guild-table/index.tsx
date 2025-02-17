@@ -1,6 +1,5 @@
 import { Box, HStack, Table, Tbody, Text } from '@chakra-ui/react'
 
-
 import { TableHeader } from './table-header'
 import { CharacterRow } from './table-row'
 import type { GuildTableProps } from './types'

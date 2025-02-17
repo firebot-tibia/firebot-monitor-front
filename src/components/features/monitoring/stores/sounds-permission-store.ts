@@ -18,9 +18,15 @@ export const useSoundStore = create<SoundState>((set, get) => ({
   },
   playSound: async (sound: AlertCondition['sound']) => {
     const { hasPermission } = get()
+    console.log('Attempting to play sound:', sound, 'Permission:', hasPermission)
     if (!hasPermission || typeof window === 'undefined') {
       console.debug('Sound permission not granted or not in browser, skipping sound')
       return
+    }
+
+    // Set user interaction flag if not already set
+    if (!document.documentElement.hasAttribute('data-user-interacted')) {
+      document.documentElement.setAttribute('data-user-interacted', 'true')
     }
 
     try {
@@ -39,24 +45,66 @@ export const useSoundStore = create<SoundState>((set, get) => ({
       }
 
       const audioPath = `/sounds/${sound}`
+      console.log('Attempting to play sound from:', audioPath)
+
+      // Create a new AudioContext for this playback
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      await audioContext.resume()
+
+      // Create audio element
       const audio = new Audio(audioPath)
       audio.volume = 0.7
       audio.preload = 'auto'
 
+      // Create audio source node
+      const source = audioContext.createMediaElementSource(audio)
+      source.connect(audioContext.destination)
+
       // Create a promise that resolves when the audio is loaded
       const loadPromise = new Promise((resolve, reject) => {
-        audio.addEventListener('canplaythrough', resolve, { once: true })
-        audio.addEventListener('error', reject, { once: true })
+        const timeoutId = setTimeout(() => reject(new Error('Audio load timeout')), 5000)
+        audio.addEventListener(
+          'canplaythrough',
+          () => {
+            clearTimeout(timeoutId)
+            console.log('Audio loaded successfully:', audioPath)
+            resolve(true)
+          },
+          { once: true },
+        )
+        audio.addEventListener(
+          'error',
+          e => {
+            clearTimeout(timeoutId)
+            console.error('Error loading audio:', e)
+            reject(new Error(`Failed to load audio: ${audioPath}`))
+          },
+          { once: true },
+        )
       })
 
-      // Load the audio
-      await loadPromise
-
-      // Try to play only if the document has been interacted with
-      if (document.documentElement.hasAttribute('data-user-interacted')) {
+      // Load and play the audio
+      try {
+        await loadPromise
         await audio.play()
-      } else {
-        console.debug('Waiting for user interaction before playing sound')
+        console.log('Audio played successfully:', audioPath)
+
+        // Clean up after playback
+        audio.addEventListener(
+          'ended',
+          () => {
+            source.disconnect()
+            audioContext.close()
+            audio.remove()
+          },
+          { once: true },
+        )
+      } catch (error) {
+        console.error('Error playing audio:', error)
+        source.disconnect()
+        audioContext.close()
+        audio.remove()
+        throw error
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'NotAllowedError') {

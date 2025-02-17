@@ -35,7 +35,7 @@ export const useGuildSSE = ({ onGuildData, onGuildChanges }: UseGuildSSEProps = 
   }, [value])
 
   const processMessages = useCallback(() => {
-    if (!mountedRef.current || processingRef.current) return
+    if (!mountedRef.current || processingRef.current || status !== 'connected') return
     processingRef.current = true
 
     try {
@@ -94,9 +94,22 @@ export const useGuildSSE = ({ onGuildData, onGuildChanges }: UseGuildSSEProps = 
 
   useEffect(() => {
     mountedRef.current = true
-    if (session?.access_token && selectedWorld && sseEndpoint) {
-      connect(sseEndpoint, session.access_token, selectedWorld)
+    let connectionTimeout: NodeJS.Timeout
+
+    const connectWithRetry = async () => {
+      if (!mountedRef.current) return
+      if (session?.access_token && selectedWorld && sseEndpoint) {
+        try {
+          await connect(sseEndpoint, session.access_token, selectedWorld)
+        } catch (error) {
+          console.error('Failed to connect to SSE:', error)
+          // Retry connection after 5 seconds
+          connectionTimeout = setTimeout(connectWithRetry, 5000)
+        }
+      }
     }
+
+    connectWithRetry()
 
     return () => {
       mountedRef.current = false
@@ -104,26 +117,34 @@ export const useGuildSSE = ({ onGuildData, onGuildChanges }: UseGuildSSEProps = 
       if (status === 'connected') {
         disconnect()
       }
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout)
+      }
     }
-  }, [connect, disconnect, selectedWorld, session?.access_token, sseEndpoint, status])
+  }, [selectedWorld, session?.access_token, sseEndpoint])
 
   useEffect(() => {
     if (!mountedRef.current) return
 
+    let processingInterval: NodeJS.Timeout
+
     const processIfConnected = () => {
-      if (status === 'connected') {
+      if (mountedRef.current && status === 'connected' && !processingRef.current) {
         processMessages()
       }
     }
 
-    // Process immediately when connected
-    processIfConnected()
-
-    // Then set up interval for future processing
-    const interval = setInterval(processIfConnected, 1000)
+    if (status === 'connected') {
+      // Process immediately when connected
+      processIfConnected()
+      // Then set up interval for future processing
+      processingInterval = setInterval(processIfConnected, 5000)
+    }
 
     return () => {
-      clearInterval(interval)
+      if (processingInterval) {
+        clearInterval(processingInterval)
+      }
     }
   }, [status, processMessages])
 

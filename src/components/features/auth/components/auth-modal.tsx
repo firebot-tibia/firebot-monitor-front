@@ -30,7 +30,7 @@ import { useLogin } from '../hooks/useLogin'
 
 const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { email, setEmail, password, setPassword, errors, handleLogin } = useLogin()
-  const { getLastLogin, saveLastLogin } = useLastLogin()
+  const { getLastLogin, saveLastLogin, clearLastLogin } = useLastLogin()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
@@ -63,13 +63,12 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
       await handleLogin()
       if (rememberMe) {
         saveLastLogin(email, password)
-      } else {
-        clearLastLogin()
       }
+      clearLastLogin()
+
       onClose()
     } catch (error) {
       console.error('Login failed:', error)
-      // Error will be handled by useLogin hook and shown in the form
     } finally {
       setIsLoading(false)
     }

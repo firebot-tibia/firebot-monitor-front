@@ -35,7 +35,6 @@ import type {
 import { AddReservationForm } from '../add-reservations'
 import { DeleteReservationModal } from '../delete-reservations-modal'
 
-
 interface ReservationTableProps {
   reservations: Reservation[]
   timeSlots: string[]
