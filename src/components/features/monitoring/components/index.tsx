@@ -43,7 +43,7 @@ const AlertSettings = () => {
       <Tooltip label="Abrir configurações de monitoramento" placement="right">
         <HStack onClick={onOpen} cursor="pointer" spacing={3}>
           <Bell size={18} color="blue.400" />
-          <Badge colorScheme="blue" variant="solid" borderRadius="md">
+          <Badge colorScheme="red" variant="solid" borderRadius="md">
             {alerts.filter(a => a.enabled).length} ALERTA DE ATAQUE
           </Badge>
         </HStack>

@@ -27,7 +27,7 @@ export default function GuildContainer() {
     handleClassificationChange,
     groupedData,
     isLoading: guildsLoading,
-    sseStatus
+    sseStatus,
   } = useGuilds({
     playSound: debouncedPlaySound, // Use debounced version for alerts
   })
@@ -37,7 +37,6 @@ export default function GuildContainer() {
       setKey(k => k + 1)
     }
   }, [sseStatus])
-
 
   if (!isClient) {
     return (
@@ -59,10 +58,10 @@ export default function GuildContainer() {
             {guildsLoading
               ? 'Carregando dados...'
               : sseStatus === 'connecting'
-              ? 'Conectando ao servidor...'
-              : sseStatus === 'disconnected'
-              ? 'Desconectado do servidor'
-              : 'Aguardando dados do servidor...'}
+                ? 'Conectando ao servidor...'
+                : sseStatus === 'disconnected'
+                  ? 'Desconectado do servidor'
+                  : 'Aguardando dados do servidor...'}
           </Text>
         </Center>
       </DashboardLayout>

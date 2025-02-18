@@ -1,115 +1,104 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
 
 interface UseGuildDataReturn {
   guildData: GuildMemberResponse[]
-  setGuildData: React.Dispatch<React.SetStateAction<GuildMemberResponse[]>>
+  setGuildData: (
+    value: GuildMemberResponse[] | ((prev: GuildMemberResponse[]) => GuildMemberResponse[]),
+  ) => void
   updateMemberData: (member: GuildMemberResponse, changes: Partial<GuildMemberResponse>) => void
-  processNewGuildData: (
-    data: GuildMemberResponse[],
-    currentGuildData: GuildMemberResponse[],
-  ) => {
-    newGuildData: GuildMemberResponse[]
-    recentlyLoggedIn: GuildMemberResponse[]
-  }
+  processNewGuildData: (data: GuildMemberResponse[]) => void
 }
 
 export const useGuildData = (): UseGuildDataReturn => {
+  // Use ref for current data to avoid re-renders
+  const guildDataRef = useRef<GuildMemberResponse[]>([])
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>(() => {
     console.debug('Initializing guild data state')
     return []
   })
 
-  // Force re-render when data changes
-  const forceUpdate = useCallback(
-    (data: GuildMemberResponse[]) => {
-      console.log('Forcing guild data update:', {
-        newDataCount: data.length,
-        currentDataCount: guildData.length,
-      })
-      setGuildData(data)
-    },
-    [guildData.length],
-  )
+  // Use Map for O(1) lookups
+  const memberMapRef = useRef(new Map<string, GuildMemberResponse>())
 
-  // Debug state changes
+  // Batch updates using RAF
+  const batchUpdateRef = useRef<number | null>(null)
+
+  // Update member map when guild data changes
   useEffect(() => {
-    console.log('Guild data updated:', {
-      count: guildData.length,
-      onlineCount: guildData.filter(m => m.OnlineStatus).length,
-      timestamp: new Date().toISOString(),
-    })
+    memberMapRef.current = new Map(guildData.map(member => [member.Name, member]))
+    guildDataRef.current = guildData
   }, [guildData])
 
   const updateMemberData = useCallback(
     (member: GuildMemberResponse, changes: Partial<GuildMemberResponse>) => {
-      console.debug('Updating member data:', { member: member.Name, changes })
-      setGuildData(prevData => {
-        const memberIndex = prevData.findIndex(m => m.Name === member.Name)
-        if (memberIndex === -1) {
-          // Member not found, add them
-          return [...prevData, { ...member, ...changes }]
-        }
-        // Update existing member
-        const newData = [...prevData]
-        newData[memberIndex] = { ...newData[memberIndex], ...changes }
-        return newData
+      const currentMap = memberMapRef.current
+      const memberName = member.Name
+      const existingMember = currentMap.get(memberName)
+
+      if (!existingMember) {
+        currentMap.set(memberName, { ...member, ...changes })
+      } else {
+        currentMap.set(memberName, { ...existingMember, ...changes })
+      }
+
+      // Schedule batch update
+      if (batchUpdateRef.current) {
+        cancelAnimationFrame(batchUpdateRef.current)
+      }
+
+      batchUpdateRef.current = requestAnimationFrame(() => {
+        setGuildData(Array.from(currentMap.values()))
       })
     },
     [],
   )
 
-  const processNewGuildData = useCallback(
-    (data: GuildMemberResponse[], currentGuildData: GuildMemberResponse[]) => {
-      console.debug('Processing new guild data:', {
+  const processNewGuildData = useCallback((data: GuildMemberResponse[]) => {
+    if (!Array.isArray(data) || data.length === 0) return
+
+    // Fast path - check if data is identical
+    if (data === guildDataRef.current) return
+
+    // Use Map for faster processing
+    const newDataMap = new Map(data.map(member => [member.Name, member]))
+
+    // Quick length and content check
+    if (newDataMap.size === memberMapRef.current.size) {
+      let hasChanges = false
+      // Use Array.from for ES5 compatibility
+      const entries = Array.from(newDataMap.keys())
+      for (let i = 0; i < entries.length; i++) {
+        const name = entries[i]
+        const member = newDataMap.get(name)
+        const existing = memberMapRef.current.get(name)
+        if (!existing || JSON.stringify(existing) !== JSON.stringify(member)) {
+          hasChanges = true
+          break
+        }
+      }
+      if (!hasChanges) return
+    }
+
+    // Schedule batch update
+    if (batchUpdateRef.current) {
+      cancelAnimationFrame(batchUpdateRef.current)
+    }
+
+    batchUpdateRef.current = requestAnimationFrame(() => {
+      console.log('Processing new guild data:', {
         newDataCount: data.length,
-        currentDataCount: currentGuildData.length,
+        currentDataCount: guildDataRef.current.length,
+        hasChanges: true,
       })
-
-      const currentTime = new Date()
-      const newGuildData = data.map((member: GuildMemberResponse) => {
-        const processed = {
-          ...member,
-          OnlineSince: member.OnlineStatus ? member.OnlineSince || currentTime.toISOString() : null,
-          TimeOnline: member.OnlineStatus ? '00:00:00' : null,
-        }
-        return processed
-      })
-
-      const processedNames = new Set(currentGuildData.map(member => member.Name))
-      const recentlyLoggedIn = newGuildData.filter((member: GuildMemberResponse) => {
-        if (!member.OnlineStatus || !member.OnlineSince || processedNames.has(member.Name))
-          return false
-        const onlineSince = new Date(member.OnlineSince)
-        const onlineTimeSeconds = (currentTime.getTime() - onlineSince.getTime()) / 1000
-        const isRecent = onlineTimeSeconds <= 180 // 3 minutes in seconds
-
-        if (isRecent) {
-          console.debug('Found recently logged in member:', {
-            name: member.Name,
-            onlineSince: member.OnlineSince,
-            timeOnline: onlineTimeSeconds,
-          })
-        }
-
-        return isRecent
-      })
-
-      console.debug('Processed guild data:', {
-        totalMembers: newGuildData.length,
-        onlineMembers: newGuildData.filter(m => m.OnlineStatus).length,
-        recentlyLoggedIn: recentlyLoggedIn.length,
-      })
-
-      return { newGuildData, recentlyLoggedIn }
-    },
-    [],
-  )
+      setGuildData(data)
+    })
+  }, [])
 
   return {
     guildData,
-    setGuildData: forceUpdate,
+    setGuildData,
     updateMemberData,
     processNewGuildData,
   }

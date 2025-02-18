@@ -22,12 +22,6 @@ interface UseGuildsProps {
   playSound: (sound: AlertCondition['sound']) => void
 }
 
-interface GroupedData {
-  type: string
-  data: GuildMemberResponse[]
-  onlineCount: number
-}
-
 export const useGuilds = ({ playSound }: UseGuildsProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const { data: session, status } = useSession()
@@ -42,18 +36,34 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
 
   useGuildTimeUpdater({ setGuildData })
 
-  const handleGuildDataProcessed = useCallback(
-    (newData: GuildMemberResponse[]) => {
-      if (!Array.isArray(newData)) {
-        return
-      }
-      console.debug('Processing guild data:', {
-        count: newData.length,
-        onlineCount: newData.filter(m => m.OnlineStatus).length,
+  const processNewGuildData = useCallback(
+    (data: GuildMemberResponse[]) => {
+      if (!Array.isArray(data)) return
+
+      // Use requestAnimationFrame to batch updates
+      requestAnimationFrame(() => {
+        console.debug('Processing guild data:', {
+          count: data.length,
+          onlineCount: data.filter(m => m.OnlineStatus).length,
+        })
+        setGuildData(prevData => {
+          // Only update if data actually changed
+          if (JSON.stringify(prevData) === JSON.stringify(data)) {
+            return prevData
+          }
+          return data
+        })
       })
-      setGuildData(newData)
     },
     [setGuildData],
+  )
+
+  const handleGuildDataProcessed = useCallback(
+    (data: GuildMemberResponse[]) => {
+      if (!Array.isArray(data)) return
+      processNewGuildData(data)
+    },
+    [processNewGuildData],
   )
 
   const handleGuildMemberAlert = useCallback(
@@ -69,9 +79,30 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   })
 
   const handleGuildData = useCallback(
-    (data: GuildMemberResponse[]) => {
-      if (!Array.isArray(data)) {
-        return
+    (rawData: unknown[]) => {
+      if (!Array.isArray(rawData)) return
+
+      // Type guard to ensure data matches GuildMemberResponse
+      const isGuildMember = (item: unknown): item is GuildMemberResponse => {
+        if (!item || typeof item !== 'object') return false
+        const member = item as Partial<GuildMemberResponse>
+        return (
+          typeof member.Name === 'string' &&
+          typeof member.Vocation === 'string' &&
+          typeof member.Level === 'number' &&
+          typeof member.OnlineStatus === 'boolean' &&
+          typeof member.Kind === 'string'
+        )
+      }
+
+      // Filter and type cast the data
+      const data = rawData.filter(isGuildMember)
+
+      if (data.length !== rawData.length) {
+        console.warn('Some guild members had invalid data format', {
+          total: rawData.length,
+          valid: data.length,
+        })
       }
 
       console.log('Received new guild data:', {
@@ -101,15 +132,23 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
 
   const handleGuildChanges = useCallback(
     (changes: Record<string, any>) => {
-      const { updatedData, loggedInMembers } = processGuildChanges(changes, guildData)
-      handleGuildDataProcessed(updatedData)
+      // Debounce changes processing
+      requestAnimationFrame(() => {
+        const { updatedData, loggedInMembers } = processGuildChanges(changes, guildData)
 
-      if (loggedInMembers.length > 0) {
-        const { reachedThreshold, alert } = checkAndTriggerAlerts(loggedInMembers)
-        if (reachedThreshold && alert) {
-          handleGuildMemberAlert(loggedInMembers, alert)
+        // Only update if we have changes
+        if (updatedData.length > 0) {
+          handleGuildDataProcessed(updatedData)
         }
-      }
+
+        // Handle alerts for logged in members
+        if (loggedInMembers.length > 0) {
+          const { reachedThreshold, alert } = checkAndTriggerAlerts(loggedInMembers)
+          if (reachedThreshold && alert) {
+            handleGuildMemberAlert(loggedInMembers, alert)
+          }
+        }
+      })
     },
     [
       guildData,
@@ -160,41 +199,43 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   )
 
   const groupedData = useMemo(() => {
+    if (!types?.length || !guildData?.length) return []
+
     console.log('Calculating grouped data:', {
-      typesLength: types?.length,
-      guildDataLength: guildData?.length,
+      typesLength: types.length,
+      guildDataLength: guildData.length,
     })
 
-    const grouped: GroupedData[] = []
-    if (!guildData?.length) return grouped
-
-    // Create a default group for unclassified members
-    const defaultType = 'Unclassified'
+    // Use Map for O(1) lookups
     const groupsByType = new Map<string, GuildMemberResponse[]>()
+    const defaultType = 'main'
 
-    // Initialize groups for all types
-    types?.forEach(type => {
+    // Pre-initialize all type arrays
+    types.forEach(type => {
       groupsByType.set(type, [])
     })
-    groupsByType.set(defaultType, [])
 
-    // Distribute members to groups
-    guildData.forEach(member => {
+    // Single pass member distribution with pre-allocated arrays
+    const membersByType = guildData.reduce((acc, member) => {
       const type = member.Kind || defaultType
-      const group = groupsByType.get(type) || groupsByType.get(defaultType)!
-      group.push(member)
-    })
-
-    // Create final grouped data
-    groupsByType.forEach((members, type) => {
-      if (members.length > 0) {
-        grouped.push({
-          type,
-          data: members,
-          onlineCount: members.filter(member => member.OnlineStatus).length,
-        })
+      const group = acc.get(type) || acc.get(defaultType)
+      if (group) {
+        group.push(member)
+      } else {
+        acc.set(type, [member])
       }
-    })
+      return acc
+    }, groupsByType)
+
+    // Create final grouped data with a single pass
+    const grouped = Array.from(membersByType.entries())
+      .filter(([_, members]) => members.length > 0)
+      .map(([type, members]) => ({
+        type,
+        data: members,
+        onlineCount: members.reduce((count, member) => count + (member.OnlineStatus ? 1 : 0), 0),
+      }))
+      .sort((a, b) => b.onlineCount - a.onlineCount) // Sort by online count
 
     console.log('Grouped data result:', {
       totalGroups: grouped.length,

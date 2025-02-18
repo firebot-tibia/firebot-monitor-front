@@ -23,7 +23,7 @@ export const GuildTable = ({
     dataLength: data?.length,
     filteredLength: filteredData?.length,
     type,
-    onlineCount
+    onlineCount,
   })
 
   return (
