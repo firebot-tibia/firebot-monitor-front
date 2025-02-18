@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
 
@@ -21,11 +21,39 @@ export const useGuildData = (): UseGuildDataReturn => {
     return []
   })
 
+  // Force re-render when data changes
+  const forceUpdate = useCallback(
+    (data: GuildMemberResponse[]) => {
+      console.log('Forcing guild data update:', {
+        newDataCount: data.length,
+        currentDataCount: guildData.length,
+      })
+      setGuildData(data)
+    },
+    [guildData.length],
+  )
+
+  // Debug state changes
+  useEffect(() => {
+    console.log('Guild data updated:', {
+      count: guildData.length,
+      onlineCount: guildData.filter(m => m.OnlineStatus).length,
+      timestamp: new Date().toISOString(),
+    })
+  }, [guildData])
+
   const updateMemberData = useCallback(
     (member: GuildMemberResponse, changes: Partial<GuildMemberResponse>) => {
       console.debug('Updating member data:', { member: member.Name, changes })
       setGuildData(prevData => {
-        const newData = prevData.map(m => (m.Name === member.Name ? { ...m, ...changes } : m))
+        const memberIndex = prevData.findIndex(m => m.Name === member.Name)
+        if (memberIndex === -1) {
+          // Member not found, add them
+          return [...prevData, { ...member, ...changes }]
+        }
+        // Update existing member
+        const newData = [...prevData]
+        newData[memberIndex] = { ...newData[memberIndex], ...changes }
         return newData
       })
     },
@@ -81,7 +109,7 @@ export const useGuildData = (): UseGuildDataReturn => {
 
   return {
     guildData,
-    setGuildData,
+    setGuildData: forceUpdate,
     updateMemberData,
     processNewGuildData,
   }

@@ -45,7 +45,6 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   const handleGuildDataProcessed = useCallback(
     (newData: GuildMemberResponse[]) => {
       if (!Array.isArray(newData)) {
-        console.warn('Invalid guild data received:', newData)
         return
       }
       console.debug('Processing guild data:', {
@@ -72,9 +71,14 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   const handleGuildData = useCallback(
     (data: GuildMemberResponse[]) => {
       if (!Array.isArray(data)) {
-        console.warn('Invalid guild data received:', data)
         return
       }
+
+      console.log('Received new guild data:', {
+        count: data.length,
+        onlineCount: data.filter(m => m.OnlineStatus).length,
+        sample: data.slice(0, 2),
+      })
 
       const { recentlyLoggedIn } = processGuildData(data, guildData)
       handleGuildDataProcessed(data)
@@ -156,18 +160,45 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   )
 
   const groupedData = useMemo(() => {
-    const grouped: GroupedData[] = []
-    if (!types?.length || !guildData?.length) return grouped
+    console.log('Calculating grouped data:', {
+      typesLength: types?.length,
+      guildDataLength: guildData?.length,
+    })
 
-    types.forEach(type => {
-      const typeData = guildData.filter(member => member.Kind === type)
-      if (typeData.length > 0) {
+    const grouped: GroupedData[] = []
+    if (!guildData?.length) return grouped
+
+    // Create a default group for unclassified members
+    const defaultType = 'Unclassified'
+    const groupsByType = new Map<string, GuildMemberResponse[]>()
+
+    // Initialize groups for all types
+    types?.forEach(type => {
+      groupsByType.set(type, [])
+    })
+    groupsByType.set(defaultType, [])
+
+    // Distribute members to groups
+    guildData.forEach(member => {
+      const type = member.Kind || defaultType
+      const group = groupsByType.get(type) || groupsByType.get(defaultType)!
+      group.push(member)
+    })
+
+    // Create final grouped data
+    groupsByType.forEach((members, type) => {
+      if (members.length > 0) {
         grouped.push({
           type,
-          data: typeData,
-          onlineCount: typeData.filter(member => member.OnlineStatus).length,
+          data: members,
+          onlineCount: members.filter(member => member.OnlineStatus).length,
         })
       }
+    })
+
+    console.log('Grouped data result:', {
+      totalGroups: grouped.length,
+      groupSizes: grouped.map(g => ({ type: g.type, size: g.data.length })),
     })
 
     return grouped

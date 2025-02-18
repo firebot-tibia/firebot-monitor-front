@@ -44,7 +44,7 @@ const LoginModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
         setRememberMe(true)
       }
     }
-  }, [isOpen]) // Remove dependencies that change on every render
+  }, [isOpen])
 
   const bgColor = useColorModeValue('white', 'gray.900')
   const textColor = useColorModeValue('gray.800', 'white')

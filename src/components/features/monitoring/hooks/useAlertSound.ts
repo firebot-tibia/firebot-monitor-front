@@ -5,17 +5,28 @@ import type { AlertCondition } from '../types/alert.types'
 
 export const useAlertSound = () => {
   const timeoutRef = useRef<NodeJS.Timeout>()
-  const { playSound: playSoundFromStore } = useSoundStore()
+  const { playSound: playSoundFromStore, hasPermission } = useSoundStore()
 
   const playSound = useCallback(
     async (sound: AlertCondition['sound']) => {
-      await playSoundFromStore(sound)
+      if (!hasPermission) {
+        console.log('Sound permission not granted, skipping sound')
+        return
+      }
+      try {
+        await playSoundFromStore(sound)
+        console.log('Sound played successfully:', sound)
+      } catch (error) {
+        console.error('Failed to play sound:', error)
+      }
     },
-    [playSoundFromStore],
+    [playSoundFromStore, hasPermission],
   )
 
   const debouncedPlaySound = useCallback(
     (sound: AlertCondition['sound']) => {
+      if (!hasPermission) return
+
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
       }
@@ -23,7 +34,7 @@ export const useAlertSound = () => {
         playSound(sound)
       }, 500)
     },
-    [playSound],
+    [playSound, hasPermission],
   )
 
   return {

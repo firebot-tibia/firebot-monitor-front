@@ -49,15 +49,17 @@ export const useSSEStore = create<SSEState>((set, get) => ({
   currentWorld: null,
 
   addMessage: data => {
-    set(state => ({
-      messages: [
-        ...state.messages,
-        {
-          timestamp: Date.now(),
-          data,
-        },
-      ].slice(-100),
-    }))
+    console.log('Adding SSE message:', { data })
+    set(state => {
+      const newMessage = {
+        timestamp: Date.now(),
+        data,
+      }
+      return {
+        messages: [...state.messages, newMessage].slice(-100),
+        status: 'connected', // Ensure we're marked as connected when receiving messages
+      }
+    })
   },
 
   connect: (url: string, token: string, world: string) => {
@@ -92,11 +94,23 @@ export const useSSEStore = create<SSEState>((set, get) => ({
         const monitorMode = url.split('/').filter(Boolean).pop() || ''
         const store = get()
 
+        console.log('SSE received data:', { monitorMode, data })
+
+        // Handle main data
         if (data[monitorMode]) {
-          store.addMessage(data[monitorMode])
+          const mainData = data[monitorMode]
+          if (Array.isArray(mainData)) {
+            store.addMessage({ [monitorMode]: mainData })
+          }
         }
-        if (data[`${monitorMode}-changes`]) {
-          store.addMessage(data[`${monitorMode}-changes`])
+
+        // Handle changes
+        const changesKey = `${monitorMode}-changes`
+        if (data[changesKey]) {
+          const changes = data[changesKey]
+          if (Array.isArray(changes)) {
+            store.addMessage({ [changesKey]: changes })
+          }
         }
       },
       onStatusChange: (status: ConnectionStatus) => {
@@ -157,7 +171,13 @@ export const useSSEStore = create<SSEState>((set, get) => ({
 
   getUnprocessedMessages: () => {
     const { messages, lastProcessedTimestamp } = get()
-    return messages.filter(msg => msg.timestamp > lastProcessedTimestamp)
+    const unprocessed = messages.filter(msg => msg.timestamp > lastProcessedTimestamp)
+    console.log('Getting unprocessed messages:', {
+      total: messages.length,
+      unprocessed: unprocessed.length,
+      lastProcessed: new Date(lastProcessedTimestamp).toISOString(),
+    })
+    return unprocessed
   },
 
   markMessagesAsProcessed: (timestamp: number) => {

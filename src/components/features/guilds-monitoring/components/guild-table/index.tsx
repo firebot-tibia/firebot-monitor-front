@@ -18,6 +18,14 @@ export const GuildTable = ({
   const { sortConfig, handleSort, filteredData } = useGuildTable(data)
   const types = useCharacterTypesView(data)
 
+  // Debug logging
+  console.log('GuildTable render:', {
+    dataLength: data?.length,
+    filteredLength: filteredData?.length,
+    type,
+    onlineCount
+  })
+
   return (
     <Box
       bg="#0D0D0D"

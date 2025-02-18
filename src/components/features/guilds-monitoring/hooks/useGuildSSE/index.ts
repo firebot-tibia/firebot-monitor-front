@@ -40,15 +40,20 @@ export const useGuildSSE = ({ onGuildData, onGuildChanges }: UseGuildSSEProps = 
 
     try {
       const unprocessedMessages = getUnprocessedMessages()
-      // Processing messages silently
+      console.log('Processing messages:', unprocessedMessages.length)
 
       let latestTimestamp = lastProcessedRef.current
-      unprocessedMessages.forEach(msg => {
-        if (!mountedRef.current) return
+      const processedData: GuildMemberResponse[] = []
+      const processedChanges: GuildMemberResponse[] = []
+
+      for (const msg of unprocessedMessages) {
+        if (!mountedRef.current) break
 
         try {
           const guildData = msg.data as Record<string, any>
-          if (guildData[value]) {
+
+          // Process main guild data
+          if (guildData[value] && Array.isArray(guildData[value])) {
             const newGuildData = guildData[value].map((member: GuildMemberResponse) => ({
               ...member,
               OnlineSince: member.OnlineStatus
@@ -56,23 +61,35 @@ export const useGuildSSE = ({ onGuildData, onGuildChanges }: UseGuildSSEProps = 
                 : null,
               TimeOnline: member.OnlineStatus ? '00:00:00' : null,
             }))
-            onGuildData?.(newGuildData)
+            processedData.push(...newGuildData)
           }
 
+          // Process changes
           const changesKey = `${value}-changes`
-          if (guildData[changesKey]) {
+          if (guildData[changesKey] && Array.isArray(guildData[changesKey])) {
             const changes = guildData[changesKey]
             const { loggedInMembers } = processGuildChanges(changes, [])
             if (loggedInMembers.length > 0) {
-              onGuildChanges?.(loggedInMembers)
+              processedChanges.push(...loggedInMembers)
             }
           }
+
           latestTimestamp = Math.max(latestTimestamp, msg.timestamp)
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error('Error processing message:', error, msg)
         }
-      })
+      }
+
+      // Batch update callbacks
+      if (processedData.length > 0) {
+        console.log('Updating guild data:', processedData.length, 'members')
+        onGuildData?.(processedData)
+      }
+
+      if (processedChanges.length > 0) {
+        console.log('Updating guild changes:', processedChanges.length, 'changes')
+        onGuildChanges?.(processedChanges)
+      }
 
       if (mountedRef.current && latestTimestamp > lastProcessedRef.current) {
         markMessagesAsProcessed(latestTimestamp)

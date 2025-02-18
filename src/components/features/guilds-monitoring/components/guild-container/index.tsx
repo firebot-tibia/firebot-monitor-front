@@ -11,19 +11,33 @@ import GuildTable from '../guild-table'
 
 export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
-  const { playSound } = useAlertSound()
-
-  // Initialize client-side
+  const { debouncedPlaySound } = useAlertSound()
+  const [key, setKey] = useState(0)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsClient(true)
-      console.debug('GuildContainer initialized on client-side')
+      document.documentElement.setAttribute('data-user-interacted', 'true')
     }
   }, [])
 
-  const { types, addType, handleLocalChange, handleClassificationChange, groupedData } = useGuilds({
-    playSound,
+  const {
+    types,
+    addType,
+    handleLocalChange,
+    handleClassificationChange,
+    groupedData,
+    isLoading: guildsLoading,
+    sseStatus
+  } = useGuilds({
+    playSound: debouncedPlaySound, // Use debounced version for alerts
   })
+
+  useEffect(() => {
+    if (sseStatus === 'connected') {
+      setKey(k => k + 1)
+    }
+  }, [sseStatus])
+
 
   if (!isClient) {
     return (
@@ -40,9 +54,15 @@ export default function GuildContainer() {
     return (
       <DashboardLayout>
         <Center h="100vh" flexDirection="column">
-          <Text mb={4}>Nenhum dado de guilda disponível.</Text>
+          <Spinner size="sm" mb={4} />
           <Text fontSize="sm" color="gray.500">
-            Aguardando dados do servidor...
+            {guildsLoading
+              ? 'Carregando dados...'
+              : sseStatus === 'connecting'
+              ? 'Conectando ao servidor...'
+              : sseStatus === 'disconnected'
+              ? 'Desconectado do servidor'
+              : 'Aguardando dados do servidor...'}
           </Text>
         </Center>
       </DashboardLayout>
@@ -78,6 +98,7 @@ export default function GuildContainer() {
           {groupedData.map(({ type, data, onlineCount }) => (
             <Box key={type} w="full" minW={{ base: 'calc(100vw - 32px)', lg: '400px' }} maxW="100%">
               <GuildTable
+                key={`${type}-${key}`} // Add key to force re-render
                 type={type}
                 data={data}
                 onlineCount={onlineCount}
@@ -86,7 +107,7 @@ export default function GuildContainer() {
                 showExivaInput={type !== 'exitados'}
                 types={types}
                 addType={addType}
-                isLoading={false}
+                isLoading={guildsLoading}
               />
             </Box>
           ))}

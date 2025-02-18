@@ -29,12 +29,29 @@ export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
   const guildId = useStorageStore.getState().getItem('selectedGuildId', '')
 
   const types = useMemo(() => {
+    // Always start with fixed types
+    const typeSet = new Set(fixedTypes)
+
+    // Add custom types
+    customTypes.forEach(type => typeSet.add(type))
+
+    // Add types from guild data
     if (Array.isArray(guildData) && guildData.length > 0) {
-      const allTypes = guildData.map(member => member.Kind)
-      const uniqueTypes = Array.from(new Set(allTypes.filter(type => type && type.trim() !== '')))
-      return Array.from(new Set([...fixedTypes, ...customTypes, ...uniqueTypes]))
+      guildData.forEach(member => {
+        if (member.Kind && member.Kind.trim() !== '') {
+          typeSet.add(member.Kind)
+        }
+      })
     }
-    return [...fixedTypes, ...customTypes]
+
+    console.log('Character types updated:', {
+      fixedTypes,
+      customTypes,
+      guildDataTypes: guildData?.map(m => m.Kind).filter(Boolean),
+      finalTypes: Array.from(typeSet),
+    })
+
+    return Array.from(typeSet)
   }, [guildData, customTypes])
 
   const addType = useCallback(

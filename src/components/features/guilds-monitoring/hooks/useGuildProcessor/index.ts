@@ -15,28 +15,55 @@ export const useGuildProcessor = ({
   const processGuildData = useCallback(
     (data: GuildMemberResponse[], currentData: GuildMemberResponse[], alert?: AlertCondition) => {
       const currentTime = new Date()
-      const newGuildData = data.map((member: GuildMemberResponse) => ({
-        ...member,
-        OnlineSince: member.OnlineStatus ? member.OnlineSince || currentTime.toISOString() : null,
-        TimeOnline: member.OnlineStatus ? '00:00:00' : null,
-      }))
+      console.log('Processing guild data:', {
+        dataLength: data.length,
+        currentDataLength: currentData.length,
+      })
 
-      const processedNames = new Set(currentData.map(member => member.Name))
+      // Create a map of current data for quick lookup
+      const currentDataMap = new Map(currentData.map(member => [member.Name, member]))
+
+      // Process new data while preserving existing information
+      const newGuildData = data.map((member: GuildMemberResponse) => {
+        const existingMember = currentDataMap.get(member.Name)
+        return {
+          ...member,
+          OnlineSince: member.OnlineStatus
+            ? member.OnlineSince || existingMember?.OnlineSince || currentTime.toISOString()
+            : null,
+          TimeOnline: member.OnlineStatus ? existingMember?.TimeOnline || '00:00:00' : null,
+          Kind: existingMember?.Kind || member.Kind,
+          Local: existingMember?.Local || member.Local,
+        }
+      })
+
+      // Find recently logged in members
       const recentlyLoggedIn = newGuildData.filter((member: GuildMemberResponse) => {
-        if (!member.OnlineStatus || !member.OnlineSince || processedNames.has(member.Name))
-          return false
+        if (!member.OnlineStatus || !member.OnlineSince) return false
+
+        const existingMember = currentDataMap.get(member.Name)
+        if (existingMember?.OnlineStatus) return false // Already online
+
         const onlineSince = new Date(member.OnlineSince)
         const onlineTimeSeconds = (currentTime.getTime() - onlineSince.getTime()) / 1000
         return onlineTimeSeconds <= 180 // 3 minutes in seconds
       })
 
-      onGuildDataProcessed(newGuildData)
+      // Create a new array to force state update
+      const finalData = [...newGuildData]
+      console.log('Processed guild data:', {
+        inputCount: data.length,
+        outputCount: finalData.length,
+        recentlyLoggedIn: recentlyLoggedIn.length,
+      })
+
+      onGuildDataProcessed(finalData)
 
       if (alert && recentlyLoggedIn.length > 0) {
         onGuildMemberAlert(recentlyLoggedIn, alert)
       }
 
-      return { newGuildData, recentlyLoggedIn }
+      return { newGuildData: finalData, recentlyLoggedIn }
     },
     [onGuildDataProcessed, onGuildMemberAlert],
   )
@@ -63,13 +90,21 @@ export const useGuildProcessor = ({
         }
       })
 
-      onGuildDataProcessed(updatedData)
+      // Create a new array to force state update
+      const finalData = [...updatedData]
+      console.log('Processed guild changes:', {
+        changesCount: Object.keys(changes).length,
+        updatedCount: finalData.length,
+        loggedInCount: loggedInMembers.length,
+      })
+
+      onGuildDataProcessed(finalData)
 
       if (alert && loggedInMembers.length > 0) {
         onGuildMemberAlert(loggedInMembers, alert)
       }
 
-      return { updatedData, loggedInMembers }
+      return { updatedData: finalData, loggedInMembers }
     },
     [onGuildDataProcessed, onGuildMemberAlert],
   )
