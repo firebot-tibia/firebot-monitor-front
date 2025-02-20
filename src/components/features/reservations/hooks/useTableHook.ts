@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 
-import { convertFrontEndDateToISO } from '@/utils/convert-from-enddate-iso'
+import { convertFrontEndDateToISO } from '@/common/utils/convert-from-enddate-iso'
 
 import type { Reservation, Respawn, CreateReservationData } from '../types/reservations.interface'
 

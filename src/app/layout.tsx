@@ -1,54 +1,52 @@
-import '../styles/globals.css'
-import type { ReactNode, FC } from 'react'
+// app/layout.tsx
+import '../common/styles/globals.css'
+import type { Metadata } from 'next'
 
-import Script from 'next/script'
 
-import { google } from '../constants/google'
-import { AppProviders } from '../contexts/useProviders'
+import { GoogleTagManager } from '@/components/layout/components/google-tag'
 
-interface RootLayoutProps {
-  children: ReactNode
+import { Providers } from './providers'
+
+export const metadata: Metadata = {
+  title: 'Firebot Monitor - Monitoramento em tempo real de inimigos',
+  description: 'Tenha informações em tempo real da movimentação de seus inimigos no Tibia',
+  openGraph: {
+    url: 'https://monitor.firebot.run/',
+    title: 'Firebot Monitor - Monitoramento em tempo real de inimigos',
+    locale: 'pt-br',
+    type: 'website',
+    description: 'Tenha informações em tempo real da movimentação de seus inimigos no Tibia',
+    images: [
+      {
+        url: 'https://monitor.firebot.run/assets/images/og.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: 'https://monitor.firebot.run/assets/images/og.png',
+    title: 'Firebot Monitor - Monitoramento em tempo real de inimigos',
+    description: 'Tenha informações em tempo real da movimentação de seus inimigos no Tibia',
+    creator: '@firebot.tibia',
+    site: 'https://monitor.firebot.run',
+  },
 }
 
-const RootLayout: FC<RootLayoutProps> = ({ children }) => {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <head>
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
-        <meta name="msapplication-TileColor" content="#da532c" />
-        <meta name="theme-color" content="#ffffff" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-        <meta
-          name="keywords"
-          content="tsbot, ts host, tibia, tibia bot, tibia tsbot, bot tibia, bot para teamspeak, firebot, tibia wars, teamspeak, servidor teamspeak, tsbot host"
-        />
-        <Script id="google-tag-manager" strategy="afterInteractive">
-          {`
-          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','${google.GTM_ID}');
-        `}
-        </Script>
-      </head>
       <body>
-        <noscript>
-          <iframe
-            src={`https://www.googletagmanager.com/ns.html?id=${google.GTM_ID}`}
-            height="0"
-            width="0"
-            style={{ display: 'none', visibility: 'hidden' }}
-          />
-        </noscript>
-        <AppProviders>{children}</AppProviders>
+        <Providers>
+          <GoogleTagManager />
+          {children}
+        </Providers>
       </body>
     </html>
   )
 }
-
-export default RootLayout

@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-import api from '@/libs/api/firebot-api'
+import api from '@/common/libs/api/firebot-api'
 
 const authOptions: NextAuthOptions = {
   providers: [

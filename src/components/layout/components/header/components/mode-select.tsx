@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { Shield, ChevronDown } from 'lucide-react'
 
-import { useStorageStore } from '@/stores/storage-store'
+import { useStorageStore } from '@/common/stores/storage-store'
 
 type Mode = 'ally' | 'enemy'
 

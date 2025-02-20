@@ -9,11 +9,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'dark-gradient': 'linear-gradient(135deg, #1f2937 0%, #4b5563 100%)',
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
+        'spin-reverse': 'spin-reverse 2s linear infinite',
       },
-      colors: {
-        white: '#ffffff',
+      keyframes: {
+        'spin-reverse': {
+          to: { transform: 'rotate(-360deg)' },
+        },
       },
     },
   },

@@ -1,219 +1,396 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 
 import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Grid,
+  Heading,
+  Stack,
+  Text,
+  chakra,
+  shouldForwardProp,
+  Tooltip
+} from '@chakra-ui/react'
+import { motion, isValidMotionProp } from 'framer-motion'
+import {
   Activity,
-  Users,
   Map,
   Shield,
-  Clock,
   Database,
   ExternalLink,
   CheckCircle,
+  Target,
+  Bell,
+  Eye,
+  Crown,
+  Sparkles,
+  Rocket
 } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
 
-import { routes } from '../../../../../constants/routes'
+import { routes } from '../../../../../common/constants/routes'
 
-const Skeleton = () => (
-  <div className="animate-pulse">
-    <div className="mb-8 flex flex-col items-center space-y-4">
-      <div className="h-8 w-64 rounded bg-gray-700"></div>
-      <div className="h-4 w-48 rounded bg-gray-700"></div>
-      <div className="h-6 w-32 rounded bg-gray-700"></div>
-    </div>
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {[...Array(6)].map((_, i) => (
-        <div key={i} className="rounded-xl bg-gray-800/50 p-6 backdrop-blur-sm">
-          <div className="mb-4 flex items-center">
-            <div className="mr-4 h-10 w-10 rounded-xl bg-gray-700"></div>
-            <div className="h-4 w-32 rounded bg-gray-700"></div>
-          </div>
-          <div className="mb-2 h-4 w-full rounded bg-gray-700"></div>
-          <div className="h-4 w-3/4 rounded bg-gray-700"></div>
-        </div>
-      ))}
-    </div>
-  </div>
-)
+// Chakra motion components
+const MotionBox = chakra(motion.div, {
+  shouldForwardProp: (prop) => isValidMotionProp(prop) || shouldForwardProp(prop),
+})
+
+// Features data
+const features = [
+  {
+    icon: <Activity />,
+    title: 'Análise Avançada de Jogadores',
+    description: 'Acompanhe EXP, tempo online, e padrões de jogo com gráficos detalhados e análises preditivas.',
+    premium: [
+      'Histórico completo de EXP por hora',
+      'Detecção de padrões de jogo suspeitos',
+      'Relatórios personalizados de progresso'
+    ],
+    highlight: 'Aumente sua eficiência com análises detalhadas'
+  },
+  {
+    icon: <Map />,
+    title: 'Rastreamento de Hunts',
+    description: 'Sistema inteligente de monitoramento de hunting spots com alertas em tempo real.',
+    premium: [
+      'Mapa interativo de hunting spots',
+      'Histórico detalhado de ocupação',
+      'Previsão de disponibilidade'
+    ],
+    highlight: 'Nunca perca um spot livre novamente'
+  },
+  {
+    icon: <Shield />,
+    title: 'Sistema Anti-Maker',
+    description: 'Proteção avançada contra makers com alertas instantâneos e análise de comportamento.',
+    premium: [
+      'Detecção automática de makers',
+      'Alertas via Discord e Telegram',
+      'Análise de padrões suspeitos'
+    ],
+    highlight: 'Proteção total contra makers'
+  },
+  {
+    icon: <Database />,
+    title: 'Gestão de Respawns',
+    description: 'Sistema completo de gestão de respawns com timer inteligente e histórico.',
+    premium: [
+      'Timer sincronizado com o servidor',
+      'Histórico de kills por respawn',
+      'Previsão de respawn com IA'
+    ],
+    highlight: 'Otimize suas rotas de caça'
+  },
+  {
+    icon: <Eye />,
+    title: 'Monitoramento Inteligente',
+    description: 'Acompanhamento 24/7 com sistema de alertas personalizados e dashboards em tempo real.',
+    premium: [
+      'Dashboards personalizáveis',
+      'Alertas configuráveis',
+      'Relatórios automáticos'
+    ],
+    highlight: 'Controle total do seu jogo'
+  },
+  {
+    icon: <Crown />,
+    title: 'Inteligência de Guild',
+    description: 'Sistema completo de inteligência para monitorar e analisar atividades de guilds rivais.',
+    premium: [
+      'Análise de membros online',
+      'Rastreamento de territórios',
+      'Histórico de guerras'
+    ],
+    highlight: 'Domine a política do servidor'
+  }
+]
 
 const BotDescriptions = () => {
-  const [isLoading, setIsLoading] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-      setIsVisible(true)
-    }, 1500)
-
-    return () => clearTimeout(timer)
+    setIsVisible(true)
   }, [])
 
-  const features = [
-    {
-      icon: <Activity className="h-6 w-6" />,
-      title: 'Análise de Jogadores',
-      description: 'EXP, tempo online e padrões de jogo com estatísticas detalhadas',
-    },
-    {
-      icon: <Map className="h-6 w-6" />,
-      title: 'Locais de Hunt',
-      description: 'Monitoramento de hunting spots e tracking online em tempo real',
-    },
-    {
-      icon: <Shield className="h-6 w-6" />,
-      title: 'Alertas de Maker',
-      description: 'Receba notificações instantâneas sobre possíveis ataques maker',
-    },
-    {
-      icon: <Database className="h-6 w-6" />,
-      title: 'Respawn Planilhado',
-      description: 'Sistema avançado substituindo planilhas tradicionais',
-    },
-    {
-      icon: <Clock className="h-6 w-6" />,
-      title: 'Monitoramento 24/7',
-      description: 'Acompanhamento contínuo com atualizações instantâneas',
-    },
-    {
-      icon: <Users className="h-6 w-6" />,
-      title: 'Inteligência de Guild',
-      description: 'Sistema completo para monitorar atividades rivais',
-    },
-  ]
-
-  const pricingFeatures = [
-    'Acesso completo a todas as funcionalidades',
-    'Suporte premium via Discord',
-    '7 dias de avaliação gratuita',
-    'Cancelamento a qualquer momento',
-    'Atualizações constantes',
-  ]
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto max-w-6xl px-4 py-8">
-        <Skeleton />
-      </div>
-    )
-  }
-
   return (
-    <div
-      className={`container mx-auto max-w-6xl px-4 py-8 transition-all duration-700 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
-    >
-      {/* Hero Section */}
-      <div className="mb-16 space-y-6 text-center">
-        <div className="relative mx-auto mb-8 h-64 w-64">
-          <Image
-            src="/assets/images/og.png"
-            alt="Firebot Monitor Logo"
-            fill
-            sizes="100"
-            className="object-contain"
-            priority
-          />
-        </div>
-
-        <p className="text-xl font-light text-gray-300 md:text-2xl">
-          Sistema Avançado de Monitoramento para Tibia
-        </p>
-
-        {/* Pricing Card */}
-        <div className="mx-auto max-w-lg rounded-2xl border border-red-500/20 bg-gray-800/50 p-8 shadow-xl backdrop-blur-sm">
-          <div className="mb-6 flex items-center justify-center gap-4">
-            <Image
-              src="/assets/tibiaCoins.gif"
-              alt="Tibia Coins"
-              width={32}
-              height={32}
-              className="animate-bounce"
-            />
-            <div className="text-center">
-              <div className="text-3xl font-bold">750 Tibia Coins</div>
-              <div className="text-gray-400">por mês</div>
-            </div>
-          </div>
-
-          <div className="mb-6 space-y-3">
-            {pricingFeatures.map((feature, index) => (
-              <div key={index} className="flex items-center gap-2 text-gray-300">
-                <CheckCircle className="h-5 w-5 text-red-500" />
-                <span>{feature}</span>
-              </div>
-            ))}
-          </div>
-
-          <Link
-            href={routes.discordUrl}
-            target="_blank"
-            className="group block w-full rounded-xl bg-gradient-to-r from-red-600 to-red-500 px-8 py-4 text-center text-xl font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-red-500/20"
-          >
-            Começar Avaliação Gratuita
-            <ExternalLink className="ml-2 inline-block h-5 w-5 opacity-75" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Features Grid */}
-      <div className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className="group rounded-xl border border-gray-700/50 bg-gray-800/50 p-8 backdrop-blur-sm transition-all duration-300 hover:border-red-500/50 hover:shadow-lg hover:shadow-red-500/5"
-          >
-            <div className="mb-4 flex items-center gap-4">
-              <div className="rounded-xl bg-gradient-to-br from-red-600 to-red-500 p-3 transition-transform duration-300 group-hover:scale-110">
-                {feature.icon}
-              </div>
-              <h3 className="text-lg font-medium">{feature.title}</h3>
-            </div>
-            <p className="leading-relaxed text-gray-400">{feature.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Integration Section */}
-      <div className="mb-16 rounded-xl border border-gray-700/50 bg-gray-800/50 p-10 backdrop-blur-sm">
-        <h2 className="mb-4 bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-center text-3xl font-bold text-transparent md:text-4xl">
-          Integração com Tibia Maps
-        </h2>
-        <p className="mx-auto mb-6 max-w-2xl text-center text-lg leading-relaxed text-gray-300">
-          Integração perfeita com a plataforma líder de mapas do Tibia para rastreamento e
-          monitoramento aprimorados
-        </p>
-        <div className="text-center">
-          <Link
-            href="https://tibiamaps.io/"
-            target="_blank"
-            className="inline-flex items-center gap-2 text-red-400 transition-colors hover:text-red-300"
-          >
-            Visite tibiamaps.io
-            <ExternalLink className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="rounded-2xl bg-gradient-to-br from-red-700 to-red-900 p-12 text-center shadow-xl">
-        <h2 className="mb-6 text-3xl font-bold md:text-4xl">
-          Pronto para melhorar a inteligência da sua guild?
-        </h2>
-        <p className="mb-4 text-xl text-gray-200">Experimente gratuitamente por 7 dias</p>
-        <p className="mb-8 text-gray-300">Sem compromisso - Cancele quando quiser</p>
-        <Link
-          href={routes.discordUrl}
-          target="_blank"
-          className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 font-medium text-red-600 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:bg-gray-50 hover:shadow-white/20"
+    <Box w="full" bg="black.900">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isVisible ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Hero Section */}
+        <Container
+          maxW="8xl"
+          py={16}
+          px={4}
+          display="flex"
+          flexDir="column"
+          alignItems="center"
+          justifyContent="center"
+          minH="100vh"
         >
-          Começar Agora
-          <ExternalLink className="h-5 w-5 opacity-75" />
-        </Link>
-      </div>
-    </div>
+          <Flex
+            direction={{ base: 'column', lg: 'row' }}
+            align="center"
+            justify="center"
+            gap={8}
+            w="full"
+            maxW={{ base: "100%", md: "container.md" }}
+            mx="auto"
+            textAlign={{ base: "center", lg: "left" }}
+          >
+            {/* Left Side - Content */}
+                          <Stack
+              spacing={8}
+              flex={1}
+              align="center"
+              textAlign="center"
+              maxW={{ base: 'full', lg: '2xl' }}
+              px={{ base: 4, sm: 6 }}
+              mx="auto"
+            >
+              <Heading
+                fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }}
+                bgGradient="linear(to-r, red.400, orange.400)"
+                bgClip="text"
+                lineHeight="1.2"
+              >
+                Firebot Monitor
+              </Heading>
+
+              <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.400">
+                Domine o jogo com as ferramentas mais avançadas do mercado.
+                Monitoramento inteligente, análise de dados e proteção anti-maker em tempo real.
+              </Text>
+
+              <Stack
+                direction={{ base: 'column', sm: 'row' }}
+                spacing={4}
+                w="full"
+                justify="center"
+              >
+                <Button
+                  size="lg"
+                  as="a"
+                  href={routes.discordUrl}
+                  target="_blank"
+                  colorScheme="red"
+                  rightIcon={<ExternalLink size={20} />}
+                  _hover={{ transform: 'translateY(-2px)' }}
+                >
+                  Começar Agora
+                </Button>
+                <Button
+                  size="lg"
+                  as="a"
+                  href={routes.discordUrl}
+                  target="_blank"
+                  variant="outline"
+                  colorScheme="red"
+                  rightIcon={<Target size={20} />}
+                >
+                  Ver Demonstração
+                </Button>
+              </Stack>
+            </Stack>
+
+            {/* Right Side - Image */}
+            <Box
+              position="relative"
+              w={{ base: '250px', sm: '300px', md: '400px', lg: '500px' }}
+              h={{ base: '250px', sm: '300px', md: '400px', lg: '500px' }}
+              mx="auto"
+            >
+              <Image
+                src="/assets/images/og.png"
+                alt="Firebot Monitor Logo"
+                fill
+                style={{ objectFit: 'contain' }}
+                priority
+              />
+            </Box>
+          </Flex>
+        </Container>
+
+        {/* Features Section */}
+        <Box bg="black.800" py={16}>
+          <Container maxW="8xl">
+            <Stack spacing={12}>
+              <Stack spacing={6} textAlign="center">
+                <Heading
+                  fontSize={{ base: '3xl', md: '4xl' }}
+                  bgGradient="linear(to-r, red.400, orange.400)"
+                  bgClip="text"
+                >
+                  Recursos Exclusivos
+                </Heading>
+                <Text fontSize="lg" color="gray.400" maxW="2xl" mx="auto">
+                  Ferramentas poderosas projetadas para maximizar sua eficiência e domínio no Tibia
+                </Text>
+              </Stack>
+
+              <Grid
+                templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+                gap={8}
+              >
+                {features.map((feature, index) => (
+                  <MotionBox
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                  >
+                    <Tooltip
+                      label={feature.highlight}
+                      placement="top"
+                      hasArrow
+                      bg="red.500"
+                    >
+                      <Box
+                        p={6}
+                        bg="black.900"
+                        borderRadius="xl"
+                        borderWidth={1}
+                        borderColor="red.500"
+                        h="full"
+                        transition="all 0.3s"
+                        _hover={{ transform: 'translateY(-4px)', shadow: 'xl' }}
+                      >
+                        <Stack spacing={4}>
+                          <Flex align="center" gap={4}>
+                            <Box
+                              p={2}
+                              borderRadius="lg"
+                              bg="red.500"
+                              color="white"
+                              transition="all 0.3s"
+                              _groupHover={{ bg: 'red.400' }}
+                            >
+                              {feature.icon}
+                            </Box>
+                            <Heading size="md">{feature.title}</Heading>
+                          </Flex>
+
+                          <Text color="gray.400">{feature.description}</Text>
+
+                          <Stack spacing={3}>
+                            {feature.premium.map((item, i) => (
+                              <Flex key={i} gap={2} align="center">
+                                <CheckCircle size={16} color="green" />
+                                <Text fontSize="sm" color="gray.400">{item}</Text>
+                              </Flex>
+                            ))}
+                          </Stack>
+                        </Stack>
+                      </Box>
+                    </Tooltip>
+                  </MotionBox>
+                ))}
+              </Grid>
+            </Stack>
+          </Container>
+        </Box>
+
+        {/* Pricing Section */}
+        <Container maxW="8xl" py={16}>
+          <Stack spacing={12}>
+            <Stack spacing={6} textAlign="center">
+              <Heading
+                fontSize={{ base: '3xl', md: '4xl' }}
+                bgGradient="linear(to-r, red.400, orange.400)"
+                bgClip="text"
+              >
+                Plano Premium
+              </Heading>
+              <Text fontSize="lg" color="gray.400" maxW="2xl" mx="auto">
+                Desbloqueie todo o potencial do Firebot com nosso plano premium
+              </Text>
+            </Stack>
+
+            <Flex
+              direction={{ base: 'column', lg: 'row' }}
+              gap={8}
+              align="center"
+              justify="center"
+            >
+              {/* Pricing Card */}
+              <MotionBox
+                maxW="md"
+                w="full"
+                bg="black.800"
+                borderRadius="2xl"
+                borderWidth={1}
+                borderColor="red.500"
+                p={8}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Stack spacing={6}>
+                  <Flex align="center" justify="center" gap={4}>
+                    <Image
+                      src="/assets/tibiaCoins.gif"
+                      alt="Tibia Coins"
+                      width={32}
+                      height={32}
+                    />
+                    <Stack spacing={0} textAlign="center">
+                      <Text fontSize="3xl" fontWeight="bold">750 Tibia Coins</Text>
+                      <Text color="gray.400">por mês</Text>
+                    </Stack>
+                  </Flex>
+
+                  <Stack spacing={4}>
+                    {[
+                      {
+                        icon: <Sparkles />,
+                        title: 'Acesso Premium Completo',
+                        description: 'Desbloqueie todo o potencial do Firebot'
+                      },
+                      {
+                        icon: <Bell />,
+                        title: 'Suporte 24/7',
+                        description: 'Atendimento prioritário via Discord'
+                      },
+                      {
+                        icon: <Target />,
+                        title: '7 Dias Grátis',
+                        description: 'Teste todas as funcionalidades premium'
+                      },
+                      {
+                        icon: <Rocket />,
+                        title: 'Atualizações Constantes',
+                        description: 'Novas funcionalidades regularmente'
+                      }
+                    ].map((feature, index) => (
+                      <Flex key={index} align="center" gap={3}>
+                        <Box color="red.400">{feature.icon}</Box>
+                        <Stack spacing={0}>
+                          <Text fontWeight="bold">{feature.title}</Text>
+                          <Text color="gray.400" fontSize="sm">{feature.description}</Text>
+                        </Stack>
+                      </Flex>
+                    ))}
+                  </Stack>
+
+                  <Button
+                    size="lg"
+                    w="full"
+                    colorScheme="red"
+                    rightIcon={<ExternalLink />}
+                    onClick={() => window.open(routes.discordUrl, '_blank')}
+                  >
+                    Começar Avaliação Gratuita
+                  </Button>
+                </Stack>
+              </MotionBox>
+            </Flex>
+          </Stack>
+        </Container>
+      </motion.div>
+    </Box>
   )
 }
 

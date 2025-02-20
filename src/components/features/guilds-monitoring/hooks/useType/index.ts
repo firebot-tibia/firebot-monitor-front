@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 
-import { fixedTypes } from '@/constants/types'
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import { fixedTypes } from '@/common/constants/types'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 
 const globalTypesSet = new Set<string>(fixedTypes)
 

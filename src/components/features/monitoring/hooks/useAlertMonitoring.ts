@@ -1,8 +1,8 @@
 import { useCallback, useRef } from 'react'
 
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 import { useAlertSettingsStore } from '@/components/features/monitoring/stores/alert-settings-store'
 import type { AlertCondition } from '@/components/features/monitoring/types/alert.types'
-import type { GuildMemberResponse } from '@/types/guild-member.response'
 
 import { useAlertMonitoringStore } from '../stores/alert-monitoring-store'
 import { useSoundStore } from '../stores/sounds-permission-store'

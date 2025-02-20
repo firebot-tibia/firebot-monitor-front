@@ -4,13 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useSession } from 'next-auth/react'
 
+import { useStorageStore } from '@/common/stores/storage-store'
 import { useAlertMonitoring } from '@/components/features/monitoring/hooks/useAlertMonitoring'
 import type { AlertCondition } from '@/components/features/monitoring/types/alert.types'
-import { useStorageStore } from '@/stores/storage-store'
 
-import { upsertPlayer } from '../../../../../services/guild-stats'
-import { useTokenStore } from '../../../../../stores/token-decoded-store'
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
+import type { GuildMemberResponse } from '../../../../../common/types/guild-member.response'
+import { useTokenStore } from '../../../auth/store/token-decoded-store'
+import { upsertPlayer } from '../../../statistics/services'
 import { useCharacterTypes } from '../useCharacterTypes'
 import { useGuildData } from '../useGuildData'
 import { useGuildLocalUpdater } from '../useGuildLocalUpdater'
@@ -20,6 +20,12 @@ import { useGuildTimeUpdater } from '../useGuildTimeUpdater'
 
 interface UseGuildsProps {
   playSound: (sound: AlertCondition['sound']) => void
+}
+
+interface GroupedData {
+  type: string
+  data: GuildMemberResponse[]
+  onlineCount: number
 }
 
 export const useGuilds = ({ playSound }: UseGuildsProps) => {
@@ -36,34 +42,19 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
 
   useGuildTimeUpdater({ setGuildData })
 
-  const processNewGuildData = useCallback(
-    (data: GuildMemberResponse[]) => {
-      if (!Array.isArray(data)) return
-
-      // Use requestAnimationFrame to batch updates
-      requestAnimationFrame(() => {
-        console.debug('Processing guild data:', {
-          count: data.length,
-          onlineCount: data.filter(m => m.OnlineStatus).length,
-        })
-        setGuildData(prevData => {
-          // Only update if data actually changed
-          if (JSON.stringify(prevData) === JSON.stringify(data)) {
-            return prevData
-          }
-          return data
-        })
+  const handleGuildDataProcessed = useCallback(
+    (newData: GuildMemberResponse[]) => {
+      if (!Array.isArray(newData)) {
+        console.warn('Invalid guild data received:', newData)
+        return
+      }
+      console.debug('Processing guild data:', {
+        count: newData.length,
+        onlineCount: newData.filter(m => m.OnlineStatus).length,
       })
+      setGuildData(newData)
     },
     [setGuildData],
-  )
-
-  const handleGuildDataProcessed = useCallback(
-    (data: GuildMemberResponse[]) => {
-      if (!Array.isArray(data)) return
-      processNewGuildData(data)
-    },
-    [processNewGuildData],
   )
 
   const handleGuildMemberAlert = useCallback(
@@ -79,37 +70,11 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   })
 
   const handleGuildData = useCallback(
-    (rawData: unknown[]) => {
-      if (!Array.isArray(rawData)) return
-
-      // Type guard to ensure data matches GuildMemberResponse
-      const isGuildMember = (item: unknown): item is GuildMemberResponse => {
-        if (!item || typeof item !== 'object') return false
-        const member = item as Partial<GuildMemberResponse>
-        return (
-          typeof member.Name === 'string' &&
-          typeof member.Vocation === 'string' &&
-          typeof member.Level === 'number' &&
-          typeof member.OnlineStatus === 'boolean' &&
-          typeof member.Kind === 'string'
-        )
+    (data: GuildMemberResponse[]) => {
+      if (!Array.isArray(data)) {
+        console.warn('Invalid guild data received:', data)
+        return
       }
-
-      // Filter and type cast the data
-      const data = rawData.filter(isGuildMember)
-
-      if (data.length !== rawData.length) {
-        console.warn('Some guild members had invalid data format', {
-          total: rawData.length,
-          valid: data.length,
-        })
-      }
-
-      console.log('Received new guild data:', {
-        count: data.length,
-        onlineCount: data.filter(m => m.OnlineStatus).length,
-        sample: data.slice(0, 2),
-      })
 
       const { recentlyLoggedIn } = processGuildData(data, guildData)
       handleGuildDataProcessed(data)
@@ -132,23 +97,15 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
 
   const handleGuildChanges = useCallback(
     (changes: Record<string, any>) => {
-      // Debounce changes processing
-      requestAnimationFrame(() => {
-        const { updatedData, loggedInMembers } = processGuildChanges(changes, guildData)
+      const { updatedData, loggedInMembers } = processGuildChanges(changes, guildData)
+      handleGuildDataProcessed(updatedData)
 
-        // Only update if we have changes
-        if (updatedData.length > 0) {
-          handleGuildDataProcessed(updatedData)
+      if (loggedInMembers.length > 0) {
+        const { reachedThreshold, alert } = checkAndTriggerAlerts(loggedInMembers)
+        if (reachedThreshold && alert) {
+          handleGuildMemberAlert(loggedInMembers, alert)
         }
-
-        // Handle alerts for logged in members
-        if (loggedInMembers.length > 0) {
-          const { reachedThreshold, alert } = checkAndTriggerAlerts(loggedInMembers)
-          if (reachedThreshold && alert) {
-            handleGuildMemberAlert(loggedInMembers, alert)
-          }
-        }
-      })
+      }
     },
     [
       guildData,
@@ -159,7 +116,7 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
     ],
   )
 
-  const { status: sseStatus } = useGuildSSE({
+  const { status: sseStatus, isConnected } = useGuildSSE({
     onGuildData: handleGuildData,
     onGuildChanges: handleGuildChanges,
   })
@@ -199,47 +156,18 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   )
 
   const groupedData = useMemo(() => {
-    if (!types?.length || !guildData?.length) return []
+    const grouped: GroupedData[] = []
+    if (!types?.length || !guildData?.length) return grouped
 
-    console.log('Calculating grouped data:', {
-      typesLength: types.length,
-      guildDataLength: guildData.length,
-    })
-
-    // Use Map for O(1) lookups
-    const groupsByType = new Map<string, GuildMemberResponse[]>()
-    const defaultType = 'main'
-
-    // Pre-initialize all type arrays
     types.forEach(type => {
-      groupsByType.set(type, [])
-    })
-
-    // Single pass member distribution with pre-allocated arrays
-    const membersByType = guildData.reduce((acc, member) => {
-      const type = member.Kind || defaultType
-      const group = acc.get(type) || acc.get(defaultType)
-      if (group) {
-        group.push(member)
-      } else {
-        acc.set(type, [member])
+      const typeData = guildData.filter(member => member.Kind === type)
+      if (typeData.length > 0) {
+        grouped.push({
+          type,
+          data: typeData,
+          onlineCount: typeData.filter(member => member.OnlineStatus).length,
+        })
       }
-      return acc
-    }, groupsByType)
-
-    // Create final grouped data with a single pass
-    const grouped = Array.from(membersByType.entries())
-      .filter(([_, members]) => members.length > 0)
-      .map(([type, members]) => ({
-        type,
-        data: members,
-        onlineCount: members.reduce((count, member) => count + (member.OnlineStatus ? 1 : 0), 0),
-      }))
-      .sort((a, b) => b.onlineCount - a.onlineCount) // Sort by online count
-
-    console.log('Grouped data result:', {
-      totalGroups: grouped.length,
-      groupSizes: grouped.map(g => ({ type: g.type, size: g.data.length })),
     })
 
     return grouped
@@ -248,12 +176,12 @@ export const useGuilds = ({ playSound }: UseGuildsProps) => {
   return {
     guildData,
     isLoading,
+    isConnected,
     handleLocalChange,
     handleClassificationChange,
     types,
     addType,
     groupedData,
     status,
-    sseStatus,
   }
 }

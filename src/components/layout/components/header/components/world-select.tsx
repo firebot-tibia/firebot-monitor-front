@@ -13,8 +13,8 @@ import {
 } from '@chakra-ui/react'
 import { Globe, ChevronDown, Check } from 'lucide-react'
 
-import { useTokenStore } from '@/stores/token-decoded-store'
-import { capitalizeFirstLetter } from '@/utils/capitalize-first-letter'
+import { useTokenStore } from '@/components/features/auth/store/token-decoded-store'
+import { capitalizeFirstLetter } from '@/common/utils/capitalize-first-letter'
 
 const WorldSelect = () => {
   const toast = useToast()

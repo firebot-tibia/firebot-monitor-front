@@ -1,11 +1,11 @@
 import { useCallback } from 'react'
 
-import { usePermission } from '@/hooks/usePermission'
+import { usePermission } from '@/common/hooks/usePermission'
 
-import { upsertPlayer } from '../../../../../services/guild-stats'
-import { useStorageStore } from '../../../../../stores/storage-store'
-import { useTokenStore } from '../../../../../stores/token-decoded-store'
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
+import { useStorageStore } from '../../../../../common/stores/storage-store'
+import type { GuildMemberResponse } from '../../../../../common/types/guild-member.response'
+import { useTokenStore } from '../../../auth/store/token-decoded-store'
+import { upsertPlayer } from '../../../statistics/services'
 
 interface UseGuildLocalUpdaterReturn {
   handleLocalChange: (member: GuildMemberResponse, newLocal: string) => Promise<void>

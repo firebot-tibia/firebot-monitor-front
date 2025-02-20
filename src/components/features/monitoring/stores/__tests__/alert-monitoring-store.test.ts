@@ -1,6 +1,6 @@
 import { act } from '@testing-library/react'
 
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 
 import { useAlertMonitoringStore } from '../alert-monitoring-store'
 

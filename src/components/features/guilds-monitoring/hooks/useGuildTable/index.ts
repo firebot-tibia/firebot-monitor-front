@@ -2,7 +2,7 @@ import { useRef, useState, useMemo } from 'react'
 
 import { useVirtualizer } from '@tanstack/react-virtual'
 
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 
 import type { SortConfig } from './types'
 
@@ -53,6 +53,7 @@ export const useGuildTable = (data: GuildMemberResponse[]) => {
     })
   }, [data, sortConfig])
 
+  // Temporarily disable virtualization for debugging
   const virtualizer = useVirtualizer({
     count: filteredData.length,
     getScrollElement: () => containerRef.current,

@@ -1,4 +1,4 @@
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 
 export type SortableFields = 'Name' | 'Level' | 'Kind' | 'TimeOnline' | 'Vocation'
 

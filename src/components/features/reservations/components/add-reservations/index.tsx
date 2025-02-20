@@ -28,8 +28,8 @@ import {
 } from 'date-fns'
 import { ChevronDownIcon } from 'lucide-react'
 
-import { useTokenStore } from '@/stores/token-decoded-store'
-import { formatDateForAPI } from '@/utils/format-date'
+import { useTokenStore } from '@/components/features/auth/store/token-decoded-store'
+import { formatDateForAPI } from '@/common/utils/format-date'
 
 import type { CreateReservationData } from '../../types/reservations.interface'
 

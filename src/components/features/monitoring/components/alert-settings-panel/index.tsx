@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 
 import {
+  Badge,
   Card,
   CardBody,
   Drawer,
@@ -11,6 +12,8 @@ import {
   DrawerOverlay,
   HStack,
   IconButton,
+  NumberInput,
+  NumberInputField,
   Select,
   Switch,
   Text,
@@ -19,7 +22,9 @@ import {
 } from '@chakra-ui/react'
 import { Bell, Clock, Plus, Trash2, Volume2 } from 'lucide-react'
 
+import { useCharacterTracker } from '../../../guilds-monitoring/hooks/useCharacterTracker'
 import { useAlertSettingsStore } from '../../stores/alert-settings-store'
+import { useMonitoringSettingsStore } from '../../stores/monitoring-settings-store'
 import { useSoundStore } from '../../stores/sounds-permission-store'
 import type { AlertCondition } from '../../types/alert.types'
 import InputField from '../input-settings'
@@ -53,6 +58,17 @@ export const AlertSettingsPanel = ({
 }: AlertSettingsPanelProps) => {
   const { updateAlert } = useAlertSettingsStore()
   const { hasPermission } = useSoundStore()
+  const { timeThreshold, memberThreshold, updateSettings } = useMonitoringSettingsStore()
+
+  const { activeCharacterCount } = useCharacterTracker(timeThreshold, memberThreshold)
+
+  const handleTimeThresholdChange = useCallback((value: number) => {
+    updateSettings({ timeThreshold: value })
+  }, [updateSettings])
+
+  const handleMemberThresholdChange = useCallback((value: number) => {
+    updateSettings({ memberThreshold: value })
+  }, [updateSettings])
 
   const handleUpdateAlert = useCallback(
     (alertId: string, field: keyof AlertCondition, value: any) => {
@@ -75,7 +91,7 @@ export const AlertSettingsPanel = ({
       <DrawerContent bg="rgba(17, 19, 23, 0.98)">
         <DrawerCloseButton color="whiteAlpha.700" />
         <DrawerHeader borderBottomWidth={1} borderBottomColor="whiteAlpha.100">
-          Configurações de Monitoramento
+          Condições de Alerta
         </DrawerHeader>
 
         <DrawerBody>
@@ -88,20 +104,24 @@ export const AlertSettingsPanel = ({
               </Card>
             )}
 
-            <HStack justify="space-between" align="center">
-              <Text fontWeight="medium" fontSize="sm">
-                Condições de Alerta
-              </Text>
-              <Tooltip label="Adicionar novo alerta">
-                <IconButton
-                  aria-label="Adicionar alerta"
-                  icon={<Plus size={16} />}
-                  onClick={onAddAlert}
-                  size="xs"
-                  colorScheme="blue"
-                />
-              </Tooltip>
-            </HStack>
+            <VStack spacing={4} align="stretch">
+
+
+              <HStack justify="space-between" align="center">
+                <Text fontWeight="medium" fontSize="sm">
+                  Condições de Alerta
+                </Text>
+                <Tooltip label="Adicionar novo alerta">
+                  <IconButton
+                    aria-label="Adicionar alerta"
+                    icon={<Plus size={16} />}
+                    onClick={onAddAlert}
+                    size="xs"
+                    colorScheme="blue"
+                  />
+                </Tooltip>
+              </HStack>
+            </VStack>
 
             <VStack spacing={2} align="stretch">
               {alerts.map(alert => (

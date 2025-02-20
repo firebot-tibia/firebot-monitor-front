@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
+import type { GuildMemberResponse } from '../../../../../common/types/guild-member.response'
 
 interface UseGuildChangesReturn {
   processGuildChanges: (

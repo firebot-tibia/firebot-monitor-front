@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { getAllRespawns } from '../../../../services/respawn'
+import { getAllRespawns } from '../services'
 
 interface Respawn {
   id: string

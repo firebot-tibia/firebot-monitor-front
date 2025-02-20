@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState, useCallback } from 'react'
 
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 
 import { useRespawnsStore } from '../../../reservations/stores/respawn-store'
 

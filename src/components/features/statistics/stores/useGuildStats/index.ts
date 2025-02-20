@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
-import { getExperienceList } from '../../../../../services/guild-stats'
-import { useStorageStore } from '../../../../../stores/storage-store'
+import { useStorageStore } from '../../../../../common/stores/storage-store'
+import { getExperienceList } from '../../services'
 import type { ExperienceListQuery, GuildData } from '../../types/guild-stats.interface'
 
 interface GuildStatsState {

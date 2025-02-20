@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Text, useToast } from '@chakra-ui/react'
 import { Bell } from 'lucide-react'
 
-import { Logger } from '@/middlewares/useLogger'
+import { Logger } from '@/common/hooks/useLogger'
 
 import { useSoundStore } from '../../stores/sounds-permission-store'
 

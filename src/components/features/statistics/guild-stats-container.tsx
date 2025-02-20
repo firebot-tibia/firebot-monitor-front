@@ -5,9 +5,9 @@ import React, { useCallback, useEffect } from 'react'
 import { Box, SimpleGrid, Tab, TabList, TabPanel, TabPanels, Tabs, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 
-import TablePagination from '@/components/common/pagination'
+import { routes } from '@/common/constants/routes'
 import { useGuildStatsStore } from '@/components/features/statistics/stores/useGuildStats'
-import { routes } from '@/constants/routes'
+import TablePagination from '@/components/layout/components/pagination'
 
 import FilterBar from './components/filter-bar'
 import GuildTable from './components/table'

@@ -2,7 +2,7 @@ import React from 'react'
 
 import { act, renderHook } from '@testing-library/react'
 
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 import { TestWrapper } from 'tests/utils/test-utils'
 
 import { mockStore, useAlertMonitoringStore } from '../../stores/__mocks__/alert-monitoring-store'

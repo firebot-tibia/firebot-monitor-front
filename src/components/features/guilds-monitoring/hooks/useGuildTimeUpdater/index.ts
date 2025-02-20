@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
-import { formatTimeOnline } from '../../../../../utils/format-time-online'
+import type { GuildMemberResponse } from '../../../../../common/types/guild-member.response'
+import { formatTimeOnline } from '../../../../../common/utils/format-time-online'
 
 interface UseGuildTimeUpdaterProps {
   setGuildData: React.Dispatch<React.SetStateAction<GuildMemberResponse[]>>

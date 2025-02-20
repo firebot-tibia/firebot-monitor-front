@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Stat, StatLabel, StatNumber, StatHelpText } from '@chakra-ui/react'
 
-import { formatExp } from '../../../../../utils/format-exp'
+import { formatExp } from '../../../../../common/utils/format-exp'
 
 interface ExpStatsProps {
   totalExp: number

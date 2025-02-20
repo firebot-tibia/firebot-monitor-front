@@ -4,11 +4,11 @@ import { useToast } from '@chakra-ui/react'
 import { create } from 'zustand'
 
 import type { UpsertPlayerInput } from './types'
-import { fixedTypes } from '../../../../../constants/types'
-import { upsertPlayer } from '../../../../../services/guild-stats'
-import { useStorageStore } from '../../../../../stores/storage-store'
-import { useTokenStore } from '../../../../../stores/token-decoded-store'
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
+import { fixedTypes } from '../../../../../common/constants/types'
+import { useStorageStore } from '../../../../../common/stores/storage-store'
+import type { GuildMemberResponse } from '../../../../../common/types/guild-member.response'
+import { useTokenStore } from '../../../auth/store/token-decoded-store'
+import { upsertPlayer } from '../../../statistics/services'
 
 interface CharacterTypesState {
   customTypes: string[]

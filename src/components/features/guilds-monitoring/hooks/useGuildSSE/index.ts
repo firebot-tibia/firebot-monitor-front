@@ -1,176 +1,126 @@
-import { useRef, useMemo, useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useSession } from 'next-auth/react'
 
-import { FIREBOT_SSE_URL } from '@/constants/env'
-import { useSSEStore } from '@/stores/sse-store'
-import { useStorage } from '@/stores/storage-store'
-import { useTokenStore } from '@/stores/token-decoded-store'
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import { FIREBOT_SSE_URL } from '@/common/constants/env'
+import { useSSEStore } from '@/common/sse/sse-store'
+import { useStorage } from '@/common/stores/storage-store'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
+import { useTokenStore } from '@/components/features/auth/store/token-decoded-store'
 
-import { useGuildChanges } from '../useGuildChanges'
-
-interface UseGuildSSEProps {
-  onGuildData?: (data: GuildMemberResponse[]) => void
-  onGuildChanges?: (changes: GuildMemberResponse[]) => void
+interface GuildChange {
+  Name: string
+  Field: string
+  OldValue: string | number | boolean | null
+  NewValue: string | number | boolean | null
 }
 
-export const useGuildSSE = ({ onGuildData, onGuildChanges }: UseGuildSSEProps = {}) => {
+interface UseGuildSSEProps {
+  onGuildData: (data: GuildMemberResponse[]) => void
+  onGuildChanges: (changes: GuildChange[]) => void
+}
+
+export const useGuildSSE = ({ onGuildData, onGuildChanges }: UseGuildSSEProps) => {
   const [value] = useStorage('monitorMode', 'enemy')
   const { data: session } = useSession()
-  const { selectedWorld: world } = useTokenStore()
+  const { selectedWorld } = useTokenStore()
   const { connect, disconnect, status, getUnprocessedMessages, markMessagesAsProcessed } =
     useSSEStore()
-  const { processGuildChanges } = useGuildChanges()
   const processingRef = useRef(false)
   const mountedRef = useRef(true)
   const lastProcessedRef = useRef<number>(0)
 
   const sseEndpoint = useMemo(() => {
     if (!FIREBOT_SSE_URL) {
+      console.error('FIREBOT_SSE_URL is not defined')
       return ''
     }
     const endpoint = `${FIREBOT_SSE_URL}${value}/`
+    console.debug('SSE Endpoint:', endpoint)
     return endpoint
   }, [value])
 
-  // Use refs to avoid unnecessary re-renders
-  const processedDataRef = useRef<GuildMemberResponse[]>([])
-  const processedChangesRef = useRef<GuildMemberResponse[]>([])
-  const batchUpdateRef = useRef<number | null>(null)
-
-  const processMessages = useCallback(async () => {
-    if (!mountedRef.current || status !== 'connected') return
-
-    const unprocessedMessages = getUnprocessedMessages()
-    if (unprocessedMessages.length === 0) return
+  const processMessages = useCallback(() => {
+    if (!mountedRef.current || processingRef.current) return
+    processingRef.current = true
 
     try {
-      console.log('Processing messages:', unprocessedMessages.length)
-      let latestTimestamp = lastProcessedRef.current
+      const unprocessedMessages = getUnprocessedMessages()
+      if (unprocessedMessages.length > 0) {
+        console.debug(`Processing ${unprocessedMessages.length} messages`)
+      }
 
-      // Process all messages first
-      for (const msg of unprocessedMessages) {
-        if (!mountedRef.current) break
-        if (!msg?.data) continue
+      let latestTimestamp = lastProcessedRef.current
+      unprocessedMessages.forEach(msg => {
+        if (!mountedRef.current) return
 
         try {
-          const guildData = msg.data as Record<string, unknown>
-
-          // Process main guild data
-          if (guildData[value] && Array.isArray(guildData[value])) {
-            const newGuildData = guildData[value] as GuildMemberResponse[]
-            processedDataRef.current = newGuildData
+          if (msg.type === 'guild-data') {
+            console.debug('Received guild data:', msg.data?.length || 0, 'members')
+            onGuildData(msg.data)
+          } else if (msg.type === 'guild-changes') {
+            console.debug('Received guild changes')
+            onGuildChanges(msg.data)
           }
-
-          // Process guild changes
-          const changesKey = `${value}-changes`
-          if (guildData[changesKey] && Array.isArray(guildData[changesKey])) {
-            const changes = guildData[changesKey] as GuildMemberResponse[]
-            processedChangesRef.current = changes
-          }
-
           latestTimestamp = Math.max(latestTimestamp, msg.timestamp)
         } catch (error) {
-          console.error('Failed to process SSE message:', error)
-        }
-      }
-
-      // Schedule batch update
-      if (batchUpdateRef.current) {
-        cancelAnimationFrame(batchUpdateRef.current)
-      }
-
-      batchUpdateRef.current = requestAnimationFrame(() => {
-        // Batch update callbacks
-        if (processedDataRef.current.length > 0) {
-          console.log('Updating guild data:', processedDataRef.current.length, 'members')
-          onGuildData?.(processedDataRef.current)
-          processedDataRef.current = []
-        }
-
-        if (processedChangesRef.current.length > 0) {
-          console.log('Processing guild changes:', processedChangesRef.current.length)
-          const changes = processGuildChanges(processedChangesRef.current, [])
-          onGuildChanges?.(changes.loggedInMembers)
-          processedChangesRef.current = []
-        }
-
-        if (mountedRef.current && latestTimestamp > lastProcessedRef.current) {
-          lastProcessedRef.current = latestTimestamp
-          markMessagesAsProcessed(latestTimestamp)
+          console.error('Error processing message:', error, msg)
         }
       })
+
+      if (mountedRef.current && latestTimestamp > lastProcessedRef.current) {
+        markMessagesAsProcessed(latestTimestamp)
+        lastProcessedRef.current = latestTimestamp
+      }
     } catch (error) {
-      console.error('Failed to process messages:', error)
+      console.error('Error in processMessages:', error)
+    } finally {
+      processingRef.current = false
     }
-  }, [
-    getUnprocessedMessages,
-    markMessagesAsProcessed,
-    onGuildData,
-    onGuildChanges,
-    processGuildChanges,
-    value,
-    status,
-  ])
+  }, [getUnprocessedMessages, markMessagesAsProcessed, onGuildData, onGuildChanges])
 
   useEffect(() => {
     mountedRef.current = true
-    let connectionTimeout: NodeJS.Timeout
+    console.debug('SSE Dependencies:', {
+      hasSession: !!session?.access_token,
+      selectedWorld,
+      sseEndpoint,
+      status,
+    })
 
-    const connectWithRetry = async () => {
-      if (!mountedRef.current) return
-      if (session?.access_token && world && sseEndpoint) {
-        try {
-          await connect(sseEndpoint, session.access_token, world)
-        } catch (error) {
-          console.error('Failed to connect to SSE:', error)
-          // Retry connection after 5 seconds
-          connectionTimeout = setTimeout(connectWithRetry, 5000)
-        }
-      }
+    if (session?.access_token && selectedWorld && sseEndpoint) {
+      console.debug('Connecting to SSE...')
+      connect(sseEndpoint, session.access_token, selectedWorld)
+    } else {
+      console.warn('Missing required SSE connection parameters')
     }
 
-    connectWithRetry()
-
     return () => {
+      console.debug('Cleaning up SSE connection')
       mountedRef.current = false
       processingRef.current = false
       if (status === 'connected') {
         disconnect()
       }
-      if (connectionTimeout) {
-        clearTimeout(connectionTimeout)
-      }
     }
-  }, [world, session?.access_token, sseEndpoint])
+  }, [connect, disconnect, selectedWorld, session?.access_token, sseEndpoint, status])
 
   useEffect(() => {
     if (!mountedRef.current) return
 
-    let processingInterval: NodeJS.Timeout
-
-    const processIfConnected = () => {
-      if (mountedRef.current && status === 'connected' && !processingRef.current) {
+    const interval = setInterval(() => {
+      if (status === 'connected') {
         processMessages()
       }
-    }
-
-    if (status === 'connected') {
-      // Process immediately when connected
-      processIfConnected()
-      // Then set up interval for future processing
-      processingInterval = setInterval(processIfConnected, 5000)
-    }
+    }, 1000)
 
     return () => {
-      if (processingInterval) {
-        clearInterval(processingInterval)
-      }
+      clearInterval(interval)
     }
-  }, [status, processMessages])
+  }, [processMessages, status])
 
   return {
+    isConnected: status === 'connected',
     status,
   }
 }

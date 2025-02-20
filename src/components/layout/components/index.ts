@@ -1,7 +1,0 @@
-export { default as Footer } from './footer'
-export { default as Navbar } from './navbar'
-export { default as Header } from './header'
-export { default as Sidebar } from './sidebar'
-export { default as LoginButton } from './navbar/login-button'
-export { default as ModeSelect } from './header/components/mode-select'
-export { default as WorldSelect } from './header/components/world-select'
