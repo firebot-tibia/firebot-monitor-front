@@ -2,7 +2,17 @@
 
 import { useCallback } from 'react'
 
-import { Center, Spinner, SimpleGrid, Box, Text, VStack, HStack, Badge, Tooltip } from '@chakra-ui/react'
+import {
+  Center,
+  Spinner,
+  SimpleGrid,
+  Box,
+  Text,
+  VStack,
+  HStack,
+  Badge,
+  Tooltip,
+} from '@chakra-ui/react'
 
 import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 import { useAlertSound } from '@/components/features/monitoring/hooks/useAlertSound'
@@ -54,7 +64,7 @@ export default function GuildContainer() {
         throw error // Re-throw para manter comportamento de erro
       }
     },
-    [handleLocalChange]
+    [handleLocalChange],
   )
 
   const renderContent = () => {
@@ -76,20 +86,15 @@ export default function GuildContainer() {
 
     return (
       <VStack w="full" spacing={4} align="stretch">
-        <Box
-          px={4}
-          py={3}
-          bg="#0D0D0D"
-          borderColor="#141414"
-          borderWidth="1px"
-          borderRadius="md"
-        >
+        <Box px={4} py={3} bg="#0D0D0D" borderColor="#141414" borderWidth="1px" borderRadius="md">
           <VStack spacing={3} align="stretch">
             <HStack justify="space-between" align="center">
               <HStack spacing={4}>
                 <Tooltip label="SSE Connection Status">
                   <Badge
-                    colorScheme={status === 'connected' ? 'green' : status === 'connecting' ? 'yellow' : 'red'}
+                    colorScheme={
+                      status === 'connected' ? 'green' : status === 'connecting' ? 'yellow' : 'red'
+                    }
                     variant="subtle"
                   >
                     {status.toUpperCase()}
@@ -114,24 +119,14 @@ export default function GuildContainer() {
             </HStack>
           </VStack>
         </Box>
-        <Box
-          w="full"
-          px={2}
-          py={2}
-          overflow="auto"
-          css={scrollbarStyles}
-        >
-        <SimpleGrid
-          columns={{ base: 1, lg: 3 }}
-          spacing={{ base: 4, lg: 6 }}
-          minChildWidth={{ base: '100%', lg: '400px' }}
-        >
-          {groupedData.map(({ type, data, onlineCount }) => (
-            <Box
-              key={type}
-              w="full"
-              maxW="100%"
-            >
+        <Box w="full" px={2} py={2} overflow="auto" css={scrollbarStyles}>
+          <SimpleGrid
+            columns={{ base: 1, lg: 3 }}
+            spacing={{ base: 4, lg: 6 }}
+            minChildWidth={{ base: '100%', lg: '400px' }}
+          >
+            {groupedData.map(({ type, data, onlineCount }) => (
+              <Box key={type} w="full" maxW="100%">
                 <GuildTable
                   key={type}
                   type={type}
@@ -143,17 +138,13 @@ export default function GuildContainer() {
                   addType={addType}
                   isLoading={isLoading}
                 />
-            </Box>
-          ))}
-        </SimpleGrid>
-      </Box>
+              </Box>
+            ))}
+          </SimpleGrid>
+        </Box>
       </VStack>
     )
   }
 
-  return (
-    <DashboardLayout>
-      {renderContent()}
-    </DashboardLayout>
-  )
+  return <DashboardLayout>{renderContent()}</DashboardLayout>
 }

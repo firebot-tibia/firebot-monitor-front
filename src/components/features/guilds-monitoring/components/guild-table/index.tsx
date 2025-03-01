@@ -96,7 +96,7 @@ export const GuildTable = ({
     dataLength: data?.length || 0,
     filteredLength: filteredData?.length || 0,
     onlineCount,
-    isLoading
+    isLoading,
   })
 
   // Show loading state
@@ -171,11 +171,7 @@ export const GuildTable = ({
 
       {/* Table */}
       <Table variant="unstyled" size="xs" layout="fixed" w="full">
-        <TableHeader
-          sortConfig={sortConfig}
-          onSort={handleSort}
-          showExivaInput={showExivaInput}
-        />
+        <TableHeader sortConfig={sortConfig} onSort={handleSort} showExivaInput={showExivaInput} />
         <Tbody>
           {filteredData.length > 0 ? (
             filteredData.map((member, index) => (

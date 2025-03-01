@@ -80,7 +80,7 @@ export const ReservationTable: React.FC<ReservationTableProps> = props => {
   )
 
   const { onFetchReservation } = props
-  
+
   const handleConfirmDelete = useCallback(
     async (deleteAll: boolean) => {
       setIsDeleting(true)

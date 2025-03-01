@@ -31,9 +31,7 @@ const WorldSelect = () => {
   }, [])
 
   // Get all available worlds from the decoded token
-  const availableWorlds = isClient && decodedToken?.guilds
-    ? Object.keys(decodedToken.guilds)
-    : []
+  const availableWorlds = isClient && decodedToken?.guilds ? Object.keys(decodedToken.guilds) : []
 
   // Theme constants
   const baseColor = 'purple.400'
@@ -56,8 +54,10 @@ const WorldSelect = () => {
 
   // Only show selected world on the client to avoid hydration mismatch
   const displayWorldName = !isClient
-    ? 'Selecionar Mundo'  // Server-rendered value - must match what's in the HTML
-    : (selectedWorld ? capitalizeFirstLetter(selectedWorld) : 'Selecionar Mundo')
+    ? 'Selecionar Mundo' // Server-rendered value - must match what's in the HTML
+    : selectedWorld
+      ? capitalizeFirstLetter(selectedWorld)
+      : 'Selecionar Mundo'
 
   // Create menu items array outside of JSX to simplify rendering
   const worldMenuItems = availableWorlds.map((world: string) => (

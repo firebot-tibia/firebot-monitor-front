@@ -27,22 +27,23 @@ interface ModeConfig {
   icon: JSX.Element
 }
 
-const getModeConfig = (mode: Mode, isClient: boolean): ModeConfig => ({
-  ally: {
-    label: 'Aliado',
-    color: 'green.400',
-    hoverColor: 'green.500',
-    bgColor: 'rgba(74, 222, 128, 0.1)',
-    icon: <Shield size={16} color={isClient ? '#4ADE80' : '#F87171'} />,
-  },
-  enemy: {
-    label: 'Inimigo',
-    color: 'red.400',
-    hoverColor: 'red.500',
-    bgColor: 'rgba(248, 113, 113, 0.1)',
-    icon: <Shield size={16} color="#F87171" />,
-  },
-})[mode]
+const getModeConfig = (mode: Mode, isClient: boolean): ModeConfig =>
+  ({
+    ally: {
+      label: 'Aliado',
+      color: 'green.400',
+      hoverColor: 'green.500',
+      bgColor: 'rgba(74, 222, 128, 0.1)',
+      icon: <Shield size={16} color={isClient ? '#4ADE80' : '#F87171'} />,
+    },
+    enemy: {
+      label: 'Inimigo',
+      color: 'red.400',
+      hoverColor: 'red.500',
+      bgColor: 'rgba(248, 113, 113, 0.1)',
+      icon: <Shield size={16} color="#F87171" />,
+    },
+  })[mode]
 
 const ModeSelect = () => {
   const toast = useToast()

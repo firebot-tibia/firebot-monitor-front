@@ -16,20 +16,13 @@ interface LoggerProviderProps {
 /**
  * Provider component to make logger available throughout the React tree
  */
-export const LoggerProvider: React.FC<LoggerProviderProps> = ({
-  children,
-  config
-}) => {
+export const LoggerProvider: React.FC<LoggerProviderProps> = ({ children, config }) => {
   // Create or get the logger instance with configuration
   const logger = useMemo(() => {
     return LoggerService.getInstance(config)
   }, [config])
 
-  return (
-    <LoggerContext.Provider value={logger}>
-      {children}
-    </LoggerContext.Provider>
-  )
+  return <LoggerContext.Provider value={logger}>{children}</LoggerContext.Provider>
 }
 
 /**

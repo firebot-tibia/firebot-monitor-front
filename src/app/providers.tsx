@@ -12,7 +12,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
       <LoggerProvider config={{ maxHistorySize: 1000, enabled: true }}>
-      <ChakraProvider theme={theme}>{children}</ChakraProvider>
+        <ChakraProvider theme={theme}>{children}</ChakraProvider>
       </LoggerProvider>
     </SessionProvider>
   )

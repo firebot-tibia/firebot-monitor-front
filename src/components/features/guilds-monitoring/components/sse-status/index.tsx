@@ -10,7 +10,7 @@ export const SSEStatus = () => {
   // Create no-op handlers since we only want to monitor status
   const { status, isConnected } = useGuildSSE({
     onGuildData: () => {},
-    onGuildChanges: () => {}
+    onGuildChanges: () => {},
   })
 
   // Track connection uptime
@@ -52,13 +52,7 @@ export const SSEStatus = () => {
   }
 
   return (
-    <Box
-      bg="#0D0D0D"
-      borderColor="#141414"
-      borderWidth="1px"
-      borderRadius="md"
-      p={2}
-    >
+    <Box bg="#0D0D0D" borderColor="#141414" borderWidth="1px" borderRadius="md" p={2}>
       <HStack spacing={4}>
         <Tooltip label="SSE Connection Status">
           <Badge colorScheme={getStatusColor()} variant="subtle">
