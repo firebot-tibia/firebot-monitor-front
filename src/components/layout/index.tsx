@@ -1,44 +1,37 @@
-'use client';
+'use client'
+import { Box, Flex } from '@chakra-ui/react'
+import { useSession } from 'next-auth/react'
 
-import { Box, Flex } from "@chakra-ui/react";
-import { FC, useState } from "react";
-import Topbar from "./topbar";
-import { Navbar } from "./navbar";
+import { Footer } from './components'
+import Header from './components/header'
+import UnauthenticatedSidebar from './components/sidebar'
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
-  mode?: 'ally' | 'enemy';
-  setMode?: (mode: 'ally' | 'enemy') => void;
+  children: React.ReactNode
 }
 
-const DashboardLayout: FC<DashboardLayoutProps> = ({ children, mode, setMode }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
-  };
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const { status } = useSession()
+  const isAuthenticated = status === 'authenticated'
 
   return (
-    <Flex direction="column" h="100vh">
-      <Topbar 
-        onToggleMenu={handleToggle} 
-        mode={mode} 
-        setMode={setMode}
-      />
-      
-      <Flex flex="1">
-        <Navbar isOpen={isOpen} onToggle={handleToggle} />
-        <Box 
-          ml={isOpen ? "240px" : "60px"} 
-          p={12} 
-          w={`calc(100% - ${isOpen ? "240px" : "60px"})`}
-          transition="margin-left 0.3s ease, width 0.3s ease"
-        >
-          {children}
+    <Flex direction="column" minH="100vh">
+      <Flex flex={1}>
+        {!isAuthenticated && <UnauthenticatedSidebar />}
+        <Box flex={1} display="flex" flexDirection="column" ml={isAuthenticated ? 0 : '60px'}>
+          {/* Header */}
+          {isAuthenticated && <Header />}
+
+          {/* Main Content */}
+          <Box flex={1} p={6}>
+            {children}
+          </Box>
         </Box>
       </Flex>
-    </Flex>
-  );
-};
 
-export default DashboardLayout;
+      {!isAuthenticated && <Footer />}
+    </Flex>
+  )
+}
+
+export default DashboardLayout

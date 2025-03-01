@@ -1,0 +1,33 @@
+
+Adicionar avisos de mortes no site e level up
+Refatorar a parte de estatistica para popup
+exiva automatico
+
+
+Criar boilerplate nestjs e aglutinar tudo que tem de backend + payments la
+Refazer a estrutura da pagina principal
+
+- Melhorar a guild list
+  - refatorar ela inteira, melhorando design e usabilidade
+  - adicionar filtros e suporte lateral facil de ser utilizado
+  - adicionar link para tibia ring e tibia
+  - adicionar estrutura de morte e levelUp
+  - adicionar estrutura de aviso de masslog
+  - adicionar para criar reserva para inimigo ao editar o local do input
+
+- Melhorar a utilizacao da estatistica - mudar para popup
+  - Melhorar a UI/UX
+
+- Melhorar o reservations - mudar para popup
+  - Melhorar a UI/UX
+
+- Melhorar o mapa exiva - mudar para popup
+  - Melhorar a UI/UX
+  - Finalizar a triangulacao automatica
+
+- cobrir a aplicacao inteira com testes
+  - adicionar testes para o back-end
+  - adicionar testes para o front-end
+
+- juntar o back-end do blog com o do tibia-tools
+- terminar o blog e a landing page do firebot.run

@@ -2,31 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-
 html {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
 }
 
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
 body {
-  @apply bg-dark-gradient text-white font-sans;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   scrollbar-width: thin;
-  scrollbar-color: #8B949E #F5F5F5;
-}
-
-@media screen and (max-width: 1200px) {
-  .chakra-table th, .chakra-table td {
-    padding: 0.5rem 0.25rem;
-  }
-}
-
-@media screen and (max-width: 992px) {
-  .chakra-table {
-    font-size: 0.8rem;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .chakra-table {
-    font-size: 0.7rem;
-  }
+  scrollbar-color: #8b949e #f5f5f5;
 }
