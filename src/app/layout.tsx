@@ -2,7 +2,6 @@
 import '../common/styles/globals.css'
 import type { Metadata } from 'next'
 
-
 import { GoogleTagManager } from '@/components/layout/components/google-tag'
 
 import { Providers } from './providers'
@@ -34,14 +33,10 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" style={{ colorScheme: 'dark' }}>
+      <body style={{ backgroundColor: '#000' }}>
         <Providers>
           <GoogleTagManager />
           {children}

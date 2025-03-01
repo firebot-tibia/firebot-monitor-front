@@ -41,7 +41,7 @@ export const useLogin = () => {
     return waitForSession(attempts - 1)
   }
 
-  const handleLogin = async () => {
+  const handleLogin = async (): Promise<boolean> => {
     try {
       setIsLoading(true)
       setErrors({})
@@ -51,7 +51,7 @@ export const useLogin = () => {
         const fieldErrors = handleValidationErrors(validationResult.error)
         setErrors(fieldErrors)
         setIsLoading(false)
-        return
+        return false
       }
 
       const result = await signIn('credentials', {
@@ -76,8 +76,10 @@ export const useLogin = () => {
         isClosable: true,
       })
 
-      router.push(routes.guild)
-      router.refresh()
+      // Ensure navigation is complete before proceeding
+      await router.push(routes.guild)
+      await router.refresh()
+      return true
     } catch (error) {
       setErrors({ password: 'Verifique as credênciais fornecidas' })
       toast({
@@ -86,6 +88,7 @@ export const useLogin = () => {
         status: 'error',
         duration: 3000,
       })
+      return false
     } finally {
       setIsLoading(false)
     }

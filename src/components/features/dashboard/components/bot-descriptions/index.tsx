@@ -12,7 +12,7 @@ import {
   Text,
   chakra,
   shouldForwardProp,
-  Tooltip
+  Tooltip,
 } from '@chakra-ui/react'
 import { motion, isValidMotionProp } from 'framer-motion'
 import {
@@ -27,7 +27,7 @@ import {
   Eye,
   Crown,
   Sparkles,
-  Rocket
+  Rocket,
 } from 'lucide-react'
 import Image from 'next/image'
 
@@ -35,7 +35,7 @@ import { routes } from '../../../../../common/constants/routes'
 
 // Chakra motion components
 const MotionBox = chakra(motion.div, {
-  shouldForwardProp: (prop) => isValidMotionProp(prop) || shouldForwardProp(prop),
+  shouldForwardProp: prop => isValidMotionProp(prop) || shouldForwardProp(prop),
 })
 
 // Features data
@@ -43,13 +43,14 @@ const features = [
   {
     icon: <Activity />,
     title: 'Análise Avançada de Jogadores',
-    description: 'Acompanhe EXP, tempo online, e padrões de jogo com gráficos detalhados e análises preditivas.',
+    description:
+      'Acompanhe EXP, tempo online, e padrões de jogo com gráficos detalhados e análises preditivas.',
     premium: [
       'Histórico completo de EXP por hora',
       'Detecção de padrões de jogo suspeitos',
-      'Relatórios personalizados de progresso'
+      'Relatórios personalizados de progresso',
     ],
-    highlight: 'Aumente sua eficiência com análises detalhadas'
+    highlight: 'Aumente sua eficiência com análises detalhadas',
   },
   {
     icon: <Map />,
@@ -58,20 +59,21 @@ const features = [
     premium: [
       'Mapa interativo de hunting spots',
       'Histórico detalhado de ocupação',
-      'Previsão de disponibilidade'
+      'Previsão de disponibilidade',
     ],
-    highlight: 'Nunca perca um spot livre novamente'
+    highlight: 'Nunca perca um spot livre novamente',
   },
   {
     icon: <Shield />,
     title: 'Sistema Anti-Maker',
-    description: 'Proteção avançada contra makers com alertas instantâneos e análise de comportamento.',
+    description:
+      'Proteção avançada contra makers com alertas instantâneos e análise de comportamento.',
     premium: [
       'Detecção automática de makers',
       'Alertas via Discord e Telegram',
-      'Análise de padrões suspeitos'
+      'Análise de padrões suspeitos',
     ],
-    highlight: 'Proteção total contra makers'
+    highlight: 'Proteção total contra makers',
   },
   {
     icon: <Database />,
@@ -80,32 +82,26 @@ const features = [
     premium: [
       'Timer sincronizado com o servidor',
       'Histórico de kills por respawn',
-      'Previsão de respawn com IA'
+      'Previsão de respawn com IA',
     ],
-    highlight: 'Otimize suas rotas de caça'
+    highlight: 'Otimize suas rotas de caça',
   },
   {
     icon: <Eye />,
     title: 'Monitoramento Inteligente',
-    description: 'Acompanhamento 24/7 com sistema de alertas personalizados e dashboards em tempo real.',
-    premium: [
-      'Dashboards personalizáveis',
-      'Alertas configuráveis',
-      'Relatórios automáticos'
-    ],
-    highlight: 'Controle total do seu jogo'
+    description:
+      'Acompanhamento 24/7 com sistema de alertas personalizados e dashboards em tempo real.',
+    premium: ['Dashboards personalizáveis', 'Alertas configuráveis', 'Relatórios automáticos'],
+    highlight: 'Controle total do seu jogo',
   },
   {
     icon: <Crown />,
     title: 'Inteligência de Guild',
-    description: 'Sistema completo de inteligência para monitorar e analisar atividades de guilds rivais.',
-    premium: [
-      'Análise de membros online',
-      'Rastreamento de territórios',
-      'Histórico de guerras'
-    ],
-    highlight: 'Domine a política do servidor'
-  }
+    description:
+      'Sistema completo de inteligência para monitorar e analisar atividades de guilds rivais.',
+    premium: ['Análise de membros online', 'Rastreamento de territórios', 'Histórico de guerras'],
+    highlight: 'Domine a política do servidor',
+  },
 ]
 
 const BotDescriptions = () => {
@@ -139,12 +135,12 @@ const BotDescriptions = () => {
             justify="center"
             gap={8}
             w="full"
-            maxW={{ base: "100%", md: "container.md" }}
+            maxW={{ base: '100%', md: 'container.md' }}
             mx="auto"
-            textAlign={{ base: "center", lg: "left" }}
+            textAlign={{ base: 'center', lg: 'left' }}
           >
             {/* Left Side - Content */}
-                          <Stack
+            <Stack
               spacing={8}
               flex={1}
               align="center"
@@ -163,8 +159,8 @@ const BotDescriptions = () => {
               </Heading>
 
               <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.400">
-                Domine o jogo com as ferramentas mais avançadas do mercado.
-                Monitoramento inteligente, análise de dados e proteção anti-maker em tempo real.
+                Domine o jogo com as ferramentas mais avançadas do mercado. Monitoramento
+                inteligente, análise de dados e proteção anti-maker em tempo real.
               </Text>
 
               <Stack
@@ -244,12 +240,7 @@ const BotDescriptions = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                   >
-                    <Tooltip
-                      label={feature.highlight}
-                      placement="top"
-                      hasArrow
-                      bg="red.500"
-                    >
+                    <Tooltip label={feature.highlight} placement="top" hasArrow bg="red.500">
                       <Box
                         p={6}
                         bg="black.900"
@@ -281,7 +272,9 @@ const BotDescriptions = () => {
                             {feature.premium.map((item, i) => (
                               <Flex key={i} gap={2} align="center">
                                 <CheckCircle size={16} color="green" />
-                                <Text fontSize="sm" color="gray.400">{item}</Text>
+                                <Text fontSize="sm" color="gray.400">
+                                  {item}
+                                </Text>
                               </Flex>
                             ))}
                           </Stack>
@@ -311,12 +304,7 @@ const BotDescriptions = () => {
               </Text>
             </Stack>
 
-            <Flex
-              direction={{ base: 'column', lg: 'row' }}
-              gap={8}
-              align="center"
-              justify="center"
-            >
+            <Flex direction={{ base: 'column', lg: 'row' }} gap={8} align="center" justify="center">
               {/* Pricing Card */}
               <MotionBox
                 maxW="md"
@@ -330,14 +318,11 @@ const BotDescriptions = () => {
               >
                 <Stack spacing={6}>
                   <Flex align="center" justify="center" gap={4}>
-                    <Image
-                      src="/assets/tibiaCoins.gif"
-                      alt="Tibia Coins"
-                      width={32}
-                      height={32}
-                    />
+                    <Image src="/assets/tibiaCoins.gif" alt="Tibia Coins" width={32} height={32} />
                     <Stack spacing={0} textAlign="center">
-                      <Text fontSize="3xl" fontWeight="bold">750 Tibia Coins</Text>
+                      <Text fontSize="3xl" fontWeight="bold">
+                        750 Tibia Coins
+                      </Text>
                       <Text color="gray.400">por mês</Text>
                     </Stack>
                   </Flex>
@@ -347,29 +332,31 @@ const BotDescriptions = () => {
                       {
                         icon: <Sparkles />,
                         title: 'Acesso Premium Completo',
-                        description: 'Desbloqueie todo o potencial do Firebot'
+                        description: 'Desbloqueie todo o potencial do Firebot',
                       },
                       {
                         icon: <Bell />,
                         title: 'Suporte 24/7',
-                        description: 'Atendimento prioritário via Discord'
+                        description: 'Atendimento prioritário via Discord',
                       },
                       {
                         icon: <Target />,
                         title: '7 Dias Grátis',
-                        description: 'Teste todas as funcionalidades premium'
+                        description: 'Teste todas as funcionalidades premium',
                       },
                       {
                         icon: <Rocket />,
                         title: 'Atualizações Constantes',
-                        description: 'Novas funcionalidades regularmente'
-                      }
+                        description: 'Novas funcionalidades regularmente',
+                      },
                     ].map((feature, index) => (
                       <Flex key={index} align="center" gap={3}>
                         <Box color="red.400">{feature.icon}</Box>
                         <Stack spacing={0}>
                           <Text fontWeight="bold">{feature.title}</Text>
-                          <Text color="gray.400" fontSize="sm">{feature.description}</Text>
+                          <Text color="gray.400" fontSize="sm">
+                            {feature.description}
+                          </Text>
                         </Stack>
                       </Flex>
                     ))}

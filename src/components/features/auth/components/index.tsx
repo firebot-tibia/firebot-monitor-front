@@ -12,23 +12,13 @@ import { LoadingTransition } from './loading'
 import { useLastLogin } from '../hooks/rememberMe'
 import { useLogin } from '../hooks/useLogin'
 
-
-
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    errors,
-    isLoading,
-    handleLogin
-  } = useLogin()
+  const { email, setEmail, password, setPassword, errors, isLoading, handleLogin } = useLogin()
 
   const { getLastLogin, saveLastLogin, clearLastLogin } = useLastLogin()
 
@@ -36,12 +26,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [rememberMe, setRememberMe] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
 
-   // Sincroniza estado de loading
-   useEffect(() => {
-    if (!isLoading && isTransitioning) {
+  // Sincroniza estado de loading
+  useEffect(() => {
+    if (!isLoading) {
       setIsTransitioning(false)
     }
-  }, [isLoading, isTransitioning])
+  }, [isLoading])
 
   // Limpa estados quando modal fecha
   useEffect(() => {
@@ -53,19 +43,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   // Load saved credentials when modal opens
   useEffect(() => {
     if (isOpen) {
-      const loadSavedCredentials = async () => {
-        const savedLogin = getLastLogin()
-        if (savedLogin) {
-          setEmail(savedLogin.email)
-          setPassword(savedLogin.password)
-          setRememberMe(true)
-        } else {
-          setEmail('')
-          setPassword('')
-          setRememberMe(false)
-        }
+      const savedLogin = getLastLogin()
+      if (savedLogin) {
+        setEmail(savedLogin.email)
+        setPassword(savedLogin.password)
+        setRememberMe(true)
+      } else {
+        setEmail('')
+        setPassword('')
+        setRememberMe(false)
       }
-      loadSavedCredentials()
     }
   }, [isOpen])
 
@@ -74,19 +61,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
     try {
       setIsTransitioning(true)
-      await handleLogin()
+      const success = await handleLogin()
 
-      // Handle remembered credentials
-      if (rememberMe) {
-        saveLastLogin(email, password)
+      if (success) {
+        // Handle remembered credentials
+        if (rememberMe) {
+          saveLastLogin(email, password)
+        } else {
+          clearLastLogin()
+        }
+
+        // Keep transition active until navigation completes
+        // Modal will be unmounted by route change
+        onClose()
+      } else {
+        setIsTransitioning(false)
       }
-
-      clearLastLogin()
-      onClose()
-
     } catch (error) {
       console.error('Login error:', error)
-    } finally {
       setIsTransitioning(false)
     }
   }
@@ -119,7 +111,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     className="absolute right-4 top-4 rounded-full p-2 text-gray-400 transition-colors hover:bg-white/10"
                   >
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
 
@@ -128,7 +125,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     className="mb-8 flex justify-center"
                     initial={{ scale: 0.9 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   >
                     <div className="relative h-32 w-32">
                       <Image
@@ -154,7 +151,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                           placeholder="Digite seu e-mail"
                           disabled={isLoading}
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={e => setEmail(e.target.value)}
                         />
                         {errors.email && (
                           <motion.p
@@ -179,7 +176,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             placeholder="Digite sua senha"
                             disabled={isLoading}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={e => setPassword(e.target.value)}
                           />
                           <button
                             type="button"
@@ -207,7 +204,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                         type="checkbox"
                         id="remember"
                         checked={rememberMe}
-                        onChange={(e) => {
+                        onChange={e => {
                           setRememberMe(e.target.checked)
                           if (!e.target.checked) {
                             clearLastLogin()
@@ -264,9 +261,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {isTransitioning && <LoadingTransition />}
-      </AnimatePresence>
+      <AnimatePresence>{isTransitioning && <LoadingTransition />}</AnimatePresence>
     </>
   )
 }

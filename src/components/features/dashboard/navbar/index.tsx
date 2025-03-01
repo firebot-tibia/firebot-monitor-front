@@ -3,14 +3,7 @@
 import { useState, useEffect } from 'react'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Menu,
-  X,
-  Home,
-  Bot,
-  HelpCircle,
-  LogIn
-} from 'lucide-react'
+import { Menu, X, Home, Bot, HelpCircle, LogIn } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -19,7 +12,7 @@ import { routes } from '../../../../common/constants/routes'
 const navItems = [
   { name: 'Home', icon: Home, path: routes.home },
   { name: 'Ferramentas', icon: Bot, path: routes.editor },
-  { name: 'Suporte Discord', icon: HelpCircle, path: routes.discordUrl }
+  { name: 'Suporte Discord', icon: HelpCircle, path: routes.discordUrl },
 ]
 
 interface UnauthenticatedNavbarProps {
@@ -53,7 +46,7 @@ const UnauthenticatedNavbar: React.FC<UnauthenticatedNavbarProps> = ({ onOpenMod
 
   const NavContent = () => (
     <div className="flex flex-col gap-4">
-      {navItems.map((item) => (
+      {navItems.map(item => (
         <Link
           key={item.path}
           href={item.path}
@@ -69,8 +62,9 @@ const UnauthenticatedNavbar: React.FC<UnauthenticatedNavbarProps> = ({ onOpenMod
   )
 
   return (
-    <nav className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300
-      ${isScrolled ? 'bg-black/80 backdrop-blur-md shadow-lg' : ''}`}
+    <nav
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300
+      ${isScrolled ? 'bg-black/80 shadow-lg backdrop-blur-md' : ''}`}
     >
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
@@ -83,7 +77,7 @@ const UnauthenticatedNavbar: React.FC<UnauthenticatedNavbarProps> = ({ onOpenMod
             {/* Desktop Navigation */}
             {!isMobile && (
               <div className="flex gap-4">
-                {navItems.map((item) => (
+                {navItems.map(item => (
                   <Link
                     key={item.path}
                     href={item.path}

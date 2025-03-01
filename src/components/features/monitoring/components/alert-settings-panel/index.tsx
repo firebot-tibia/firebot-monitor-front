@@ -62,13 +62,19 @@ export const AlertSettingsPanel = ({
 
   const { activeCharacterCount } = useCharacterTracker(timeThreshold, memberThreshold)
 
-  const handleTimeThresholdChange = useCallback((value: number) => {
-    updateSettings({ timeThreshold: value })
-  }, [updateSettings])
+  const handleTimeThresholdChange = useCallback(
+    (value: number) => {
+      updateSettings({ timeThreshold: value })
+    },
+    [updateSettings],
+  )
 
-  const handleMemberThresholdChange = useCallback((value: number) => {
-    updateSettings({ memberThreshold: value })
-  }, [updateSettings])
+  const handleMemberThresholdChange = useCallback(
+    (value: number) => {
+      updateSettings({ memberThreshold: value })
+    },
+    [updateSettings],
+  )
 
   const handleUpdateAlert = useCallback(
     (alertId: string, field: keyof AlertCondition, value: any) => {
@@ -105,8 +111,6 @@ export const AlertSettingsPanel = ({
             )}
 
             <VStack spacing={4} align="stretch">
-
-
               <HStack justify="space-between" align="center">
                 <Text fontWeight="medium" fontSize="sm">
                   Condições de Alerta

@@ -8,10 +8,14 @@ const config: ThemeConfig = {
 
 const styles = {
   global: {
-    body: {
-      bg: 'black.900',
+    'html, body': {
+      bg: '#000',
       color: 'white',
       fontFamily: 'var(--font-sans)',
+    },
+    '#__next': {
+      bg: '#000',
+      minHeight: '100vh',
     },
   },
 }

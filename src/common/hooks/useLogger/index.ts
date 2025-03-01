@@ -1,232 +1,64 @@
-/* eslint-disable no-console */
-import chalk from 'chalk'
-import type { ChalkInstance } from 'chalk'
-import type { NextRequest, NextResponse } from 'next/server'
+'use client'
 
-import type { LogEntry, LogError, LogLevel } from './types'
+import { useLoggerContext } from './logger.context'
+import { LoggerService } from './logger.service'
+import type { UseLoggerReturn, LoggerConfig } from './types'
 
-export class Logger {
-  private static instance: Logger
-  private requestId: string
-  private logHistory: LogEntry[] = []
-  private readonly maxHistorySize = 1000
-  private readonly isProduction = process.env.NODE_ENV === 'production'
-  private readonly isEnabled = !this.isProduction
+/**
+ * Custom hook for using the logger in React components
+ *
+ * @param config - Optional configuration for the logger
+ * @returns All logging methods and the logger instance
+ *
+ * @example
+ * ```tsx
+ * const { info, error, warn, debug } = useLogger();
+ *
+ * // Log information
+ * info('User logged in', { userId: '123' });
+ *
+ * // Log errors with proper stack traces
+ * try {
+ *   // Some code that might throw
+ * } catch (err) {
+ *   error('Operation failed', err);
+ * }
+ * ```
+ */
+export const useLogger = (config?: LoggerConfig): UseLoggerReturn => {
+  // Get logger from context, or fallback to singleton
+  const loggerContext = useLoggerContext()
 
-  private constructor() {
-    this.requestId = this.generateRequestId()
-  }
+  // Apply any custom config to the logger
+  const logger = config ? LoggerService.getInstance(config) : loggerContext
 
-  static getInstance(): Logger {
-    if (!this.instance) {
-      this.instance = new Logger()
-    }
-    return this.instance
-  }
+  // Create a memoized wrapper with all logger methods
+  return {
+    // Expose the logger instance directly
+    logger,
 
-  private generateRequestId(): string {
-    if (!this.isEnabled) return ''
-    return `${Date.now()}-${Math.random().toString(36).substring(7)}`
-  }
+    // Expose request ID and enabled state
+    isEnabled: (logger as LoggerService).getIsEnabled(),
+    requestId: (logger as LoggerService).getRequestId(),
 
-  private getTimestamp(): string {
-    return new Date().toISOString()
-  }
+    // Forward all logging methods
+    logApi: (method, path, data, startTime) => logger.logApi(method, path, data, startTime),
 
-  private getDuration(startTime: number): number {
-    return Date.now() - startTime
-  }
+    logRoute: (method, path, data, startTime) => logger.logRoute(method, path, data, startTime),
 
-  private formatError(error: unknown): LogError {
-    if (!this.isEnabled) return { message: '', code: 'DISABLED' }
+    info: (message, data, startTime) => logger.info(message, data, startTime),
 
-    if (error instanceof Error) {
-      return {
-        message: error.message,
-        stack: this.isEnabled ? error.stack : undefined,
-        code: 'ERROR',
-      }
-    }
+    error: (message, error, startTime) => logger.error(message, error, startTime),
 
-    if (typeof error === 'string') {
-      return {
-        message: error,
-        code: 'STRING_ERROR',
-      }
-    }
+    warn: (message, data, startTime) => logger.warn(message, data, startTime),
 
-    return {
-      message: 'Unknown error occurred',
-      code: 'UNKNOWN_ERROR',
-      ...(error as object),
-    }
-  }
+    debug: (message, data, startTime) => logger.debug(message, data, startTime),
 
-  private log(level: LogLevel, message: string, data?: any, startTime?: number): void {
-    if (!this.isEnabled) return
+    getLogHistory: () => logger.getLogHistory(),
 
-    const duration = startTime ? this.getDuration(startTime) : undefined
-
-    const entry: LogEntry = {
-      timestamp: this.getTimestamp(),
-      level,
-      message,
-      requestId: this.requestId,
-      data,
-      duration,
-    }
-
-    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-      this.logHistory.unshift(entry)
-      if (this.logHistory.length > this.maxHistorySize) {
-        this.logHistory.pop()
-      }
-    }
-
-    const timestamp = chalk.gray(entry.timestamp)
-    const requestId = chalk.gray(`[${entry.requestId}]`)
-    const durationStr = duration ? chalk.cyan(` (${duration}ms)`) : ''
-
-    let levelColor: ChalkInstance
-    let prefix: string
-
-    switch (level) {
-      case 'api':
-        levelColor = chalk.blue
-        prefix = '🌐 API'
-        break
-      case 'route':
-        levelColor = chalk.green
-        prefix = '🛣️ ROUTE'
-        break
-      case 'error':
-        levelColor = chalk.red
-        prefix = '❌ ERROR'
-        break
-      case 'warn':
-        levelColor = chalk.yellow
-        prefix = '⚠️ WARN'
-        break
-      case 'debug':
-        levelColor = chalk.gray
-        prefix = '🔍 DEBUG'
-        break
-      default:
-        levelColor = chalk.white
-        prefix = 'ℹ️ INFO'
-    }
-
-    const output = `${timestamp} ${requestId} ${levelColor(prefix)}: ${message}${durationStr}`
-
-    if (this.isEnabled) {
-      if (level === 'error') {
-        console.error(output)
-        if (data?.stack) {
-          console.error(chalk.red(data.stack))
-        }
-      } else {
-        console.log(output)
-      }
-
-      if (data && !data.stack) {
-        console.log(chalk.gray(JSON.stringify(data, null, 2)))
-      }
-    }
-  }
-
-  logApi(method: string, path: string, data?: any, startTime?: number): void {
-    if (!this.isEnabled) return
-    this.log('api', `${chalk.yellow(method)} ${path}`, data, startTime)
-  }
-
-  logRoute(method: string, path: string, data?: any, startTime?: number): void {
-    if (!this.isEnabled) return
-    this.log('route', `${chalk.yellow(method)} ${path}`, data, startTime)
-  }
-
-  info(message: string, data?: any, startTime?: number): void {
-    if (!this.isEnabled) return
-    this.log('info', message, data, startTime)
-  }
-
-  error(message: string, error?: unknown, startTime?: number): void {
-    if (!this.isEnabled) return
-    const formattedError = this.formatError(error)
-    this.log('error', message, formattedError, startTime)
-  }
-
-  warn(message: string, data?: any, startTime?: number): void {
-    if (!this.isEnabled) return
-    this.log('warn', message, data, startTime)
-  }
-
-  debug(message: string, data?: any, startTime?: number): void {
-    if (!this.isEnabled || process.env.NODE_ENV !== 'development') return
-    this.log('debug', message, data, startTime)
-  }
-
-  getLogHistory(): LogEntry[] {
-    if (!this.isEnabled) return []
-    return [...this.logHistory]
-  }
-
-  clearHistory(): void {
-    if (!this.isEnabled) return
-    this.logHistory = []
+    clearHistory: () => logger.clearHistory(),
   }
 }
 
-export async function loggerMiddleware(request: NextRequest, next: () => Promise<NextResponse>) {
-  const logger = Logger.getInstance()
-
-  // Skip logging in production
-  if (process.env.NODE_ENV === 'production') {
-    return next()
-  }
-
-  const startTime = Date.now()
-  const { pathname, searchParams } = request.nextUrl
-  const method = request.method
-
-  try {
-    if (pathname.startsWith('/api')) {
-      logger.logApi(
-        method,
-        pathname,
-        {
-          query: Object.fromEntries(searchParams),
-          headers: Object.fromEntries(request.headers),
-        },
-        startTime,
-      )
-    } else {
-      logger.logRoute(
-        method,
-        pathname,
-        {
-          query: Object.fromEntries(searchParams),
-        },
-        startTime,
-      )
-    }
-
-    const response = await next()
-
-    const logData = {
-      status: response.status,
-      statusText: response.statusText,
-      headers: Object.fromEntries(response.headers),
-    }
-
-    if (pathname.startsWith('/api')) {
-      logger.logApi(method, pathname, { response: logData }, startTime)
-    } else {
-      logger.logRoute(method, pathname, { response: logData }, startTime)
-    }
-
-    return response
-  } catch (error: unknown) {
-    logger.error(`Request failed: ${method} ${pathname}`, error, startTime)
-    throw error
-  }
-}
+// Export a singleton instance for non-React usage
+export const logger = LoggerService.getInstance()

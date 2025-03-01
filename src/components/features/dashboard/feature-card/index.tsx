@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState } from 'react'
 
-import { motion } from "framer-motion";
-import { CheckCircle } from "lucide-react";
+import { motion } from 'framer-motion'
+import { CheckCircle } from 'lucide-react'
 
-import { staggerContainer, fadeInUp } from "../constants";
-import type { Feature } from "../types";
+import { staggerContainer, fadeInUp } from '../constants'
+import type { Feature } from '../types'
 
 export const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -21,13 +21,13 @@ export const FeatureCard = ({ feature, index }: { feature: Feature; index: numbe
           y: 0,
           transition: {
             duration: 0.5,
-            delay: index * 0.1
-          }
-        }
+            delay: index * 0.1,
+          },
+        },
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="group relative w-full perspective-1000"
+      className="perspective-1000 group relative w-full"
     >
       <motion.div
         animate={{
@@ -35,10 +35,10 @@ export const FeatureCard = ({ feature, index }: { feature: Feature; index: numbe
           rotateY: isHovered ? 2 : 0,
           scale: isHovered ? 1.02 : 1,
           transition: {
-            type: "spring",
+            type: 'spring',
             stiffness: 300,
-            damping: 20
-          }
+            damping: 20,
+          },
         }}
         className="relative h-full overflow-hidden rounded-xl border border-red-500 bg-gradient-to-b from-black to-black/80 p-6 shadow-lg backdrop-blur-sm"
       >
@@ -49,7 +49,7 @@ export const FeatureCard = ({ feature, index }: { feature: Feature; index: numbe
           <motion.div
             className="flex items-center gap-4"
             animate={{ x: isHovered ? 5 : 0 }}
-            transition={{ type: "spring", stiffness: 300 }}
+            transition={{ type: 'spring', stiffness: 300 }}
           >
             <div className="rounded-lg bg-gradient-to-r from-red-500 to-red-600 p-2 text-white shadow-lg transition-all duration-300 group-hover:shadow-red-500/25">
               {feature.icon}
@@ -61,16 +61,9 @@ export const FeatureCard = ({ feature, index }: { feature: Feature; index: numbe
             {feature.description}
           </p>
 
-          <motion.div
-            className="space-y-3"
-            variants={staggerContainer}
-          >
+          <motion.div className="space-y-3" variants={staggerContainer}>
             {feature.premium.map((item, i) => (
-              <motion.div
-                key={i}
-                variants={fadeInUp}
-                className="flex items-center gap-2"
-              >
+              <motion.div key={i} variants={fadeInUp} className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span className="text-sm text-gray-400 transition-colors duration-300 group-hover:text-gray-300">
                   {item}

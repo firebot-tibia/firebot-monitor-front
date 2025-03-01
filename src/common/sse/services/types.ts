@@ -4,19 +4,29 @@
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected'
 
 /**
- * Represents a message received through the SSE connection
+ * Message type discriminator for SSE messages
+ */
+export type SSEMessageType = 'guild_data' | 'guild_changes' | 'heartbeat' | 'error'
+
+/**
+ * Generic SSE message interface with strong typing
  */
 export interface SSEMessage<T = unknown> {
-  /** Type of the message */
-  type: 'guild-data' | 'guild-changes' | 'heartbeat' | 'error'
-  /** Message payload */
+  /** Type of the message for distinguishing different message types */
+  type: SSEMessageType
+  /** Strongly typed payload data */
   data: T
   /** Timestamp when the message was received */
   timestamp: number
+  /** Optional error information */
+  error?: {
+    code: string
+    message: string
+  }
 }
 
 /**
- * Configuration options for the SSE client
+ * Configuration for the SSE client
  */
 export interface SSEConfig {
   /** Base URL for the SSE endpoint */
@@ -25,6 +35,8 @@ export interface SSEConfig {
   token: string
   /** Refresh token for authentication */
   refreshToken: string
+  /** World ID for context-specific data */
+  worldId: string
   /** Callback for handling incoming messages */
   onMessage: (message: SSEMessage) => void
   /** Callback for handling connection status changes */
@@ -32,7 +44,7 @@ export interface SSEConfig {
   /** Callback for handling errors */
   onError?: (error: Error) => void
   /** Callback for handling token refresh */
-  onTokenRefresh?: (newToken: string) => void
+  onTokenRefresh?: (newToken: string, newRefreshToken: string) => void
   /** Callback when maximum reconnection attempts are reached */
   onMaxRetriesReached?: () => void
 }
@@ -47,28 +59,68 @@ export interface SSEOptions {
   initialReconnectDelay?: number
   /** Maximum delay between reconnection attempts (in ms) */
   maxReconnectDelay?: number
-  /** Interval for sending heartbeat messages (in ms) */
+  /** Interval for checking connection health (in ms) */
   heartbeatInterval?: number
-  /** Maximum time to wait for a heartbeat before considering the connection dead (in ms) */
+  /** Maximum time to wait for a message before considering the connection dead (in ms) */
   heartbeatTimeout?: number
-  /** Maximum size of the message queue */
-  maxQueueSize?: number
-  /** Number of messages to process in each batch */
-  batchSize?: number
-  /** Delay between processing batches (in ms) */
-  batchDelay?: number
+  /** Enable debug logging */
+  debug?: boolean
 }
 
 /**
- * Default configuration values for SSE client
+ * Default configuration values for SSE client optimized for real-time performance
  */
-export const DEFAULT_SSE_OPTIONS: SSEOptions = {
-  maxReconnectAttempts: 5,
-  initialReconnectDelay: 1000,
-  maxReconnectDelay: 30000,
-  heartbeatInterval: 30000,
-  heartbeatTimeout: 45000,
-  maxQueueSize: 1000,
-  batchSize: 10,
-  batchDelay: 1000,
+export const DEFAULT_SSE_OPTIONS: Required<SSEOptions> = {
+  maxReconnectAttempts: 15, // More retry attempts for resilience
+  initialReconnectDelay: 500, // Start with very short delay
+  maxReconnectDelay: 5000, // Cap at 5 seconds for responsiveness
+  heartbeatInterval: 10000, // Check connection health every 10 seconds
+  heartbeatTimeout: 20000, // Consider connection dead after 20 seconds of silence
+  debug: false, // Disable debug logging by default
+}
+
+/**
+ * Guild specific data types
+ */
+
+// Base guild member type
+export interface GuildMember {
+  Name: string
+  Vocation: string
+  Level: number
+  OnlineStatus: boolean
+  Kind: string
+  Status: string
+  Local: string
+  Login: string
+  TimeOnline: string | null
+  LastLogin: string
+  OnlineSince: string | null
+  Rank?: string
+  Alias?: string
+  JoiningDate?: string
+  ChangedAt?: number
+}
+
+// Alias for GuildMemberResponse to maintain backward compatibility
+export type GuildMemberResponse = GuildMember
+
+// Guild change notification
+export interface GuildChange {
+  Member: GuildMember
+  ChangeType: 'logged-in' | 'logged-out' | 'updated' | string
+}
+
+// Guild data structure in messages
+export interface GuildData {
+  members: GuildMember[]
+  timestamp: number
+  worldId: string
+}
+
+// Guild changes structure in messages
+export interface GuildChanges {
+  changes: GuildChange[]
+  timestamp: number
+  worldId: string
 }

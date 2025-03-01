@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Text, useToast } from '@chakra-ui/react'
 import { Bell } from 'lucide-react'
 
-import { Logger } from '@/common/hooks/useLogger'
-
 import { useSoundStore } from '../../stores/sounds-permission-store'
 
 interface SoundPermissionProps {
@@ -16,7 +14,6 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
   const [shouldShow, setShouldShow] = useState(true)
   const { hasPermission, setHasPermission } = useSoundStore()
   const toast = useToast()
-  const logger = Logger.getInstance()
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -131,7 +128,6 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
         isClosable: true,
       })
     } catch (error) {
-      logger.error('[Sound] Erro ao solicitar permissão:', error)
       toast({
         title: 'Erro ao habilitar sons',
         description: 'Verifique se seu navegador permite notificações sonoras.',
@@ -142,7 +138,7 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
     } finally {
       setIsLoading(false)
     }
-  }, [hasPermission, onPermissionGranted, toast, logger, setHasPermission])
+  }, [hasPermission, onPermissionGranted, toast, setHasPermission])
 
   if (hasPermission || !shouldShow) return null
 

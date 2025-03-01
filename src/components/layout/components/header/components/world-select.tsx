@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 import {
   Box,
   Text,
@@ -13,15 +15,25 @@ import {
 } from '@chakra-ui/react'
 import { Globe, ChevronDown, Check } from 'lucide-react'
 
-import { useTokenStore } from '@/components/features/auth/store/token-decoded-store'
 import { capitalizeFirstLetter } from '@/common/utils/capitalize-first-letter'
+import { useTokenStore } from '@/components/features/auth/store/token-decoded-store'
 
 const WorldSelect = () => {
   const toast = useToast()
   const { decodedToken, selectedWorld, setSelectedWorld } = useTokenStore()
 
+  // Use a client-only approach to prevent hydration mismatches
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    // This only runs on the client
+    setIsClient(true)
+  }, [])
+
   // Get all available worlds from the decoded token
-  const availableWorlds = decodedToken?.guilds ? Object.keys(decodedToken.guilds) : []
+  const availableWorlds = isClient && decodedToken?.guilds
+    ? Object.keys(decodedToken.guilds)
+    : []
 
   // Theme constants
   const baseColor = 'purple.400'
@@ -42,6 +54,28 @@ const WorldSelect = () => {
     }
   }
 
+  // Only show selected world on the client to avoid hydration mismatch
+  const displayWorldName = !isClient
+    ? 'Selecionar Mundo'  // Server-rendered value - must match what's in the HTML
+    : (selectedWorld ? capitalizeFirstLetter(selectedWorld) : 'Selecionar Mundo')
+
+  // Create menu items array outside of JSX to simplify rendering
+  const worldMenuItems = availableWorlds.map((world: string) => (
+    <MenuItem
+      key={world}
+      onClick={() => handleWorldChange(world)}
+      bg="transparent"
+      _hover={{ bg: 'whiteAlpha.200' }}
+      color="gray.300"
+      fontSize="sm"
+    >
+      <HStack justify="space-between" w="full">
+        <Text>{capitalizeFirstLetter(world)}</Text>
+        {selectedWorld === world && <Check size={14} color="#9333EA" />}
+      </HStack>
+    </MenuItem>
+  ))
+
   return (
     <Menu>
       <MenuButton
@@ -55,7 +89,7 @@ const WorldSelect = () => {
         <HStack spacing={2}>
           <Globe size={16} color="#9333EA" />
           <Text fontSize="sm" color={baseColor}>
-            {selectedWorld ? capitalizeFirstLetter(selectedWorld) : 'Selecionar Mundo'}
+            {displayWorldName}
           </Text>
           <ChevronDown size={14} color="#9333EA" />
         </HStack>
@@ -84,21 +118,7 @@ const WorldSelect = () => {
             },
           }}
         >
-          {availableWorlds.map((world: string) => (
-            <MenuItem
-              key={world}
-              onClick={() => handleWorldChange(world)}
-              bg="transparent"
-              _hover={{ bg: 'whiteAlpha.200' }}
-              color="gray.300"
-              fontSize="sm"
-            >
-              <HStack justify="space-between" w="full">
-                <Text>{capitalizeFirstLetter(world)}</Text>
-                {selectedWorld === world && <Check size={14} color="#9333EA" />}
-              </HStack>
-            </MenuItem>
-          ))}
+          {worldMenuItems}
         </MenuList>
       </Portal>
     </Menu>

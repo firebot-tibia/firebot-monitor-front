@@ -7,16 +7,19 @@ import BotDescriptions from '@/components/features/dashboard'
 import UnauthenticatedNavbar from '@/components/features/dashboard/navbar'
 import Footer from '@/components/layout/components/footer'
 
-
 export default function Home() {
-  const { isOpen: isAuthModalOpen, onOpen: onOpenAuthModal, onClose: onCloseAuthModal } = useDisclosure()
+  const {
+    isOpen: isAuthModalOpen,
+    onOpen: onOpenAuthModal,
+    onClose: onCloseAuthModal,
+  } = useDisclosure()
 
   return (
     <>
-    <UnauthenticatedNavbar onOpenModal={onOpenAuthModal} />
-    <AuthModal isOpen={isAuthModalOpen} onClose={onCloseAuthModal} />
-    <BotDescriptions />
-    <Footer />
+      <UnauthenticatedNavbar onOpenModal={onOpenAuthModal} />
+      <AuthModal isOpen={isAuthModalOpen} onClose={onCloseAuthModal} />
+      <BotDescriptions />
+      <Footer />
     </>
   )
 }

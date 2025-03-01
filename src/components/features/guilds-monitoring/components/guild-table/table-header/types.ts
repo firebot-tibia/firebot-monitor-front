@@ -1,7 +1,9 @@
-import type { SortableFields, SortConfig } from '../../../hooks/useGuildTable/types'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
+
+import type { SortConfig } from '../index'
 
 export interface TableHeaderProps {
   sortConfig: SortConfig
-  onSort: (key: SortableFields) => void
+  onSort: (key: keyof GuildMemberResponse) => void
   showExivaInput: boolean
 }

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"
+import { motion } from 'framer-motion'
 
 export const LoadingSpinner = () => (
   <div className="relative h-24 w-24">
@@ -13,7 +13,7 @@ export const LoadingSpinner = () => (
   </div>
 )
 
-export  const LoadingTransition = () => (
+export const LoadingTransition = () => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -36,14 +36,14 @@ export  const LoadingTransition = () => (
       <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-gray-800">
         <motion.div
           className="h-full bg-gradient-to-r from-red-500 to-orange-500"
-          initial={{ width: "0%" }}
+          initial={{ width: '0%' }}
           animate={{
-            width: "100%",
+            width: '100%',
             transition: {
               repeat: Infinity,
               duration: 1.5,
-              ease: "linear"
-            }
+              ease: 'linear',
+            },
           }}
         />
       </div>

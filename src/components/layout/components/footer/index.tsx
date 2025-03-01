@@ -36,36 +36,36 @@ export const Footer = () => {
       icon: FaInstagram,
       label: 'Instagram',
       color: 'text-pink-400',
-      delay: 0.1
+      delay: 0.1,
     },
     {
       href: 'https://www.youtube.com/@firebot-tibia',
       icon: FaYoutube,
       label: 'YouTube',
       color: 'text-red-500',
-      delay: 0.2
+      delay: 0.2,
     },
     {
       href: 'https://discord.gg/firebot',
       icon: FaDiscord,
       label: 'Discord',
       color: 'text-indigo-400',
-      delay: 0.3
+      delay: 0.3,
     },
     {
       href: 'https://github.com/ssbreno',
       icon: FaGithub,
       label: 'GitHub ssbreno',
       color: 'text-gray-400',
-      delay: 0.4
+      delay: 0.4,
     },
     {
       href: 'https://github.com/matheusrps',
       icon: FaGithub,
       label: 'GitHub matheusrps',
       color: 'text-gray-400',
-      delay: 0.5
-    }
+      delay: 0.5,
+    },
   ]
 
   return (
@@ -82,12 +82,8 @@ export const Footer = () => {
             transition={{ duration: 0.5 }}
             className="flex flex-col items-center space-y-2 md:items-start"
           >
-            <h3 className="text-sm font-bold text-white">
-              © Firebot | {currentYear}
-            </h3>
-            <p className="text-xs text-gray-500">
-              Desenvolvido por ssbreno e matheusrps
-            </p>
+            <h3 className="text-sm font-bold text-white">© Firebot | {currentYear}</h3>
+            <p className="text-xs text-gray-500">Desenvolvido por ssbreno e matheusrps</p>
           </motion.div>
 
           {/* Social Links */}
@@ -97,7 +93,7 @@ export const Footer = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex items-center space-x-6"
           >
-            {socialLinks.map((link, index) => (
+            {socialLinks.map((link, _index) => (
               <motion.div
                 key={link.href}
                 initial={{ opacity: 0, y: 20 }}

@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useDisclosure as useChakraDisclosure } from '@chakra-ui/react'
@@ -10,7 +9,11 @@ import UnauthenticatedNavbar from '../dashboard/navbar'
 import DescriptionEditor from './components/description'
 
 const Editor = () => {
-  const { isOpen: isAuthModalOpen, onOpen: onOpenAuthModal, onClose: onCloseAuthModal } = useChakraDisclosure()
+  const {
+    isOpen: isAuthModalOpen,
+    onOpen: onOpenAuthModal,
+    onClose: onCloseAuthModal,
+  } = useChakraDisclosure()
 
   return (
     <div className="min-h-screen bg-black">

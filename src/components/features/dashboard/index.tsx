@@ -1,15 +1,9 @@
 'use client'
 
-import { useState, useEffect, Key } from 'react'
+import { useState, useEffect } from 'react'
 
 import { motion } from 'framer-motion'
-import {
-  ExternalLink,
-  Target,
-  Bell,
-  Sparkles,
-  Rocket
-} from 'lucide-react'
+import { ExternalLink, Target, Bell, Sparkles, Rocket } from 'lucide-react'
 import Image from 'next/image'
 
 import { routes } from '@/common/constants/routes'
@@ -18,8 +12,6 @@ import { staggerContainer, fadeInUp, features } from './constants'
 import { FeatureCard } from './feature-card'
 import { PricingFeature } from './pricing-feature'
 import type { Feature } from './types'
-
-
 
 const BotDescriptions = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -60,8 +52,8 @@ const BotDescriptions = () => {
                   transition={{ duration: 0.6, delay: 0.4 }}
                   className="text-lg text-gray-400 sm:text-xl"
                 >
-                  Domine o jogo com as ferramentas mais avançadas do mercado.
-                  Monitoramento inteligente, análise de dados e proteção anti-maker em tempo real.
+                  Domine o jogo com as ferramentas mais avançadas do mercado. Monitoramento
+                  inteligente, análise de dados e proteção anti-maker em tempo real.
                 </motion.p>
 
                 <motion.div
@@ -103,7 +95,7 @@ const BotDescriptions = () => {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="mt-12 w-full max-w-lg lg:mt-0"
               >
-                <div className="relative aspect-square w-full max-w-[500px] mx-auto">
+                <div className="relative mx-auto aspect-square w-full max-w-[500px]">
                   <Image
                     src="/assets/images/og.png"
                     alt="Firebot Monitor Logo"
@@ -127,10 +119,7 @@ const BotDescriptions = () => {
               variants={staggerContainer}
               className="space-y-12"
             >
-              <motion.div
-                variants={fadeInUp}
-                className="text-center"
-              >
+              <motion.div variants={fadeInUp} className="text-center">
                 <h2 className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
                   Recursos Exclusivos
                 </h2>
@@ -158,10 +147,7 @@ const BotDescriptions = () => {
               variants={staggerContainer}
               className="space-y-12"
             >
-              <motion.div
-                variants={fadeInUp}
-                className="text-center"
-              >
+              <motion.div variants={fadeInUp} className="text-center">
                 <h2 className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
                   Plano Premium
                 </h2>
@@ -176,7 +162,7 @@ const BotDescriptions = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   whileHover={{ scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   className="relative w-full max-w-md overflow-hidden rounded-2xl border border-red-500 bg-gradient-to-b from-black to-black/80 p-8 shadow-lg backdrop-blur-sm"
                 >
                   {/* Animated gradient border */}
@@ -201,10 +187,7 @@ const BotDescriptions = () => {
                       </div>
                     </motion.div>
 
-                    <motion.div
-                      variants={staggerContainer}
-                      className="space-y-4"
-                    >
+                    <motion.div variants={staggerContainer} className="space-y-4">
                       <PricingFeature
                         icon={<Sparkles className="h-6 w-6" />}
                         title="Acesso Premium Completo"

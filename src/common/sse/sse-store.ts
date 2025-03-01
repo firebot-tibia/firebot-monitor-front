@@ -1,204 +1,282 @@
-import * as jwtDecode from 'jsonwebtoken'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
-import { SSEClient } from '@/common/sse/services'
-import type { ConnectionStatus } from '@/common/sse/services/types'
-import type { GuildMemberResponse } from '@/common/types/guild-member.response'
-import { TokenManager } from '@/components/features/auth/services'
+import { SSEClient } from './services'
+import type { ConnectionStatus, SSEMessage } from './services/types'
 
-interface GuildChange {
-  ChangeType: 'logged-in' | 'logged-out' | 'updated'
-  Member: GuildMemberResponse
-}
-
-type GuildData = {
-  [key: string]: GuildMemberResponse[]
-}
-
-type GuildChanges = {
-  [key: string]: {
-    [memberName: string]: GuildChange
-  }
-}
-
-interface SSEMessage {
-  timestamp: number
-  data: GuildData | GuildChanges
-}
-
+/**
+ * State interface for the SSE store
+ */
 interface SSEState {
-  messages: SSEMessage[]
+  // Connection state
   client: SSEClient | null
   status: ConnectionStatus
+
+  // Message queue & processing
+  messages: SSEMessage[]
   lastProcessedTimestamp: number
-  currentUrl: string | null
-  currentToken: string | null
-  currentWorld: string | null
+
+  // Connection parameters (persisted)
   baseUrl: string | null
-  addMessage: (data: GuildData | GuildChanges) => void
-  connect: (baseUrl: string, token: string, world: string) => void
+  worldId: string | null
+  monitorMode: string | null
+
+  // Methods
+  connect: (
+    baseUrl: string,
+    token: string,
+    refreshToken: string,
+    worldId: string,
+    monitorMode: string,
+  ) => void
   disconnect: () => void
+  addMessage: (message: SSEMessage) => void
   getUnprocessedMessages: () => SSEMessage[]
   markMessagesAsProcessed: (timestamp: number) => void
-  refreshConnection: (newToken: string) => void
+  updateToken: (newToken: string, newRefreshToken: string) => void
 }
 
-export const useSSEStore = create<SSEState>((set, get) => ({
-  messages: [],
-  client: null,
-  status: 'disconnected',
-  lastProcessedTimestamp: 0,
-  currentUrl: null,
-  currentToken: null,
-  currentWorld: null,
-  baseUrl: null,
+/**
+ * Validates incoming SSE message structure
+ */
+const validateMessage = (message: unknown): message is SSEMessage => {
+  if (!message || typeof message !== 'object') return false
 
-  addMessage: data => {
-    set(state => ({
-      messages: [
-        ...state.messages,
-        {
-          timestamp: Date.now(),
-          data,
-        },
-      ].slice(-100),
-    }))
-  },
+  const msg = message as any
+  if (!msg.type || !msg.data || typeof msg.timestamp !== 'number') return false
 
-  connect: (baseUrl: string, token: string, world: string) => {
-    const { client, disconnect } = get()
+  // Validate known message types
+  if (!['guild_data', 'guild_changes', 'heartbeat', 'error'].includes(msg.type)) return false
 
-    // Validate token before connecting
-    try {
-      const tokenData = jwtDecode.default(token) as { exp: number }
-      const now = Math.floor(Date.now() / 1000)
+  return true
+}
 
-      if (tokenData.exp <= now) {
-        console.error('Token is expired, cannot connect')
-        return
-      }
-    } catch (error) {
-      console.error('Invalid token format:', error)
-      return
-    }
+/**
+ * Zustand store for managing SSE connections and messages
+ */
+export const useSSEStore = create<SSEState>()(
+  persist(
+    (set, get) => ({
+      // Connection state
+      client: null,
+      status: 'disconnected',
 
-    // Store base configuration
-    set({
-      baseUrl,
-      currentToken: token,
-      currentWorld: world,
-    })
+      // Message queue
+      messages: [],
+      lastProcessedTimestamp: 0,
 
-    // Construct full URL with token and world
-    const url = new URL(baseUrl)
-    url.searchParams.set('token', encodeURIComponent(token))
-    url.searchParams.set('world', world)
-    const fullUrl = url.toString()
+      // Connection parameters
+      baseUrl: null,
+      worldId: null,
+      monitorMode: null,
 
-    set({ currentUrl: fullUrl })
+      /**
+       * Connect to the SSE endpoint
+       */
+      connect: (
+        baseUrl: string,
+        token: string,
+        refreshToken: string,
+        worldId: string,
+        monitorMode: string,
+      ) => {
+        // Store connection parameters
+        set({
+          baseUrl,
+          worldId,
+          monitorMode,
+        })
 
-    // Disconnect existing client if any
-    if (client) {
-      disconnect()
-    }
-
-    const newClient = new SSEClient({
-      url: fullUrl,
-      token,
-      refreshToken: token,
-      onMessage: (data: any) => {
-        if (!data) return
-
-        const monitorMode = baseUrl.split('/').filter(Boolean).pop() || ''
-        const store = get()
-
-        if (data[monitorMode]) {
-          store.addMessage(data[monitorMode])
+        // Clean up existing client
+        const { client } = get()
+        if (client) {
+          client.closeConnection()
         }
-        if (data[`${monitorMode}-changes`]) {
-          store.addMessage(data[`${monitorMode}-changes`])
+
+        // Create the URL with base and monitor mode
+        const url = new URL(`${baseUrl}${monitorMode}/`)
+        const fullUrl = url.toString()
+
+        // Create a new client
+        const newClient = new SSEClient(
+          {
+            url: fullUrl,
+            token,
+            refreshToken,
+            worldId,
+            onMessage: (message: unknown) => {
+              // Validate message structure
+              if (!validateMessage(message)) {
+                console.error('[SSE Store] Invalid message structure:', message)
+                return
+              }
+
+              // Process received message by adding it to our store
+              get().addMessage(message)
+            },
+            onStatusChange: (status: ConnectionStatus) => {
+              set({ status })
+            },
+            onError: (error: Error) => {
+              console.error('[SSE Store] Connection error:', error)
+              // Add error message to the queue
+              get().addMessage({
+                type: 'error',
+                data: {
+                  message: error.message,
+                  code: 'CONNECTION_ERROR',
+                },
+                timestamp: Date.now(),
+              })
+            },
+            onTokenRefresh: (newToken: string, newRefreshToken: string) => {
+              get().updateToken(newToken, newRefreshToken)
+            },
+            onMaxRetriesReached: () => {
+              console.error('[SSE Store] Max reconnection attempts reached')
+            },
+          },
+          {
+            debug: process.env.NODE_ENV === 'development',
+          },
+        )
+
+        // Store the client and connect
+        set({ client: newClient, status: 'connecting' })
+        newClient.connect()
+      },
+
+      /**
+       * Disconnect from the SSE endpoint
+       */
+      disconnect: () => {
+        const { client } = get()
+        if (client) {
+          client.closeConnection()
+          set({
+            client: null,
+            status: 'disconnected',
+            messages: [], // Clear message queue on disconnect
+          })
         }
       },
-      onError: (error: Error) => {
-        console.error('SSE Error:', error)
-        // Check if error is due to token expiration
-        if (error.message.includes('TOKEN_EXPIRED')) {
-          // Attempt to refresh token
-          const tokenManager = TokenManager.getInstance()
-          tokenManager
-            .refreshToken(get().currentToken || '', get().currentToken || '')
-            .then(newToken => {
-              get().refreshConnection(newToken.access_token)
-            })
-            .catch(err => {
-              console.error('Failed to refresh token:', err)
-              set({ status: 'disconnected' })
-            })
+
+      /**
+       * Add a new message to the queue
+       */
+      addMessage: (message: SSEMessage) => {
+        console.log('[SSE Store Debug] Adding message:', message)
+        // Validate message format
+        if (!message || !message.data) {
+          console.warn('[SSE Store] Invalid message format:', message)
+          return
+        }
+
+        // Process and normalize the message based on its format
+        const { monitorMode } = get()
+        let processedMessage: SSEMessage | null = null
+
+        // Extract data based on the message structure
+        const data = message.data as any
+
+        // Determine message type based on data structure
+        const changesKey = `${monitorMode}-changes`
+        const type = data[changesKey] ? 'guild_changes' : 'guild_data'
+
+        // Check for specific properties in the data object
+        if (data[monitorMode as string]) {
+          // Full guild data update
+          processedMessage = {
+            type,
+            data: data[monitorMode as string],
+            timestamp: message.timestamp || Date.now(),
+          }
         } else {
-          set({ status: 'disconnected' })
-        }
-      },
-      onStatusChange: (status: ConnectionStatus) => {
-        const store = get()
-        if (store.client === newClient) {
-          set({ status })
-          if (status === 'disconnected') {
-            console.warn('SSE connection disconnected')
+          // Check for changes format
+          const changesKey = `${monitorMode}-changes`
+          if (data[changesKey]) {
+            // Incremental changes
+            processedMessage = {
+              type,
+              data: data[changesKey],
+              timestamp: message.timestamp || Date.now(),
+            }
+          } else if (Array.isArray(data)) {
+            // Direct array format
+            processedMessage = {
+              type,
+              data,
+              timestamp: message.timestamp || Date.now(),
+            }
+          } else if (typeof data === 'object' && data !== null) {
+            // Other object format - try to determine type
+            const keys = Object.keys(data)
+            if (
+              keys.length > 0 &&
+              typeof data[keys[0]] === 'object' &&
+              'ChangeType' in data[keys[0]]
+            ) {
+              processedMessage = {
+                type: 'guild_changes',
+                data,
+                timestamp: message.timestamp || Date.now(),
+              }
+            } else {
+              // Unknown format, store as-is
+              processedMessage = message
+            }
+          } else {
+            // Fallback - store as-is
+            processedMessage = message
           }
         }
-      },
-      onMaxRetriesReached: () => {
-        const store = get()
-        if (store.client === newClient) {
-          console.error('Max SSE reconnection attempts reached')
-          disconnect()
+
+        // Add the processed message to our store
+        if (processedMessage) {
+          console.log('[SSE Store Debug] Processed message:', processedMessage)
+          set(state => ({
+            messages: [...state.messages, processedMessage as SSEMessage].slice(-200), // Keep last 200 messages
+          }))
         }
       },
-    })
 
-    set({
-      client: newClient,
-      status: 'connecting',
-      currentUrl: fullUrl,
-      currentToken: token,
-      currentWorld: world,
-    })
+      /**
+       * Get messages that haven't been processed yet
+       */
+      getUnprocessedMessages: () => {
+        console.log('[SSE Store Debug] Getting unprocessed messages')
+        const { messages, lastProcessedTimestamp } = get()
+        const unprocessed = messages.filter(msg => msg.timestamp > lastProcessedTimestamp)
+        console.log('[SSE Store Debug] Found unprocessed messages:', unprocessed)
+        return unprocessed
+      },
 
-    newClient.connect()
-  },
+      /**
+       * Mark messages as processed up to the given timestamp
+       */
+      markMessagesAsProcessed: timestamp => {
+        set({ lastProcessedTimestamp: timestamp })
+      },
 
-  disconnect: () => {
-    const { client } = get()
-    if (client) {
-      client.closeConnection()
-      set({
-        client: null,
-        status: 'disconnected',
-        currentUrl: null,
-        currentToken: null,
-        currentWorld: null,
-        baseUrl: null,
-      })
-    }
-  },
-
-  refreshConnection: (newToken: string) => {
-    const { baseUrl, currentWorld } = get()
-    if (!baseUrl || !currentWorld) {
-      console.error('Cannot refresh connection: missing base URL or world')
-      return
-    }
-
-    // Reconnect with new token
-    get().connect(baseUrl, newToken, currentWorld)
-  },
-
-  getUnprocessedMessages: () => {
-    const { messages, lastProcessedTimestamp } = get()
-    return messages.filter(msg => msg.timestamp > lastProcessedTimestamp)
-  },
-
-  markMessagesAsProcessed: (timestamp: number) => {
-    set({ lastProcessedTimestamp: timestamp })
-  },
-}))
+      /**
+       * Update tokens in the client
+       */
+      updateToken: (newToken, newRefreshToken) => {
+        const { client } = get()
+        if (client) {
+          client.updateToken(newToken, newRefreshToken)
+        }
+      },
+    }),
+    {
+      name: 'sse-store',
+      // Only persist these fields
+      partialize: state => ({
+        lastProcessedTimestamp: state.lastProcessedTimestamp,
+        baseUrl: state.baseUrl,
+        worldId: state.worldId,
+        monitorMode: state.monitorMode,
+      }),
+    },
+  ),
+)

@@ -43,14 +43,6 @@ export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
         }
       })
     }
-
-    console.log('Character types updated:', {
-      fixedTypes,
-      customTypes,
-      guildDataTypes: guildData?.map(m => m.Kind).filter(Boolean),
-      finalTypes: Array.from(typeSet),
-    })
-
     return Array.from(typeSet)
   }, [guildData, customTypes])
 

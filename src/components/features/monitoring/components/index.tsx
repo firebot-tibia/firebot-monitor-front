@@ -26,7 +26,7 @@ const AlertSettings = () => {
       ? {
           playSound,
         }
-      : { playSound: () => {} },
+      : { playSound: () => console.debug('Sound not initialized yet') },
   )
 
   const handleAddAlert = () => {

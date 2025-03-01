@@ -3,11 +3,11 @@ import * as jwtDecode from 'jsonwebtoken'
 import { getSession, signOut } from 'next-auth/react'
 
 import { BACKEND_URL } from '@/common/constants/env'
-import { Logger } from '@/common/hooks/useLogger'
+import { LoggerService } from '@/common/hooks/useLogger/logger.service'
 import { TokenManager } from '@/components/features/auth/services'
 import type { DecodedToken } from '@/components/features/auth/types/auth.types'
 
-const logger = Logger.getInstance()
+const logger = LoggerService.getInstance()
 
 const api = axios.create({
   baseURL: BACKEND_URL,
@@ -81,7 +81,7 @@ api.interceptors.response.use(
           url: originalRequest.url,
         })
 
-        originalRequest.headers.setAuthorization(tokens.access_token)
+        originalRequest.headers.Authorization = tokens.access_token
         return api(originalRequest)
       } catch (refreshError) {
         logger.error('Token refresh failed', refreshError)

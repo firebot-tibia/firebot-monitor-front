@@ -8,175 +8,161 @@ interface UseGuildDataReturn {
     value: GuildMemberResponse[] | ((prev: GuildMemberResponse[]) => GuildMemberResponse[]),
   ) => void
   updateMemberData: (member: GuildMemberResponse, changes: Partial<GuildMemberResponse>) => void
-  processNewGuildData: (data: GuildMemberResponse[]) => void
+  processNewGuildData: (data: unknown) => boolean
+  getMemberByName: (name: string) => GuildMemberResponse | undefined
 }
 
+/**
+ * Hook for managing guild data with optimized updates and batching
+ */
 export const useGuildData = (): UseGuildDataReturn => {
-  // Use ref for current data to avoid re-renders
-  const guildDataRef = useRef<GuildMemberResponse[]>([])
-  const lastUpdateRef = useRef<number>(Date.now())
+  // Store guild data in state
+  const [guildData, setGuildData] = useState<GuildMemberResponse[]>([])
+
+  // Fast lookup references
+  const memberMapRef = useRef<Map<string, GuildMemberResponse>>(new Map())
   const pendingUpdatesRef = useRef<Set<string>>(new Set())
-
-  const [guildData, setGuildData] = useState<GuildMemberResponse[]>(() => {
-    console.debug('Initializing guild data state')
-    return []
-  })
-
-  // Use Map for O(1) lookups
-  const memberMapRef = useRef(new Map<string, GuildMemberResponse>())
-
-  // Batch updates using RAF
   const batchUpdateRef = useRef<number | null>(null)
+  const lastUpdateRef = useRef<number>(Date.now())
 
-  // Update member map when guild data changes
+  // Keep member map in sync with guild data
   useEffect(() => {
     memberMapRef.current = new Map(guildData.map(member => [member.Name, member]))
-    guildDataRef.current = guildData
   }, [guildData])
 
+  /**
+   * Get member by name with O(1) lookup
+   */
+  const getMemberByName = useCallback((name: string): GuildMemberResponse | undefined => {
+    return memberMapRef.current.get(name)
+  }, [])
+
+  /**
+   * Updates a single member's data with batching for performance
+   */
   const updateMemberData = useCallback(
     (member: GuildMemberResponse, changes: Partial<GuildMemberResponse>) => {
-      const currentMap = memberMapRef.current
-      const memberName = member.Name
-      const existingMember = currentMap.get(memberName)
-      const now = Date.now()
+      // Validate input
+      if (!member?.Name) return
 
-      // Adicionar à lista de atualizações pendentes
+      const memberName = member.Name
+      const currentMap = memberMapRef.current
+      const existingMember = currentMap.get(memberName)
+
+      // Add to pending updates
       pendingUpdatesRef.current.add(memberName)
 
       if (!existingMember) {
+        // Add new member with changes
         currentMap.set(memberName, { ...member, ...changes })
       } else {
-        // Verificar se a atualização é necessária
+        // Check if update is necessary
         const hasChanges = Object.entries(changes).some(
           ([key, value]) => existingMember[key as keyof GuildMemberResponse] !== value,
         )
 
         if (hasChanges) {
+          // Update existing member
           currentMap.set(memberName, { ...existingMember, ...changes })
-          lastUpdateRef.current = now
+          lastUpdateRef.current = Date.now()
         } else {
+          // No changes needed
           pendingUpdatesRef.current.delete(memberName)
-          return // Pular atualização se não houver mudanças
+          return
         }
       }
 
-      // Schedule batch update
+      // Batch updates for better performance
       if (batchUpdateRef.current) {
         cancelAnimationFrame(batchUpdateRef.current)
       }
 
       batchUpdateRef.current = requestAnimationFrame(() => {
-        batchUpdateRef.current = null
-        const newData = Array.from(currentMap.values())
-
-        // Só atualizar se houver mudanças pendentes
+        // Only update if we have pending changes
         if (pendingUpdatesRef.current.size > 0) {
-          console.debug('Batch updating guild data:', {
-            updatedMembers: Array.from(pendingUpdatesRef.current),
-            totalMembers: newData.length,
-            timestamp: new Date().toISOString(),
-          })
-
+          const newData = Array.from(currentMap.values())
           setGuildData(newData)
           pendingUpdatesRef.current.clear()
         }
+        batchUpdateRef.current = null
       })
     },
     [],
   )
 
-  const processNewGuildData = useCallback((data: GuildMemberResponse[]) => {
+  /**
+   * Process a complete new guild data set
+   * @returns true if data was processed successfully
+   */
+  const processNewGuildData = useCallback((data: unknown): boolean => {
+    console.log('[Guild Data] Processing new guild data:', {
+      dataType: typeof data,
+      isArray: Array.isArray(data),
+      length: Array.isArray(data) ? data.length : 0,
+      sample: Array.isArray(data) ? data[0] : null,
+    })
+    // Validate input
     if (!Array.isArray(data)) {
-      console.warn('Invalid guild data received:', data)
-      return
+      console.warn('[Guild Data] Invalid data format:', data)
+      return false
     }
 
-    const now = Date.now()
-    const timeSinceLastUpdate = now - lastUpdateRef.current
+    // Cancel any pending batch updates
+    if (batchUpdateRef.current) {
+      cancelAnimationFrame(batchUpdateRef.current)
+      batchUpdateRef.current = null
+    }
 
-    // Validar dados recebidos
-    const validData = data.filter(member => {
+    if (data.length === 0) {
+      return false
+    }
+
+    // Filter valid members
+    const validMembers = data.filter((member): member is GuildMemberResponse => {
       if (!member?.Name || typeof member.Name !== 'string') {
-        console.warn('Invalid member data:', member)
         return false
       }
       return true
     })
 
-    if (validData.length === 0) {
-      console.warn('No valid guild data to process')
-      return
+    if (validMembers.length === 0) {
+      return false
     }
 
-    // Verificar se há mudanças significativas
-    const hasSignificantChanges = validData.some(newMember => {
-      const existingMember = memberMapRef.current.get(newMember.Name)
-      return !existingMember || JSON.stringify(existingMember) !== JSON.stringify(newMember)
-    })
-
-    if (hasSignificantChanges || timeSinceLastUpdate > 30000) {
-      // Forçar atualização após 30s
-      console.debug('Processing new guild data:', {
-        validMembers: validData.length,
-        timeSinceLastUpdate: Math.round(timeSinceLastUpdate / 1000) + 's',
-        hasChanges: hasSignificantChanges,
-      })
-
-      setGuildData(validData)
-      lastUpdateRef.current = now
-    } else {
-      console.debug('Skipping update - no significant changes')
-    }
-
-    // Use Map for faster processing
-    const newDataMap = new Map(validData.map(member => [member.Name, member]))
-
-    // Quick length and content check
-    if (newDataMap.size === memberMapRef.current.size) {
-      let hasChanges = false
-      // Use Array.from for ES5 compatibility
-      const entries = Array.from(newDataMap.keys())
-      for (let i = 0; i < entries.length; i++) {
-        const name = entries[i]
-        const member = newDataMap.get(name)
-        const existing = memberMapRef.current.get(name)
-        if (!existing || JSON.stringify(existing) !== JSON.stringify(member)) {
-          hasChanges = true
-          break
-        }
+    try {
+      // Cancel any pending updates
+      if (batchUpdateRef.current) {
+        cancelAnimationFrame(batchUpdateRef.current)
+        batchUpdateRef.current = null
       }
-      if (!hasChanges) {
-        console.debug('No changes detected in guild data')
-        return
+
+      // Update the member map directly
+      const newMap = new Map(validMembers.map(member => [member.Name, member]))
+      memberMapRef.current = newMap
+
+      // Update state
+      setGuildData(validMembers)
+      lastUpdateRef.current = Date.now()
+      pendingUpdatesRef.current.clear()
+
+      return true
+    } catch (error) {
+      // Retry once on error
+      setTimeout(() => {
+        setGuildData(validMembers)
+      }, 0)
+
+      return false
+    }
+  }, [])
+
+  // Clean up any pending operations on unmount
+  useEffect(() => {
+    return () => {
+      if (batchUpdateRef.current) {
+        cancelAnimationFrame(batchUpdateRef.current)
       }
     }
-
-    // Schedule batch update with debounce
-    if (batchUpdateRef.current) {
-      cancelAnimationFrame(batchUpdateRef.current)
-    }
-
-    const timestamp = Date.now()
-    batchUpdateRef.current = requestAnimationFrame(() => {
-      console.log('Processing new guild data:', {
-        newDataCount: validData.length,
-        currentDataCount: guildDataRef.current.length,
-        hasChanges: true,
-        processTime: Date.now() - timestamp,
-      })
-
-      try {
-        setGuildData(validData)
-      } catch (error) {
-        console.error('Error updating guild data:', error)
-        // Tentar novamente com um novo RAF
-        requestAnimationFrame(() => {
-          console.log('Retrying guild data update...')
-          setGuildData(validData)
-        })
-      }
-    })
   }, [])
 
   return {
@@ -184,5 +170,6 @@ export const useGuildData = (): UseGuildDataReturn => {
     setGuildData,
     updateMemberData,
     processNewGuildData,
+    getMemberByName,
   }
 }

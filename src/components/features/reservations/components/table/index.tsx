@@ -79,15 +79,17 @@ export const ReservationTable: React.FC<ReservationTableProps> = props => {
     [handleDeleteReservation],
   )
 
+  const { onFetchReservation } = props
+  
   const handleConfirmDelete = useCallback(
     async (deleteAll: boolean) => {
       setIsDeleting(true)
       await confirmDeleteReservation(deleteAll)
       setIsDeleting(false)
       closeDeleteModal()
-      props.onFetchReservation()
+      onFetchReservation()
     },
-    [confirmDeleteReservation, closeDeleteModal, props.onFetchReservation],
+    [confirmDeleteReservation, closeDeleteModal, onFetchReservation],
   )
 
   const renderTable = useCallback(

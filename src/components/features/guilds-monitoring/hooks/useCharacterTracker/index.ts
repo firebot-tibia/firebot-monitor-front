@@ -54,20 +54,6 @@ export const useCharacterTracker = (
 
     const activeCount = trackedCharacters.filter(char => char.timestamp > cutoffTime).length
 
-    // Log count updates
-    console.log('Character tracker count update:', {
-      total: trackedCharacters.length,
-      active: activeCount,
-      windowMinutes,
-      threshold,
-      timestamp: new Date(now).toISOString(),
-      characters: trackedCharacters.map(char => ({
-        name: char.name,
-        age: Math.floor((now - char.timestamp) / 1000),
-        isActive: char.timestamp > cutoffTime,
-      })),
-    })
-
     setActiveCharacterCount(activeCount)
 
     // Se atingiu o limite, resetar o contador
