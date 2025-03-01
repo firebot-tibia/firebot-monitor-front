@@ -2,10 +2,10 @@
 
 import { useDisclosure } from '@chakra-ui/react'
 
-import AuthModal from '@/components/features/auth/components'
-import BotDescriptions from '@/components/features/dashboard'
-import UnauthenticatedNavbar from '@/components/features/dashboard/navbar'
-import Footer from '@/components/layout/components/footer'
+import AuthModal from '@/modules/auth/components'
+import LandingPage from '@/modules/landing-page'
+import UnauthenticatedNavbar from '@/modules/landing-page/navbar'
+import Footer from '@/modules/layout/components/footer'
 
 export default function Home() {
   const {
@@ -18,7 +18,7 @@ export default function Home() {
     <>
       <UnauthenticatedNavbar onOpenModal={onOpenAuthModal} />
       <AuthModal isOpen={isAuthModalOpen} onClose={onCloseAuthModal} />
-      <BotDescriptions />
+      <LandingPage />
       <Footer />
     </>
   )
