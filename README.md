@@ -34,19 +34,23 @@ src/
 ## Module Organization
 
 ### Free Features
+
 - **Basic Monitoring**: Simple member list, online/offline status, basic sorting
 - **Basic Alerts**: Login/logout notifications, basic sound alerts
 - **Public Stats**: Basic guild statistics, public member information
 
 ### Premium Features
+
 - **Advanced Monitoring**: Real-time tracking, advanced filtering, custom groups
 - **Advanced Alerts**: Custom conditions, multiple sounds, Discord/email integration
 - **Analytics**: Historical data, activity patterns, custom reports
 
 ### Shared Resources
+
 Components, hooks, and utilities that are used across both free and premium features.
 
 ### Core
+
 Core application functionality including authentication, state management, and API integration.
 
 ## Development Guidelines

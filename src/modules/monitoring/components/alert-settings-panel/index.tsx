@@ -19,7 +19,6 @@ import {
 } from '@chakra-ui/react'
 import { Bell, Clock, Plus, Trash2, Volume2 } from 'lucide-react'
 
-
 import { useCharacterTracker } from '../../hooks/useCharacterTracker'
 import { useAlertSettingsStore } from '../../stores/alert-settings-store'
 import { useMonitoringSettingsStore } from '../../stores/monitoring-settings-store'

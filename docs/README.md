@@ -29,12 +29,14 @@ src/
 
 Each module follows this structure:
 ```
+
 module/
-├── components/    # Module-specific components
-├── hooks/         # Module-specific hooks
-├── utils/         # Module-specific utilities
-├── types/         # Module-specific types
-└── index.ts       # Module entry point
+├── components/ # Module-specific components
+├── hooks/ # Module-specific hooks
+├── utils/ # Module-specific utilities
+├── types/ # Module-specific types
+└── index.ts # Module entry point
+
 ```
 
 ## Development Guidelines
@@ -44,3 +46,4 @@ module/
 3. Keep module-specific code within its module
 4. Use core services for cross-module functionality
 5. Follow consistent naming conventions
+```

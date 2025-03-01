@@ -6,7 +6,6 @@ import '../core/styles/globals.css'
 
 import { Providers } from './providers'
 
-
 export const metadata: Metadata = {
   title: 'Firebot Monitor - Monitoramento em tempo real de inimigos',
   description: 'Tenha informações em tempo real da movimentação de seus inimigos no Tibia',

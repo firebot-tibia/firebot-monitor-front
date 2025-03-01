@@ -11,14 +11,16 @@ const Custom404 = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [showEasterEgg, setShowEasterEgg] = useState(false)
   const [_clickCount, setClickCount] = useState(0)
-  const [particles, setParticles] = useState<Array<{
-    id: number;
-    size: number;
-    x: number;
-    y: number;
-    duration: number;
-    delay: number;
-  }>>([])
+  const [particles, setParticles] = useState<
+    Array<{
+      id: number
+      size: number
+      x: number
+      y: number
+      duration: number
+      delay: number
+    }>
+  >([])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -41,7 +43,7 @@ const Custom404 = () => {
         y: Math.random() * 100,
         duration: Math.random() * 20 + 10,
         delay: Math.random() * 5,
-      }))
+      })),
     )
   }, [])
 
@@ -147,15 +149,15 @@ const Custom404 = () => {
             className="absolute left-0 top-0 z-0 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-8xl font-black text-transparent opacity-70"
             animate={{
               x: [0, -5, 10, -10, 5, 0],
-              opacity: [0.5, 0.8, 0.5]
+              opacity: [0.5, 0.8, 0.5],
             }}
             transition={{
               duration: 2,
               repeat: Infinity,
-              repeatType: "reverse"
+              repeatType: 'reverse',
             }}
             style={{
-              textShadow: "3px 3px 6px rgba(255,100,50,0.2)"
+              textShadow: '3px 3px 6px rgba(255,100,50,0.2)',
             }}
           >
             404
@@ -177,14 +179,15 @@ const Custom404 = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="mb-8 max-w-md text-lg text-gray-400"
         >
-          A página que você está procurando pode ter sido removida, renomeada ou está temporariamente indisponível.
+          A página que você está procurando pode ter sido removida, renomeada ou está
+          temporariamente indisponível.
         </motion.p>
 
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
-          whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(239, 68, 68, 0.5)" }}
+          whileHover={{ scale: 1.05, boxShadow: '0 0 15px rgba(239, 68, 68, 0.5)' }}
           whileTap={{ scale: 0.95 }}
           onClick={() => router.push('/')}
           className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-8 py-4 font-medium text-white transition-all"
@@ -197,7 +200,12 @@ const Custom404 = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
             Voltar para o Início
           </span>
@@ -205,15 +213,15 @@ const Custom404 = () => {
           <motion.div
             className="absolute inset-0 -z-10 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 opacity-0 transition-opacity group-hover:opacity-100"
             animate={{
-              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
             }}
             transition={{
               duration: 5,
               repeat: Infinity,
-              ease: "linear"
+              ease: 'linear',
             }}
             style={{
-              backgroundSize: '200% 200%'
+              backgroundSize: '200% 200%',
             }}
           />
         </motion.button>
@@ -232,21 +240,21 @@ const Custom404 = () => {
       <div
         className="absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-red-500/5"
         style={{
-          transform: `translate(-50%, -50%) translate(${mousePosition.x / -50}px, ${mousePosition.y / -50}px)`
+          transform: `translate(-50%, -50%) translate(${mousePosition.x / -50}px, ${mousePosition.y / -50}px)`,
         }}
       />
 
       <div
         className="animation-delay-200 absolute left-1/2 top-1/2 -z-10 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-orange-500/5"
         style={{
-          transform: `translate(-50%, -50%) translate(${mousePosition.x / -30}px, ${mousePosition.y / -30}px)`
+          transform: `translate(-50%, -50%) translate(${mousePosition.x / -30}px, ${mousePosition.y / -30}px)`,
         }}
       />
 
       <div
         className="animation-delay-500 absolute left-1/2 top-1/2 -z-10 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-pink-500/5"
         style={{
-          transform: `translate(-50%, -50%) translate(${mousePosition.x / -80}px, ${mousePosition.y / -80}px)`
+          transform: `translate(-50%, -50%) translate(${mousePosition.x / -80}px, ${mousePosition.y / -80}px)`,
         }}
       />
     </div>
