@@ -2,15 +2,15 @@ import { memo } from 'react'
 
 import { useToast, Tr, Td, HStack, Text, Image } from '@chakra-ui/react'
 
-import { getTimeColor } from '@/utils/get-time-color'
-import { tableVocationIcons } from '@/utils/table-vocation-icons'
+import { getTimeColor } from '@/common/utils/get-time-color'
+import { tableVocationIcons } from '@/common/utils/table-vocation-icons'
 
+import { capitalizeFirstLetter } from '../../../../../../common/utils/capitalize-first-letter'
+import { useTooltipState } from '../../../hooks/useTooltip'
+import { CharacterTooltip } from '../table-tooltip'
 import { CharacterClassification } from '../table-type-classification'
 import { ExivaInput } from './exiva-input'
 import type { CharacterRowProps } from './types'
-import { capitalizeFirstLetter } from '../../../../../../utils/capitalize-first-letter'
-import { useTooltipState } from '../../../hooks/useTooltip'
-import { CharacterTooltip } from '../table-tooltip'
 
 export const CharacterRow = memo(function CharacterRow({
   member,

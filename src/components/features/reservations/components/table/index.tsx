@@ -23,7 +23,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 
-import { formatTimeSlotEnd } from '@/utils/format-time-slot'
+import { formatTimeSlotEnd } from '@/common/utils/format-time-slot'
 
 import { useReservationsManager } from '../../hooks/useReservations'
 import { useReservationTable } from '../../hooks/useTableHook'
@@ -79,15 +79,17 @@ export const ReservationTable: React.FC<ReservationTableProps> = props => {
     [handleDeleteReservation],
   )
 
+  const { onFetchReservation } = props
+
   const handleConfirmDelete = useCallback(
     async (deleteAll: boolean) => {
       setIsDeleting(true)
       await confirmDeleteReservation(deleteAll)
       setIsDeleting(false)
       closeDeleteModal()
-      props.onFetchReservation()
+      onFetchReservation()
     },
-    [confirmDeleteReservation, closeDeleteModal, props.onFetchReservation],
+    [confirmDeleteReservation, closeDeleteModal, onFetchReservation],
   )
 
   const renderTable = useCallback(

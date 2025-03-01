@@ -44,7 +44,6 @@ L.LevelButtons = L.Control.extend({
     )
     return plugin_container
   },
-  onRemove: function () {},
   _onUpButton: function (event) {
     const upper_floor_index = this._tibia_map_obj.floor - 1
     if (upper_floor_index >= 0) {
@@ -74,7 +73,7 @@ L.LevelButtons = L.Control.extend({
     const floor_button = L.DomUtil.get('floor_button')
     const ground_floor = 7
     let text = ''
-    if (floor == ground_floor) {
+    if (floor === ground_floor) {
       text = '0'
     } else if (floor < ground_floor) {
       text = '+' + String(ground_floor - floor)

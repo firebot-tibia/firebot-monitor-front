@@ -15,8 +15,8 @@ import {
 } from '@chakra-ui/react'
 import { ChevronDownIcon } from 'lucide-react'
 
-import { capitalizeFirstLetter } from '@/utils/capitalize-first-letter'
-import { typeColors } from '@/utils/character-type-icons'
+import { capitalizeFirstLetter } from '@/common/utils/capitalize-first-letter'
+import { typeColors } from '@/common/utils/character-type-icons'
 
 import { CharacterTypesManager } from './character-type'
 import type { CharacterClassificationProps } from './types'

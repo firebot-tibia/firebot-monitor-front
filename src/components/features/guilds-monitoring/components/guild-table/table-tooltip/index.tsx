@@ -19,7 +19,7 @@ import {
 import { MoreHorizontal, Clock, User, Award, Sword } from 'lucide-react'
 import NextLink from 'next/link'
 
-import { routes } from '@/constants/routes'
+import { routes } from '@/common/constants/routes'
 
 import type { CharacterTooltipProps } from './types'
 

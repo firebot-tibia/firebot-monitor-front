@@ -3,12 +3,12 @@ import { useCallback, useMemo } from 'react'
 import { useToast } from '@chakra-ui/react'
 import { create } from 'zustand'
 
-import { fixedTypes } from '../../../../../constants/types'
-import { upsertPlayer } from '../../../../../services/guild-stats'
-import { useStorageStore } from '../../../../../stores/storage-store'
-import { useTokenStore } from '../../../../../stores/token-decoded-store'
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
-import type { UpsertPlayerInput } from '../../types/character-upsert'
+import type { UpsertPlayerInput } from './types'
+import { fixedTypes } from '../../../../../common/constants/types'
+import { useStorageStore } from '../../../../../common/stores/storage-store'
+import type { GuildMemberResponse } from '../../../../../common/types/guild-member.response'
+import { useTokenStore } from '../../../auth/store/token-decoded-store'
+import { upsertPlayer } from '../../../statistics/services'
 
 interface CharacterTypesState {
   customTypes: string[]
@@ -29,12 +29,21 @@ export const useCharacterTypes = (guildData: GuildMemberResponse[]) => {
   const guildId = useStorageStore.getState().getItem('selectedGuildId', '')
 
   const types = useMemo(() => {
+    // Always start with fixed types
+    const typeSet = new Set(fixedTypes)
+
+    // Add custom types
+    customTypes.forEach(type => typeSet.add(type))
+
+    // Add types from guild data
     if (Array.isArray(guildData) && guildData.length > 0) {
-      const allTypes = guildData.map(member => member.Kind)
-      const uniqueTypes = Array.from(new Set(allTypes.filter(type => type && type.trim() !== '')))
-      return Array.from(new Set([...fixedTypes, ...customTypes, ...uniqueTypes]))
+      guildData.forEach(member => {
+        if (member.Kind && member.Kind.trim() !== '') {
+          typeSet.add(member.Kind)
+        }
+      })
     }
-    return [...fixedTypes, ...customTypes]
+    return Array.from(typeSet)
   }, [guildData, customTypes])
 
   const addType = useCallback(

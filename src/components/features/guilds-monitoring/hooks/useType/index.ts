@@ -1,9 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 
-import { fixedTypes } from '@/constants/types'
-import type { GuildMemberResponse } from '@/types/guild-member.response'
+import { fixedTypes } from '@/common/constants/types'
+import type { GuildMemberResponse } from '@/common/types/guild-member.response'
 
-// Initialize with fixed types
 const globalTypesSet = new Set<string>(fixedTypes)
 
 export const useCharacterTypesView = (guildData: GuildMemberResponse[]) => {
@@ -17,7 +16,6 @@ export const useCharacterTypesView = (guildData: GuildMemberResponse[]) => {
   }
 
   const updateTypes = useCallback(() => {
-    // Reset to fixed types if no data
     if (!Array.isArray(guildData) || guildData.length === 0) {
       const baseTypes = Array.from(fixedTypes).sort()
       if (!areArraysEqual(baseTypes, previousTypesRef.current)) {
@@ -27,7 +25,6 @@ export const useCharacterTypesView = (guildData: GuildMemberResponse[]) => {
       return
     }
 
-    // Only update if data has changed
     if (
       areArraysEqual(
         guildData.map(d => d.Kind),
@@ -37,7 +34,6 @@ export const useCharacterTypesView = (guildData: GuildMemberResponse[]) => {
       return
     }
 
-    // Reset and rebuild types set
     globalTypesSet.clear()
     fixedTypes.forEach(type => globalTypesSet.add(type))
 

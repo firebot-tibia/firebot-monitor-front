@@ -21,9 +21,9 @@ import {
 import { ChevronDownIcon, SearchIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import { routes } from '../../../../../constants/routes'
-import { capitalizeFirstLetter } from '../../../../../utils/capitalize-first-letter'
-import { tableVocationIcons } from '../../../../../utils/table-vocation-icons'
+import { routes } from '../../../../../common/constants/routes'
+import { capitalizeFirstLetter } from '../../../../../common/utils/capitalize-first-letter'
+import { tableVocationIcons } from '../../../../../common/utils/table-vocation-icons'
 
 interface FilterBarProps {
   filter: string

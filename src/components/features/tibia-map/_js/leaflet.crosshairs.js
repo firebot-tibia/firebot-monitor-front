@@ -63,7 +63,7 @@ L.Crosshairs = L.LayerGroup.extend({
     this._map.on('mouseover', this._show.bind(this))
     this.eachLayer(map.addLayer, map)
   },
-  onRemove: function (map) {
+  onRemove: function () {
     this._map.off('click', this._moveCrosshairs)
     this._map.off('zoomend', this._moveCrosshairs)
     this.eachLayer(this.removeLayer, this)

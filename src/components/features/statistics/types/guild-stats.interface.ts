@@ -1,4 +1,4 @@
-import type { GuildMember } from '@/types/guild-member'
+import type { GuildMember } from '@/common/types/guild-member'
 
 export interface GuildData {
   data: GuildMember[]

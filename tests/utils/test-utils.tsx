@@ -1,7 +1,8 @@
 import React from 'react'
+
+import { ChakraProvider } from '@chakra-ui/react'
 import { render as rtlRender } from '@testing-library/react'
 import { SessionProvider } from 'next-auth/react'
-import { ChakraProvider } from '@chakra-ui/react'
 
 function render(ui: React.ReactElement, { session = null, ...options } = {}) {
   function Wrapper({ children }: { children: React.ReactNode }) {

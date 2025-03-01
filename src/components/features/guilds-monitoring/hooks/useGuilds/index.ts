@@ -1,225 +1,293 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useToast } from '@chakra-ui/react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
 import { useSession } from 'next-auth/react'
 
-import { FIREBOT_SSE_URL } from '@/constants/env'
-import { usePermission } from '@/hooks/usePermission'
+import { LoggerService } from '@/common/hooks/useLogger/logger.service'
+import { useStorageStore } from '@/common/stores/storage-store'
+import { useAlertMonitoring } from '@/components/features/monitoring/hooks/useAlertMonitoring'
+import type { AlertCondition } from '@/components/features/monitoring/types/alert.types'
 
-import { useSSE } from '../../../../../hooks/useSSE'
-import { upsertPlayer } from '../../../../../services/guild-stats'
-import { useStorage, useStorageStore } from '../../../../../stores/storage-store'
-import { useTokenStore } from '../../../../../stores/token-decoded-store'
-import type { GuildMemberResponse } from '../../../../../types/guild-member.response'
-import { formatTimeOnline } from '../../../../../utils/format-time-online'
+import type { GuildMemberResponse } from '../../../../../common/types/guild-member.response'
+import { useTokenStore } from '../../../auth/store/token-decoded-store'
+import { upsertPlayer } from '../../../statistics/services'
 import { useCharacterTypes } from '../useCharacterTypes'
+import { useGuildData } from '../useGuildData'
+import { useGuildLocalUpdater } from '../useGuildLocalUpdater'
+import { useGuildProcessor } from '../useGuildProcessor'
+import { useGuildSSE } from '../useGuildSSE'
+import { useGuildTimeUpdater } from '../useGuildTimeUpdater'
 
-export const useGuilds = () => {
-  const [value, setValue] = useStorage('monitorMode', 'enemy')
-  const toast = useToast()
-  const [guildData, setGuildData] = useState<GuildMemberResponse[]>([])
+/**
+ * Types for the useGuilds hook
+ */
+interface UseGuildsProps {
+  playSound: (sound: AlertCondition['sound']) => void
+}
+
+interface GroupedData {
+  type: string
+  data: GuildMemberResponse[]
+  onlineCount: number
+}
+
+interface UseGuildsReturn {
+  guildData: GuildMemberResponse[]
+  isLoading: boolean
+  isConnected: boolean
+  handleLocalChange: (member: GuildMemberResponse, newLocal: string) => void
+  handleClassificationChange: (member: GuildMemberResponse, newType: string) => Promise<void>
+  types: string[]
+  addType: (type: string) => void
+  groupedData: GroupedData[]
+  status: string
+}
+
+/**
+ * Main hook for guild data management and processing
+ */
+export const useGuilds = ({ playSound }: UseGuildsProps): UseGuildsReturn => {
+  // State
   const [isLoading, setIsLoading] = useState(true)
-  const { data: session, status } = useSession()
+  const [error, setError] = useState<Error | null>(null)
+
+  // Session and storage data
+  const { data: session, status: sessionStatus } = useSession()
+  const { decodeAndSetToken } = useTokenStore()
   const guildId = useStorageStore.getState().getItem('selectedGuildId', '')
-  const { selectedWorld, setSelectedWorld, decodeAndSetToken } = useTokenStore()
-  const checkPermission = usePermission()
+  const selectedWorld = useStorageStore.getState().getItem('selectedWorld', '')
 
-  const [characterChanges, setCharacterChanges] = useState<GuildMemberResponse[]>([])
+  // Initialize base hooks
+  const { guildData, setGuildData, updateMemberData, processNewGuildData } = useGuildData()
   const { types, addType } = useCharacterTypes(guildData)
+  const { checkAndTriggerAlerts } = useAlertMonitoring()
+  const { handleLocalChange } = useGuildLocalUpdater(updateMemberData)
 
-  // New handleMessage callback
-  const handleMessage = useCallback(
-    (data: any) => {
-      if (data?.[value]) {
-        const newGuildData = data[value].map((member: GuildMemberResponse) => ({
-          ...member,
-          OnlineSince: member.OnlineStatus ? member.OnlineSince || new Date().toISOString() : null,
-          TimeOnline: member.OnlineStatus ? '00:00:00' : null,
-        }))
-        setGuildData(newGuildData)
-      }
+  // Prevent unnecessary re-renders
+  const guildDataRef = useRef(guildData)
+  const typesRef = useRef(types)
 
-      if (data?.[`${value}-changes`]) {
-        setGuildData(prevData => {
-          const updatedData = [...prevData]
-          const newChanges: GuildMemberResponse[] = []
-          Object.entries(data[`${value}-changes`]).forEach(([name, change]: [string, any]) => {
-            const index = updatedData.findIndex(member => member.Name === name)
-            if (index !== -1) {
-              if (change.ChangeType === 'logged-in') {
-                updatedData[index] = {
-                  ...updatedData[index],
-                  ...change.Member,
-                  OnlineStatus: true,
-                  OnlineSince: new Date().toISOString(),
-                  TimeOnline: '00:00:00',
-                }
-                newChanges.push(updatedData[index])
-              } else if (change.ChangeType === 'logged-out') {
-                updatedData[index] = {
-                  ...updatedData[index],
-                  ...change.Member,
-                  OnlineStatus: false,
-                  OnlineSince: null,
-                  TimeOnline: null,
-                }
-              } else {
-                updatedData[index] = { ...updatedData[index], ...change.Member }
-              }
-            }
-          })
-          setCharacterChanges(prev => [...prev, ...newChanges])
-          return updatedData
-        })
-      }
+  useEffect(() => {
+    guildDataRef.current = guildData
+    typesRef.current = types
+  }, [guildData, types])
+
+  // Setup automatic time updates
+  useGuildTimeUpdater({ setGuildData })
+
+  /**
+   * Process and validate new guild data
+   */
+  const handleGuildDataProcessed = useCallback(
+    (newData: GuildMemberResponse[]) => {
+      console.log('[Guilds Hook] Processing guild data:', {
+        isArray: Array.isArray(newData),
+        length: newData?.length,
+        sample: newData?.[0],
+      })
+      if (!Array.isArray(newData) || newData.length === 0) return
+
       setIsLoading(false)
+      processNewGuildData(newData)
     },
-    [value],
+    [processNewGuildData, setIsLoading],
   )
 
-  const { status: sseStatus, isConnected } = useSSE({
-    endpoint: `${FIREBOT_SSE_URL}${value}/`,
-    onMessage: handleMessage,
+  /**
+   * Handle alerts when triggered
+   */
+  const handleGuildMemberAlert = useCallback(
+    (members: GuildMemberResponse[], alert: AlertCondition) => {
+      playSound(alert.sound)
+    },
+    [playSound],
+  )
+
+  // Initialize guild processor
+  const { processGuildData, processGuildChanges } = useGuildProcessor({
+    onGuildDataProcessed: handleGuildDataProcessed,
+    onGuildMemberAlert: handleGuildMemberAlert,
   })
 
+  /**
+   * Process new guild data from SSE
+   */
+  const handleGuildData = useCallback(
+    (data: GuildMemberResponse[]) => {
+      console.log('[Guilds Hook] Handling guild data:', {
+        isArray: Array.isArray(data),
+        length: data?.length,
+        sample: data?.[0],
+      })
+      if (!Array.isArray(data) || data.length === 0) return
+
+      try {
+        // Process data and get members who recently logged in
+        const { recentlyLoggedIn } = processGuildData(data, guildDataRef.current)
+
+        // Update guild data with new information
+        handleGuildDataProcessed(data)
+
+        // Handle alerts for recently logged in members
+        if (recentlyLoggedIn.length > 0) {
+          const { reachedThreshold, alert } = checkAndTriggerAlerts(recentlyLoggedIn)
+          if (reachedThreshold && alert) {
+            handleGuildMemberAlert(recentlyLoggedIn, alert)
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to process guild data'))
+      }
+    },
+    [
+      guildData,
+      processGuildData,
+      checkAndTriggerAlerts,
+      handleGuildMemberAlert,
+      handleGuildDataProcessed,
+    ],
+  )
+
+  /**
+   * Process guild changes from SSE
+   */
+  const handleGuildChanges = useCallback(
+    (changes: any) => {
+      if (!changes) return
+
+      try {
+        const { updatedData, loggedInMembers } = processGuildChanges(changes, guildData)
+
+        // Update guild data if we have changes
+        if (updatedData.length > 0) {
+          handleGuildDataProcessed(updatedData)
+        }
+
+        // Handle alerts for members who just logged in
+        if (loggedInMembers.length > 0) {
+          const { reachedThreshold, alert } = checkAndTriggerAlerts(loggedInMembers)
+          if (reachedThreshold && alert) {
+            handleGuildMemberAlert(loggedInMembers, alert)
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to process guild changes'))
+      }
+    },
+    [
+      guildData,
+      processGuildChanges,
+      checkAndTriggerAlerts,
+      handleGuildMemberAlert,
+      handleGuildDataProcessed,
+    ],
+  )
+
+  // Connect to SSE data source
+  const { status: sseStatus, isConnected } = useGuildSSE({
+    onGuildData: handleGuildData,
+    onGuildChanges: handleGuildChanges,
+  })
+
+  // Handle SSE connection status changes
   useEffect(() => {
     if (sseStatus === 'connected') {
       setIsLoading(false)
     } else if (sseStatus === 'connecting') {
       setIsLoading(true)
+    } else if (sseStatus === 'disconnected') {
+      // Only show loading if we have no data
+      setIsLoading(!guildData.length)
     }
-  }, [sseStatus])
+  }, [sseStatus, guildData.length])
 
+  // Set token when session is authenticated
   useEffect(() => {
-    const interval = setInterval(() => {
-      setGuildData(prevData =>
-        prevData.map(member => {
-          if (member.OnlineStatus && member.OnlineSince) {
-            const onlineSince = new Date(member.OnlineSince)
-            const now = new Date()
-            const diffInMinutes = (now.getTime() - onlineSince.getTime()) / 60000
-            return { ...member, TimeOnline: formatTimeOnline(diffInMinutes) }
-          }
-          return member
-        }),
-      )
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    if (status === 'authenticated' && session?.access_token) {
+    if (sessionStatus === 'authenticated' && session?.access_token) {
       decodeAndSetToken(session.access_token)
     }
-  }, [status, session, decodeAndSetToken])
+  }, [sessionStatus, session, decodeAndSetToken])
 
-  const updateMemberData = useCallback(
-    (member: GuildMemberResponse, changes: Partial<GuildMemberResponse>) => {
-      setGuildData(prevData =>
-        prevData.map(m => (m.Name === member.Name ? { ...m, ...changes } : m)),
-      )
-    },
-    [],
-  )
-
-  const handleLocalChange = useCallback(
-    async (member: GuildMemberResponse, newLocal: string) => {
-      if (!checkPermission()) return
-      if (!guildId) return
-
-      try {
-        const playerData = {
-          guild_id: guildId,
-          kind: member.Kind,
-          name: member.Name,
-          status: member.Status,
-          local: newLocal,
-        }
-
-        await upsertPlayer(playerData, selectedWorld)
-        updateMemberData(member, { Local: newLocal })
-      } catch (error) {
-        throw error
-      }
-    },
-    [guildId, checkPermission, selectedWorld, updateMemberData],
-  )
-
+  /**
+   * Update member classification
+   */
   const handleClassificationChange = useCallback(
-    async (member: GuildMemberResponse, newClassification: string) => {
-      if (!checkPermission()) return
-      if (!guildId) return
-
+    async (member: GuildMemberResponse, newType: string) => {
       try {
         const playerData = {
           guild_id: guildId,
-          kind: newClassification,
+          kind: newType,
           name: member.Name,
           status: member.Status,
-          local: member.Local || '',
+          local: member.Local,
         }
 
         await upsertPlayer(playerData, selectedWorld)
-        updateMemberData(member, { Kind: newClassification })
-        toast({
-          title: 'Sucesso',
-          description: `${member.Name} classificado como ${newClassification}.`,
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        })
-      } catch (error) {
-        throw error
+        updateMemberData(member, { Kind: newType })
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to update player classification'))
+        throw err
       }
     },
-    [guildId, checkPermission, selectedWorld, updateMemberData, toast],
+    [guildId, selectedWorld, updateMemberData],
   )
 
+  /**
+   * Group guild data by type for display
+   */
   const groupedData = useMemo(() => {
-    const onlineMembers = guildData.filter(member => member.OnlineStatus && member.TimeOnline)
+    const currentData = guildDataRef.current
+    const currentTypes = typesRef.current
 
-    const sortedGuildData = onlineMembers.sort((a, b) => {
-      const timeA = a.TimeOnline || '00:00:00'
-      const timeB = b.TimeOnline || '00:00:00'
-
-      if (timeA === '00:00:00' && timeB !== '00:00:00') return -1
-      if (timeA !== '00:00:00' && timeB === '00:00:00') return 1
-
-      return timeA.localeCompare(timeB)
+    console.log('[Guilds Hook] Grouping data:', {
+      guildDataLength: currentData?.length,
+      types: currentTypes,
+      sample: currentData?.[0],
     })
 
-    return types
-      .map(type => ({
-        type,
-        data: sortedGuildData.filter(member => member.Kind === type),
-        onlineCount: sortedGuildData.filter(member => member.Kind === type).length,
-      }))
-      .concat({
-        type: 'unclassified',
-        data: sortedGuildData.filter(member => !member.Kind || !types.includes(member.Kind)),
-        onlineCount: sortedGuildData.filter(member => !member.Kind || !types.includes(member.Kind))
-          .length,
-      })
-      .filter(group => group.data.length > 0)
-  }, [guildData, types])
+    const grouped: GroupedData[] = []
+    if (!currentData?.length) return grouped
+
+    // Default types if none are set
+    const effectiveTypes = currentTypes?.length
+      ? currentTypes
+      : ['main', 'hunted', 'maker', 'bomba']
+
+    // Group members by their Kind
+    const groupsByKind = new Map<string, GuildMemberResponse[]>()
+
+    for (const member of currentData) {
+      const kind = member.Kind || 'main'
+      const group = groupsByKind.get(kind) || []
+      group.push(member)
+      groupsByKind.set(kind, group)
+    }
+
+    // Create groups for each type with members
+    for (const type of effectiveTypes) {
+      const typeData = groupsByKind.get(type) || []
+      if (typeData.length > 0) {
+        grouped.push({
+          type,
+          data: typeData,
+          onlineCount: typeData.filter(member => member.OnlineStatus).length,
+        })
+      }
+    }
+
+    return grouped
+  }, [])
 
   return {
-    value,
-    setValue,
-    setSelectedWorld,
     guildData,
     isLoading,
-    status,
-    types,
-    addType,
+    isConnected,
     handleLocalChange,
     handleClassificationChange,
+    types,
+    addType,
     groupedData,
-    characterChanges,
-    setCharacterChanges,
-    connectionStatus: sseStatus,
-    isConnected,
+    status: error ? 'error' : sseStatus,
   }
 }
