@@ -2,8 +2,9 @@ import React from 'react'
 
 import { Box, Heading } from '@chakra-ui/react'
 
-import CharacterStatsPage from '../../../components/features/statistics/components/player-modal'
-import DashboardLayout from '../../../components/layout'
+import DashboardLayout from '@/modules/layout/components'
+
+import CharacterStatsPage from '../../../modules/statistics/components/player-modal'
 
 const CharacterPage: React.FC = () => {
   return (

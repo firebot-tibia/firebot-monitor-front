@@ -1,8 +1,8 @@
-// app/layout.tsx
-import '../common/styles/globals.css'
 import type { Metadata } from 'next'
 
-import { GoogleTagManager } from '@/components/layout/components/google-tag'
+import { GoogleTagManager } from '@/modules/layout/components/google-tag'
+
+import '../core/styles/globals.css'
 
 import { Providers } from './providers'
 
