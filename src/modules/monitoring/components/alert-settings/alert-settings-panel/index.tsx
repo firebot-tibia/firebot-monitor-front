@@ -81,7 +81,7 @@ const AlertCard = memo(function AlertCard({
         onUpdateAlert(alert.id, 'timeRange', numValue)
       }
     },
-    [alert.id, onUpdateAlert]
+    [alert.id, onUpdateAlert],
   )
 
   const handleThresholdChange = useCallback(
@@ -91,7 +91,7 @@ const AlertCard = memo(function AlertCard({
         onUpdateAlert(alert.id, 'threshold', numValue)
       }
     },
-    [alert.id, onUpdateAlert]
+    [alert.id, onUpdateAlert],
   )
 
   const handleSoundChange = useCallback(
@@ -99,7 +99,7 @@ const AlertCard = memo(function AlertCard({
       onUpdateAlert(alert.id, 'sound', e.target.value)
       onTestSound(e.target.value as any)
     },
-    [alert.id, onUpdateAlert, onTestSound]
+    [alert.id, onUpdateAlert, onTestSound],
   )
 
   return (
@@ -135,7 +135,7 @@ const AlertCard = memo(function AlertCard({
                   bg="rgba(255, 255, 255, 0.06)"
                   borderColor="whiteAlpha.200"
                   _hover={{
-                    borderColor: "whiteAlpha.300",
+                    borderColor: 'whiteAlpha.300',
                   }}
                 />
                 <NumberInputStepper>
@@ -143,7 +143,9 @@ const AlertCard = memo(function AlertCard({
                   <NumberDecrementStepper />
                 </NumberInputStepper>
               </NumberInput>
-              <Text fontSize="xs" color="gray.400">min</Text>
+              <Text fontSize="xs" color="gray.400">
+                min
+              </Text>
             </HStack>
 
             {/* Threshold */}
@@ -165,7 +167,7 @@ const AlertCard = memo(function AlertCard({
                   bg="rgba(255, 255, 255, 0.06)"
                   borderColor="whiteAlpha.200"
                   _hover={{
-                    borderColor: "whiteAlpha.300",
+                    borderColor: 'whiteAlpha.300',
                   }}
                 />
                 <NumberInputStepper>
@@ -188,7 +190,7 @@ const AlertCard = memo(function AlertCard({
                 bg="rgba(255, 255, 255, 0.06)"
                 borderColor="whiteAlpha.200"
                 _hover={{
-                  borderColor: "whiteAlpha.300",
+                  borderColor: 'whiteAlpha.300',
                 }}
                 value={alert.sound}
                 onChange={handleSoundChange}
@@ -246,30 +248,27 @@ export const AlertSettingsPanel = memo(function AlertSettingsPanel({
   const borderColor = useColorModeValue('whiteAlpha.100', 'whiteAlpha.100')
 
   // Memoize array of enabled alerts for stable rendering
-  const enabledAlerts = useMemo(() =>
-    alerts.filter(a => a.enabled).length,
-    [alerts]
-  )
+  const enabledAlerts = useMemo(() => alerts.filter(a => a.enabled).length, [alerts])
 
   const handleTimeThresholdChange = useCallback(
     (value: number) => {
       updateSettings({ timeThreshold: value })
     },
-    [updateSettings]
+    [updateSettings],
   )
 
   const handleMemberThresholdChange = useCallback(
     (value: number) => {
       updateSettings({ memberThreshold: value })
     },
-    [updateSettings]
+    [updateSettings],
   )
 
   const handleUpdateAlert = useCallback(
     (alertId: string, field: keyof AlertCondition, value: any) => {
       updateAlert(alertId, field, value)
     },
-    [updateAlert]
+    [updateAlert],
   )
 
   return (
@@ -281,23 +280,12 @@ export const AlertSettingsPanel = memo(function AlertSettingsPanel({
       blockScrollOnMount={false}
     >
       <DrawerOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
-      <DrawerContent
-        bg={bgColor}
-        boxShadow="dark-lg"
-      >
+      <DrawerContent bg={bgColor} boxShadow="dark-lg">
         <DrawerCloseButton color="whiteAlpha.700" />
-        <DrawerHeader
-          borderBottomWidth={1}
-          borderBottomColor={borderColor}
-        >
+        <DrawerHeader borderBottomWidth={1} borderBottomColor={borderColor}>
           Condições de Alerta
           {enabledAlerts > 0 && (
-            <Tag
-              size="sm"
-              colorScheme="blue"
-              ml={2}
-              borderRadius="full"
-            >
+            <Tag size="sm" colorScheme="blue" ml={2} borderRadius="full">
               {enabledAlerts} ativo{enabledAlerts > 1 ? 's' : ''}
             </Tag>
           )}

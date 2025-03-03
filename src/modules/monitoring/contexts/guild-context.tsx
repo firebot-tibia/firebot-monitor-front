@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 import { createContext, useContext, useCallback, useState, useEffect } from 'react'
 
 import { FIREBOT_SSE_URL } from '@/core/constants/env'
@@ -15,7 +15,10 @@ interface GuildContextData {
   types: string[]
   addType: (type: string) => void
   handleLocalChange: (member: GuildMemberResponse, newLocal: string) => Promise<void>
-  handleClassificationChange: (member: GuildMemberResponse, newClassification: string) => Promise<void>
+  handleClassificationChange: (
+    member: GuildMemberResponse,
+    newClassification: string,
+  ) => Promise<void>
   groupedData: Array<{ type: string; data: GuildMemberResponse[]; onlineCount: number }>
   guildData: GuildMemberResponse[]
 }
@@ -59,8 +62,13 @@ export function GuildProvider({ children }: { children: ReactNode }) {
       if (data?.[value]) {
         const now = new Date()
         const newGuildData = data[value].map((member: GuildMemberResponse) => {
-          const onlineSince = member.OnlineStatus ? member.OnlineSince || now.toISOString() : '00:00:00'
-          const timeOnline = member.OnlineStatus && onlineSince ? formatTimeOnline(new Date(onlineSince), now) : '00:00:00'
+          const onlineSince = member.OnlineStatus
+            ? member.OnlineSince || now.toISOString()
+            : '00:00:00'
+          const timeOnline =
+            member.OnlineStatus && onlineSince
+              ? formatTimeOnline(new Date(onlineSince), now)
+              : '00:00:00'
           return {
             ...member,
             OnlineSince: onlineSince,
@@ -113,19 +121,16 @@ export function GuildProvider({ children }: { children: ReactNode }) {
     onMessage: handleMessage,
   })
 
-  const handleLocalChange = useCallback(
-    async (member: GuildMemberResponse, newLocal: string) => {
-      setGuildData(prevData => {
-        const newData = [...prevData]
-        const index = newData.findIndex(m => m.Name === member.Name)
-        if (index !== -1) {
-          newData[index] = { ...newData[index], Local: newLocal }
-        }
-        return newData
-      })
-    },
-    [],
-  )
+  const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
+    setGuildData(prevData => {
+      const newData = [...prevData]
+      const index = newData.findIndex(m => m.Name === member.Name)
+      if (index !== -1) {
+        newData[index] = { ...newData[index], Local: newLocal }
+      }
+      return newData
+    })
+  }, [])
 
   const handleClassificationChange = useCallback(
     async (member: GuildMemberResponse, newClassification: string) => {

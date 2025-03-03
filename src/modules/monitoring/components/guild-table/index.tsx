@@ -7,8 +7,6 @@ import CharacterRow from './table-row'
 import { useGuildTable } from '../../hooks/useGuildTable'
 import { useCharacterTypesView } from '../../hooks/useType'
 
-
-
 export interface GuildTableProps {
   type: string
   data: GuildMemberResponse[]

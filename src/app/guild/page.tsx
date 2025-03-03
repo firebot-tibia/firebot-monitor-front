@@ -30,7 +30,5 @@ export const metadata: Metadata = {
 }
 
 export default function GuildPage() {
-  return (
-      <GuildContainer />
-  )
+  return <GuildContainer />
 }
