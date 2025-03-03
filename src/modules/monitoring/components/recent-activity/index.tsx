@@ -137,7 +137,7 @@ export function ActivityWidget() {
               ) : (
                 <Text
                   fontSize="sm"
-                  color={useColorModeValue('gray.500', 'whiteAlpha.600')}
+                  color={'whiteAlpha.600'}
                   textAlign="center"
                 >
                   Nenhuma atividade recente
@@ -159,7 +159,7 @@ export function ActivityWidget() {
               ) : (
                 <Text
                   fontSize="sm"
-                  color={useColorModeValue('gray.500', 'whiteAlpha.600')}
+                  color={'whiteAlpha.600'}
                   textAlign="center"
                 >
                   Nenhuma atividade recente

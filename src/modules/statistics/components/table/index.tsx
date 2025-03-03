@@ -2,8 +2,7 @@ import React from 'react'
 
 import { Box, Flex, Image, Spinner, Table, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react'
 
-import type { GuildMember } from '@/core/types/guild-member'
-
+import { formatExp } from '../../../../core/utils/format-exp'
 import { tableVocationIcons } from '../../../../core/utils/table-vocation-icons'
 import type { GuildData } from '../../types/guild-stats.interface'
 import ExpStats from '../exp-stats'
@@ -63,17 +62,16 @@ const GuildTableStats: React.FC<GuildTableProps> = ({
               <Th isNumeric color={headerColor}>
                 LVL
               </Th>
-              <Th color={headerColor}>STATUS</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {guildData.data.map((item: GuildMember) => (
+            {guildData.data.map(item => (
               <Tr
                 key={item.name}
                 _hover={{ bg: hoverBgColor, cursor: 'pointer' }}
                 onClick={() => onCharacterClick(item.name)}
               >
-                <Td color={textColor}>{item.experience}</Td>
+                <Td color={textColor}>{formatExp(item.experience)}</Td>
                 <Td>
                   <Image
                     src={tableVocationIcons[item.vocation]}
@@ -84,9 +82,6 @@ const GuildTableStats: React.FC<GuildTableProps> = ({
                 <Td color={textColor}>{item.name}</Td>
                 <Td isNumeric color={textColor}>
                   {item.level}
-                </Td>
-                <Td>
-                  <Box w={3} h={3} borderRadius="full" bg={item.online ? 'green.500' : 'red.500'} />
                 </Td>
               </Tr>
             ))}

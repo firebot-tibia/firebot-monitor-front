@@ -1,26 +1,32 @@
 import { create } from 'zustand'
 
-import { useStorageStore } from '../../../../core/store/storage-store'
-import { getExperienceList } from '../../services'
-import type { ExperienceListQuery, GuildData } from '../../types/guild-stats.interface'
+import { useStorageStore } from '../../../core/store/storage-store'
+import { getExperienceList } from '../services'
+import type { ExperienceListQuery, GuildData } from '../types/guild-stats.interface'
 
 interface GuildStatsState {
-  filter: string
-  sort: string
-  vocationFilter: string
-  nameFilter: string
+  // Data
   allyGainData: GuildData
   allyLossData: GuildData
   enemyGainData: GuildData
   enemyLossData: GuildData
+
+  // Pagination
   allyGainPage: number
   allyLossPage: number
   enemyGainPage: number
   enemyLossPage: number
+
+  // UI State
   loading: boolean
+  filter: string
+  sort: string
+  vocationFilter: string
+  nameFilter: string
   selectedCharacter: string | null
   itemsPerPage: number
 
+  // Actions
   setFilter: (filter: string) => void
   setVocationFilter: (vocation: string) => void
   setNameFilter: (name: string) => void
@@ -29,15 +35,24 @@ interface GuildStatsState {
   fetchGuildStats: (guildType: 'ally' | 'enemy') => Promise<void>
 }
 
+const emptyGuildData: GuildData = {
+  data: [],
+  totalPages: 0,
+  totalExp: 0,
+  avgExp: 0,
+  page: 1,
+}
+
 export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
+  // Initial state
   filter: 'Diaria',
   sort: 'exp_yesterday',
   vocationFilter: '',
   nameFilter: '',
-  allyGainData: { data: [], totalPages: 1, totalExp: 0, avgExp: 0 },
-  allyLossData: { data: [], totalPages: 1, totalExp: 0, avgExp: 0 },
-  enemyGainData: { data: [], totalPages: 1, totalExp: 0, avgExp: 0 },
-  enemyLossData: { data: [], totalPages: 1, totalExp: 0, avgExp: 0 },
+  allyGainData: { ...emptyGuildData },
+  allyLossData: { ...emptyGuildData },
+  enemyGainData: { ...emptyGuildData },
+  enemyLossData: { ...emptyGuildData },
   allyGainPage: 1,
   allyLossPage: 1,
   enemyGainPage: 1,
@@ -46,6 +61,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
   selectedCharacter: null,
   itemsPerPage: 30,
 
+  // Actions
   setFilter: filter => {
     const newSort =
       filter === 'Diaria' ? 'exp_yesterday' : filter === 'Semanal' ? 'exp_week' : 'exp_month'
@@ -132,7 +148,6 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         vocation: player.vocation,
         name: player.name,
         level: player.level,
-        online: player.online,
       }))
 
       const gainData = formattedData.filter((player: any) => {
@@ -172,6 +187,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         totalPages: Math.ceil(gainData.length / itemsPerPage),
         totalExp: gainTotalExp,
         avgExp: gainAvgExp,
+        page: guildType === 'ally' ? allyGainPage : enemyGainPage,
       }
 
       const newLossData = {
@@ -182,6 +198,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         totalPages: Math.ceil(lossData.length / itemsPerPage),
         totalExp: lossTotalExp,
         avgExp: lossAvgExp,
+        page: guildType === 'ally' ? allyLossPage : enemyLossPage,
       }
 
       if (guildType === 'ally') {
@@ -190,6 +207,7 @@ export const useGuildStatsStore = create<GuildStatsState>((set, get) => ({
         set({ enemyGainData: newGainData, enemyLossData: newLossData, loading: false })
       }
     } catch (error) {
+      console.error('Error fetching guild stats:', error)
       set({ loading: false })
     }
   },

@@ -1,10 +1,28 @@
 import type { GuildMember } from '@/core/types/guild-member'
 
+export interface GuildMemberStats {
+  name: string
+  vocation: string
+  level: number
+  experience: number
+}
+
 export interface GuildData {
-  data: GuildMember[]
+  data: GuildMemberStats[]
   totalPages: number
   totalExp: number
   avgExp: number
+  page: number
+}
+
+export interface GuildGroupData {
+  gain: GuildData
+  loss: GuildData
+}
+
+export interface GuildStatsData {
+  ally: GuildGroupData
+  enemy: GuildGroupData
 }
 
 export interface ExperienceListQuery {
