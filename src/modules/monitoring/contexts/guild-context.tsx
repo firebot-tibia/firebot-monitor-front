@@ -17,7 +17,6 @@ import { useSSE } from '../hooks/useSSE'
 import type { DeathEvent } from '../types/death'
 import type { LevelEvent } from '../types/level'
 
-
 interface GuildContextData {
   isLoading: boolean
   status: string
@@ -279,59 +278,63 @@ export function GuildProvider({ children }: { children: ReactNode }) {
   }, [guildData])
 
   // Optimize member updates with O(1) lookups
-  const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
-    try {
-      if (!selectedWorld) {
+  const handleLocalChange = useCallback(
+    async (member: GuildMemberResponse, newLocal: string) => {
+      try {
+        if (!selectedWorld) {
+          toast({
+            title: 'Erro ao atualizar localização',
+            description:
+              'Por favor, selecione um mundo antes de atualizar a localização do personagem.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          })
+          return
+        }
+
+        await upsertPlayer(
+          {
+            name: member.Name,
+            kind: member.Kind || 'sem classificação',
+            local: newLocal,
+          },
+          selectedWorld,
+        )
+
+        // Update local state only after successful API call
+        setGuildData(prevData => {
+          // Use map for O(1) lookups instead of findIndex (O(n))
+          const targetMember = memberMapRef.current.get(member.Name)
+          if (!targetMember) return prevData
+
+          // Update the map
+          memberMapRef.current.set(member.Name, { ...targetMember, Local: newLocal })
+
+          // Return new array with updated member
+          return prevData.map(m => (m.Name === member.Name ? { ...m, Local: newLocal } : m))
+        })
+
+        toast({
+          title: 'Localização atualizada',
+          description: `A localização de ${member.Name} foi atualizada para ${newLocal}`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        })
+      } catch (error) {
+        console.error('Error updating player location:', error)
         toast({
           title: 'Erro ao atualizar localização',
-          description: 'Por favor, selecione um mundo antes de atualizar a localização do personagem.',
+          description: 'Não foi possível atualizar a localização do personagem. Tente novamente.',
           status: 'error',
           duration: 5000,
           isClosable: true,
         })
-        return
       }
-
-      await upsertPlayer(
-        {
-          name: member.Name,
-          kind: member.Kind || 'sem classificação',
-          local: newLocal,
-        },
-        selectedWorld
-      )
-
-      // Update local state only after successful API call
-      setGuildData(prevData => {
-        // Use map for O(1) lookups instead of findIndex (O(n))
-        const targetMember = memberMapRef.current.get(member.Name)
-        if (!targetMember) return prevData
-
-        // Update the map
-        memberMapRef.current.set(member.Name, { ...targetMember, Local: newLocal })
-
-        // Return new array with updated member
-        return prevData.map(m => (m.Name === member.Name ? { ...m, Local: newLocal } : m))
-      })
-
-      toast({
-        title: 'Localização atualizada',
-        description: `A localização de ${member.Name} foi atualizada para ${newLocal}`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true
-      })
-    } catch (error) {
-      console.error('Error updating player location:', error)
-      toast({
-        title: 'Erro ao atualizar localização',
-        description: 'Não foi possível atualizar a localização do personagem. Tente novamente.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      })
-    }
-  }, [selectedWorld, toast])
+    },
+    [selectedWorld, toast],
+  )
 
   const handleClassificationChange = useCallback(
     async (member: GuildMemberResponse, newClassification: string) => {
@@ -353,7 +356,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
             kind: newClassification,
             local: member.Local || '',
           },
-          selectedWorld
+          selectedWorld,
         )
 
         // Update local state only after successful API call
