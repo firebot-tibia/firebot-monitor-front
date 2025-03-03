@@ -15,17 +15,18 @@ interface UseGuildDataReturn {
 type MemberMap = Map<string, GuildMemberResponse>
 
 /**
- * Hook for managing guild data with optimized updates and batching
+ * Optimized hook for managing guild data with efficient updates and batching
  */
 export const useGuildData = (): UseGuildDataReturn => {
   // Store guild data in state
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([])
 
-  // Fast lookup references
+  // Fast lookup references with refs to avoid re-renders
   const memberMapRef = useRef<MemberMap>(new Map())
   const pendingUpdatesRef = useRef<Set<string>>(new Set())
   const batchUpdateTimerRef = useRef<number | null>(null)
   const lastUpdateTimeRef = useRef<number>(Date.now())
+  const processingRef = useRef(false)
 
   // Keep member map in sync with guild data
   useEffect(() => {
@@ -33,7 +34,7 @@ export const useGuildData = (): UseGuildDataReturn => {
   }, [guildData])
 
   /**
-   * Helper function to schedule a batched update of the guild data state
+   * Schedule a batched update of the guild data state with debouncing
    */
   const scheduleBatchUpdate = useCallback(() => {
     // Cancel any existing scheduled updates
@@ -41,12 +42,23 @@ export const useGuildData = (): UseGuildDataReturn => {
       cancelAnimationFrame(batchUpdateTimerRef.current)
     }
 
+    // Use requestAnimationFrame for optimal performance
     batchUpdateTimerRef.current = requestAnimationFrame(() => {
-      // Only update if we have pending changes
-      if (pendingUpdatesRef.current.size > 0) {
+      // Only update if we have pending changes and not already processing
+      if (pendingUpdatesRef.current.size > 0 && !processingRef.current) {
+        processingRef.current = true
+
+        // Create new array from current member map
         const newData = Array.from(memberMapRef.current.values())
+
         setGuildData(newData)
         pendingUpdatesRef.current.clear()
+        lastUpdateTimeRef.current = Date.now()
+
+        // Allow next update after this one completes
+        setTimeout(() => {
+          processingRef.current = false
+        }, 0)
       }
       batchUpdateTimerRef.current = null
     })
@@ -78,10 +90,14 @@ export const useGuildData = (): UseGuildDataReturn => {
         // Add new member with changes
         currentMap.set(memberName, { ...member, ...changes })
       } else {
-        // Check if update is necessary
-        const hasChanges = Object.entries(changes).some(
-          ([key, value]) => existingMember[key as keyof GuildMemberResponse] !== value,
-        )
+        // Check if update is necessary by comparing values
+        let hasChanges = false
+        for (const [key, value] of Object.entries(changes)) {
+          if (existingMember[key as keyof GuildMemberResponse] !== value) {
+            hasChanges = true
+            break
+          }
+        }
 
         if (hasChanges) {
           // Update existing member
@@ -94,6 +110,7 @@ export const useGuildData = (): UseGuildDataReturn => {
         }
       }
 
+      // Schedule the update but debounce it
       scheduleBatchUpdate()
     },
     [scheduleBatchUpdate],
@@ -119,20 +136,30 @@ export const useGuildData = (): UseGuildDataReturn => {
       // Fast check: always update if online status changes
       if (newMember.OnlineStatus !== existingMember.OnlineStatus) return true
 
-      return Object.keys(newMember).some(key => {
+      // Fast check: check if TimeOnline has changed
+      if (newMember.TimeOnline !== existingMember.TimeOnline) return true
+
+      // Fast check: check if Local has changed
+      if (newMember.Local !== existingMember.Local) return true
+
+      // Fast check: check if Kind has changed
+      if (newMember.Kind !== existingMember.Kind) return true
+
+      // Detailed check for date fields
+      for (const key of ['OnlineSince', 'LastLogin']) {
         const typedKey = key as keyof GuildMemberResponse
-        const newValue = newMember[typedKey]
-        const existingValue = existingMember[typedKey]
+        const newValue = newMember[typedKey] as string
+        const existingValue = existingMember[typedKey] as string
 
-        // Handle special cases for date fields
-        if (key === 'OnlineSince' || key === 'LastLogin' || key === 'Login') {
-          return (
-            new Date(newValue as string).getTime() !== new Date(existingValue as string).getTime()
-          )
+        if (!newValue && !existingValue) continue
+        if (!newValue || !existingValue) return true
+
+        if (new Date(newValue).getTime() !== new Date(existingValue).getTime()) {
+          return true
         }
+      }
 
-        return newValue !== existingValue
-      })
+      return false
     },
     [],
   )
@@ -143,13 +170,6 @@ export const useGuildData = (): UseGuildDataReturn => {
    */
   const processNewGuildData = useCallback(
     (data: unknown): boolean => {
-      console.log('[Guild Data] Processing new guild data:', {
-        dataType: typeof data,
-        isArray: Array.isArray(data),
-        length: Array.isArray(data) ? data.length : 0,
-        sample: Array.isArray(data) ? data[0] : null,
-      })
-
       // Cancel any pending batch updates
       if (batchUpdateTimerRef.current !== null) {
         cancelAnimationFrame(batchUpdateTimerRef.current)
@@ -158,7 +178,7 @@ export const useGuildData = (): UseGuildDataReturn => {
 
       // Validate input
       if (!Array.isArray(data) || data.length === 0) {
-        console.warn('[Guild Data] Invalid or empty data format:', data)
+        console.warn('[Guild Data] Invalid or empty data format')
         return false
       }
 
@@ -172,7 +192,6 @@ export const useGuildData = (): UseGuildDataReturn => {
 
       // Fast path: first load - update immediately
       if (memberMapRef.current.size === 0) {
-        console.log('[Guild Data] First load, updating immediately')
         const newMap = new Map(validMembers.map(member => [member.Name, member]))
         memberMapRef.current = newMap
         setGuildData(validMembers)
@@ -181,17 +200,12 @@ export const useGuildData = (): UseGuildDataReturn => {
         return true
       }
 
-      // Check if we actually have changes
+      // Check if we actually have changes (optimize for no changes case)
       const currentMap = memberMapRef.current
       const currentSize = currentMap.size
 
       // Fast check: different number of members
       if (currentSize !== validMembers.length) {
-        console.log('[Guild Data] Member count changed, updating...', {
-          current: currentSize,
-          new: validMembers.length,
-        })
-
         // Update the member map and state
         const newMap = new Map(validMembers.map(member => [member.Name, member]))
         memberMapRef.current = newMap
@@ -202,27 +216,21 @@ export const useGuildData = (): UseGuildDataReturn => {
       }
 
       // Detailed check: compare each member's data
-      const hasChanges = validMembers.some(member => {
+      let hasChanges = false
+      for (const member of validMembers) {
         const existing = currentMap.get(member.Name)
-        if (!existing) return true
-        return hasMemberChanged(member, existing)
-      })
+        if (!existing || hasMemberChanged(member, existing)) {
+          hasChanges = true
+          currentMap.set(member.Name, member)
+        }
+      }
 
-      console.log('[Guild Data] Change detection:', {
-        memberCount: validMembers.length,
-        hasChanges,
-        sample: validMembers[0],
-      })
-
+      // Only update state if we found changes
       if (hasChanges) {
-        // Schedule update using requestAnimationFrame
+        // Use rAF for better performance
         batchUpdateTimerRef.current = requestAnimationFrame(() => {
-          // Update the member map directly
-          const newMap = new Map(validMembers.map(member => [member.Name, member]))
-          memberMapRef.current = newMap
-
-          // Update state
-          setGuildData(validMembers)
+          const newArray = Array.from(currentMap.values())
+          setGuildData(newArray)
           lastUpdateTimeRef.current = Date.now()
           pendingUpdatesRef.current.clear()
           batchUpdateTimerRef.current = null

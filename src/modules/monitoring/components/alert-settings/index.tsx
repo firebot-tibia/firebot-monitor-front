@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react'
 import { HStack, Badge, Tooltip, useDisclosure } from '@chakra-ui/react'
 import { Bell } from 'lucide-react'
 
+import { AlertSettingsPanel } from './alert-settings-panel'
 import { soundOptions } from '../../constants/sounds'
-import { useAlertSound } from '../../hooks/useAlertSound'
+import { useAlertSound } from '../../hooks/useAlertSound/useAlertSound'
 import { useGuilds } from '../../hooks/useGuilds'
 import { useAlertSettingsStore } from '../../stores/alert-settings-store'
-import { AlertSettingsPanel } from '../alert-settings-panel'
 
 const AlertSettings = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -23,10 +23,8 @@ const AlertSettings = () => {
 
   useGuilds(
     isInitialized
-      ? {
-          playSound,
-        }
-      : { playSound: () => console.debug('Sound not initialized yet') },
+      ? { playSound: () => playSound('notification_sound.mp3') }
+      : { playSound: () => console.debug('Sound not initialized yet') }
   )
 
   const handleAddAlert = () => {
