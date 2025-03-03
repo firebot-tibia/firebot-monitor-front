@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 
 import { useSession } from 'next-auth/react'
 
@@ -10,9 +10,17 @@ interface UseSSEProps {
   endpoint: string
   onMessage: (data: any) => void
   onError?: (error: Error) => void
+  reconnectOnError?: boolean
+  reconnectInterval?: number
 }
 
-export const useSSE = ({ endpoint, onMessage, onError }: UseSSEProps) => {
+export const useSSE = ({
+  endpoint,
+  onMessage,
+  onError,
+  reconnectOnError = true,
+  reconnectInterval = 1000,
+}: UseSSEProps) => {
   const { data: session } = useSession()
   const { selectedWorld } = useTokenStore()
   const [status, setStatus] = useState<ConnectionStatus>('disconnected')
@@ -26,7 +34,14 @@ export const useSSE = ({ endpoint, onMessage, onError }: UseSSEProps) => {
   const handleMaxRetriesReached = useCallback(async () => {
     console.log('Max retries reached')
     setStatus('disconnected')
-  }, [])
+
+    if (reconnectOnError) {
+      setTimeout(() => {
+        cleanupSSE()
+        initializeSSE()
+      }, reconnectInterval)
+    }
+  }, [reconnectOnError, reconnectInterval])
 
   const cleanupSSE = useCallback(() => {
     if (sseClientRef.current) {
@@ -40,8 +55,13 @@ export const useSSE = ({ endpoint, onMessage, onError }: UseSSEProps) => {
     if (!session?.access_token || !session?.refresh_token || !selectedWorld || sseClientRef.current)
       return
 
+    // Add performance parameters to URL
+    const url = new URL(endpoint)
+    url.searchParams.set('buffer_size', '0') // Disable buffering
+    url.searchParams.set('throttle', '100') // Fast updates
+
     const config: SSEConfig = {
-      url: endpoint,
+      url: url.toString(),
       token: session.access_token,
       refreshToken: session.refresh_token,
       worldId: selectedWorld,

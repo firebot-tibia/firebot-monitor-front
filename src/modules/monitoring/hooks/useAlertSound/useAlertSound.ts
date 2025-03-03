@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react'
 
-import { useSoundStore } from '../../stores/sounds-permission-store'
-import type { AlertCondition } from '../../types/alert.types'
+import { useSoundStore } from '../../stores/alert-system/sounds-permission-store'
+import type { AlertCondition } from '../../types/alert'
 
 export const useAlertSound = () => {
   const timeoutRef = useRef<NodeJS.Timeout>()

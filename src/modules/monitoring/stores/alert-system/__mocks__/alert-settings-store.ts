@@ -1,6 +1,6 @@
 import type { StoreApi } from 'zustand'
 
-import type { AlertCondition } from '../../types/alert.types'
+import type { AlertCondition } from '../../../types/alert'
 import type { AlertSettingsState } from '../types'
 
 const mockState: AlertSettingsState = {

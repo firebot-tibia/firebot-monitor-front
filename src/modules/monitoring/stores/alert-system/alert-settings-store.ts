@@ -1,8 +1,17 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import type { AlertSettingsState } from './types'
-import type { AlertCondition } from '../types/alert.types'
+import type { AlertCondition } from '../../types/alert'
+
+interface AlertSettingsState {
+  alerts: AlertCondition[]
+  isWidgetCollapsed: boolean
+  addAlert: (alert: Omit<AlertCondition, 'id' | 'createdAt'>) => void
+  removeAlert: (id: string) => void
+  toggleAlert: (id: string) => void
+  updateAlert: (id: string, field: keyof AlertCondition, value: any) => void
+  toggleWidget: () => void
+}
 
 export const useAlertSettingsStore = create<
   AlertSettingsState & {

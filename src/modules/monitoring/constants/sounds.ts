@@ -1,4 +1,4 @@
-import type { AlertCondition } from '../types/alert.types'
+import type { AlertCondition } from '../types/alert'
 
 export const soundOptions: Array<{ value: AlertCondition['sound']; label: string }> = [
   { value: 'notification_sound.mp3', label: 'Som de Notificação 1' },

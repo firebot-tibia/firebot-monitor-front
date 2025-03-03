@@ -9,9 +9,9 @@ import { AlertSettingsPanel } from './alert-settings-panel'
 import { soundOptions } from '../../constants/sounds'
 import { useGuildContext } from '../../contexts/guild-context'
 import { useAlertSound } from '../../hooks/useAlertSound/useAlertSound'
-import { useAlertSettingsStore } from '../../stores/alert-settings-store'
+import { useAlertSettingsStore } from '../../stores/alert-system/alert-settings-store'
 
-const RECENT_LOGIN_THRESHOLD = 5 * 60 * 1000 // 5 minutes in milliseconds
+const ALERT_DURATION = 60 * 1000 // 1 minute in milliseconds
 const MAX_ALERT_TRIGGERS = 5 // Maximum number of times to trigger alert in a minute
 const ALERT_RESET_INTERVAL = 60 * 1000 // 1 minute in milliseconds
 
@@ -22,6 +22,8 @@ const AlertSettings = () => {
   const { guildData } = useGuildContext()
   const [recentLogins, setRecentLogins] = useState<number>(0)
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
+  const [alertDismissed, setAlertDismissed] = useState<boolean>(false)
+  const alertStartTimeRef = useRef<number | null>(null)
 
   // Track alert triggers
   const alertTriggersRef = useRef<number>(0)
@@ -39,7 +41,7 @@ const AlertSettings = () => {
       const recentLoginCount = members.filter(member => {
         if (!member.OnlineSince || !member.OnlineStatus) return false
         const loginTime = new Date(member.OnlineSince)
-        return now.getTime() - loginTime.getTime() <= RECENT_LOGIN_THRESHOLD
+        return now.getTime() - loginTime.getTime() <= ALERT_DURATION
       }).length
 
       setRecentLogins(recentLoginCount)
@@ -51,7 +53,7 @@ const AlertSettings = () => {
         const matchingMembers = members.filter(member => {
           if (!member.OnlineSince || !member.OnlineStatus) return false
           const loginTime = new Date(member.OnlineSince)
-          return now.getTime() - loginTime.getTime() <= RECENT_LOGIN_THRESHOLD
+          return now.getTime() - loginTime.getTime() <= ALERT_DURATION
         })
 
         if (matchingMembers.length >= alert.threshold) {
@@ -71,11 +73,18 @@ const AlertSettings = () => {
     alertTriggersRef.current = 0
     setRecentLogins(0)
     setTimeRemaining(0)
+    setAlertDismissed(false)
+    alertStartTimeRef.current = null
     resetTimeoutRef.current = null
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current)
       countdownIntervalRef.current = null
     }
+  }, [])
+
+  const dismissCurrentAlert = useCallback(() => {
+    setAlertDismissed(true)
+    alertTriggersRef.current = MAX_ALERT_TRIGGERS // Prevent further sounds
   }, [])
 
   // Monitor guild data changes for alerts
@@ -99,24 +108,24 @@ const AlertSettings = () => {
 
           // Set timeout to reset alerts if not already set
           if (!resetTimeoutRef.current) {
-            resetTimeoutRef.current = setTimeout(resetAlerts, RECENT_LOGIN_THRESHOLD)
-            
+            alertStartTimeRef.current = Date.now()
+            resetTimeoutRef.current = setTimeout(resetAlerts, ALERT_DURATION)
+
             // Start countdown timer
-            setTimeRemaining(Math.floor(RECENT_LOGIN_THRESHOLD / 1000))
+            setTimeRemaining(60)
             if (countdownIntervalRef.current) {
               clearInterval(countdownIntervalRef.current)
             }
             countdownIntervalRef.current = setInterval(() => {
-              setTimeRemaining(prev => {
-                if (prev <= 1) {
-                  if (countdownIntervalRef.current) {
-                    clearInterval(countdownIntervalRef.current)
-                    countdownIntervalRef.current = null
-                  }
-                  return 0
+              if (alertStartTimeRef.current) {
+                const elapsed = Math.floor((Date.now() - alertStartTimeRef.current) / 1000)
+                const remaining = Math.max(60 - elapsed, 0)
+                setTimeRemaining(remaining)
+
+                if (remaining === 0) {
+                  resetAlerts()
                 }
-                return prev - 1
-              })
+              }
             }, 1000)
           }
         }
@@ -154,26 +163,43 @@ const AlertSettings = () => {
             {alerts.filter(a => a.enabled).length} ALERTA DE ATAQUE
           </Badge>
           <HStack spacing={1}>
-            <Badge 
-              colorScheme={recentLogins > 0 ? 'red' : 'gray'} 
-              variant="solid" 
+            <Badge
+              colorScheme={recentLogins > 0 ? 'red' : 'gray'}
+              variant="solid"
               borderRadius="md"
             >
               {recentLogins} personagens detectados
             </Badge>
             {timeRemaining > 0 && (
-              <Badge 
-                colorScheme="yellow" 
-                variant="solid" 
-                borderRadius="md"
-                fontSize="xs"
-                display="flex"
-                alignItems="center"
-                gap={1}
-              >
-                <Text>Resetando em</Text>
-                <Text fontWeight="bold">{timeRemaining}s</Text>
-              </Badge>
+              <HStack spacing={1}>
+                <Badge
+                  colorScheme="yellow"
+                  variant="solid"
+                  borderRadius="md"
+                  fontSize="xs"
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                >
+                  <Text>Resetando em</Text>
+                  <Text fontWeight="bold">{timeRemaining}s</Text>
+                </Badge>
+                {!alertDismissed && (
+                  <Badge
+                    colorScheme="red"
+                    variant="outline"
+                    borderRadius="md"
+                    fontSize="xs"
+                    cursor="pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      dismissCurrentAlert()
+                    }}
+                  >
+                    Silenciar
+                  </Badge>
+                )}
+              </HStack>
             )}
           </HStack>
         </HStack>

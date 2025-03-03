@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { Badge, Box, Flex, HStack, IconButton, Tooltip, useColorModeValue } from '@chakra-ui/react'
+import { Box, Flex, HStack, IconButton, Tooltip, useColorModeValue } from '@chakra-ui/react'
 import { Home, LogOut } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
@@ -10,8 +10,6 @@ import { FaDiscord } from 'react-icons/fa'
 
 import { routes } from '@/core/constants/routes'
 import AlertSettings from '@/modules/monitoring/components/alert-settings'
-import { useCharacterTracker } from '@/modules/monitoring/hooks/useCharacterTracker'
-import { useMonitoringSettingsStore } from '@/modules/monitoring/stores/monitoring-settings-store'
 import RespawnListWidget from '@/modules/reservations/components/respawn-list-widget'
 import StatisticsWidget from '@/modules/statistics/components/statistics-widget'
 import MapWidget from '@/modules/tools/tibia-map/map-widget'
@@ -21,8 +19,6 @@ import WorldSelect from './components/world-select'
 
 const Header = () => {
   const router = useRouter()
-  const { timeThreshold, memberThreshold } = useMonitoringSettingsStore()
-  const { activeCharacterCount } = useCharacterTracker(timeThreshold, memberThreshold)
   const [isClient, setIsClient] = React.useState(false)
 
   React.useEffect(() => {

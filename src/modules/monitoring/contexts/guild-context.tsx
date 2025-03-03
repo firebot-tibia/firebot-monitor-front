@@ -32,14 +32,26 @@ export function GuildProvider({ children }: { children: ReactNode }) {
   const [characterChanges, setCharacterChanges] = useState<GuildMemberResponse[]>([])
   const { types, addType } = useCharacterTypes(guildData)
 
-  // Function to update time online for all characters
+  // Function to update time online for all characters with optimizations
   const updateTimeOnline = useCallback(() => {
     setGuildData(prevData => {
       const now = new Date()
+      const nowTime = now.getTime()
+      
+      // Pre-calculate dates for better performance
+      const memberDates = new Map<string, Date>()
+      prevData.forEach(member => {
+        if (member.OnlineStatus && member.OnlineSince) {
+          memberDates.set(member.Name, new Date(member.OnlineSince))
+        }
+      })
+
       return prevData.map(member => {
         if (member.OnlineStatus && member.OnlineSince) {
-          const onlineSince = new Date(member.OnlineSince)
-          const timeOnline = formatTimeOnline(onlineSince, now)
+          const memberDate = memberDates.get(member.Name)
+          if (!memberDate) return member
+          
+          const timeOnline = formatTimeOnline(memberDate, now)
           return { ...member, TimeOnline: timeOnline }
         }
         return member
@@ -57,25 +69,97 @@ export function GuildProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval)
   }, [updateTimeOnline])
 
+  const processGuildData = useCallback((members: GuildMemberResponse[]) => {
+    const now = new Date()
+    const nowTime = now.getTime()
+    
+    // Pre-calculate dates to avoid repeated creation
+    const memberDates = new Map<string, Date>()
+    members.forEach(member => {
+      if (member.OnlineSince) {
+        memberDates.set(member.Name, new Date(member.OnlineSince))
+      }
+    })
+
+    return members.map((member: GuildMemberResponse) => {
+      if (!member.OnlineStatus) {
+        return {
+          ...member,
+          OnlineSince: null,
+          TimeOnline: null,
+        }
+      }
+
+      const onlineSince = member.OnlineSince || now.toISOString()
+      const memberDate = memberDates.get(member.Name) || new Date(onlineSince)
+      const timeOnline = formatTimeOnline(memberDate, now)
+
+      return {
+        ...member,
+        OnlineSince: onlineSince,
+        TimeOnline: timeOnline,
+      }
+    })
+  }, [])
+
+  // Update time display for online characters
+  useEffect(() => {
+    let frameId: number
+    let lastUpdate = Date.now()
+    
+    const updateTimes = () => {
+      const now = Date.now()
+      // Only update if more than 500ms has passed
+      if (now - lastUpdate >= 500) {
+        lastUpdate = now
+        const nowDate = new Date(now)
+        
+        setGuildData(prevData => {
+          // Pre-calculate dates
+          const memberDates = new Map<string, Date>()
+          prevData.forEach(member => {
+            if (member.OnlineSince) {
+              memberDates.set(member.Name, new Date(member.OnlineSince))
+            }
+          })
+          
+          return prevData.map(member => {
+            if (!member.OnlineStatus || !member.OnlineSince) return member
+            const memberDate = memberDates.get(member.Name)
+            if (!memberDate) return member
+            
+            return {
+              ...member,
+              TimeOnline: formatTimeOnline(memberDate, nowDate)
+            }
+          })
+        })
+      }
+      
+      frameId = requestAnimationFrame(updateTimes)
+    }
+    
+    frameId = requestAnimationFrame(updateTimes)
+    return () => cancelAnimationFrame(frameId)
+  }, [])
+
   const handleMessage = useCallback(
     (data: any) => {
       if (data?.[value]) {
-        const now = new Date()
-        const newGuildData = data[value].map((member: GuildMemberResponse) => {
-          const onlineSince = member.OnlineStatus
-            ? member.OnlineSince || now.toISOString()
-            : '00:00:00'
-          const timeOnline =
-            member.OnlineStatus && onlineSince
-              ? formatTimeOnline(new Date(onlineSince), now)
-              : '00:00:00'
+        // Process data immediately without animation frame to reduce delay
+        const processedData = data[value].map((member: GuildMemberResponse) => {
+          const now = new Date()
+          if (!member.OnlineStatus) {
+            return { ...member, OnlineSince: null, TimeOnline: null }
+          }
+          const onlineSince = member.OnlineSince || now.toISOString()
           return {
             ...member,
             OnlineSince: onlineSince,
-            TimeOnline: timeOnline,
+            TimeOnline: formatTimeOnline(new Date(onlineSince), now)
           }
         })
-        setGuildData(newGuildData)
+        setGuildData(processedData)
       }
 
       if (data?.[`${value}-changes`]) {

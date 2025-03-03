@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import type { AlertCondition } from '../types/alert.types'
+import type { AlertCondition } from '../../types/alert'
 
 interface SoundState {
   hasPermission: boolean

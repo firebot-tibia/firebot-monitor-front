@@ -2,7 +2,6 @@ import { useCallback, useMemo, memo } from 'react'
 
 import {
   Box,
-  Button,
   Card,
   CardBody,
   Drawer,
@@ -29,11 +28,9 @@ import {
 } from '@chakra-ui/react'
 import { Bell, Clock, Plus, Trash2, Volume2 } from 'lucide-react'
 
-import { useCharacterTracker } from '../../../hooks/useCharacterTracker'
-import { useAlertSettingsStore } from '../../../stores/alert-settings-store'
-import { useMonitoringSettingsStore } from '../../../stores/monitoring-settings-store'
-import { useSoundStore } from '../../../stores/sounds-permission-store'
-import type { AlertCondition } from '../../../types/alert.types'
+import { useAlertSettingsStore } from '../../../stores/alert-system/alert-settings-store'
+import { useSoundStore } from '../../../stores/alert-system/sounds-permission-store'
+import type { AlertCondition } from '../../../types/alert'
 import { SoundPermission } from '../sound-permission'
 
 interface SoundOption {
@@ -239,8 +236,6 @@ export const AlertSettingsPanel = memo(function AlertSettingsPanel({
 }: AlertSettingsPanelProps) {
   const { updateAlert } = useAlertSettingsStore()
   const { hasPermission } = useSoundStore()
-  const { timeThreshold, memberThreshold, updateSettings } = useMonitoringSettingsStore()
-  const { activeCharacterCount } = useCharacterTracker(timeThreshold, memberThreshold)
 
   // Memoize colors to avoid recalculations
   const bgColor = useColorModeValue('rgba(17, 19, 23, 0.98)', 'rgba(17, 19, 23, 0.98)')
@@ -249,20 +244,6 @@ export const AlertSettingsPanel = memo(function AlertSettingsPanel({
 
   // Memoize array of enabled alerts for stable rendering
   const enabledAlerts = useMemo(() => alerts.filter(a => a.enabled).length, [alerts])
-
-  const handleTimeThresholdChange = useCallback(
-    (value: number) => {
-      updateSettings({ timeThreshold: value })
-    },
-    [updateSettings],
-  )
-
-  const handleMemberThresholdChange = useCallback(
-    (value: number) => {
-      updateSettings({ memberThreshold: value })
-    },
-    [updateSettings],
-  )
 
   const handleUpdateAlert = useCallback(
     (alertId: string, field: keyof AlertCondition, value: any) => {

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 
-import type { AlertCondition } from '../../types/alert.types'
+import type { AlertCondition } from '../../../types/alert'
 import { useAlertSettingsStore } from '../alert-settings-store'
 
 describe('alert-settings-store', () => {

@@ -1,9 +1,3 @@
-export type CharacterStatus = {
-  Name: string
-  Kind: string
-  OnlineSince: string
-}
-
 export type AlertCondition = {
   id: string
   timeRange: number
@@ -18,17 +12,4 @@ export type AlertCondition = {
     | 'google_voice_enemy'
   useVoice?: boolean
   lastTriggered?: string
-}
-
-export type ListChange = {
-  type: string
-  change: number
-  timestamp: string
-}
-
-export type AlertCheck = {
-  changes: ListChange[]
-  totalChange: number
-  threshold: number
-  timeRange: number
 }
