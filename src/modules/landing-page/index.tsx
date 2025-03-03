@@ -182,7 +182,7 @@ const LandingPage = () => {
                         />
                       </div>
                       <div className="text-center">
-                        <p className="text-3xl font-bold text-white">750 Tibia Coins</p>
+                        <p className="text-3xl font-bold text-white">250 Tibia Coins</p>
                         <p className="text-gray-400">por mês</p>
                       </div>
                     </motion.div>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useSession } from 'next-auth/react'
 
@@ -12,6 +12,8 @@ interface UseSSEProps {
   onError?: (error: Error) => void
   reconnectOnError?: boolean
   reconnectInterval?: number
+  bufferSize?: number // Added parameter
+  throttle?: number // Added parameter
 }
 
 export const useSSE = ({
@@ -20,12 +22,45 @@ export const useSSE = ({
   onError,
   reconnectOnError = true,
   reconnectInterval = 1000,
+  bufferSize = 0, // Default: disable buffering
+  throttle = 100, // Default: fast updates
 }: UseSSEProps) => {
   const { data: session } = useSession()
   const { selectedWorld } = useTokenStore()
   const [status, setStatus] = useState<ConnectionStatus>('disconnected')
   const sseClientRef = useRef<SSEClient | null>(null)
+  const lastMessageRef = useRef<string>('') // Cache last message to prevent duplicates
   const isConnected = status === 'connected'
+
+  // Debounced message handler to prevent excessive updates
+  const handleMessageDebounced = useCallback(
+    (message: SSEMessage) => {
+      try {
+        if (typeof message.data === 'string') {
+          // Skip duplicate messages
+          if (message.data === lastMessageRef.current) return
+          lastMessageRef.current = message.data
+
+          const data = JSON.parse(message.data)
+          // Use requestAnimationFrame to batch with browser render cycle
+          requestAnimationFrame(() => {
+            onMessage(data)
+          })
+        } else {
+          if (JSON.stringify(message.data) === lastMessageRef.current) return
+          lastMessageRef.current = JSON.stringify(message.data)
+
+          requestAnimationFrame(() => {
+            onMessage(message.data)
+          })
+        }
+      } catch (error) {
+        console.error('Failed to parse SSE message:', error)
+        onError?.(error instanceof Error ? error : new Error('Failed to parse SSE message'))
+      }
+    },
+    [onMessage, onError],
+  )
 
   const handleTokenRefresh = useCallback((newToken: string) => {
     console.log('Token refreshed:', newToken)
@@ -36,6 +71,7 @@ export const useSSE = ({
     setStatus('disconnected')
 
     if (reconnectOnError) {
+      // Use setTimeout to avoid immediate reconnection
       setTimeout(() => {
         cleanupSSE()
         initializeSSE()
@@ -57,27 +93,15 @@ export const useSSE = ({
 
     // Add performance parameters to URL
     const url = new URL(endpoint)
-    url.searchParams.set('buffer_size', '0') // Disable buffering
-    url.searchParams.set('throttle', '100') // Fast updates
+    url.searchParams.set('buffer_size', bufferSize.toString())
+    url.searchParams.set('throttle', throttle.toString())
 
     const config: SSEConfig = {
       url: url.toString(),
       token: session.access_token,
       refreshToken: session.refresh_token,
       worldId: selectedWorld,
-      onMessage: (message: SSEMessage) => {
-        try {
-          if (typeof message.data === 'string') {
-            const data = JSON.parse(message.data)
-            onMessage(data)
-          } else {
-            onMessage(message.data)
-          }
-        } catch (error) {
-          console.error('Failed to parse SSE message:', error)
-          onError?.(error instanceof Error ? error : new Error('Failed to parse SSE message'))
-        }
-      },
+      onMessage: handleMessageDebounced,
       onError: error => {
         console.error('SSE Error:', error)
         onError?.(error)
@@ -94,7 +118,9 @@ export const useSSE = ({
     return cleanupSSE
   }, [
     endpoint,
-    onMessage,
+    bufferSize,
+    throttle,
+    handleMessageDebounced,
     onError,
     session,
     selectedWorld,
