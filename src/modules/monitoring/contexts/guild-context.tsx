@@ -3,16 +3,20 @@ import { createContext, useContext, useCallback, useState, useEffect, useMemo, u
 
 import { useToast } from '@chakra-ui/react'
 
-import { BACKEND_URL, FIREBOT_SSE_URL } from '@/core/constants/env'
-import { upsertPlayer } from '@/modules/statistics/services'
-import { useStorage } from '@/core/store/storage-store'
+import { FIREBOT_SSE_URL } from '@/core/constants/env'
+import { useStorageStore } from '@/core/store/storage-store'
 import type { GuildMemberResponse } from '@/core/types/guild-member.response'
 import { formatTimeOnline } from '@/core/utils/format-time-online'
+import { useTokenStore } from '@/modules/auth/store/token-decoded-store'
+import { upsertPlayer } from '@/modules/statistics/services'
+
+type Mode = 'ally' | 'enemy'
 
 import { useCharacterTypes } from '../hooks/useCharacterTypes'
 import { useSSE } from '../hooks/useSSE'
 import type { DeathEvent } from '../types/death'
 import type { LevelEvent } from '../types/level'
+
 
 interface GuildContextData {
   isLoading: boolean
@@ -28,10 +32,9 @@ interface GuildContextData {
   guildData: GuildMemberResponse[]
   recentDeaths: DeathEvent[]
   recentLevels: LevelEvent[]
-  selectedMode: 'ally' | 'enemy'
-  setSelectedMode: (mode: 'ally' | 'enemy') => void
+  selectedMode: Mode
+  setSelectedMode: (mode: Mode) => void
   selectedWorld: string
-  setSelectedWorld: (world: string) => void
 }
 
 const GuildContext = createContext<GuildContextData | undefined>(undefined)
@@ -41,12 +44,12 @@ type MemberMap = Map<string, GuildMemberResponse>
 
 export function GuildProvider({ children }: { children: ReactNode }) {
   const toast = useToast()
-  const [value] = useStorage('monitorMode', 'enemy')
+  const { selectedWorld } = useTokenStore()
+  const storedMode = useStorageStore.getState().getItem('monitorMode', 'enemy') as Mode
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [characterChanges, setCharacterChanges] = useState<GuildMemberResponse[]>([])
-  const [selectedMode, setSelectedMode] = useState<'ally' | 'enemy'>('ally')
-  const [selectedWorld, setSelectedWorld] = useState<string>('')
+  const [selectedMode, setSelectedMode] = useState<Mode>(storedMode)
 
   const [recentDeaths, setRecentDeaths] = useState<DeathEvent[]>(() => {
     if (typeof window !== 'undefined') {
@@ -108,10 +111,10 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         })
       }
 
-      if (data?.[value]) {
+      if (data?.[storedMode]) {
         const now = new Date()
         // Use a single transform on the incoming data
-        const processedData = data[value].map((member: GuildMemberResponse) => {
+        const processedData = data[storedMode].map((member: GuildMemberResponse) => {
           if (!member.OnlineStatus) {
             return { ...member, OnlineSince: null, TimeOnline: null }
           }
@@ -135,12 +138,12 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         memberMapRef.current = newMemberMap
       }
 
-      if (data?.[`${value}-changes`]) {
+      if (data?.[`${storedMode}-changes`]) {
         // Use batch updates for changes
         setGuildData(prevData => {
           const newChanges: GuildMemberResponse[] = []
           const updatedData = prevData.map(member => {
-            const change = data[`${value}-changes`][member.Name]
+            const change = data[`${storedMode}-changes`][member.Name]
             if (!change) return member
 
             const now = new Date()
@@ -182,7 +185,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
 
       setIsLoading(false)
     },
-    [value, selectedWorld, selectedMode],
+    [storedMode, selectedWorld, selectedMode],
   )
 
   // Single efficient time update mechanism using requestAnimationFrame
@@ -226,7 +229,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
 
   // Reconnect SSE every 5 minutes to refresh data
   const { status, reconnect } = useSSE({
-    endpoint: `${FIREBOT_SSE_URL}${value}/`,
+    endpoint: `${FIREBOT_SSE_URL}${storedMode}/`,
     onMessage: handleMessage,
     bufferSize: 0, // Disable buffering for real-time updates
     throttle: 50, // Fast updates (milliseconds)
@@ -277,28 +280,80 @@ export function GuildProvider({ children }: { children: ReactNode }) {
 
   // Optimize member updates with O(1) lookups
   const handleLocalChange = useCallback(async (member: GuildMemberResponse, newLocal: string) => {
-    setGuildData(prevData => {
-      // Use map for O(1) lookups instead of findIndex (O(n))
-      const targetMember = memberMapRef.current.get(member.Name)
-      if (!targetMember) return prevData
+    try {
+      if (!selectedWorld) {
+        toast({
+          title: 'Erro ao atualizar localização',
+          description: 'Por favor, selecione um mundo antes de atualizar a localização do personagem.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        })
+        return
+      }
 
-      // Update the map
-      memberMapRef.current.set(member.Name, { ...targetMember, Local: newLocal })
+      await upsertPlayer(
+        {
+          name: member.Name,
+          kind: member.Kind || 'sem classificação',
+          local: newLocal,
+        },
+        selectedWorld
+      )
 
-      // Return new array with updated member
-      return prevData.map(m => (m.Name === member.Name ? { ...m, Local: newLocal } : m))
-    })
-  }, [])
+      // Update local state only after successful API call
+      setGuildData(prevData => {
+        // Use map for O(1) lookups instead of findIndex (O(n))
+        const targetMember = memberMapRef.current.get(member.Name)
+        if (!targetMember) return prevData
+
+        // Update the map
+        memberMapRef.current.set(member.Name, { ...targetMember, Local: newLocal })
+
+        // Return new array with updated member
+        return prevData.map(m => (m.Name === member.Name ? { ...m, Local: newLocal } : m))
+      })
+
+      toast({
+        title: 'Localização atualizada',
+        description: `A localização de ${member.Name} foi atualizada para ${newLocal}`,
+        status: 'success',
+        duration: 3000,
+        isClosable: true
+      })
+    } catch (error) {
+      console.error('Error updating player location:', error)
+      toast({
+        title: 'Erro ao atualizar localização',
+        description: 'Não foi possível atualizar a localização do personagem. Tente novamente.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+  }, [selectedWorld, toast])
 
   const handleClassificationChange = useCallback(
     async (member: GuildMemberResponse, newClassification: string) => {
       try {
+        if (!selectedWorld) {
+          toast({
+            title: 'Erro ao atualizar tipo',
+            description: 'Por favor, selecione um mundo antes de atualizar o tipo do personagem.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          })
+          return
+        }
+
         await upsertPlayer(
           {
             name: member.Name,
             kind: newClassification,
+            local: member.Local || '',
           },
-          selectedWorld,
+          selectedWorld
         )
 
         // Update local state only after successful API call
@@ -323,7 +378,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         })
       }
     },
-    [],
+    [selectedWorld, toast],
   )
 
   return (
@@ -342,7 +397,6 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         selectedMode,
         setSelectedMode,
         selectedWorld,
-        setSelectedWorld,
       }}
     >
       {children}

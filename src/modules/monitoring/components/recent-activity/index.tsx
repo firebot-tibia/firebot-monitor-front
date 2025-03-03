@@ -125,22 +125,30 @@ export function ActivityWidget() {
       >
         <VStack align="stretch" spacing={3} p={4}>
           <VStack spacing={4} align="stretch">
-            {hasAllyActivities && (
-              <Box>
-                <Text fontSize="sm" fontWeight="bold" color="green.300" textAlign="center" mb={2}>
-                  Aliados (24h)
-                </Text>
+            <Box>
+              <Text fontSize="sm" fontWeight="bold" color="green.300" textAlign="center" mb={2}>
+                Aliados (24h)
+              </Text>
+              {hasAllyActivities ? (
                 <ActivityTabs activities={allyActivities} />
-              </Box>
-            )}
-            {hasEnemyActivities && (
-              <Box>
-                <Text fontSize="sm" fontWeight="bold" color="red.300" textAlign="center" mb={2}>
-                  Inimigos (24h)
+              ) : (
+                <Text fontSize="sm" color="whiteAlpha.600" textAlign="center">
+                  Nenhuma atividade recente
                 </Text>
+              )}
+            </Box>
+            <Box>
+              <Text fontSize="sm" fontWeight="bold" color="red.300" textAlign="center" mb={2}>
+                Inimigos (24h)
+              </Text>
+              {hasEnemyActivities ? (
                 <ActivityTabs activities={enemyActivities} />
-              </Box>
-            )}
+              ) : (
+                <Text fontSize="sm" color="whiteAlpha.600" textAlign="center">
+                  Nenhuma atividade recente
+                </Text>
+              )}
+            </Box>
           </VStack>
         </VStack>
       </MotionBox>
