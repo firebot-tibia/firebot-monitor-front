@@ -8,7 +8,7 @@ import { TestWrapper } from 'tests/utils/test-utils'
 import { mockStore, useAlertMonitoringStore } from '../../stores/__mocks__/alert-monitoring-store'
 import { useAlertSettingsStore } from '../../stores/__mocks__/alert-settings-store'
 import type { AlertCondition } from '../../types/alert.types'
-import { useAlertMonitoring } from '../useAlertMonitoring'
+import { useAlertMonitoring } from '../useAlertMonitoring/useAlertMonitoring'
 
 jest.mock('@/middlewares/useLogger', () => ({
   Logger: {

@@ -15,7 +15,7 @@ export const usePermission = () => {
       const payload = session.access_token.split('.')[1]
       const decoded = JSON.parse(atob(payload))
       const userStatus = decoded?.status
-      if (userStatus !== 'admin') {
+      if (userStatus !== 'admin' && userStatus !== 'bot-admin') {
         toast({
           title: 'Permissão negada',
           description: 'Você não tem permissão para editar estas informações.',

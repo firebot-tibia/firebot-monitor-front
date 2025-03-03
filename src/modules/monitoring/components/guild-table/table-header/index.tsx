@@ -4,7 +4,11 @@ import { Thead, Tr, Th } from '@chakra-ui/react'
 
 import type { TableHeaderProps } from './types'
 
-export const TableHeader = memo(function TableHeader({ onSort, showExivaInput }: TableHeaderProps) {
+export const TableHeader = memo(function TableHeader({
+  sortConfig,
+  onSort,
+  showExivaInput,
+}: TableHeaderProps) {
   return (
     <Thead>
       <Tr borderBottomWidth="1px" borderColor="white.800">

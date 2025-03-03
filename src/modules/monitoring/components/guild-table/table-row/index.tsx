@@ -6,7 +6,7 @@ import { getTimeColor } from '@/core/utils/get-time-color'
 import { tableVocationIcons } from '@/core/utils/table-vocation-icons'
 import { useTooltipState } from '@/modules/monitoring/hooks/useTooltip'
 
-import { capitalizeFirstLetter } from '../../../../core/utils/capitalize-first-letter'
+import { capitalizeFirstLetter } from '../../../../../core/utils/capitalize-first-letter'
 import { CharacterTooltip } from '../table-tooltip'
 import { CharacterClassification } from '../table-type-classification'
 import { ExivaInput } from './exiva-input'

@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 
-import { useAlertSound } from '../useAlertSound'
+import { useAlertSound } from '../useAlertSound/useAlertSound'
 
 describe('useAlertSound', () => {
   const mockSpeechSynthesis = {
