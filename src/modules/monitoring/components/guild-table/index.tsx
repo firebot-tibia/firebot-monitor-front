@@ -18,7 +18,6 @@ export interface GuildTableProps {
   showExivaInput: boolean
   types: string[]
   addType: (type: string) => void
-  isLoading: boolean
 }
 
 export const GuildTable = ({
@@ -29,7 +28,6 @@ export const GuildTable = ({
   onClassificationChange,
   showExivaInput,
   addType,
-  isLoading,
 }: GuildTableProps) => {
   const { sortConfig, handleSort, filteredData } = useGuildTable(data)
   const types = useCharacterTypesView(data)

@@ -6,13 +6,11 @@ import { Center, Spinner, SimpleGrid, Box, Text } from '@chakra-ui/react'
 
 import DashboardLayout from '@/modules/layout/components'
 
-import { useAlertSound } from '../../hooks/useAlertSound/useAlertSound'
-import { useGuilds } from '../../hooks/useGuilds'
+import { useGuildContext } from '../../contexts/guild-context'
 import { GuildTable } from '../guild-table'
 
 export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
-  const { debouncedPlaySound } = useAlertSound()
 
   const {
     isLoading,
@@ -22,9 +20,7 @@ export default function GuildContainer() {
     handleLocalChange,
     handleClassificationChange,
     groupedData,
-  } = useGuilds({
-    playSound: debouncedPlaySound
-  })
+  } = useGuildContext()
 
   useEffect(() => {
     setIsClient(true)
@@ -87,7 +83,6 @@ export default function GuildContainer() {
                 showExivaInput={type !== 'exitados'}
                 types={types}
                 addType={addType}
-                isLoading={false}
               />
             </Box>
           ))}

@@ -83,13 +83,6 @@ const Header = () => {
           <MapWidget />
           <AlertSettings />
 
-          <Badge
-            colorScheme={activeCharacterCount >= memberThreshold ? 'red' : 'gray'}
-            fontSize="sm"
-          >
-            {activeCharacterCount} personagens detectados
-          </Badge>
-
           {isClient && (
             <Tooltip label="Sair" placement="bottom">
               <IconButton

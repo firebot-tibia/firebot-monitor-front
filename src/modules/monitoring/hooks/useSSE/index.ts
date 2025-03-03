@@ -32,12 +32,13 @@ export const useSSE = ({ endpoint, onMessage, onError }: UseSSEProps) => {
     if (sseClientRef.current) {
       sseClientRef.current.closeConnection()
       sseClientRef.current = null
+      setStatus('disconnected')
     }
-    setStatus('disconnected')
   }, [])
 
   const initializeSSE = useCallback(() => {
-    if (!session?.access_token || !session?.refresh_token || !selectedWorld) return
+    if (!session?.access_token || !session?.refresh_token || !selectedWorld || sseClientRef.current)
+      return
 
     const config: SSEConfig = {
       url: endpoint,
@@ -83,11 +84,11 @@ export const useSSE = ({ endpoint, onMessage, onError }: UseSSEProps) => {
   ])
 
   useEffect(() => {
-    const cleanup = initializeSSE()
+    initializeSSE()
     return () => {
-      cleanup?.()
+      cleanupSSE()
     }
-  }, [initializeSSE])
+  }, [initializeSSE, cleanupSSE])
 
   const reconnect = useCallback(() => {
     cleanupSSE()
