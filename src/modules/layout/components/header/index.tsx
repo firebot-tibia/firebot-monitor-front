@@ -17,7 +17,6 @@ import MapWidget from '@/modules/tools/tibia-map/map-widget'
 import ModeSelect from './components/mode-select'
 import WorldSelect from './components/world-select'
 
-
 const Header = () => {
   const router = useRouter()
   const [isClient, setIsClient] = React.useState(false)

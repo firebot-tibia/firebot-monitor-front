@@ -135,11 +135,7 @@ export function ActivityWidget() {
               {hasAllyActivities ? (
                 <ActivityTabs activities={allyActivities} />
               ) : (
-                <Text
-                  fontSize="sm"
-                  color={'whiteAlpha.600'}
-                  textAlign="center"
-                >
+                <Text fontSize="sm" color={'whiteAlpha.600'} textAlign="center">
                   Nenhuma atividade recente
                 </Text>
               )}
@@ -157,11 +153,7 @@ export function ActivityWidget() {
               {hasEnemyActivities ? (
                 <ActivityTabs activities={enemyActivities} />
               ) : (
-                <Text
-                  fontSize="sm"
-                  color={'whiteAlpha.600'}
-                  textAlign="center"
-                >
+                <Text fontSize="sm" color={'whiteAlpha.600'} textAlign="center">
                   Nenhuma atividade recente
                 </Text>
               )}

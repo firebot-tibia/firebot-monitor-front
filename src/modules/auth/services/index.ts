@@ -4,7 +4,14 @@ import { signOut } from 'next-auth/react'
 import { LoggerService } from '@/core/hooks/useLogger/logger.service'
 import type { ILogger } from '@/core/hooks/useLogger/types'
 
-import type { TokenResponse, RefreshError } from './types'
+interface TokenResponse {
+  access_token: string
+  refresh_token: string
+}
+
+interface RefreshError extends Error {
+  status?: number
+}
 
 export class TokenManager {
   private static instance: TokenManager

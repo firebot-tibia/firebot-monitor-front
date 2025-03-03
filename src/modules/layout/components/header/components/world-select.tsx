@@ -20,7 +20,7 @@ import { useTokenStore } from '@/modules/auth/store/token-decoded-store'
 
 const WorldSelect = () => {
   const toast = useToast()
-  const { decodedToken, selectedWorld, setSelectedWorld } = useTokenStore()
+  const { decodedToken, selectedWorld, availableWorlds, setSelectedWorld } = useTokenStore()
 
   // Use a client-only approach to prevent hydration mismatches
   const [isClient, setIsClient] = useState(false)
@@ -30,8 +30,7 @@ const WorldSelect = () => {
     setIsClient(true)
   }, [])
 
-  // Get all available worlds from the decoded token
-  const availableWorlds = isClient && decodedToken?.guilds ? Object.keys(decodedToken.guilds) : []
+
 
   // Theme constants
   const baseColor = 'purple.400'
