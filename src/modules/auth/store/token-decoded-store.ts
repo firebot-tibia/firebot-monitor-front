@@ -101,7 +101,6 @@ export const useTokenStore = create<TokenState>((set, get) => ({
         useStorageStore.getState().setItem('selectedGuildId', guildId)
       }
     } catch (error) {
-      console.error('Error decoding token:', error)
       set({ decodedToken: null, userStatus: '', selectedWorld: '' })
       throw error
     }

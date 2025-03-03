@@ -10,15 +10,11 @@ export const useAlertSound = () => {
   const playSound = useCallback(
     async (sound: AlertCondition['sound']) => {
       if (!hasPermission) {
-        console.log('Sound permission not granted, skipping sound')
         return
       }
       try {
         await playSoundFromStore(sound)
-        console.log('Sound played successfully:', sound)
-      } catch (error) {
-        console.error('Failed to play sound:', error)
-      }
+      } catch (error) {}
     },
     [playSoundFromStore, hasPermission],
   )

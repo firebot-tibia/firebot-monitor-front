@@ -55,19 +55,15 @@ export const useSSE = ({
           })
         }
       } catch (error) {
-        console.error('Failed to parse SSE message:', error)
         onError?.(error instanceof Error ? error : new Error('Failed to parse SSE message'))
       }
     },
     [onMessage, onError],
   )
 
-  const handleTokenRefresh = useCallback((newToken: string) => {
-    console.log('Token refreshed:', newToken)
-  }, [])
+  const handleTokenRefresh = useCallback((newToken: string) => {}, [])
 
   const handleMaxRetriesReached = useCallback(async () => {
-    console.log('Max retries reached')
     setStatus('disconnected')
 
     if (reconnectOnError) {
@@ -103,7 +99,6 @@ export const useSSE = ({
       worldId: selectedWorld,
       onMessage: handleMessageDebounced,
       onError: error => {
-        console.error('SSE Error:', error)
         onError?.(error)
         setStatus('disconnected')
       },

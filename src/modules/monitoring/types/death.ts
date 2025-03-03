@@ -1,9 +1,15 @@
 export interface Death {
   name: string
-  killer: string
+  killer: string | null
+  date: string
+  text: string
   level: number
   vocation: string
   city: string
-  text: string
-  date?: string
+  world: string
+  isAlly: boolean
+}
+
+export interface DeathEvent {
+  death: Death
 }

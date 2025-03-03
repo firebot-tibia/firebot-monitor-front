@@ -78,7 +78,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setIsTransitioning(false)
       }
     } catch (error) {
-      console.error('Login error:', error)
       setIsTransitioning(false)
     }
   }

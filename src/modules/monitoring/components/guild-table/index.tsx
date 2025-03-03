@@ -4,8 +4,8 @@ import type { GuildMemberResponse } from '@/core/types/guild-member.response'
 
 import { TableHeader } from './table-header'
 import CharacterRow from './table-row'
+import { useCharacterTypesView } from '../../hooks/useCharacterTypes'
 import { useGuildTable } from '../../hooks/useGuildTable'
-import { useCharacterTypesView } from '../../hooks/useType'
 
 export interface GuildTableProps {
   type: string

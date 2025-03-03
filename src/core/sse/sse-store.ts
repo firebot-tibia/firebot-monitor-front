@@ -107,7 +107,6 @@ export const useSSEStore = create<SSEState>()(
             onMessage: (message: unknown) => {
               // Validate message structure
               if (!validateMessage(message)) {
-                console.error('[SSE Store] Invalid message structure:', message)
                 return
               }
 
@@ -118,7 +117,6 @@ export const useSSEStore = create<SSEState>()(
               set({ status })
             },
             onError: (error: Error) => {
-              console.error('[SSE Store] Connection error:', error)
               // Add error message to the queue
               get().addMessage({
                 type: 'error',
@@ -132,9 +130,7 @@ export const useSSEStore = create<SSEState>()(
             onTokenRefresh: (newToken: string, newRefreshToken: string) => {
               get().updateToken(newToken, newRefreshToken)
             },
-            onMaxRetriesReached: () => {
-              console.error('[SSE Store] Max reconnection attempts reached')
-            },
+            onMaxRetriesReached: () => {},
           },
           {
             debug: process.env.NODE_ENV === 'development',
@@ -165,10 +161,8 @@ export const useSSEStore = create<SSEState>()(
        * Add a new message to the queue
        */
       addMessage: (message: SSEMessage) => {
-        console.log('[SSE Store Debug] Adding message:', message)
         // Validate message format
         if (!message || !message.data) {
-          console.warn('[SSE Store] Invalid message format:', message)
           return
         }
 
@@ -233,7 +227,6 @@ export const useSSEStore = create<SSEState>()(
 
         // Add the processed message to our store
         if (processedMessage) {
-          console.log('[SSE Store Debug] Processed message:', processedMessage)
           set(state => ({
             messages: [...state.messages, processedMessage as SSEMessage].slice(-200), // Keep last 200 messages
           }))
@@ -244,10 +237,9 @@ export const useSSEStore = create<SSEState>()(
        * Get messages that haven't been processed yet
        */
       getUnprocessedMessages: () => {
-        console.log('[SSE Store Debug] Getting unprocessed messages')
         const { messages, lastProcessedTimestamp } = get()
         const unprocessed = messages.filter(msg => msg.timestamp > lastProcessedTimestamp)
-        console.log('[SSE Store Debug] Found unprocessed messages:', unprocessed)
+
         return unprocessed
       },
 

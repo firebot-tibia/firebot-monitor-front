@@ -22,7 +22,10 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
         await audioContext.resume()
 
-        const persistedPermission = localStorage.getItem('sound-permission') === 'true'
+        const persistedPermission =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('sound-permission') === 'true'
+            : false
         if (persistedPermission) {
           // Verify if we can actually play sounds
           const testAudio = new Audio('/sounds/notification_sound.mp3')
@@ -57,11 +60,11 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
           setHasPermission(true)
           onPermissionGranted()
           setShouldShow(false)
-          console.log('Sound permission verified successfully')
         }
       } catch (error) {
-        console.error('Failed to verify sound permission:', error)
-        localStorage.removeItem('sound-permission')
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('sound-permission')
+        }
         setHasPermission(false)
       }
     }
@@ -117,7 +120,9 @@ export const SoundPermission = ({ onPermissionGranted }: SoundPermissionProps) =
       testAudio.remove()
 
       setHasPermission(true)
-      localStorage.setItem('sound-permission', 'true')
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sound-permission', 'true')
+      }
       onPermissionGranted()
       setShouldShow(false)
       toast({

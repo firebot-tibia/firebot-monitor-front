@@ -8,6 +8,7 @@ import DashboardLayout from '@/modules/layout/components'
 
 import { useGuildContext } from '../../contexts/guild-context'
 import { GuildTable } from '../guild-table'
+import { ActivityWidget } from '../recent-activity'
 
 export default function GuildContainer() {
   const [isClient, setIsClient] = useState(false)
@@ -88,6 +89,9 @@ export default function GuildContainer() {
           ))}
         </SimpleGrid>
       </Box>
+
+      {/* Activity Widget as an overlay */}
+      <ActivityWidget />
     </DashboardLayout>
   )
 }

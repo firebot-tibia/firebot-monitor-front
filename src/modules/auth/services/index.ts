@@ -195,7 +195,9 @@ export class TokenManager {
     if (userId) {
       try {
         if (typeof window !== 'undefined') {
-          localStorage.setItem(`refresh_token_${userId}`, data.refresh_token)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(`refresh_token_${userId}`, data.refresh_token)
+          }
         }
       } catch (err) {
         this.logger.warn('Failed to store refresh token in localStorage', { err })
@@ -246,7 +248,9 @@ export class TokenManager {
     // Clear stored refresh token
     try {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem(`refresh_token_${userId}`)
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(`refresh_token_${userId}`)
+        }
       }
     } catch (err) {
       this.logger.warn('Failed to remove refresh token from localStorage', { err })
@@ -273,7 +277,9 @@ export class TokenManager {
   getStoredRefreshToken(userId: string): string | null {
     try {
       if (typeof window !== 'undefined') {
-        return localStorage.getItem(`refresh_token_${userId}`)
+        return typeof window !== 'undefined'
+          ? localStorage.getItem(`refresh_token_${userId}`)
+          : null
       }
     } catch (err) {
       this.logger.warn('Failed to get refresh token from localStorage', { err })
@@ -287,7 +293,9 @@ export class TokenManager {
   storeRefreshToken(userId: string, refreshToken: string): void {
     try {
       if (typeof window !== 'undefined') {
-        localStorage.setItem(`refresh_token_${userId}`, refreshToken)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(`refresh_token_${userId}`, refreshToken)
+        }
       }
     } catch (err) {
       this.logger.warn('Failed to store refresh token in localStorage', { err })

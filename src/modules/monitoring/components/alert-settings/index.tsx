@@ -8,7 +8,7 @@ import type { GuildMemberResponse } from '@/core/types/guild-member.response'
 import { AlertSettingsPanel } from './alert-settings-panel'
 import { soundOptions } from '../../constants/sounds'
 import { useGuildContext } from '../../contexts/guild-context'
-import { useAlertSound } from '../../hooks/useAlertSound/useAlertSound'
+import { useAlertSound } from '../../hooks/useAlertSound'
 import { useAlertSettingsStore } from '../../stores/alert-system/alert-settings-store'
 
 const ALERT_DURATION = 60 * 1000 // 1 minute in milliseconds
@@ -191,7 +191,7 @@ const AlertSettings = () => {
                     borderRadius="md"
                     fontSize="xs"
                     cursor="pointer"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation()
                       dismissCurrentAlert()
                     }}

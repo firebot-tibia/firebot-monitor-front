@@ -1,5 +1,5 @@
 import api from '../../../core/api/firebot-api'
-import type { UpsertPlayerInput } from '../../monitoring/hooks/useCharacterTypes/types'
+import type { UpsertPlayerInput } from '../../monitoring/types/character'
 import type { ExperienceListQuery } from '../types/guild-stats.interface'
 
 export const upsertPlayer = async (playerData: UpsertPlayerInput, world: string) => {

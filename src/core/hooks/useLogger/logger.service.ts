@@ -115,7 +115,6 @@ export class LoggerService implements ILogger {
     // Always log to console in development
     if (process.env.NODE_ENV !== 'production') {
       const timestamp = this.getTimestamp()
-      console.log(`[${timestamp}] [${level.toUpperCase()}] ${message}`, data || '')
     }
 
     const duration = startTime ? this.getDuration(startTime) : undefined
@@ -176,16 +175,12 @@ export class LoggerService implements ILogger {
     // Output to console
     if (this.isEnabled) {
       if (level === 'error') {
-        console.error(output)
         if (data?.stack) {
-          console.error(chalk.red(data.stack))
         }
       } else {
-        console.log(output)
       }
 
       if (data && !data.stack) {
-        console.log(chalk.gray(JSON.stringify(data, null, 2)))
       }
     }
   }

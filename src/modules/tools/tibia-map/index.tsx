@@ -9,7 +9,7 @@ const Maps: React.FC = () => {
     fetch('/api/maps')
       .then(response => response.text())
       .then(data => setHtmlContent(data))
-      .catch(error => console.error('Error fetching HTML:', error))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -47,9 +47,7 @@ const Maps: React.FC = () => {
           })
 
           window.dispatchEvent(new Event('scriptsLoaded'))
-        } catch (error) {
-          console.error('Error loading scripts:', error)
-        }
+        } catch (error) {}
       }
 
       loadScripts()

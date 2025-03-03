@@ -47,6 +47,11 @@ export function GuildProvider({ children }: { children: ReactNode }) {
   const [characterChanges, setCharacterChanges] = useState<GuildMemberResponse[]>([])
   const [selectedMode, setSelectedMode] = useState<'ally' | 'enemy'>('ally')
   const [selectedWorld, setSelectedWorld] = useState<string>('')
+  const { types, addType } = useCharacterTypes()
+
+  const memberMapRef = useRef<MemberMap>(new Map())
+  const frameIdRef = useRef<number>()
+  const lastUpdateRef = useRef(0)
 
   const [recentDeaths, setRecentDeaths] = useState<DeathEvent[]>(() => {
     if (typeof window !== 'undefined') {
@@ -55,6 +60,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
     }
     return []
   })
+
   const [recentLevels, setRecentLevels] = useState<LevelEvent[]>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('recentLevels')
@@ -62,19 +68,21 @@ export function GuildProvider({ children }: { children: ReactNode }) {
     }
     return []
   })
-  const { types, addType } = useCharacterTypes(guildData)
 
-  // Use a ref for memberMap to avoid recreating it on every render
-  const memberMapRef = useRef<MemberMap>(new Map())
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('recentDeaths', JSON.stringify(recentDeaths))
+    }
+  }, [recentDeaths])
 
-  // Timestamping-related refs to avoid unnecessary renders
-  const lastUpdateRef = useRef(Date.now())
-  const frameIdRef = useRef<number | null>(null)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('recentLevels', JSON.stringify(recentLevels))
+    }
+  }, [recentLevels])
 
-  // Handle SSE messages efficiently
   const handleMessage = useCallback(
     (data: any) => {
-      // Handle death events
       if (data?.death) {
         const deathEvent = {
           death: {
@@ -84,14 +92,8 @@ export function GuildProvider({ children }: { children: ReactNode }) {
             date: new Date().toISOString(), // Ensure we have the current timestamp
           },
         } as DeathEvent
-        setRecentDeaths(prev => {
-          const updated = [deathEvent, ...prev].slice(0, 10) // Keep last 10 deaths
-          localStorage.setItem('recentDeaths', JSON.stringify(updated))
-          return updated
-        })
+        setRecentDeaths(prev => [deathEvent, ...prev].slice(0, 10))
       }
-
-      // Handle level events
       if (data?.level) {
         const levelEvent = {
           level: {
@@ -101,11 +103,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
             timestamp: new Date().toISOString(), // Add timestamp to level events
           },
         } as LevelEvent
-        setRecentLevels(prev => {
-          const updated = [levelEvent, ...prev].slice(0, 10) // Keep last 10 level changes
-          localStorage.setItem('recentLevels', JSON.stringify(updated))
-          return updated
-        })
+        setRecentLevels(prev => [levelEvent, ...prev].slice(0, 10))
       }
 
       if (data?.[value]) {
@@ -296,6 +294,8 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         await upsertPlayer(
           {
             name: member.Name,
+            vocation: member.Vocation,
+            level: member.Level,
             kind: newClassification,
           },
           selectedWorld,
@@ -313,9 +313,18 @@ export function GuildProvider({ children }: { children: ReactNode }) {
           // Return new array with updated member
           return prevData.map(m => (m.Name === member.Name ? { ...m, Kind: newClassification } : m))
         })
-      } catch (error) {
+
         toast({
-          title: 'Erro ao atualizar tipo',
+          title: 'Tipo atualizado',
+          description: `O tipo de ${member.Name} foi atualizado para ${newClassification}`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        })
+      } catch (error) {
+        console.error('Error updating player classification:', error)
+        toast({
+          title: 'Erro ao atualizar tipo do personagem',
           description: 'Não foi possível atualizar o tipo do personagem. Tente novamente.',
           status: 'error',
           duration: 5000,
@@ -323,7 +332,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         })
       }
     },
-    [],
+    [selectedWorld],
   )
 
   return (

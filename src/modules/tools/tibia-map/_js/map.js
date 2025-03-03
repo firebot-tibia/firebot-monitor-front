@@ -282,7 +282,6 @@
           done(null, tile)
         }
         image.onerror = function () {
-          console.error('Failed to load tile:', tileId)
           ctx.fillStyle = '#000'
           ctx.fillRect(0, 0, 256, 256)
           done(null, tile)
@@ -432,8 +431,6 @@
           },
           true,
         )
-
-        console.log('Clicked at:', event.latlng, 'Coords:', coordX, coordY)
       }
     })
 
@@ -547,7 +544,6 @@
   function findHuntAreas(direction) {
     const map = tibiaMap.map
     if (!map) {
-      console.error('Mapa não está disponível')
       return
     }
 
@@ -555,16 +551,12 @@
     const center = map.getCenter()
 
     if (!bounds || !center) {
-      console.error('Limites ou centro do mapa inválidos')
       return
     }
-
-    console.log('Finding hunt areas in direction:', direction)
 
     const relevantAreas = huntAreas.filter(area => {
       const areaLatLng = map.unproject([area.x, area.y], 0)
       if (!areaLatLng) {
-        console.error('Não foi possível desprojetar coordenadas para:', area)
         return false
       }
       const areaDirection = determineDirection(areaLatLng)
@@ -602,23 +594,17 @@
   function determineDirection(clickPoint) {
     const map = tibiaMap.map
     if (!map) {
-      console.error('Mapa não está disponível')
       return null
     }
 
     const center = map.getCenter()
     if (!center) {
-      console.error('Centro do mapa inválido:', center)
       return null
     }
 
     if (!clickPoint) {
-      console.error('Ponto de clique inválido:', clickPoint)
       return null
     }
-
-    console.log('Center:', center)
-    console.log('Click point:', clickPoint)
 
     const dx = clickPoint.lng - center.lng
     const dy = clickPoint.lat - center.lat
@@ -640,7 +626,6 @@
   function createCityButtons() {
     const cityButtonsContainer = document.getElementById('city-buttons')
     if (!cityButtonsContainer) {
-      console.error('Container de botões de cidade não encontrado')
       return
     }
 
@@ -652,7 +637,6 @@
         button.textContent = city.name
         button.className = 'btn btn-sm btn-outline-light city-btn'
         button.onclick = function () {
-          console.log(`Movendo para ${city.name}: x=${city.x}, y=${city.y}, floor=${city.floor}`)
           if (tibiaMap && tibiaMap.map) {
             const latLng = tibiaMap.map.unproject([city.x, city.y], 0)
             tibiaMap.map.setView(latLng, tibiaMap.map.getZoom())

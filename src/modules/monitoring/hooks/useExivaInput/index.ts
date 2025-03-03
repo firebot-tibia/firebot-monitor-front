@@ -28,7 +28,7 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
   const [isDropdownSelection, setIsDropdownSelection] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [recentLocations, setRecentLocations] = useState<string[]>(() => {
-    const saved = localStorage.getItem('recentLocations')
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('recentLocations') : null
     return saved ? JSON.parse(saved) : []
   })
 
@@ -50,7 +50,9 @@ export const useLocalInput = ({ member, onLocalChange }: UseLocalInputProps) => 
   }, [fetchRespawns])
 
   useEffect(() => {
-    localStorage.setItem('recentLocations', JSON.stringify(recentLocations))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('recentLocations', JSON.stringify(recentLocations))
+    }
   }, [recentLocations])
 
   const updateDropdownPosition = useCallback(() => {
