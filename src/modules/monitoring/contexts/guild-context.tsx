@@ -13,9 +13,9 @@ import { upsertPlayer } from '@/modules/statistics/services'
 type Mode = 'ally' | 'enemy'
 
 interface CharacterDetection {
-  timestamp: number;
-  expiryTimeout: NodeJS.Timeout;
-  formattedName: string;
+  timestamp: number
+  expiryTimeout: NodeJS.Timeout
+  formattedName: string
 }
 
 import { useCharacterTypes } from '../hooks/useCharacterTypes'
@@ -164,8 +164,12 @@ export function GuildProvider({ children }: { children: ReactNode }) {
           }
 
           // Handle character detection - only for newly logged in characters
-          const detection: CharacterDetection | undefined = characterDetectionsRef.current.get(member.Name)
-          const loginTime = member.OnlineSince ? new Date(member.OnlineSince).getTime() : now.getTime()
+          const detection: CharacterDetection | undefined = characterDetectionsRef.current.get(
+            member.Name,
+          )
+          const loginTime = member.OnlineSince
+            ? new Date(member.OnlineSince).getTime()
+            : now.getTime()
           const timeSinceLogin = now.getTime() - loginTime
           const isNewLogin = timeSinceLogin <= TWO_MINUTES
           const previousMember = memberMapRef.current.get(member.Name)
@@ -188,7 +192,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
             characterDetectionsRef.current.set(member.Name, {
               timestamp: now.getTime(),
               expiryTimeout,
-              formattedName: formatCharacterName(member.Name)
+              formattedName: formatCharacterName(member.Name),
             })
 
             // Always update last detection time for new detections
@@ -209,7 +213,9 @@ export function GuildProvider({ children }: { children: ReactNode }) {
             OnlineSince: onlineSince,
             TimeOnline: formatTimeOnline(new Date(onlineSince), now),
             IsDetected: isDetected,
-            FormattedName: isDetected ? memberDetection?.formattedName : formatCharacterName(member.Name)
+            FormattedName: isDetected
+              ? memberDetection?.formattedName
+              : formatCharacterName(member.Name),
           }
         })
 

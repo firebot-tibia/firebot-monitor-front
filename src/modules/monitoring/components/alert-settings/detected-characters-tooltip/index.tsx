@@ -8,7 +8,10 @@ interface DetectedCharactersTooltipProps {
   alerts: AlertCondition[]
 }
 
-export const DetectedCharactersTooltip = ({ characters, alerts }: DetectedCharactersTooltipProps) => {
+export const DetectedCharactersTooltip = ({
+  characters,
+  alerts,
+}: DetectedCharactersTooltipProps) => {
   return (
     <Box
       bg="rgba(0, 0, 0, 0.85)"
@@ -16,10 +19,12 @@ export const DetectedCharactersTooltip = ({ characters, alerts }: DetectedCharac
       borderRadius="lg"
       boxShadow="dark-lg"
       p={3}
-      minW="300px"
+      w={{ base: '90vw', sm: '300px' }}
+      maxW="400px"
       border="1px solid"
       borderColor="whiteAlpha.200"
       pointerEvents="all"
+      mx={{ base: 2, sm: 0 }}
     >
       <HStack mb={3} borderBottom="1px solid" borderColor="whiteAlpha.200" pb={2}>
         <Text fontWeight="bold" color="white" fontSize="md">
@@ -55,13 +60,21 @@ export const DetectedCharactersTooltip = ({ characters, alerts }: DetectedCharac
                   <Text color="gray.400" fontSize="sm">
                     {character.Vocation}
                   </Text>
-                  <Text color="gray.400" fontSize="sm">•</Text>
                   <Text color="gray.400" fontSize="sm">
-                    Expira às {new Date(new Date(character.OnlineSince!).getTime() + (alerts.find(a => a.enabled)?.timeRange || 5) * 60 * 1000).toLocaleTimeString()}
+                    •
+                  </Text>
+                  <Text color="gray.400" fontSize="sm">
+                    Expira às{' '}
+                    {new Date(
+                      new Date(character.OnlineSince!).getTime() +
+                        (alerts.find(a => a.enabled)?.timeRange || 5) * 60 * 1000,
+                    ).toLocaleTimeString()}
                   </Text>
                   <Spacer />
                   <Text fontSize="xs" color="gray.300">
-                    {character.OnlineSince ? new Date(character.OnlineSince).toLocaleTimeString() : ''}
+                    {character.OnlineSince
+                      ? new Date(character.OnlineSince).toLocaleTimeString()
+                      : ''}
                   </Text>
                 </HStack>
                 <HStack spacing={2}>
@@ -75,8 +88,7 @@ export const DetectedCharactersTooltip = ({ characters, alerts }: DetectedCharac
                 </HStack>
               </VStack>
             </Box>
-          ))
-        }
+          ))}
       </VStack>
     </Box>
   )

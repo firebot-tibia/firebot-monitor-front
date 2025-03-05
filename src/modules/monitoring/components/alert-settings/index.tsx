@@ -195,48 +195,78 @@ const AlertSettings = () => {
     <>
       <Tooltip label="Abrir configurações de monitoramento" placement="right">
         <HStack onClick={onOpen} cursor="pointer" spacing={3}>
-          <Tooltip label={`Última atividade: ${lastDetectionTime ? new Date(lastDetectionTime).toLocaleTimeString() : 'Nenhuma'}`}>
+          <Tooltip
+            label={`Última atividade: ${lastDetectionTime ? new Date(lastDetectionTime).toLocaleTimeString() : 'Nenhuma'}`}
+          >
             <Bell size={18} color="blue.400" />
           </Tooltip>
           <Badge colorScheme="red" variant="solid" borderRadius="md">
             {alerts.filter(a => a.enabled).length} ALERTA DE ATAQUE
           </Badge>
           <HStack spacing={1}>
-            <Box
-              position="relative"
-              onMouseEnter={onTooltipOpen}
-              onMouseLeave={onTooltipClose}
-            >
+            <Box position="relative" onMouseEnter={onTooltipOpen} onMouseLeave={onTooltipClose}>
               <Box
                 position="fixed"
                 visibility={isTooltipOpen ? 'visible' : 'hidden'}
                 opacity={isTooltipOpen ? 1 : 0}
                 transform={`translateY(${isTooltipOpen ? '0' : '-10px'})`}
                 transition="all 0.2s"
-                top="calc(var(--popper-y) + 10px)"
-                left="var(--popper-x)"
                 zIndex={1000}
                 ref={node => {
                   if (node) {
                     const trigger = node.previousElementSibling
                     if (trigger) {
                       const rect = trigger.getBoundingClientRect()
-                      node.style.setProperty('--popper-x', `${rect.left}px`)
-                      node.style.setProperty('--popper-y', `${rect.bottom}px`)
+                      const viewportWidth = window.innerWidth
+                      const viewportHeight = window.innerHeight
+                      
+                      // Calculate available space
+                      const spaceBelow = viewportHeight - rect.bottom
+                      const spaceAbove = rect.top
+                      const spaceRight = viewportWidth - rect.right
+                      const spaceLeft = rect.left
+
+                      // Default position (below and to the right)
+                      let top = rect.bottom + 10
+                      let left = rect.left
+
+                      // Check if tooltip would overflow bottom
+                      if (spaceBelow < 300 && spaceAbove > 300) {
+                        top = rect.top - 310 // Position above
+                      }
+
+                      // Check if tooltip would overflow right
+                      if (spaceRight < 300 && spaceLeft > 300) {
+                        left = rect.right - 300 // Position to the left
+                      }
+
+                      // Ensure tooltip stays within viewport bounds
+                      left = Math.max(10, Math.min(left, viewportWidth - 310))
+                      top = Math.max(10, Math.min(top, viewportHeight - 310))
+
+                      node.style.setProperty('top', `${top}px`)
+                      node.style.setProperty('left', `${left}px`)
                     }
                   }
                 }}
               >
                 <DetectedCharactersTooltip
-                  characters={guildData.filter(member => {
-                    if (!member.OnlineSince || !member.OnlineStatus) return false
-                    if (excludedVocations.includes(member.Vocation)) return false
-                    const now = new Date()
-                    const loginTime = new Date(member.OnlineSince)
-                    const activeAlert = alerts.find(a => a.enabled)
-                    if (!activeAlert) return false
-                    return now.getTime() - loginTime.getTime() <= activeAlert.timeRange * 60 * 1000
-                  }).sort((a, b) => new Date(b.OnlineSince!).getTime() - new Date(a.OnlineSince!).getTime())}
+                  characters={guildData
+                    .filter(member => {
+                      if (!member.OnlineSince || !member.OnlineStatus) return false
+                      if (excludedVocations.includes(member.Vocation)) return false
+                      const now = new Date()
+                      const loginTime = new Date(member.OnlineSince)
+                      const activeAlert = alerts.find(a => a.enabled)
+                      if (!activeAlert) return false
+                      return (
+                        now.getTime() - loginTime.getTime() <= activeAlert.timeRange * 60 * 1000
+                      )
+                    })
+                    .sort(
+                      (a, b) =>
+                        new Date(b.OnlineSince!).getTime() - new Date(a.OnlineSince!).getTime(),
+                    )}
                   alerts={alerts}
                 />
               </Box>
@@ -263,7 +293,9 @@ const AlertSettings = () => {
                   <Text>Próximo reset em</Text>
                   <Text fontWeight="bold">
                     <Countdown
-                      targetTime={new Date(alertStartTimeRef.current + (currentAlert.timeRange * 60 * 1000))}
+                      targetTime={
+                        new Date(alertStartTimeRef.current + currentAlert.timeRange * 60 * 1000)
+                      }
                       onComplete={resetAlerts}
                     />
                   </Text>
