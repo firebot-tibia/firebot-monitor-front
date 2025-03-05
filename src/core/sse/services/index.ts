@@ -340,14 +340,17 @@ export class SSEClient {
         return false
       }
 
-      const newToken = await this.config.onTokenRefresh()
-      if (!newToken) {
-        this.log('warn', 'Token refresh failed - no new token received')
+      // Call token refresh with current tokens as placeholders
+      // The actual implementation should provide new tokens
+      const result = await this.config.onTokenRefresh(this.config.token, this.config.refreshToken)
+      if (!result) {
+        this.log('warn', 'Token refresh failed - no tokens received')
         return false
       }
 
       this.log('info', 'Token refreshed successfully')
-      this.config.token = newToken
+      this.config.token = result.token
+      this.config.refreshToken = result.refreshToken
 
       // Close and reopen connection with new token
       this.closeEventSource()
@@ -359,19 +362,6 @@ export class SSEClient {
       return false
     } finally {
       this.tokenRefreshInProgress = false
-    }
-  }
-
-  /**
-   * Extract user ID from token
-   */
-  private extractUserIdFromToken(token: string): string | null {
-    try {
-      const decoded = jwtDecode<DecodedToken>(token)
-      return decoded.sub
-    } catch (error) {
-      this.log('error', 'Failed to decode token', error)
-      return null
     }
   }
 

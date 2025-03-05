@@ -10,4 +10,6 @@ export interface GuildMemberResponse {
   TimeOnline: string | null
   OnlineSince: string | null
   LastLogin: string
+  IsDetected?: boolean
+  FormattedName?: string
 }

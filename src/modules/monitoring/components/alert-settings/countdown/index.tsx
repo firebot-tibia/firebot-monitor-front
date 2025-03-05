@@ -20,8 +20,9 @@ export function Countdown({ targetTime, onComplete }: CountdownProps) {
         return '00:00'
       }
 
+      const minutes = Math.floor(difference / (1000 * 60))
       const seconds = Math.floor((difference / 1000) % 60)
-      return `${seconds.toString().padStart(2, '0')}s`
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
     }
 
     // Initial calculation

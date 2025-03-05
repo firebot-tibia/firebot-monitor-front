@@ -12,8 +12,15 @@ import { upsertPlayer } from '@/modules/statistics/services'
 
 type Mode = 'ally' | 'enemy'
 
+interface CharacterDetection {
+  timestamp: number;
+  expiryTimeout: NodeJS.Timeout;
+  formattedName: string;
+}
+
 import { useCharacterTypes } from '../hooks/useCharacterTypes'
 import { useSSE } from '../hooks/useSSE'
+import { useAlertSettingsStore } from '../stores/alert-system/alert-settings-store'
 import type { DeathEvent } from '../types/death'
 import type { LevelEvent } from '../types/level'
 
@@ -34,6 +41,7 @@ interface GuildContextData {
   selectedMode: Mode
   setSelectedMode: (mode: Mode) => void
   selectedWorld: string
+  lastDetectionTime: Date | null
 }
 
 const GuildContext = createContext<GuildContextData | undefined>(undefined)
@@ -47,7 +55,6 @@ export function GuildProvider({ children }: { children: ReactNode }) {
   const storedMode = useStorageStore.getState().getItem('monitorMode', 'enemy') as Mode
   const [guildData, setGuildData] = useState<GuildMemberResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [characterChanges, setCharacterChanges] = useState<GuildMemberResponse[]>([])
   const [selectedMode, setSelectedMode] = useState<Mode>(storedMode)
 
   const [recentDeaths, setRecentDeaths] = useState<DeathEvent[]>(() => {
@@ -73,9 +80,40 @@ export function GuildProvider({ children }: { children: ReactNode }) {
   const lastUpdateRef = useRef(Date.now())
   const frameIdRef = useRef<number | null>(null)
 
+  // Import alert settings store
+  const alerts = useAlertSettingsStore(state => state.alerts)
+
+  // Format character name for display
+  const formatCharacterName = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ')
+  }
+
+  // Keep track of character detections with timestamps
+  const characterDetectionsRef = useRef<Map<string, CharacterDetection>>(new Map())
+  const [lastDetectionTime, setLastDetectionTime] = useState<Date | null>(null)
+
   // Handle SSE messages efficiently
   const handleMessage = useCallback(
     (data: any) => {
+      const now = Date.now()
+
+      // Get monitoring windows from alert settings
+      const activeAlert = alerts.find(alert => alert.enabled)
+      const MONITORING_WINDOW = (activeAlert?.timeRange || 10) * 60 * 1000 // Convert minutes to milliseconds
+      const TWO_MINUTES = 2 * 60 * 1000
+      const FIVE_MINUTES = 5 * 60 * 1000
+
+      // Clean up old events based on monitoring window
+      const cleanupOldEvents = (events: any[], timestampKey: string) => {
+        return events.filter(event => {
+          const eventTime = new Date(event[timestampKey]).getTime()
+          return now - eventTime <= MONITORING_WINDOW
+        })
+      }
+
       // Handle death events
       if (data?.death && typeof data.death === 'object' && data.death.name && data.death.text) {
         const deathEvent = {
@@ -83,53 +121,95 @@ export function GuildProvider({ children }: { children: ReactNode }) {
             ...data.death,
             world: selectedWorld,
             isAlly: selectedMode === 'ally',
-            date: new Date().toISOString(), // Ensure we have the current timestamp
+            date: new Date().toISOString(),
           },
         } as DeathEvent
         setRecentDeaths(prev => {
-          const updated = [deathEvent, ...prev].slice(0, 10) // Keep last 10 deaths
+          const cleaned = cleanupOldEvents(prev, 'death.date')
+          const updated = [deathEvent, ...cleaned]
           localStorage.setItem('recentDeaths', JSON.stringify(updated))
           return updated
         })
       }
 
       // Handle level events
-      if (data?.level && typeof data.level === 'object' && data.level.player && data.level.new_level) {
+      if (
+        data?.level &&
+        typeof data.level === 'object' &&
+        data.level.player &&
+        data.level.new_level
+      ) {
         const levelEvent = {
           level: {
             ...data.level,
             world: selectedWorld,
             isAlly: selectedMode === 'ally',
-            timestamp: new Date().toISOString(), // Add timestamp to level events
+            timestamp: new Date().toISOString(),
           },
         } as LevelEvent
         setRecentLevels(prev => {
-          // Remove any existing events for the same player within 5 seconds
-          const now = new Date()
-          const filtered = prev.filter(event => {
-            const eventTime = new Date(event.level.timestamp || '')
-            const timeDiff = now.getTime() - eventTime.getTime()
-            return timeDiff > 5000 || event.level.player !== data.level.player
-          })
-          const updated = [levelEvent, ...filtered].slice(0, 10) // Keep last 10 level changes
+          const cleaned = cleanupOldEvents(prev, 'level.timestamp')
+          const updated = [levelEvent, ...cleaned]
           localStorage.setItem('recentLevels', JSON.stringify(updated))
           return updated
         })
       }
 
       if (data?.[storedMode]) {
-        const now = new Date()
-        // Use a single transform on the incoming data
+        // Process incoming data with time windows
         const processedData = data[storedMode].map((member: GuildMemberResponse) => {
+          const now = new Date()
           if (!member.OnlineStatus) {
             return { ...member, OnlineSince: null, TimeOnline: null }
           }
 
+          // Handle character detection - only for newly logged in characters
+          const detection: CharacterDetection | undefined = characterDetectionsRef.current.get(member.Name)
+          const loginTime = member.OnlineSince ? new Date(member.OnlineSince).getTime() : now.getTime()
+          const timeSinceLogin = now.getTime() - loginTime
+          const isNewLogin = timeSinceLogin <= TWO_MINUTES
+          const previousMember = memberMapRef.current.get(member.Name)
+          const wasOffline = !previousMember?.OnlineStatus
+          const isFirstAppearance = !previousMember
+
+          // Only detect if character just logged in and was previously offline or is first appearance
+          if (!detection && isNewLogin && (wasOffline || isFirstAppearance)) {
+            // Set new detection with expiry
+            const expiryTimeout = setTimeout(() => {
+              characterDetectionsRef.current.delete(member.Name)
+              // Trigger a re-render to update counts
+              setGuildData(current => [...current])
+              // Update last detection time if this was the last detected character
+              if (characterDetectionsRef.current.size === 0) {
+                setLastDetectionTime(null)
+              }
+            }, FIVE_MINUTES)
+
+            characterDetectionsRef.current.set(member.Name, {
+              timestamp: now.getTime(),
+              expiryTimeout,
+              formattedName: formatCharacterName(member.Name)
+            })
+
+            // Always update last detection time for new detections
+            setLastDetectionTime(new Date())
+
+            // Update last detection time for new detections
+            if (!detection) {
+              setLastDetectionTime(new Date())
+            }
+          }
+
           const onlineSince = member.OnlineSince || now.toISOString()
+          const isDetected = characterDetectionsRef.current.has(member.Name)
+          const memberDetection = characterDetectionsRef.current.get(member.Name)
+
           return {
             ...member,
             OnlineSince: onlineSince,
             TimeOnline: formatTimeOnline(new Date(onlineSince), now),
+            IsDetected: isDetected,
+            FormattedName: isDetected ? memberDetection?.formattedName : formatCharacterName(member.Name)
           }
         })
 
@@ -145,9 +225,8 @@ export function GuildProvider({ children }: { children: ReactNode }) {
       }
 
       if (data?.[`${storedMode}-changes`]) {
-        // Use batch updates for changes
+        // Handle character changes with detection tracking
         setGuildData(prevData => {
-          const newChanges: GuildMemberResponse[] = []
           const updatedData = prevData.map(member => {
             const change = data[`${storedMode}-changes`][member.Name]
             if (!change) return member
@@ -162,28 +241,36 @@ export function GuildProvider({ children }: { children: ReactNode }) {
                 OnlineStatus: true,
                 OnlineSince: now.toISOString(),
                 TimeOnline: '00:00:00',
+                IsDetected: characterDetectionsRef.current.has(member.Name),
               }
-              newChanges.push(updatedMember)
             } else if (change.ChangeType === 'logged-out') {
+              // Clear detection when character logs out
+              const detection = characterDetectionsRef.current.get(member.Name)
+              if (detection) {
+                clearTimeout(detection.expiryTimeout)
+                characterDetectionsRef.current.delete(member.Name)
+              }
+
               updatedMember = {
                 ...updatedMember,
                 ...change.Member,
                 OnlineStatus: false,
                 OnlineSince: null,
                 TimeOnline: null,
+                IsDetected: false,
               }
             } else {
-              updatedMember = { ...updatedMember, ...change.Member }
+              updatedMember = {
+                ...updatedMember,
+                ...change.Member,
+                IsDetected: characterDetectionsRef.current.has(member.Name),
+              }
             }
 
             // Update our reference map
             memberMapRef.current.set(updatedMember.Name, updatedMember)
             return updatedMember
           })
-
-          if (newChanges.length > 0) {
-            setCharacterChanges(prev => [...prev, ...newChanges])
-          }
 
           return updatedData
         })
@@ -193,6 +280,16 @@ export function GuildProvider({ children }: { children: ReactNode }) {
     },
     [storedMode, selectedWorld, selectedMode],
   )
+
+  // Cleanup detection timeouts on unmount
+  useEffect(() => {
+    return () => {
+      characterDetectionsRef.current.forEach(detection => {
+        clearTimeout(detection.expiryTimeout)
+      })
+      characterDetectionsRef.current.clear()
+    }
+  }, [])
 
   // Single efficient time update mechanism using requestAnimationFrame
   useEffect(() => {
@@ -405,6 +502,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         selectedMode,
         setSelectedMode,
         selectedWorld,
+        lastDetectionTime,
       }}
     >
       {children}

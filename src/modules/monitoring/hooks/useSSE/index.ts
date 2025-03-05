@@ -70,29 +70,47 @@ export const useSSE = ({
     }
   }, [reconnectOnError, reconnectInterval])
 
-  const handleTokenRefresh = useCallback(async () => {
-    if (!session?.refresh_token || !session?.access_token) return null
+  const handleTokenRefresh = useCallback(
+    async (currentToken: string, currentRefreshToken: string) => {
+      if (!session?.refresh_token || !session?.access_token) {
+        console.warn('No refresh token or access token available')
+        throw new Error('No tokens available')
+      }
 
-    try {
-      // Extract user ID from the current access token
-      const userId = tokenManager.current.extractUserIdFromToken(session.access_token)
-      if (!userId) throw new Error('Could not extract user ID from token')
+      try {
+        // Extract user ID from the current access token
+        const userId = tokenManager.current.extractUserIdFromToken(currentToken)
+        if (!userId) {
+          console.error('Could not extract user ID from token')
+          throw new Error('Invalid token')
+        }
 
-      // Perform token refresh
-      const newTokens = await tokenManager.current.refreshToken(userId, session.refresh_token)
+        // Perform token refresh
+        const newTokens = await tokenManager.current.refreshToken(userId, currentRefreshToken)
+        if (!newTokens?.access_token) {
+          console.error('No access token in refresh response')
+          throw new Error('Token refresh failed')
+        }
 
-      // Update session with new tokens
-      await updateSession({
-        access_token: newTokens.access_token,
-        refresh_token: newTokens.refresh_token,
-      })
+        // Update session with new tokens
+        const newRefreshToken = newTokens.refresh_token || currentRefreshToken
+        await updateSession({
+          ...session,
+          access_token: newTokens.access_token,
+          refresh_token: newRefreshToken,
+        })
 
-      return newTokens.access_token
-    } catch (error) {
-      console.error('Failed to refresh token:', error)
-      return null
-    }
-  }, [session, updateSession])
+        return {
+          token: newTokens.access_token,
+          refreshToken: newRefreshToken,
+        }
+      } catch (error) {
+        console.error('Token refresh failed:', error)
+        throw error
+      }
+    },
+    [session, updateSession],
+  )
 
   const cleanupSSE = useCallback(() => {
     if (sseClientRef.current) {

@@ -6,11 +6,13 @@ import type { AlertCondition } from '../../types/alert'
 interface AlertSettingsState {
   alerts: AlertCondition[]
   isWidgetCollapsed: boolean
+  excludedVocations: string[]
   addAlert: (alert: Omit<AlertCondition, 'id' | 'createdAt'>) => void
   removeAlert: (id: string) => void
   toggleAlert: (id: string) => void
   updateAlert: (id: string, field: keyof AlertCondition, value: any) => void
   toggleWidget: () => void
+  setExcludedVocations: (vocations: string[]) => void
 }
 
 export const useAlertSettingsStore = create<
@@ -25,7 +27,8 @@ export const useAlertSettingsStore = create<
   persist(
     set => ({
       alerts: [],
-      isWidgetCollapsed: true,
+      isWidgetCollapsed: false, // Start collapsed
+      excludedVocations: ['Elite Knight', 'Knight'],
       addAlert: alert =>
         set(state => ({
           alerts: [
@@ -73,6 +76,10 @@ export const useAlertSettingsStore = create<
       toggleWidget: () =>
         set(state => ({
           isWidgetCollapsed: !state.isWidgetCollapsed,
+        })),
+      setExcludedVocations: vocations =>
+        set(() => ({
+          excludedVocations: vocations,
         })),
     }),
     { name: 'alert-settings' },

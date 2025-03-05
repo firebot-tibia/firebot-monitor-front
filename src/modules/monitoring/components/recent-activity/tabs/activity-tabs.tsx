@@ -85,7 +85,7 @@ const EmptyState = () => (
 
 export function ActivityTabs({ activities }: ActivityTabsProps) {
   const { deaths, levelUps, levelDowns } = activities
-  
+
   // Sort activities by date
   const sortedDeaths = [...deaths].sort((a, b) => b.date.getTime() - a.date.getTime())
   const sortedLevelUps = [...levelUps].sort((a, b) => b.date.getTime() - a.date.getTime())

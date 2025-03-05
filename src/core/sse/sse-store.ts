@@ -127,8 +127,9 @@ export const useSSEStore = create<SSEState>()(
                 timestamp: Date.now(),
               })
             },
-            onTokenRefresh: (newToken: string, newRefreshToken: string) => {
+            onTokenRefresh: async (newToken: string, newRefreshToken: string) => {
               get().updateToken(newToken, newRefreshToken)
+              return { token: newToken, refreshToken: newRefreshToken }
             },
             onMaxRetriesReached: () => {},
           },

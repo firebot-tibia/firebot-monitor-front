@@ -1,29 +1,67 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 
-import { HStack, Badge, Tooltip, useDisclosure, Text } from '@chakra-ui/react'
+import { HStack, Badge, Box, useDisclosure, Text, Tooltip } from '@chakra-ui/react'
 import { Bell } from 'lucide-react'
 
-import { Countdown } from '@/modules/monitoring/components/alert-settings/countdown'
 import type { GuildMemberResponse } from '@/core/types/guild-member.response'
+import { Countdown } from '@/modules/monitoring/components/alert-settings/countdown'
+import { DetectedCharactersTooltip } from '@/modules/monitoring/components/alert-settings/detected-characters-tooltip'
 
 import { AlertSettingsPanel } from './alert-settings-panel'
 import { soundOptions } from '../../constants/sounds'
 import { useGuildContext } from '../../contexts/guild-context'
 import { useAlertSound } from '../../hooks/useAlertSound'
 import { useAlertSettingsStore } from '../../stores/alert-system/alert-settings-store'
+import type { AlertCondition } from '../../types/alert'
 
-const ALERT_DURATION = 60 * 1000 // 1 minute in milliseconds
-const MAX_ALERT_TRIGGERS = 5 // Maximum number of times to trigger alert in a minute
+// Constants
+const MAX_ALERT_TRIGGERS = 3 // Maximum number of times to trigger alert in a minute
 const ALERT_RESET_INTERVAL = 60 * 1000 // 1 minute in milliseconds
 
 const AlertSettings = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure() // Panel disclosure
+  const { isOpen: isTooltipOpen, onOpen: onTooltipOpen, onClose: onTooltipClose } = useDisclosure() // Tooltip disclosure
   const { alerts, addAlert, removeAlert, toggleAlert } = useAlertSettingsStore()
   const { debouncedPlaySound: playSound } = useAlertSound()
-  const { guildData } = useGuildContext()
-  const [recentLogins, setRecentLogins] = useState<number>(0)
+  const { guildData, lastDetectionTime } = useGuildContext()
+
+  // Get excluded vocations from store
+  const { excludedVocations } = useAlertSettingsStore()
+
+  // Track previous detected characters for new character alert
+  const prevDetectedRef = useRef<Set<string>>(new Set())
+
+  // Calculate detected characters based on alert timeRange
+  const detectedCharacters = useMemo(() => {
+    const now = new Date()
+    // Use the first enabled alert's timeRange
+    const activeAlert = alerts.find(a => a.enabled)
+    if (!activeAlert) return 0
+
+    const timeRangeMs = activeAlert.timeRange * 60 * 1000
+    const filteredMembers = guildData.filter(member => {
+      if (!member.OnlineSince || !member.OnlineStatus) return false
+      if (excludedVocations.includes(member.Vocation)) return false
+      const loginTime = new Date(member.OnlineSince)
+      return now.getTime() - loginTime.getTime() <= timeRangeMs
+    })
+
+    // Check for new characters above threshold
+    const currentDetected = new Set(filteredMembers.map(m => m.Name))
+    const prevCount = prevDetectedRef.current.size
+    if (prevCount >= activeAlert.threshold) {
+      const newCharacters = filteredMembers.filter(m => !prevDetectedRef.current.has(m.Name))
+      if (newCharacters.length > 0) {
+        playSound(activeAlert.sound)
+      }
+    }
+    prevDetectedRef.current = currentDetected
+
+    return filteredMembers.length
+  }, [guildData, alerts, excludedVocations, playSound])
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
   const [alertDismissed, setAlertDismissed] = useState<boolean>(false)
+  const [currentAlert, setCurrentAlert] = useState<AlertCondition | null>(null)
   const alertStartTimeRef = useRef<number | null>(null)
 
   // Track alert triggers
@@ -38,23 +76,16 @@ const AlertSettings = () => {
       let reachedThreshold = false
       let triggeredAlert = null
 
-      // Count recent logins
-      const recentLoginCount = members.filter(member => {
-        if (!member.OnlineSince || !member.OnlineStatus) return false
-        const loginTime = new Date(member.OnlineSince)
-        return now.getTime() - loginTime.getTime() <= ALERT_DURATION
-      }).length
-
-      setRecentLogins(recentLoginCount)
-
       // Check each alert condition
       for (const alert of alerts) {
         if (!alert.enabled) continue
 
+        // Count characters that logged in within the alert's time range
+        const timeRangeMs = alert.timeRange * 60 * 1000 // Convert minutes to milliseconds
         const matchingMembers = members.filter(member => {
           if (!member.OnlineSince || !member.OnlineStatus) return false
           const loginTime = new Date(member.OnlineSince)
-          return now.getTime() - loginTime.getTime() <= ALERT_DURATION
+          return now.getTime() - loginTime.getTime() <= timeRangeMs
         })
 
         if (matchingMembers.length >= alert.threshold) {
@@ -72,9 +103,9 @@ const AlertSettings = () => {
   // Reset alert triggers and counter after time period
   const resetAlerts = useCallback(() => {
     alertTriggersRef.current = 0
-    setRecentLogins(0)
     setTimeRemaining(0)
     setAlertDismissed(false)
+    setCurrentAlert(null)
     alertStartTimeRef.current = null
     resetTimeoutRef.current = null
     if (countdownIntervalRef.current) {
@@ -110,17 +141,22 @@ const AlertSettings = () => {
           // Set timeout to reset alerts if not already set
           if (!resetTimeoutRef.current) {
             alertStartTimeRef.current = Date.now()
-            resetTimeoutRef.current = setTimeout(resetAlerts, ALERT_DURATION)
+            const timeRangeMs = result.alert.timeRange * 60 * 1000 // Convert minutes to milliseconds
+            resetTimeoutRef.current = setTimeout(resetAlerts, timeRangeMs)
 
-            // Start countdown timer
-            setTimeRemaining(60)
+            // Set current alert
+            setCurrentAlert(result.alert)
+
+            // Start countdown timer based on alert's timeRange
+            const timeRangeSeconds = result.alert.timeRange * 60 // Convert minutes to seconds
+            setTimeRemaining(timeRangeSeconds)
             if (countdownIntervalRef.current) {
               clearInterval(countdownIntervalRef.current)
             }
             countdownIntervalRef.current = setInterval(() => {
               if (alertStartTimeRef.current) {
                 const elapsed = Math.floor((Date.now() - alertStartTimeRef.current) / 1000)
-                const remaining = Math.max(60 - elapsed, 0)
+                const remaining = Math.max(timeRangeSeconds - elapsed, 0)
                 setTimeRemaining(remaining)
 
                 if (remaining === 0) {
@@ -159,19 +195,61 @@ const AlertSettings = () => {
     <>
       <Tooltip label="Abrir configurações de monitoramento" placement="right">
         <HStack onClick={onOpen} cursor="pointer" spacing={3}>
-          <Bell size={18} color="blue.400" />
+          <Tooltip label={`Última atividade: ${lastDetectionTime ? new Date(lastDetectionTime).toLocaleTimeString() : 'Nenhuma'}`}>
+            <Bell size={18} color="blue.400" />
+          </Tooltip>
           <Badge colorScheme="red" variant="solid" borderRadius="md">
             {alerts.filter(a => a.enabled).length} ALERTA DE ATAQUE
           </Badge>
           <HStack spacing={1}>
-            <Badge
-              colorScheme={recentLogins > 0 ? 'red' : 'gray'}
-              variant="solid"
-              borderRadius="md"
+            <Box
+              position="relative"
+              onMouseEnter={onTooltipOpen}
+              onMouseLeave={onTooltipClose}
             >
-              {recentLogins} personagens detectados
-            </Badge>
-            {timeRemaining > 0 && alertStartTimeRef.current && (
+              <Box
+                position="fixed"
+                visibility={isTooltipOpen ? 'visible' : 'hidden'}
+                opacity={isTooltipOpen ? 1 : 0}
+                transform={`translateY(${isTooltipOpen ? '0' : '-10px'})`}
+                transition="all 0.2s"
+                top="calc(var(--popper-y) + 10px)"
+                left="var(--popper-x)"
+                zIndex={1000}
+                ref={node => {
+                  if (node) {
+                    const trigger = node.previousElementSibling
+                    if (trigger) {
+                      const rect = trigger.getBoundingClientRect()
+                      node.style.setProperty('--popper-x', `${rect.left}px`)
+                      node.style.setProperty('--popper-y', `${rect.bottom}px`)
+                    }
+                  }
+                }}
+              >
+                <DetectedCharactersTooltip
+                  characters={guildData.filter(member => {
+                    if (!member.OnlineSince || !member.OnlineStatus) return false
+                    if (excludedVocations.includes(member.Vocation)) return false
+                    const now = new Date()
+                    const loginTime = new Date(member.OnlineSince)
+                    const activeAlert = alerts.find(a => a.enabled)
+                    if (!activeAlert) return false
+                    return now.getTime() - loginTime.getTime() <= activeAlert.timeRange * 60 * 1000
+                  }).sort((a, b) => new Date(b.OnlineSince!).getTime() - new Date(a.OnlineSince!).getTime())}
+                  alerts={alerts}
+                />
+              </Box>
+              <Badge
+                colorScheme={detectedCharacters > 0 ? 'red' : 'gray'}
+                variant="solid"
+                borderRadius="md"
+                cursor="pointer"
+              >
+                {detectedCharacters} personagens detectados
+              </Badge>
+            </Box>
+            {timeRemaining > 0 && alertStartTimeRef.current && currentAlert && (
               <HStack spacing={1}>
                 <Badge
                   colorScheme="yellow"
@@ -182,29 +260,33 @@ const AlertSettings = () => {
                   alignItems="center"
                   gap={1}
                 >
-                  <Text>Resetando em</Text>
+                  <Text>Próximo reset em</Text>
                   <Text fontWeight="bold">
                     <Countdown
-                      targetTime={new Date(alertStartTimeRef.current + ALERT_DURATION)}
+                      targetTime={new Date(alertStartTimeRef.current + (currentAlert.timeRange * 60 * 1000))}
                       onComplete={resetAlerts}
                     />
                   </Text>
                 </Badge>
-                {!alertDismissed && (
+                {
                   <Badge
                     colorScheme="red"
-                    variant="outline"
+                    variant={alertDismissed ? 'solid' : 'outline'}
                     borderRadius="md"
                     fontSize="xs"
                     cursor="pointer"
                     onClick={e => {
                       e.stopPropagation()
-                      dismissCurrentAlert()
+                      if (alertDismissed) {
+                        setAlertDismissed(false)
+                      } else {
+                        dismissCurrentAlert()
+                      }
                     }}
                   >
-                    Silenciar
+                    {alertDismissed ? 'Ativar Som' : 'Silenciar'}
                   </Badge>
-                )}
+                }
               </HStack>
             )}
           </HStack>

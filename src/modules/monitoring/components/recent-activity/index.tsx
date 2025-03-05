@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import { Box, VStack, Text, useColorModeValue, IconButton } from '@chakra-ui/react'
+import { Box, VStack, Text, useColorModeValue, IconButton, Tooltip } from '@chakra-ui/react'
 import { Activity } from 'lucide-react'
 
 import { ActivityTabs } from './tabs/activity-tabs'
@@ -9,7 +9,7 @@ import type { DeathEvent } from '../../types/death'
 import type { LevelEvent } from '../../types/level'
 
 export function ActivityWidget() {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false) // Start hidden
   const { recentDeaths, recentLevels, selectedMode, selectedWorld } = useGuildContext()
 
   // Process and filter activities within last 24 hours
@@ -72,26 +72,32 @@ export function ActivityWidget() {
 
   return (
     <>
-      <IconButton
-        aria-label="Toggle Activity Widget"
-        icon={<Activity size={20} />}
-        position="fixed"
-        right={isOpen ? '300px' : '0'}
-        top="50%"
-        transform="translateY(-50%)"
-        zIndex={11}
-        variant="solid"
-        bg={useColorModeValue('white', 'gray.800')}
-        color={useColorModeValue('gray.800', 'white')}
-        boxShadow="md"
-        _hover={{
-          bg: useColorModeValue('gray.100', 'gray.700'),
-        }}
-        borderRadius={isOpen ? '4px 0 0 4px' : '4px'}
-        size="sm"
-        onClick={() => setIsOpen(prev => !prev)}
-        transition="right 0.3s"
-      />
+      <Tooltip
+        label={isOpen ? 'Esconder atividades' : 'Mostrar atividades'}
+        hasArrow
+        placement="left"
+      >
+        <IconButton
+          aria-label="Toggle Activity Widget"
+          icon={<Activity size={20} />}
+          position="fixed"
+          right={isOpen ? '300px' : '0'}
+          top="50%"
+          transform="translateY(-50%)"
+          zIndex={11}
+          variant="solid"
+          bg={useColorModeValue('white', 'gray.800')}
+          color={useColorModeValue('gray.800', 'white')}
+          boxShadow="md"
+          _hover={{
+            bg: useColorModeValue('gray.100', 'gray.700'),
+          }}
+          borderRadius={isOpen ? '4px 0 0 4px' : '4px'}
+          size="sm"
+          onClick={() => setIsOpen(prev => !prev)}
+          transition="right 0.3s"
+        />
+      </Tooltip>
 
       <Box
         transform={`translateX(${isOpen ? '0' : '100%'})`}

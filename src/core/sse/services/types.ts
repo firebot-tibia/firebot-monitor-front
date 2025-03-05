@@ -44,7 +44,10 @@ export interface SSEConfig {
   /** Callback for handling errors */
   onError?: (error: Error) => void
   /** Callback for handling token refresh */
-  onTokenRefresh?: (newToken: string, newRefreshToken: string) => void
+  onTokenRefresh?: (
+    currentToken: string,
+    currentRefreshToken: string,
+  ) => Promise<{ token: string; refreshToken: string }>
   /** Callback when maximum reconnection attempts are reached */
   onMaxRetriesReached?: () => void
 }
