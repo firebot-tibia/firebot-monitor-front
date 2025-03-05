@@ -213,40 +213,56 @@ const AlertSettings = () => {
                 transition="all 0.2s"
                 zIndex={1000}
                 ref={node => {
-                  if (node) {
-                    const trigger = node.previousElementSibling
-                    if (trigger) {
-                      const rect = trigger.getBoundingClientRect()
-                      const viewportWidth = window.innerWidth
-                      const viewportHeight = window.innerHeight
-                      
-                      // Calculate available space
-                      const spaceBelow = viewportHeight - rect.bottom
-                      const spaceAbove = rect.top
-                      const spaceRight = viewportWidth - rect.right
-                      const spaceLeft = rect.left
+                  if (node && isTooltipOpen) {
+                    // Wait for next frame to ensure tooltip is rendered
+                    requestAnimationFrame(() => {
+                      const trigger = node.previousElementSibling
+                      if (trigger) {
+                        const rect = trigger.getBoundingClientRect()
+                        const viewportWidth = window.innerWidth
+                        const viewportHeight = window.innerHeight
+                        const nodeRect = node.getBoundingClientRect()
+                        const tooltipHeight = nodeRect.height || 350 // Increased fallback height
+                        const tooltipWidth = nodeRect.width || 350 // Increased fallback width
+                        
+                        // Calculate available space
+                        const spaceBelow = viewportHeight - rect.bottom
+                        const spaceAbove = rect.top
+                        const spaceRight = viewportWidth - rect.left
+                        
+                        // Default position (below)
+                        let top = rect.bottom + 10
+                        let left = rect.left
 
-                      // Default position (below and to the right)
-                      let top = rect.bottom + 10
-                      let left = rect.left
+                        // Adjust vertical position
+                        if (spaceBelow < tooltipHeight + 20) {
+                          if (spaceAbove > tooltipHeight + 20) {
+                            // Position above if there's space
+                            top = rect.top - tooltipHeight - 10
+                          } else {
+                            // Center vertically if neither top nor bottom has enough space
+                            top = Math.max(10, (viewportHeight - tooltipHeight) / 2)
+                          }
+                        }
 
-                      // Check if tooltip would overflow bottom
-                      if (spaceBelow < 300 && spaceAbove > 300) {
-                        top = rect.top - 310 // Position above
+                        // Adjust horizontal position
+                        if (viewportWidth <= 480) {
+                          // Center on mobile
+                          left = (viewportWidth - tooltipWidth) / 2
+                        } else if (spaceRight < tooltipWidth + 20) {
+                          // Align to right edge with padding
+                          left = viewportWidth - tooltipWidth - 10
+                        }
+
+                        // Ensure minimum spacing from edges
+                        left = Math.max(10, Math.min(left, viewportWidth - tooltipWidth - 10))
+                        top = Math.max(10, Math.min(top, viewportHeight - tooltipHeight - 10))
+
+                        // Apply position
+                        node.style.setProperty('top', `${top}px`)
+                        node.style.setProperty('left', `${left}px`)
                       }
-
-                      // Check if tooltip would overflow right
-                      if (spaceRight < 300 && spaceLeft > 300) {
-                        left = rect.right - 300 // Position to the left
-                      }
-
-                      // Ensure tooltip stays within viewport bounds
-                      left = Math.max(10, Math.min(left, viewportWidth - 310))
-                      top = Math.max(10, Math.min(top, viewportHeight - 310))
-
-                      node.style.setProperty('top', `${top}px`)
-                      node.style.setProperty('left', `${left}px`)
-                    }
+                    })
                   }
                 }}
               >

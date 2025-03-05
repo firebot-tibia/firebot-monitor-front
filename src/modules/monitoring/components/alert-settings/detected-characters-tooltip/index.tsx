@@ -18,13 +18,15 @@ export const DetectedCharactersTooltip = ({
       backdropFilter="blur(8px)"
       borderRadius="lg"
       boxShadow="dark-lg"
-      p={3}
-      w={{ base: '90vw', sm: '300px' }}
+      p={4}
+      w={{ base: '90vw', sm: '350px' }}
       maxW="400px"
       border="1px solid"
       borderColor="whiteAlpha.200"
       pointerEvents="all"
       mx={{ base: 2, sm: 0 }}
+      overflowY="auto"
+      maxH="80vh"
     >
       <HStack mb={3} borderBottom="1px solid" borderColor="whiteAlpha.200" pb={2}>
         <Text fontWeight="bold" color="white" fontSize="md">
