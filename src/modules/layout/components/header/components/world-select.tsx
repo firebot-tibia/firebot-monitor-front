@@ -30,8 +30,6 @@ const WorldSelect = () => {
     setIsClient(true)
   }, [])
 
-
-
   // Theme constants
   const baseColor = 'purple.400'
   const menuBgColor = 'rgba(26, 26, 26, 0.95)'

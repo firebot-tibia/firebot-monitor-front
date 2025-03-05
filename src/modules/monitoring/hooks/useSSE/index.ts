@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 
 import { SSEClient } from '@/core/sse/services'
 import type { ConnectionStatus, SSEConfig, SSEMessage } from '@/core/sse/services/types'
+import { TokenManager } from '@/modules/auth/services'
 import { useTokenStore } from '@/modules/auth/store/token-decoded-store'
 
 interface UseSSEProps {
@@ -12,8 +13,6 @@ interface UseSSEProps {
   onError?: (error: Error) => void
   reconnectOnError?: boolean
   reconnectInterval?: number
-  bufferSize?: number // Added parameter
-  throttle?: number // Added parameter
 }
 
 export const useSSE = ({
@@ -22,15 +21,14 @@ export const useSSE = ({
   onError,
   reconnectOnError = true,
   reconnectInterval = 1000,
-  bufferSize = 0, // Default: disable buffering
-  throttle = 100, // Default: fast updates
 }: UseSSEProps) => {
-  const { data: session } = useSession()
+  const { data: session, update: updateSession } = useSession()
   const { selectedWorld } = useTokenStore()
   const [status, setStatus] = useState<ConnectionStatus>('disconnected')
   const sseClientRef = useRef<SSEClient | null>(null)
   const lastMessageRef = useRef<string>('') // Cache last message to prevent duplicates
   const isConnected = status === 'connected'
+  const tokenManager = useRef(TokenManager.getInstance())
 
   // Debounced message handler to prevent excessive updates
   const handleMessageDebounced = useCallback(
@@ -61,19 +59,40 @@ export const useSSE = ({
     [onMessage, onError],
   )
 
-  const handleTokenRefresh = useCallback((newToken: string) => {}, [])
-
   const handleMaxRetriesReached = useCallback(async () => {
     setStatus('disconnected')
 
     if (reconnectOnError) {
-      // Use setTimeout to avoid immediate reconnection
       setTimeout(() => {
         cleanupSSE()
         initializeSSE()
       }, reconnectInterval)
     }
   }, [reconnectOnError, reconnectInterval])
+
+  const handleTokenRefresh = useCallback(async () => {
+    if (!session?.refresh_token || !session?.access_token) return null
+
+    try {
+      // Extract user ID from the current access token
+      const userId = tokenManager.current.extractUserIdFromToken(session.access_token)
+      if (!userId) throw new Error('Could not extract user ID from token')
+
+      // Perform token refresh
+      const newTokens = await tokenManager.current.refreshToken(userId, session.refresh_token)
+
+      // Update session with new tokens
+      await updateSession({
+        access_token: newTokens.access_token,
+        refresh_token: newTokens.refresh_token,
+      })
+
+      return newTokens.access_token
+    } catch (error) {
+      console.error('Failed to refresh token:', error)
+      return null
+    }
+  }, [session, updateSession])
 
   const cleanupSSE = useCallback(() => {
     if (sseClientRef.current) {
@@ -84,13 +103,17 @@ export const useSSE = ({
   }, [])
 
   const initializeSSE = useCallback(() => {
-    if (!session?.access_token || !session?.refresh_token || !selectedWorld || sseClientRef.current)
+    if (
+      !session ||
+      !session.access_token ||
+      !session.refresh_token ||
+      !selectedWorld ||
+      sseClientRef.current
+    )
       return
 
     // Add performance parameters to URL
     const url = new URL(endpoint)
-    url.searchParams.set('buffer_size', bufferSize.toString())
-    url.searchParams.set('throttle', throttle.toString())
 
     const config: SSEConfig = {
       url: url.toString(),
@@ -113,15 +136,13 @@ export const useSSE = ({
     return cleanupSSE
   }, [
     endpoint,
-    bufferSize,
-    throttle,
     handleMessageDebounced,
     onError,
     session,
     selectedWorld,
-    handleTokenRefresh,
     handleMaxRetriesReached,
     cleanupSSE,
+    handleTokenRefresh,
   ])
 
   useEffect(() => {

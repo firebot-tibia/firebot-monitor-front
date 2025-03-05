@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { HStack, Badge, Tooltip, useDisclosure, Text } from '@chakra-ui/react'
 import { Bell } from 'lucide-react'
 
+import { Countdown } from '@/modules/monitoring/components/alert-settings/countdown'
 import type { GuildMemberResponse } from '@/core/types/guild-member.response'
 
 import { AlertSettingsPanel } from './alert-settings-panel'
@@ -170,7 +171,7 @@ const AlertSettings = () => {
             >
               {recentLogins} personagens detectados
             </Badge>
-            {timeRemaining > 0 && (
+            {timeRemaining > 0 && alertStartTimeRef.current && (
               <HStack spacing={1}>
                 <Badge
                   colorScheme="yellow"
@@ -182,7 +183,12 @@ const AlertSettings = () => {
                   gap={1}
                 >
                   <Text>Resetando em</Text>
-                  <Text fontWeight="bold">{timeRemaining}s</Text>
+                  <Text fontWeight="bold">
+                    <Countdown
+                      targetTime={new Date(alertStartTimeRef.current + ALERT_DURATION)}
+                      onComplete={resetAlerts}
+                    />
+                  </Text>
                 </Badge>
                 {!alertDismissed && (
                   <Badge

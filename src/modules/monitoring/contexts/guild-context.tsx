@@ -77,7 +77,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
   const handleMessage = useCallback(
     (data: any) => {
       // Handle death events
-      if (data?.death) {
+      if (data?.death && typeof data.death === 'object' && data.death.name && data.death.text) {
         const deathEvent = {
           death: {
             ...data.death,
@@ -94,7 +94,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
       }
 
       // Handle level events
-      if (data?.level) {
+      if (data?.level && typeof data.level === 'object' && data.level.player && data.level.new_level) {
         const levelEvent = {
           level: {
             ...data.level,
@@ -104,7 +104,14 @@ export function GuildProvider({ children }: { children: ReactNode }) {
           },
         } as LevelEvent
         setRecentLevels(prev => {
-          const updated = [levelEvent, ...prev].slice(0, 10) // Keep last 10 level changes
+          // Remove any existing events for the same player within 5 seconds
+          const now = new Date()
+          const filtered = prev.filter(event => {
+            const eventTime = new Date(event.level.timestamp || '')
+            const timeDiff = now.getTime() - eventTime.getTime()
+            return timeDiff > 5000 || event.level.player !== data.level.player
+          })
+          const updated = [levelEvent, ...filtered].slice(0, 10) // Keep last 10 level changes
           localStorage.setItem('recentLevels', JSON.stringify(updated))
           return updated
         })
@@ -230,8 +237,6 @@ export function GuildProvider({ children }: { children: ReactNode }) {
   const { status, reconnect } = useSSE({
     endpoint: `${FIREBOT_SSE_URL}${storedMode}/`,
     onMessage: handleMessage,
-    bufferSize: 0, // Disable buffering for real-time updates
-    throttle: 50, // Fast updates (milliseconds)
     reconnectInterval: 5, // Faster reconnection
   })
 
@@ -242,7 +247,7 @@ export function GuildProvider({ children }: { children: ReactNode }) {
         // Refreshing guild data
         reconnect() // This will close and reopen the SSE connection
       },
-      5 * 60 * 500,
+      5 * 60 * 1000,
     ) // 5 minutes in milliseconds
 
     return () => clearInterval(refreshInterval)

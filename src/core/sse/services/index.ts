@@ -167,12 +167,32 @@ export class SSEClient {
   /**
    * Handle EventSource error
    */
-  private handleError(event: Event): void {
+  private async handleError(event: Event): Promise<void> {
     this.log('warn', 'SSE connection error', event)
 
     // Check if connection is closed
     if (this.eventSource?.readyState === EventSource.CLOSED) {
       this.setStatus('disconnected')
+
+      // Check if the error might be due to an expired token
+      try {
+        const token = this.config.token
+        const decodedToken = jwtDecode<DecodedToken>(token)
+        const tokenExpiration = decodedToken.exp * 1000 // Convert to milliseconds
+
+        if (Date.now() >= tokenExpiration) {
+          this.log('info', 'Token expired, attempting refresh')
+          const refreshed = await this.refreshToken()
+          if (refreshed) {
+            // Token refreshed successfully, attempt to reconnect
+            this.connect()
+            return
+          }
+        }
+      } catch (error) {
+        this.log('error', 'Error checking token expiration:', error)
+      }
+
       this.scheduleReconnect()
       return
     }
@@ -182,7 +202,7 @@ export class SSEClient {
 
     if (timeSinceLastMessage > 30000 && !this.tokenRefreshInProgress) {
       this.log('warn', 'No messages received for 30s, attempting token refresh')
-      this.refreshToken()
+      await this.refreshToken()
     }
   }
 
@@ -307,43 +327,35 @@ export class SSEClient {
    */
   private async refreshToken(): Promise<boolean> {
     if (this.tokenRefreshInProgress) {
+      this.log('debug', 'Token refresh already in progress')
       return false
     }
 
     this.tokenRefreshInProgress = true
+    this.log('info', 'Starting token refresh')
 
     try {
-      const userId = this.extractUserIdFromToken(this.config.token)
-
-      if (!userId) {
-        this.log('error', 'Could not extract user ID from token')
+      if (!this.config.onTokenRefresh) {
+        this.log('warn', 'No token refresh handler configured')
         return false
       }
 
-      const tokens = await this.tokenManager.refreshToken(userId, this.config.refreshToken)
-
-      if (tokens && tokens.access_token) {
-        this.log('info', 'Token refreshed successfully')
-
-        // Update tokens
-        this.config.token = tokens.access_token
-        this.config.refreshToken = tokens.refresh_token || this.config.refreshToken
-
-        if (this.config.onTokenRefresh) {
-          this.config.onTokenRefresh(tokens.access_token, tokens.refresh_token)
-        }
-
-        // Only reconnect if we're disconnected
-        if (this.connectionStatus === 'disconnected') {
-          this.connect()
-        }
-
-        return true
+      const newToken = await this.config.onTokenRefresh()
+      if (!newToken) {
+        this.log('warn', 'Token refresh failed - no new token received')
+        return false
       }
 
-      return false
+      this.log('info', 'Token refreshed successfully')
+      this.config.token = newToken
+
+      // Close and reopen connection with new token
+      this.closeEventSource()
+      this.connect()
+
+      return true
     } catch (error) {
-      this.log('error', 'Token refresh failed', error)
+      this.log('error', 'Token refresh failed:', error)
       return false
     } finally {
       this.tokenRefreshInProgress = false

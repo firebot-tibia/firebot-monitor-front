@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { Box, VStack, Text, useColorModeValue, IconButton } from '@chakra-ui/react'
 import { Activity } from 'lucide-react'
 
-import { ActivityTabs } from './activity-tabs'
+import { ActivityTabs } from './tabs/activity-tabs'
 import { useGuildContext } from '../../contexts/guild-context'
 import type { DeathEvent } from '../../types/death'
 import type { LevelEvent } from '../../types/level'
@@ -30,6 +30,7 @@ export function ActivityWidget() {
           date: new Date(d.death.date),
           data: d.death,
         }))
+        .sort((a, b) => b.date.getTime() - a.date.getTime())
 
       const levelChanges = levels
         .filter(l => {
@@ -45,6 +46,7 @@ export function ActivityWidget() {
             direction: l.level.new_level > l.level.old_level ? ('up' as const) : ('down' as const),
           },
         }))
+        .sort((a, b) => b.date.getTime() - a.date.getTime())
 
       return {
         deaths: deathEvents,
