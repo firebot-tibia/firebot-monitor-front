@@ -78,6 +78,11 @@ const ModeSelect = () => {
 
   const currentConfig = getModeConfig(currentMode, isClient)
 
+  // Don't render anything until we're on the client
+  if (!isClient) {
+    return null
+  }
+
   return (
     <Menu>
       <MenuButton
