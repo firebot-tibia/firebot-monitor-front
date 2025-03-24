@@ -29,14 +29,21 @@ export const useDescriptionEditor = () => {
   const descriptionBg = useColorModeValue('gray.50', 'gray.700')
 
   useEffect(() => {
-    const activeFields = [
-      formState.mainChar && `Main: ${formState.mainChar}`,
-      formState.makers.some(m => m.trim()) &&
-        `Maker: ${formState.makers.filter(m => m.trim()).join(', ')}`,
-      formState.registeredBy && `Reg: ${formState.registeredBy}`,
-    ].filter(Boolean)
+    // Sempre inclui Main e Maker, mesmo quando vazios
+    const mainPart = `Main: ${formState.mainChar}`
 
-    setGeneratedDescription(activeFields.join(' | '))
+    // Sempre inclui o Maker, mesmo que vazio
+    const makerPart = `Maker: ${formState.makers.filter(m => m.trim()).join(', ')}`
+
+    const regPart = formState.registeredBy ? `Reg: ${formState.registeredBy}` : ''
+
+    // Cria um array com as partes (Main e Maker sempre presentes)
+    const parts = [mainPart, makerPart]
+
+    // Adiciona Reg apenas se estiver preenchido
+    if (regPart) parts.push(regPart)
+
+    setGeneratedDescription(parts.join(' | '))
   }, [formState])
 
   useEffect(() => {
