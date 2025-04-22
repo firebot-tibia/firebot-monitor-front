@@ -27,10 +27,8 @@ export const getExperienceList = async (query: ExperienceListQuery) => {
 
 export const getPlayerOnlineHistory = async (query: { character: string }) => {
   try {
-    const decodedCharacter = decodeURIComponent(query.character)
-    const response = await api.get(`/gamedata/online-time`, {
-      params: { character: decodedCharacter },
-    })
+    const url = `/gamedata/online-time?character=${encodeURIComponent(query.character.replace(/\+/g, ' '))}`
+    const response = await api.get(url, {})
     return response.data
   } catch (error) {
     throw error
@@ -39,10 +37,8 @@ export const getPlayerOnlineHistory = async (query: { character: string }) => {
 
 export const getPlayersLifeTimeDeaths = async (query: { character: string }) => {
   try {
-    const decodedCharacter = decodeURIComponent(query.character)
-    const response = await api.get(`/gamedata/players/deaths`, {
-      params: { character: decodedCharacter },
-    })
+    const url = `/gamedata/players/deaths?character=${encodeURIComponent(query.character.replace(/\+/g, ' '))}`
+    const response = await api.get(url, {})
     return response.data
   } catch (error) {
     throw error
@@ -51,10 +47,9 @@ export const getPlayersLifeTimeDeaths = async (query: { character: string }) => 
 
 export const getPlayerExperienceHistory = async (query: { character: string }) => {
   try {
-    const decodedCharacter = decodeURIComponent(query.character)
-    const response = await api.get(`/gamedata/players/experience-history`, {
-      params: { character: decodedCharacter },
-    })
+    // Create a manually encoded URL with spaces as %20
+    const url = `/gamedata/players/experience-history?character=${encodeURIComponent(query.character.replace(/\+/g, ' '))}`
+    const response = await api.get(url, {})
     return response.data
   } catch (error) {
     throw error

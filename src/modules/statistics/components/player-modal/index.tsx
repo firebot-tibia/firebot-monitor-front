@@ -16,7 +16,8 @@ import PlayerDashboard from '../player-dashboard'
 const CharacterStatsPage: React.FC = () => {
   const params = useParams()
   const router = useRouter()
-  const characterName = decodeURIComponent(params['character-name'] as string)
+  // Process the URL parameter for display - convert + to spaces and decode other encoded chars
+  const characterName = decodeURIComponent((params['character-name'] as string)?.replace(/\+/g, ' '))
 
   const [onlineHistory, setOnlineHistory] = useState<OnlineTimeDay[]>([])
   const [experienceData, setExperienceData] = useState<ExperienceDataItem[]>([])

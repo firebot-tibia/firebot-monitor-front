@@ -20,7 +20,18 @@ const CharacterTooltip: React.FC<GuildMember> = ({ name, vocation, level, experi
       <VStack align="stretch" spacing={3}>
         <Flex justify="space-between" align="center">
           <HStack>
-            <Image src={tableVocationIcons[vocation]} alt={vocation} boxSize="32px" />
+            {(() => {
+              const icon = tableVocationIcons[vocation];
+              if (icon.type === 'image') {
+                return <Image src={icon.value} alt={vocation} boxSize="32px" />;
+              } else {
+                return (
+                  <Box boxSize="32px" display="flex" alignItems="center" justifyContent="center">
+                    <Text fontSize="20px">{icon.value}</Text>
+                  </Box>
+                );
+              }
+            })()}
             <Text fontWeight="bold" fontSize="lg" color="white">
               {name}
             </Text>

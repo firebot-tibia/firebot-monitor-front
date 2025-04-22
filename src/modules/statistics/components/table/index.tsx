@@ -73,11 +73,24 @@ const GuildTableStats: React.FC<GuildTableProps> = ({
               >
                 <Td color={textColor}>{formatExp(item.experience)}</Td>
                 <Td>
-                  <Image
-                    src={tableVocationIcons[item.vocation]}
-                    alt={item.vocation}
-                    boxSize="24px"
-                  />
+                  {(() => {
+                    const icon = tableVocationIcons[item.vocation];
+                    if (icon.type === 'image') {
+                      return (
+                        <Image
+                          src={icon.value}
+                          alt={item.vocation}
+                          boxSize="24px"
+                        />
+                      );
+                    } else {
+                      return (
+                        <Box boxSize="24px" display="flex" alignItems="center" justifyContent="center">
+                          <Text fontSize="16px">{icon.value}</Text>
+                        </Box>
+                      );
+                    }
+                  })()}
                 </Td>
                 <Td color={textColor}>{item.name}</Td>
                 <Td isNumeric color={textColor}>

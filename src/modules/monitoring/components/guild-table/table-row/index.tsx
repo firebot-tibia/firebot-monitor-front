@@ -1,6 +1,6 @@
 import { memo } from 'react'
 
-import { useToast, Tr, Td, HStack, Text, Image } from '@chakra-ui/react'
+import { useToast, Tr, Td, HStack, Text, Image, Box } from '@chakra-ui/react'
 import { keyframes } from '@emotion/react'
 import { motion } from 'framer-motion'
 import { ArrowUp, ArrowDown, Skull } from 'lucide-react'
@@ -118,12 +118,25 @@ export const CharacterRow = memo(function CharacterRow({
       </Td>
       <Td p={0} pl={1} w="6%" lineHeight="1">
         <HStack spacing={0}>
-          <Image
-            src={tableVocationIcons[member.Vocation]}
-            alt={member.Vocation}
-            width={4}
-            height={4}
-          />
+          {(() => {
+            const icon = tableVocationIcons[member.Vocation];
+            if (icon.type === 'image') {
+              return (
+                <Image
+                  src={icon.value}
+                  alt={member.Vocation}
+                  width={4}
+                  height={4}
+                />
+              );
+            } else {
+              return (
+                <Box w={4} h={4} display="flex" alignItems="center" justifyContent="center">
+                  <Text fontSize="12px">{icon.value}</Text>
+                </Box>
+              );
+            }
+          })()}
         </HStack>
       </Td>
       <Td p={0} pl={1} w="20%" lineHeight="1">

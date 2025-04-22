@@ -137,7 +137,18 @@ const FilterBar: React.FC<FilterBarProps> = ({
                     {...menuItemStyle}
                   >
                     <HStack spacing={2}>
-                      <Image src={tableVocationIcons[vocation]} boxSize="20px" alt="" />
+                      {(() => {
+                        const icon = tableVocationIcons[vocation];
+                        if (icon.type === 'image') {
+                          return <Image src={icon.value} boxSize="20px" alt="" />;
+                        } else {
+                          return (
+                            <Box boxSize="20px" display="flex" alignItems="center" justifyContent="center">
+                              <Text fontSize="14px">{icon.value}</Text>
+                            </Box>
+                          );
+                        }
+                      })()}
                       <Text>{capitalizeFirstLetter(vocation)}</Text>
                     </HStack>
                   </MenuItem>
